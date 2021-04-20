@@ -7,3 +7,8 @@
 # Documentation here: https://yarnpkg.com/features/zero-installs
 !/.yarn/cache
 #/.pnp.*
+
+## Pnpfiy editor configurations
+.yarn/sdks/integrations.yml
+.vscode
+.vim
