@@ -863,6 +863,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"hitcon-online-maplib@workspace:common/maplib":
+  version: 0.0.0-use.local
+  resolution: "hitcon-online-maplib@workspace:common/maplib"
+  languageName: unknown
+  linkType: soft
+
 "hitcon-online@workspace:.":
   version: 0.0.0-use.local
   resolution: "hitcon-online@workspace:."

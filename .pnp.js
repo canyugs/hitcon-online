@@ -23,6 +23,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         "reference": "workspace:."
       },
       {
+        "name": "hitcon-online-maplib",
+        "reference": "workspace:common/maplib"
+      },
+      {
         "name": "hitcon-online-gateway",
         "reference": "workspace:services/gateway"
       }
@@ -31,7 +35,8 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
     "ignorePatternData": "(^(?:\\.yarn\\/sdks(?:\\/(?!\\.)(?:(?:(?!(?:^|\\/)\\.).)*?)|$))$)",
     "fallbackExclusionList": [
       ["hitcon-online", ["workspace:."]],
-      ["hitcon-online-gateway", ["workspace:services/gateway"]]
+      ["hitcon-online-gateway", ["workspace:services/gateway"]],
+      ["hitcon-online-maplib", ["workspace:common/maplib"]]
     ],
     "fallbackPool": [
     ],
@@ -1144,6 +1149,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./services/gateway/",
           "packageDependencies": [
             ["hitcon-online-gateway", "workspace:services/gateway"]
+          ],
+          "linkType": "SOFT",
+        }]
+      ]],
+      ["hitcon-online-maplib", [
+        ["workspace:common/maplib", {
+          "packageLocation": "./common/maplib/",
+          "packageDependencies": [
+            ["hitcon-online-maplib", "workspace:common/maplib"]
           ],
           "linkType": "SOFT",
         }]
