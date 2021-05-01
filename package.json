@@ -1,6 +1,7 @@
 {
   "name": "hitcon-online",
   "workspaces": [
+    "common/*",
     "sites/*",
     "services/*",
     "extensions/*"
