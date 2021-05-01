@@ -27,6 +27,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         "reference": "workspace:common/maplib"
       },
       {
+        "name": "hitcon-online-rpc-directory",
+        "reference": "workspace:common/rpc-directory"
+      },
+      {
         "name": "hitcon-online-gateway",
         "reference": "workspace:services/gateway"
       }
@@ -36,7 +40,8 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
     "fallbackExclusionList": [
       ["hitcon-online", ["workspace:."]],
       ["hitcon-online-gateway", ["workspace:services/gateway"]],
-      ["hitcon-online-maplib", ["workspace:common/maplib"]]
+      ["hitcon-online-maplib", ["workspace:common/maplib"]],
+      ["hitcon-online-rpc-directory", ["workspace:common/rpc-directory"]]
     ],
     "fallbackPool": [
     ],
@@ -1158,6 +1163,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./common/maplib/",
           "packageDependencies": [
             ["hitcon-online-maplib", "workspace:common/maplib"]
+          ],
+          "linkType": "SOFT",
+        }]
+      ]],
+      ["hitcon-online-rpc-directory", [
+        ["workspace:common/rpc-directory", {
+          "packageLocation": "./common/rpc-directory/",
+          "packageDependencies": [
+            ["hitcon-online-rpc-directory", "workspace:common/rpc-directory"]
           ],
           "linkType": "SOFT",
         }]
