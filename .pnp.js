@@ -21,12 +21,17 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
       {
         "name": "hitcon-online",
         "reference": "workspace:."
+      },
+      {
+        "name": "hitcon-online-gateway",
+        "reference": "workspace:services/gateway"
       }
     ],
     "enableTopLevelFallback": true,
     "ignorePatternData": "(^(?:\\.yarn\\/sdks(?:\\/(?!\\.)(?:(?:(?!(?:^|\\/)\\.).)*?)|$))$)",
     "fallbackExclusionList": [
-      ["hitcon-online", ["workspace:."]]
+      ["hitcon-online", ["workspace:."]],
+      ["hitcon-online-gateway", ["workspace:services/gateway"]]
     ],
     "fallbackPool": [
     ],
@@ -1130,6 +1135,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["prettier", "npm:2.2.1"],
             ["socketio-jwt", "npm:4.6.2"],
             ["typescript", "patch:typescript@npm%3A4.2.4#builtin<compat/typescript>::version=4.2.4&hash=a45b0e"]
+          ],
+          "linkType": "SOFT",
+        }]
+      ]],
+      ["hitcon-online-gateway", [
+        ["workspace:services/gateway", {
+          "packageLocation": "./services/gateway/",
+          "packageDependencies": [
+            ["hitcon-online-gateway", "workspace:services/gateway"]
           ],
           "linkType": "SOFT",
         }]

@@ -857,6 +857,12 @@ __metadata:
   languageName: node
   linkType: hard
 
+"hitcon-online-gateway@workspace:services/gateway":
+  version: 0.0.0-use.local
+  resolution: "hitcon-online-gateway@workspace:services/gateway"
+  languageName: unknown
+  linkType: soft
+
 "hitcon-online@workspace:.":
   version: 0.0.0-use.local
   resolution: "hitcon-online@workspace:."
