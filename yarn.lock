@@ -383,6 +383,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"config@npm:^3.3.6":
+  version: 3.3.6
+  resolution: "config@npm:3.3.6"
+  dependencies:
+    json5: ^2.1.1
+  checksum: c066ebd8eddd19913a17b014b86e0f8f9cf680be6953581d51d3304fe03b79ee16e4433735ba589e1551906225d642885b8d0c7a210e14be212c917a38803107
+  languageName: node
+  linkType: hard
+
 "cross-spawn@npm:^7.0.2":
   version: 7.0.3
   resolution: "cross-spawn@npm:7.0.3"
@@ -838,6 +847,7 @@ __metadata:
   dependencies:
     "@typescript-eslint/eslint-plugin": ^4.22.0
     "@typescript-eslint/parser": ^4.22.0
+    config: ^3.3.6
     eslint: ^7.24.0
     eslint-config-google: ^0.14.0
     eslint-config-prettier: ^8.2.0
@@ -995,6 +1005,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"json5@npm:^2.1.1":
+  version: 2.2.0
+  resolution: "json5@npm:2.2.0"
+  dependencies:
+    minimist: ^1.2.5
+  bin:
+    json5: lib/cli.js
+  checksum: 07b1f90c2801dc52df2b0ac8d606cc400a85cda79130e754780fa2ab9805d0fb85a0e61b6a5cdd68e88e5d0c8f9109ec415af08283175556cdccaa8563853908
+  languageName: node
+  linkType: hard
+
 "levn@npm:^0.4.1":
   version: 0.4.1
   resolution: "levn@npm:0.4.1"
@@ -1065,6 +1086,13 @@ __metadata:
   dependencies:
     brace-expansion: ^1.1.7
   checksum: 47eab9263962cacd5733e274ecad2d8e54b0f8e124ba35ae69189e296058f634a4967b87a98954f86fa5c830ff177caf827ce0136d28717ed3232951fb4fae62
+  languageName: node
+  linkType: hard
+
+"minimist@npm:^1.2.5":
+  version: 1.2.5
+  resolution: "minimist@npm:1.2.5"
+  checksum: b77b8590147a4e217ff34266236bc39de23b52e6e33054076991ff674c7397a1380a7bde11111916f16f003a94aaa7e4f3d92595a32189644ff607fabc65a5b6
   languageName: node
   linkType: hard
 

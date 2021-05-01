@@ -39,6 +39,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageDependencies": [
             ["@typescript-eslint/eslint-plugin", "virtual:c008340e8a5e0f84b982166dce6fa3bbb719ec395ad370a1168cabe867a22d930d921f1ccc2f859ea9035d7fd6f11cfd72423e5065a99a574406cbd088651e88#npm:4.22.0"],
             ["@typescript-eslint/parser", "virtual:c008340e8a5e0f84b982166dce6fa3bbb719ec395ad370a1168cabe867a22d930d921f1ccc2f859ea9035d7fd6f11cfd72423e5065a99a574406cbd088651e88#npm:4.22.0"],
+            ["config", "npm:3.3.6"],
             ["eslint", "npm:7.24.0"],
             ["eslint-config-google", "virtual:c008340e8a5e0f84b982166dce6fa3bbb719ec395ad370a1168cabe867a22d930d921f1ccc2f859ea9035d7fd6f11cfd72423e5065a99a574406cbd088651e88#npm:0.14.0"],
             ["eslint-config-prettier", "virtual:c008340e8a5e0f84b982166dce6fa3bbb719ec395ad370a1168cabe867a22d930d921f1ccc2f859ea9035d7fd6f11cfd72423e5065a99a574406cbd088651e88#npm:8.2.0"],
@@ -535,6 +536,16 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/concat-map-npm-0.0.1-85a921b7ee-554e28d9ee.zip/node_modules/concat-map/",
           "packageDependencies": [
             ["concat-map", "npm:0.0.1"]
+          ],
+          "linkType": "HARD",
+        }]
+      ]],
+      ["config", [
+        ["npm:3.3.6", {
+          "packageLocation": "./.yarn/cache/config-npm-3.3.6-a760162d97-c066ebd8ed.zip/node_modules/config/",
+          "packageDependencies": [
+            ["config", "npm:3.3.6"],
+            ["json5", "npm:2.2.0"]
           ],
           "linkType": "HARD",
         }]
@@ -1091,6 +1102,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["hitcon-online", "workspace:."],
             ["@typescript-eslint/eslint-plugin", "virtual:c008340e8a5e0f84b982166dce6fa3bbb719ec395ad370a1168cabe867a22d930d921f1ccc2f859ea9035d7fd6f11cfd72423e5065a99a574406cbd088651e88#npm:4.22.0"],
             ["@typescript-eslint/parser", "virtual:c008340e8a5e0f84b982166dce6fa3bbb719ec395ad370a1168cabe867a22d930d921f1ccc2f859ea9035d7fd6f11cfd72423e5065a99a574406cbd088651e88#npm:4.22.0"],
+            ["config", "npm:3.3.6"],
             ["eslint", "npm:7.24.0"],
             ["eslint-config-google", "virtual:c008340e8a5e0f84b982166dce6fa3bbb719ec395ad370a1168cabe867a22d930d921f1ccc2f859ea9035d7fd6f11cfd72423e5065a99a574406cbd088651e88#npm:0.14.0"],
             ["eslint-config-prettier", "virtual:c008340e8a5e0f84b982166dce6fa3bbb719ec395ad370a1168cabe867a22d930d921f1ccc2f859ea9035d7fd6f11cfd72423e5065a99a574406cbd088651e88#npm:8.2.0"],
@@ -1276,6 +1288,16 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD",
         }]
       ]],
+      ["json5", [
+        ["npm:2.2.0", {
+          "packageLocation": "./.yarn/cache/json5-npm-2.2.0-da49dc7cb5-07b1f90c28.zip/node_modules/json5/",
+          "packageDependencies": [
+            ["json5", "npm:2.2.0"],
+            ["minimist", "npm:1.2.5"]
+          ],
+          "linkType": "HARD",
+        }]
+      ]],
       ["levn", [
         ["npm:0.4.1", {
           "packageLocation": "./.yarn/cache/levn-npm-0.4.1-d183b2d7bb-2f6ddfb0b9.zip/node_modules/levn/",
@@ -1359,6 +1381,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageDependencies": [
             ["minimatch", "npm:3.0.4"],
             ["brace-expansion", "npm:1.1.11"]
+          ],
+          "linkType": "HARD",
+        }]
+      ]],
+      ["minimist", [
+        ["npm:1.2.5", {
+          "packageLocation": "./.yarn/cache/minimist-npm-1.2.5-ced0e1f617-b77b859014.zip/node_modules/minimist/",
+          "packageDependencies": [
+            ["minimist", "npm:1.2.5"]
           ],
           "linkType": "HARD",
         }]
