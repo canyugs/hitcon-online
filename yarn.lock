@@ -454,6 +454,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"eslint-config-google@npm:^0.14.0":
+  version: 0.14.0
+  resolution: "eslint-config-google@npm:0.14.0"
+  peerDependencies:
+    eslint: ">=5.16.0"
+  checksum: b1cb79fc4ac675b18dfc65e8772a3349c380c65ea99eb45b32ebb9f0885526605f5bce624e1fffcfbb8c0edf12c007c355b57191790f4eac3f5833350c207558
+  languageName: node
+  linkType: hard
+
 "eslint-config-prettier@npm:^8.2.0":
   version: 8.2.0
   resolution: "eslint-config-prettier@npm:8.2.0"
@@ -830,6 +839,7 @@ __metadata:
     "@typescript-eslint/eslint-plugin": ^4.22.0
     "@typescript-eslint/parser": ^4.22.0
     eslint: ^7.24.0
+    eslint-config-google: ^0.14.0
     eslint-config-prettier: ^8.2.0
     eslint-plugin-prettier: ^3.4.0
     prettier: ^2.2.1
