@@ -33,12 +33,17 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
       {
         "name": "hitcon-online-gateway",
         "reference": "workspace:services/gateway"
+      },
+      {
+        "name": "hitcon-online-game-client",
+        "reference": "workspace:sites/game-client"
       }
     ],
     "enableTopLevelFallback": true,
     "ignorePatternData": "(^(?:\\.yarn\\/sdks(?:\\/(?!\\.)(?:(?:(?!(?:^|\\/)\\.).)*?)|$))$)",
     "fallbackExclusionList": [
       ["hitcon-online", ["workspace:."]],
+      ["hitcon-online-game-client", ["workspace:sites/game-client"]],
       ["hitcon-online-gateway", ["workspace:services/gateway"]],
       ["hitcon-online-maplib", ["workspace:common/maplib"]],
       ["hitcon-online-rpc-directory", ["workspace:common/rpc-directory"]]
@@ -1145,6 +1150,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["prettier", "npm:2.2.1"],
             ["socketio-jwt", "npm:4.6.2"],
             ["typescript", "patch:typescript@npm%3A4.2.4#builtin<compat/typescript>::version=4.2.4&hash=a45b0e"]
+          ],
+          "linkType": "SOFT",
+        }]
+      ]],
+      ["hitcon-online-game-client", [
+        ["workspace:sites/game-client", {
+          "packageLocation": "./sites/game-client/",
+          "packageDependencies": [
+            ["hitcon-online-game-client", "workspace:sites/game-client"]
           ],
           "linkType": "SOFT",
         }]
