@@ -23,6 +23,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         "reference": "workspace:."
       },
       {
+        "name": "hitcon-online-extlib",
+        "reference": "workspace:common/extlib"
+      },
+      {
         "name": "hitcon-online-maplib",
         "reference": "workspace:common/maplib"
       },
@@ -47,6 +51,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
     "ignorePatternData": "(^(?:\\.yarn\\/sdks(?:\\/(?!\\.)(?:(?:(?!(?:^|\\/)\\.).)*?)|$))$)",
     "fallbackExclusionList": [
       ["hitcon-online", ["workspace:."]],
+      ["hitcon-online-extlib", ["workspace:common/extlib"]],
       ["hitcon-online-game-client", ["workspace:sites/game-client"]],
       ["hitcon-online-gateway", ["workspace:services/gateway"]],
       ["hitcon-online-main-server", ["workspace:services/main"]],
@@ -1396,6 +1401,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["redis", "npm:3.1.2"],
             ["socketio-jwt", "npm:4.6.2"],
             ["typescript", "patch:typescript@npm%3A4.2.4#builtin<compat/typescript>::version=4.2.4&hash=a45b0e"]
+          ],
+          "linkType": "SOFT",
+        }]
+      ]],
+      ["hitcon-online-extlib", [
+        ["workspace:common/extlib", {
+          "packageLocation": "./common/extlib/",
+          "packageDependencies": [
+            ["hitcon-online-extlib", "workspace:common/extlib"]
           ],
           "linkType": "SOFT",
         }]
