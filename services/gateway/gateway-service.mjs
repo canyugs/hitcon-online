@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 import assert from 'assert';
-
+import { Server } from "socket.io";
+import { RPCDirectory } from "../../common/rpc-directory"
 /**
  * This class handles the connections from the client and does the most
  * processing required to service the client.
@@ -16,7 +17,7 @@ class GatewayService {
    * @param {RPCDirectory} dir - The RPCDirectory for calling other services.
    */
   constructor(dir) {
-    void dir;
+    this.dir = dir;
     assert.fail('Not implemented');
   }
 
@@ -26,16 +27,32 @@ class GatewayService {
    * created, but their initialize() have not been called.
    */
   initialize() {
+    this.dir.register("getewayServer");
+    this.servers = [];
     assert.fail('Not implemented');
   }
 
   /**
    * Add a new socket.io server to this service.
    * This is typtically called by the main class/function.
-   * @param {EventEmitter} server - The socket.io server to add to this class.
+   * @param {Server} server - The socket.io server to add to this class.
    */
   addServer(server) {
-    void server;
+    this.servers.push(server);
+    server
+    .on('connection', socketioJwt.authorize({
+      secret: 'your secret or public key',
+      timeout: 15000 
+    }))
+    .on('authenticated', (socket) => {
+      addSocket(socket);
+     
+    })
+    .on('location',(socket)=>{
+      onUserLocation(socket);
+      
+    });
+
     assert.fail('Not implemented');
   }
 
@@ -47,8 +64,7 @@ class GatewayService {
    * socketio-jwt.
    * @param {Socket} socket - The socket.io socket.
    */
-  addUnauthSocket(socket) {
-    void socket;
+  addUnauthSocket(socket) {// this may be not necessary
     assert.fail('Not implemented');
   }
 
@@ -59,7 +75,8 @@ class GatewayService {
    * @param {Socket} socket - The socket.io socket of the authorized user.
    */
   addSocket(socket) {
-    void socket;
+    //this socket is authenticated, we are good to handle more events from it.
+    console.log(`hello! ${socket.decoded_token.name}`);
     assert.fail('Not implemented');
   }
 
@@ -73,6 +90,9 @@ class GatewayService {
    * - facing: One of 'U', 'D', 'L', 'R'. The direction the user is facing.
    */
   async onUserLocation(uid, msg) {
+    // todo : store user location in server
+    this.dir.callRPC("","");
+    this.broadcastUserLocation(socket,msg);
   }
 
   /**
@@ -84,8 +104,9 @@ class GatewayService {
    * @param {String} facing - 'U', 'D', 'L', 'R', the direction user's facing.
    * @return {Boolean} success - true if successful.
    */
-  async broadcastUserLocation(uid, x, y, facing) {
-    void [uid, x, y, facing];
+  async broadcastUserLocation(socket , uid, x, y, facing) {
+    socket.broadcast.emit("location",{uid:uid,x:x,y:y,facing:facing});
+    //void [uid, x, y, facing];
     assert.fail('Not implemented');
     return false;
   }
