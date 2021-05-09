@@ -8,8 +8,8 @@ const require = createRequire(import.meta.url);
 import assert from 'assert';
 const {Server} = require('socket.io');
 const config = require('config');
-
 import { get } from 'http';
+
 /**
  * This class handles the connections from the client and does the most
  * processing required to service the client.
@@ -35,6 +35,7 @@ class GatewayService {
     // A map that tracks the current connected clients.
     // key is the player ID. value is the socket.
     this.socks = {};
+
   }
 
   /**
@@ -48,8 +49,12 @@ class GatewayService {
     await this.rpcHandler.registerAsGateway();
     this.rpcHandler.registerRPC('callS2c', this.callS2c.bind(this));
     this.servers = [];
+<<<<<<< HEAD
     await this.extMan.createAllInGateway(this.rpcHandler, this);
     await this.extMan.startAllInGateway();
+=======
+
+>>>>>>> efc38ef (wip)
   }
 
   async callS2c(serviceName, playerID, extName, methodName, timeout, args) {
@@ -220,7 +225,7 @@ class GatewayService {
    * - displayName: The name to show for this player.
    * - displayChar: The character asset to display.
    */
-  async onUserLocation(socket, msg) {
+    async onUserLocation(socket, msg) {
     msg.playerID = socket.playerID;
     msg.displayName = socket.playerData.displayName;
     msg.displayChar = socket.playerData.displayChar;
