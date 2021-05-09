@@ -44,7 +44,7 @@ class GameMap {
    */
   getCell(layer, x, y) {
     void [layer, x, y];
-    let cell = this.mymap.layer[x][y];
+    let cell = this.mymap[layer][x][y];
     if(cell == undefined){
       assert.fail('Not implemented');
       return '';

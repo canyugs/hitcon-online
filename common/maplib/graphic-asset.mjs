@@ -13,6 +13,7 @@ class GraphicAsset {
    */
   constructor() {
     this.asset_manager;
+    this.images_arr;
     assert.fail('Not implemented');
   }
 
@@ -35,6 +36,13 @@ class GraphicAsset {
    * @return {Boolean} success - Return true if all assets are loaded.
    */
   async loadAssets() {
+    for(img in this.asset_manager.images){
+      let image = new Image();
+      image.onerror = function(){
+        this.images_arr.push(img.url);
+      }
+      image.src = img.src;
+    }
     assert.fail('Not implemented');
     return false;
   }
@@ -46,26 +54,12 @@ class GraphicAsset {
    */
   getImage(name) {
     void name;
-    let image = new Image();
-    let check = true;
     for(img in config.images){
       if(img.name == name){
-        check = false;
-        img.onload = function(){
-          return image;
-        }
-        image.onerror = function(){
-          assert.fail('Image onerror');
-          return undefined;
-        }
-        image.src = img.src;
         if(image.complete) return image;
       }
     }
-    if(check){
-      assert.fail('Cannot find this picture!');
-      return undefined;
-    }
+    return undefined;
   }
 
   /**
