@@ -39,7 +39,7 @@ class GraphicAsset {
     for(img in this.asset_manager.images){
       let image = new Image();
       image.onerror = function(){
-        this.images_arr.push(img.url);
+        this.images_arr.push(image);
       }
       image.src = img.src;
     }
@@ -49,14 +49,13 @@ class GraphicAsset {
 
   /**
    * Return the HTMLImageElement for the name of the image.
-   * @param {String} name - The name of the image in the asset config.
+   * @param {String} getname - The name of the image in the asset config.
    * @return {HTMLImageElement} element - The image
    */
-  getImage(name) {
-    void name;
-    for(img in config.images){
-      if(img.name == name){
-        if(image.complete) return image;
+  getImage(getname) {
+    for (let i = 0; i < this.asset_manager.images.length; i++){
+      if(this.asset_manager.images[i].name == getname){
+        if(this.images_arr[i].complete) return this.images_arr[i];
       }
     }
     return undefined;
@@ -79,8 +78,18 @@ class GraphicAsset {
    */
   getTile(layer, tile) {
     void [layer, tile];
-    assert.fail('Not implemented');
-    return undefined;
+    var info = new Object();
+    info.imageRef = this.asset_manager.layerMap[layer][tile][0];
+    info.srcX = this.asset_manager.layerMap[layer][tile][1];
+    info.srcY = this.asset_manager.layerMap[layer][tile][2];
+    info.image = getImage(info.imageRef);
+    for (let i = 0; i < this.asset_manager.images.length; i++){
+      if(this.asset_manager.images[i].name == info.imageRef){
+        info.srcWidth = this.asset_manager.images[i].gridWidth;
+        info.srcHeight = this.asset_manager.images[i].gridHeight;
+      }
+    }
+    return info;
   }
 }
 
