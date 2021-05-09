@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 import assert from 'assert';
+import { config } from 'process';
 
 /**
  * Manages the graphic assets for a map. This will tell which part of which
@@ -43,8 +44,26 @@ class GraphicAsset {
    */
   getImage(name) {
     void name;
-    assert.fail('Not implemented');
-    return undefined;
+    let image = new Image();
+    let check = true;
+    for(img in config.images){
+      if(img.name == name){
+        check = false;
+        img.onload = function(){
+          return image;
+        }
+        image.onerror = function(){
+          assert.fail('Image onerror');
+          return undefined;
+        }
+        image.src = img.src;
+        if(image.complete) return image;
+      }
+    }
+    if(check){
+      assert.fail('Cannot find this picture!');
+      return undefined;
+    }
   }
 
   /**
