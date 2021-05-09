@@ -1052,6 +1052,12 @@ __metadata:
   languageName: node
   linkType: hard
 
+"hitcon-online-blank@workspace:extensions/blank":
+  version: 0.0.0-use.local
+  resolution: "hitcon-online-blank@workspace:extensions/blank"
+  languageName: unknown
+  linkType: soft
+
 "hitcon-online-extlib@workspace:common/extlib":
   version: 0.0.0-use.local
   resolution: "hitcon-online-extlib@workspace:common/extlib"
