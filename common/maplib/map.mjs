@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 import assert from 'assert';
-
 /**
  * Map represents the loaded map. A map is multiple layers of 2D grid of cells.
  * Each cell of the map is usually a string or boolean.
@@ -14,8 +13,9 @@ class Map {
    * @param {GraphicAsset} asset - The asset that is used with this set of map.
    */
   constructor(asset) {
-    void asset;
-    assert.fail('Not implemented');
+    if(!asset){
+      assert.fail('Not implemented');
+    }
   }
 
   /**
@@ -25,8 +25,11 @@ class Map {
    */
   appendMap(map) {
     void map;
-    assert.fail('Not implemented');
-    return false;
+    if(!map){
+      assert.fail('Not implemented');
+      return false;
+    }
+    return true;
   }
 
   /**
@@ -60,6 +63,10 @@ class Map {
    */
   getRenderInfo(layer, x, y) {
     void [layer, x, y];
+    let cell = getCell();
+    if(GraphicAsset.loadAssets()){
+      return GraphicAsset.getTitle();
+    }
     assert.fail('Not implemented');
     return undefined;
   }
