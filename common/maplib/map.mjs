@@ -7,13 +7,16 @@ import assert from 'assert';
  * Each cell of the map is usually a string or boolean.
  * The documentation for format of the map is found at the end of this file.
  */
-class Map {
+class GameMap {
   /**
    * Construct an empty map.
    * @param {GraphicAsset} asset - The asset that is used with this set of map.
    */
   constructor(asset) {
-    if(!asset){
+    this.myasset = new GraphicAsset();
+    var check_asset = this.myasset.loadAssetConfig(asset);
+    this.mymap;
+    if(!check_asset){
       assert.fail('Not implemented');
     }
   }
@@ -24,8 +27,8 @@ class Map {
    * @return {Boolean} success - Return true if successful.
    */
   appendMap(map) {
-    void map;
-    if(!map){
+    this.mymap = map;
+    if(!this.mymap){
       assert.fail('Not implemented');
       return false;
     }
@@ -41,8 +44,12 @@ class Map {
    */
   getCell(layer, x, y) {
     void [layer, x, y];
-    assert.fail('Not implemented');
-    return '';
+    let cell = this.mymap.layer[x][y];
+    if(cell == undefined){
+      assert.fail('Not implemented');
+      return '';
+    }
+    return cell;
   }
 
   /**
@@ -63,9 +70,9 @@ class Map {
    */
   getRenderInfo(layer, x, y) {
     void [layer, x, y];
-    let cell = getCell();
-    if(GraphicAsset.loadAssets()){
-      return GraphicAsset.getTitle();
+    let tile = getCell(layer, x, y);
+    if(this.myasset.loadAssets()){
+      return this.myasset.getTitle(layer, tile);
     }
     assert.fail('Not implemented');
     return undefined;
