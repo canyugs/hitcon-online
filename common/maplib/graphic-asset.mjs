@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 import assert from 'assert';
-import { config } from 'process';
 
 /**
  * Manages the graphic assets for a map. This will tell which part of which
@@ -13,6 +12,7 @@ class GraphicAsset {
    * Construct an empty graphic asset manager.
    */
   constructor() {
+    this.asset_manager;
     assert.fail('Not implemented');
   }
 
@@ -23,6 +23,8 @@ class GraphicAsset {
    * @return {Boolean} success - Return true if successful.
    */
   loadAssetConfig(assetConfig) {
+    this.asset_manager = assetConfig;
+    if(this.asset_manager) return true;
     assert.fail('Not implemented');
     return false;
   }
