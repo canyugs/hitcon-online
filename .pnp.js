@@ -35,6 +35,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         "reference": "workspace:common/rpc-directory"
       },
       {
+        "name": "hitcon-online-blank",
+        "reference": "workspace:extensions/blank"
+      },
+      {
         "name": "hitcon-online-gateway",
         "reference": "workspace:services/gateway"
       },
@@ -51,6 +55,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
     "ignorePatternData": "(^(?:\\.yarn\\/sdks(?:\\/(?!\\.)(?:(?:(?!(?:^|\\/)\\.).)*?)|$))$)",
     "fallbackExclusionList": [
       ["hitcon-online", ["workspace:."]],
+      ["hitcon-online-blank", ["workspace:extensions/blank"]],
       ["hitcon-online-extlib", ["workspace:common/extlib"]],
       ["hitcon-online-game-client", ["workspace:sites/game-client"]],
       ["hitcon-online-gateway", ["workspace:services/gateway"]],
@@ -1401,6 +1406,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["redis", "npm:3.1.2"],
             ["socketio-jwt", "npm:4.6.2"],
             ["typescript", "patch:typescript@npm%3A4.2.4#builtin<compat/typescript>::version=4.2.4&hash=a45b0e"]
+          ],
+          "linkType": "SOFT",
+        }]
+      ]],
+      ["hitcon-online-blank", [
+        ["workspace:extensions/blank", {
+          "packageLocation": "./extensions/blank/",
+          "packageDependencies": [
+            ["hitcon-online-blank", "workspace:extensions/blank"]
           ],
           "linkType": "SOFT",
         }]
