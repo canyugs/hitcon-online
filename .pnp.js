@@ -1423,7 +1423,9 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./services/main/",
           "packageDependencies": [
             ["hitcon-online-main-server", "workspace:services/main"],
-            ["express", "npm:4.16.4"]
+            ["config", "npm:3.3.6"],
+            ["express", "npm:4.16.4"],
+            ["redis", "npm:3.1.2"]
           ],
           "linkType": "SOFT",
         }]
