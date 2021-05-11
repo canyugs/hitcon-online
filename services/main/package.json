@@ -5,6 +5,8 @@
     "start": "node main-server.js"
   },
   "dependencies": {
-    "express": "~4.16.1"
+    "config": "^3.3.6",
+    "express": "~4.16.1",
+    "redis": "^3.1.2"
   }
 }

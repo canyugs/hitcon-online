@@ -1068,7 +1068,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "hitcon-online-main-server@workspace:services/main"
   dependencies:
+    config: ^3.3.6
     express: ~4.16.1
+    redis: ^3.1.2
   languageName: unknown
   linkType: soft
 
