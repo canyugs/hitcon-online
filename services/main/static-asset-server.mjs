@@ -31,10 +31,13 @@ class StaticAssetServer {
    */
   initialize() {
     // TODO: Restrict the visible pages.
-    this.app.use('/static', express.static(__dirname+'/../../'));
+    // Not sure if all static files are in sites
+    this.app.use('/static', express.static(__dirname+'/../../sites'));
+  }
+  run() {
     // Send the user to the game client page.
     this.app.get('/', function(req, res) {
-      res.redirect('/static/sites/game-client/client.html');
+      res.sendFile('game-client/client.html');
     });
   }
 }
