@@ -30,8 +30,10 @@ function mainServer() {
   // let rpcDirectory = new Directory();
   // gatewayService = new GatewayService(rpcDirectory);
 
-  /* Start all services */
+  /* Initialize static asset server */
   staticAssetServer.initialize();
+  /* Start static asset server */
+  staticAssetServer.run();
   // TODO: Uncomment the following when RPC Directory is implemented.
   // gatewayService.initialize();
 
@@ -39,4 +41,7 @@ function mainServer() {
   app.listen(config.get('server.port'));
 }
 
-mainServer();
+if (require.main === module) {
+  mainServer();
+}
+
