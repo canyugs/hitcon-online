@@ -16,8 +16,8 @@ class Handler {
    * @param {String} serviceName - The name of the service.
    */
   constructor(serviceName) {
-    void serviceName;
-    assert.fail('Not implemented');
+    this.serviceName = serviceName;
+    this.methods.serviceName = {};
   }
 
   /**
@@ -29,8 +29,10 @@ class Handler {
    * service is the caller, args is the call arguments.
    */
   registerRPC(methodName, callback) {
-    void [methodName, callback];
-    assert.fail('Not implemented');
+    if(methodName in this.methods){
+      throw 'A method with the same name has been registered';
+    }
+    this.methods[methodName] = callback;
   }
 
   /**
@@ -42,8 +44,7 @@ class Handler {
    */
   callRPC(serviceName, methodName, args) {
     void [serviceName, methodName, args];
-    assert.fail('Not implemented');
-    return undefined;
+    return this.methods[methodName].apply(args); // now it only takes list, WIP...
   }
 }
 
