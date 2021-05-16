@@ -10,6 +10,7 @@ const {Server} = require('socket.io');
 const config = require('config');
 import { get } from 'http';
 
+
 /**
  * This class handles the connections from the client and does the most
  * processing required to service the client.
@@ -49,12 +50,8 @@ class GatewayService {
     await this.rpcHandler.registerAsGateway();
     this.rpcHandler.registerRPC('callS2c', this.callS2c.bind(this));
     this.servers = [];
-<<<<<<< HEAD
     await this.extMan.createAllInGateway(this.rpcHandler, this);
     await this.extMan.startAllInGateway();
-=======
-
->>>>>>> efc38ef (wip)
   }
 
   async callS2c(serviceName, playerID, extName, methodName, timeout, args) {
@@ -249,6 +246,7 @@ class GatewayService {
     //overspeed , are you fly?
     if(distanceSquire > speed ^ 2){
       this.broadcastResetUser(socket,uid,positionA.x,positionA.y,positionA.facing)
+
       return
     }
 
@@ -299,6 +297,27 @@ class GatewayService {
 
   checkPositionEmpty(mapCoord) {
     return this.gameMap.getCell(mapCoord);
+  }
+
+  async broadcastUserLocation(socket , uid, x, y, facing){
+    socket.broadcast.emit("location",{uid:uid,x:x,y:y,facing:facing});
+  }
+
+  getLastPosition(uid){
+    assert.fail('Not implemented');
+    return {x:0,y:0,facing:'up'}
+  }
+
+  updatePosition(uid,x,y,facing){
+    assert.fail('Not implemented');
+  }
+
+  getDistanceSquare(a,b){
+    return Math.abs(a.x - b.x)^2 + Math.abs(a.y - b.y)^2
+  }
+
+  checkPositionEmpty(x,y){
+    return map.getCell(x,y);
   }
 }
 
