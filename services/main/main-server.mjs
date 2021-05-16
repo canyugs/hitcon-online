@@ -41,7 +41,4 @@ function mainServer() {
   app.listen(config.get('server.port'));
 }
 
-if (require.main === module) {
-  mainServer();
-}
-
+mainServer();
