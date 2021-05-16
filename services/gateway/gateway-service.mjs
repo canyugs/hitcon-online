@@ -3,7 +3,11 @@
 
 import assert from 'assert';
 import { Server } from "socket.io";
+import { redis } from "redis";
+
 import { RPCDirectory } from "../../common/rpc-directory"
+import { map } from "../../common/maplib"
+import { get } from 'http';
 /**
  * This class handles the connections from the client and does the most
  * processing required to service the client.
@@ -29,6 +33,7 @@ class GatewayService {
   initialize() {
     this.dir.register("getewayServer");
     this.servers = [];
+    this.publisher = redis.createClient();
     assert.fail('Not implemented');
   }
 
@@ -57,18 +62,6 @@ class GatewayService {
   }
 
   /**
-   * This is called after accepting a socket.io connection.
-   * Usually called by server.on('connection') or by external user who wants to
-   * inject a connection.
-   * The connection is not authorized yet and need to be authenticated by
-   * socketio-jwt.
-   * @param {Socket} socket - The socket.io socket.
-   */
-  addUnauthSocket(socket) {// this may be not necessary
-    assert.fail('Not implemented');
-  }
-
-  /**
    * Accept an authorized user's socket.
    * This is usually called by addUnauthSocket() above.
    * socket.decoded_token.uid should be populated and is the User ID.
@@ -90,9 +83,31 @@ class GatewayService {
    * - facing: One of 'U', 'D', 'L', 'R'. The direction the user is facing.
    */
   async onUserLocation(uid, msg) {
+    // todo : checking movement is ligal
+    // 取出uid 上一個位置
+    // 計算距離< 最大可移動距離
+    // 確認目標點是可以走的
+    let speed = 1; // this can be adjust later
+
+    let positionA = this.getLastPosition(uid)
+    let positionB = {x:msg.x,y:msg.y};
+    let distance = this.getDistance(positionA,positionB);
+
+    //overspeed , are you fly?
+    if(distance^2 > speed ^ 2){
+      this.broadcastUserLocation(socket,uid,positionA.x,positionA.y,positionA.facing)
+      return
+    }
+
+    //enter none empty grid
+    if(this.checkPositionEmpty(positionB)){
+      this.broadcastUserLocation(socket,uid,positionA.x,positionA.y,positionA.facing)
+      return
+    }
+
     // todo : store user location in server
-    this.dir.callRPC("","");
-    this.broadcastUserLocation(socket,msg);
+
+    //this.broadcastUserLocation(socket,msg);
   }
 
   /**
@@ -105,10 +120,34 @@ class GatewayService {
    * @return {Boolean} success - true if successful.
    */
   async broadcastUserLocation(socket , uid, x, y, facing) {
-    socket.broadcast.emit("location",{uid:uid,x:x,y:y,facing:facing});
-    //void [uid, x, y, facing];
     assert.fail('Not implemented');
+
+    this.publisher.publish("updateUserPosition",{uid:uid,x:x,y:y,facing:facing});
+
+    // there are some logic for calling extendsion api
+    socket.broadcast.emit("location",{uid:uid,x:x,y:y,facing:facing});
     return false;
+  }
+
+  async broadcastUserLocation(socket , uid, x, y, facing){
+    socket.broadcast.emit("location",{uid:uid,x:x,y:y,facing:facing});
+  }
+
+  getLastPosition(uid){
+    assert.fail('Not implemented');
+    return {x:0,y:0,facing:'up'}
+  }
+
+  updatePosition(uid,x,y,facing){
+    assert.fail('Not implemented');
+  }
+
+  getDistanceSquare(a,b){
+    return Math.abs(a.x - b.x)^2 + Math.abs(a.y - b.y)^2
+  }
+
+  checkPositionEmpty(x,y){
+    return map.getCell(x,y);
   }
 }
 
