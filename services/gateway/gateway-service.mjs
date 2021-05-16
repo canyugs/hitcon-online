@@ -246,13 +246,13 @@ class GatewayService {
     //overspeed , are you fly?
     if(distanceSquire > speed ^ 2){
       this.broadcastResetUser(socket,uid,positionA.x,positionA.y,positionA.facing)
-
       return
     }
 
     //enter none empty grid
     if(this.checkPositionEmpty(positionB)){
       this._broadcastResetUser(socket,uid,positionA.x,positionA.y,positionA.facing)
+
       return
     }
 
@@ -299,7 +299,7 @@ class GatewayService {
     return this.gameMap.getCell(mapCoord);
   }
 
-  async broadcastUserLocation(socket , uid, x, y, facing){
+  async broadcastResetUser(socket , uid, x, y, facing){
     socket.broadcast.emit("location",{uid:uid,x:x,y:y,facing:facing});
   }
 
