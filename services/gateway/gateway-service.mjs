@@ -91,17 +91,17 @@ class GatewayService {
 
     let positionA = this.getLastPosition(uid)
     let positionB = {x:msg.x,y:msg.y};
-    let distance = this.getDistance(positionA,positionB);
+    let distanceSquire = this.getDistanceSquare(positionA,positionB);
 
     //overspeed , are you fly?
-    if(distance^2 > speed ^ 2){
-      this.broadcastUserLocation(socket,uid,positionA.x,positionA.y,positionA.facing)
+    if(distanceSquire > speed ^ 2){
+      this.broadcastResetUser(socket,uid,positionA.x,positionA.y,positionA.facing)
       return
     }
 
     //enter none empty grid
     if(this.checkPositionEmpty(positionB)){
-      this.broadcastUserLocation(socket,uid,positionA.x,positionA.y,positionA.facing)
+      this.broadcastResetUser(socket,uid,positionA.x,positionA.y,positionA.facing)
       return
     }
 
@@ -129,7 +129,7 @@ class GatewayService {
     return false;
   }
 
-  async broadcastUserLocation(socket , uid, x, y, facing){
+  async broadcastResetUser(socket , uid, x, y, facing){
     socket.broadcast.emit("location",{uid:uid,x:x,y:y,facing:facing});
   }
 
