@@ -27,7 +27,7 @@ class SingleProcessRPCDirectory extends Directory {
     if(name in this.handlers){
         throw 'A service with the same name has been registered';
     }
-    this.handlers[name] = new Handler(name);
+    this.handlers[name] = new Handler(name, this);
     return this.handlers[name];
   }
 }
