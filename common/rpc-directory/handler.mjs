@@ -43,7 +43,7 @@ class Handler {
    * @param {Object} args - The arguments.
    * @return {Object} result - The result of the call.
    */
-  callRPC(serviceName, methodName, args) {
+  async callRPC(serviceName, methodName, args) {
     void [serviceName, methodName, args];
     if(!(serviceName in this.RPCDirectory.handlers)){
       throw 'serviceName not found.';
@@ -52,7 +52,7 @@ class Handler {
       throw 'Method not found.';
     }
 
-    return this.RPCDirectory.handlers[serviceName].methods[methodName].apply(args); // now it only takes list, WIP...
+    return await this.RPCDirectory.handlers[serviceName].methods[methodName].apply(args); // now it only takes list, WIP...
   }
 }
 
