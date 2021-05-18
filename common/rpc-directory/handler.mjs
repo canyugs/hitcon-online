@@ -15,8 +15,9 @@ class Handler {
    * @constructor
    * @param {String} serviceName - The name of the service.
    */
-  constructor(serviceName) {
+  constructor(serviceName, RPCDirectory) {
     this.serviceName = serviceName;
+    this.RPCDirectory = RPCDirectory;
     this.methods.serviceName = {};
   }
 
@@ -44,7 +45,14 @@ class Handler {
    */
   callRPC(serviceName, methodName, args) {
     void [serviceName, methodName, args];
-    return this.methods[methodName].apply(args); // now it only takes list, WIP...
+    if(!(serviceName in this.RPCDirectory.handlers)){
+      throw 'serviceName not found.';
+    }
+    if(!(serviceName in this.RPCDirectory.handlers[serviceName].methods)){
+      throw 'Method not found.';
+    }
+
+    return this.RPCDirectory.handlers[serviceName].methods[methodName].apply(args); // now it only takes list, WIP...
   }
 }
 
