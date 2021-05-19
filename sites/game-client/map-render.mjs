@@ -5,12 +5,23 @@
  * MapRender renders the map onto the a canvas element.
  */
 class MapRender {
+  canvas = null
+
   /**
    * Create a new MapRender.
    * @param {Canvas} canvas - The canvas to draw onto.
    * @param {Map} map - The map object to retrieve the map information.
    */
   constructor(canvas, map) {
+    this.canvas = canvas
+  }
+
+  /**
+   * Return map canvas
+   * @returns {Canvas} - The using canvas
+   */
+  getCanvas() {
+    return this.canvas
   }
 
   /**
