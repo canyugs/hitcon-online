@@ -9,12 +9,36 @@ SPDX-License-Identifier: BSD-2-Clause
   <meta charset="utf-8">
   <title>HITCON Online</title>
   <link rel="stylesheet" href="client.css">
+  <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
 <div id="rootdiv">
 <canvas id="mapcanvas"></canvas>
 </div>
-<script>
+<script type="module">
+import GameMap from '../../common/maplib/map.mjs';
+import GraphicAsset from '../../common/maplib/graphic-asset.mjs';
+import MapState from '../../common/maplib/map-state.mjs';
+import GameClient from './game-client.js';
+
+// Export internal classes for ease of debugging.
+let gameClass = {};
+gameClass.GameMap = GameMap;
+gameClass.GraphicAsset = GraphicAsset;
+gameClass.MapState = MapState;
+gameClass.GameClient = GameClient;
+window.gameClass = gameClass;
+
+// Create the various essential game classes.
+let game = {};
+window.game = game;
+
+game.io = window.io();
+game.graphicAsset = new GraphicAsset();
+game.map = new GameMap(game.graphicAsset);
+game.mapState = new MapState(game.Map);
+game.gameClient = new GameClient(game.io, game.mapState);
+
 </script>
 </body>
 </html>
