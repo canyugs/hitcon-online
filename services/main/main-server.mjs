@@ -9,10 +9,14 @@ const express = require('express');
 const path = require('path');
 const config = require('config');
 const redis = require('redis');
+const {Server} = require('socket.io');
+const http = require('http');
 
 /* Import all servers */
 import GatewayService from '../gateway/gateway-service.mjs';
 import Directory from '../../common/rpc-directory/directory.mjs';
+import SingleProcessRPCDirectory from
+  '../../common/rpc-directory/SingleProcessRPCDirectory.mjs';
 import StaticAssetServer from './static-asset-server.mjs';
 
 function mainServer() {
@@ -23,22 +27,26 @@ function mainServer() {
   //   console.error(err);
   // });
 
-  /* Create all services */
+  /* Create the http service */
   const app = express();
+  const server = http.createServer(app);
+  const io = new Server(server);
+
+  /* Create all services */
   const staticAssetServer = new StaticAssetServer(app);
-  // TODO: Uncomment the following when RPC Directory is implemented.
-  // let rpcDirectory = new Directory();
-  // gatewayService = new GatewayService(rpcDirectory);
+  const rpcDirectory = new SingleProcessRPCDirectory();
+  // TODO: Uncomment the following when Gateway Service is implemented.
+  // let gatewayService = new GatewayService(rpcDirectory);
 
   /* Initialize static asset server */
   staticAssetServer.initialize();
   /* Start static asset server */
   staticAssetServer.run();
-  // TODO: Uncomment the following when RPC Directory is implemented.
+  // TODO: Uncomment the following when Gateway Service is implemented.
   // gatewayService.initialize();
 
   // TODO: Set the port once configuration is done.
-  app.listen(config.get('server.port'));
+  server.listen(config.get('server.port'));
 }
 
 mainServer();
