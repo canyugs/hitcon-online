@@ -83,7 +83,7 @@ export default GameMap;
 /*
 Sample format for the map:
 {
-  "ground": ["ground","ground","ground","ground","ground"],
+  "ground": ["ground","ground","ground","ground","ground","ground"],
   "wall": [true, true, true, false, false, false],
   "object": [null, null, null, "bar0", null, null],
   "startX": 0,
