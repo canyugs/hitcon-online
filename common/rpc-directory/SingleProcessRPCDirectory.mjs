@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 import assert from 'assert';
-import Directory from './directory'
-import Handler from './handler'
+import Directory from './directory.mjs'
+import Handler from './handler.mjs'
 
 /**
  * This class is handling all RPC calls in Single Process version.
@@ -14,6 +14,7 @@ class SingleProcessRPCDirectory extends Directory {
    * @constructor
    */
   constructor() {
+    super();
     this.handlers = {};
   }
 
