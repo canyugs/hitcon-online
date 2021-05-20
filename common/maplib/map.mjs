@@ -12,12 +12,8 @@ class GameMap {
    * @param {GraphicAsset} asset - The asset that is used with this set of map.
    */
   constructor(asset) {
-    this.myasset = new GraphicAsset();
-    var check_asset = this.myasset.loadAssetConfig(asset);
+    this.myasset = asset;
     this.mymap;
-    if(!check_asset){
-      assert.fail('Not implemented');
-    }
   }
 
   /**
