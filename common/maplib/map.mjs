@@ -1,7 +1,6 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
-import assert from 'assert';
 /**
  * Map represents the loaded map. A map is multiple layers of 2D grid of cells.
  * Each cell of the map is usually a string or boolean.
@@ -29,7 +28,7 @@ class GameMap {
   appendMap(map) {
     this.mymap = map;
     if(!this.mymap){
-      assert.fail('Not implemented');
+      console.error('Not implemented');
       return false;
     }
     return true;
@@ -46,7 +45,7 @@ class GameMap {
     void [layer, x, y];
     let cell = this.mymap[layer][x][y];
     if(cell == undefined){
-      assert.fail('Not implemented');
+      console.error('Not implemented');
       return '';
     }
     return cell;
@@ -74,12 +73,12 @@ class GameMap {
     if(this.myasset.loadAssets()){
       return this.myasset.getTitle(layer, tile);
     }
-    assert.fail('Not implemented');
+    console.error('Not implemented');
     return undefined;
   }
 }
 
-export default Map;
+export default GameMap;
 
 /*
 Sample format for the map:
