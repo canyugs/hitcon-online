@@ -1,8 +1,6 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
-import assert from 'assert';
-
 /**
  * Manages the graphic assets for a map. This will tell which part of which
  * image file represents which value in a layer of the map.
@@ -14,7 +12,7 @@ class GraphicAsset {
   constructor() {
     this.asset_manager;
     this.images_arr;
-    assert.fail('Not implemented');
+    console.error('Not implemented');
   }
 
   /**
@@ -26,7 +24,7 @@ class GraphicAsset {
   loadAssetConfig(assetConfig) {
     this.asset_manager = assetConfig;
     if(this.asset_manager) return true;
-    assert.fail('Not implemented');
+    console.error('Not implemented');
     return false;
   }
 
@@ -43,7 +41,7 @@ class GraphicAsset {
       }
       image.src = img.src;
     }
-    assert.fail('Not implemented');
+    console.error('Not implemented');
     return false;
   }
 
