@@ -15,7 +15,7 @@ class Directory {
    * @constructor
    */
   constructor() {
-    assert.fail('Not implemented');
+    // Do nothing, this is the base class.
   }
 
   /**
