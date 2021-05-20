@@ -9,9 +9,11 @@ class GameClient {
   /**
    * Create a game client.
    * @param {Socket} socket - A socket.io socket.
+   * @param {MapState} mapState - The map state object for tracking the map
+   * state.
    * @constructor
    */
-  constructor(socket) {
+  constructor(socket, mapState) {
     void socket;
     console.error('Not implemented.');
   }
