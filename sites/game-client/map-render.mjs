@@ -4,24 +4,24 @@
 /**
  * MapRender renders the map onto the a canvas element.
  */
-class MapRender {
-  canvas = null
-
+class MapRenderer {
   /**
    * Create a new MapRender.
    * @param {Canvas} canvas - The canvas to draw onto.
-   * @param {Map} map - The map object to retrieve the map information.
+   * @param {GameMap} map - The map object to retrieve the map information.
    */
   constructor(canvas, map) {
-    this.canvas = canvas
+    this.canvas = canvas;
+    this.map = map;
+    this.ctx = canvas.getContext('2d');
   }
 
   /**
    * Return map canvas
-   * @returns {Canvas} - The using canvas
+   * @return {Canvas} - The using canvas
    */
   getCanvas() {
-    return this.canvas
+    return this.canvas;
   }
 
   /**
@@ -63,6 +63,13 @@ class MapRender {
    * @return {Boolean} success - Return true if successful.
    */
   draw() {
+    let ret = true;
+    for (let y = 0; y < 15; ++y) {
+      for (let x = 0; x < 9; ++x) {
+        ret &&= this.drawCell(x, y);
+      }
+    }
+    return ret;
   }
 
   /**
@@ -74,8 +81,11 @@ class MapRender {
    * @param {Number} y - The y coordinate.
    * @return {Boolean} success - Return true if successful.
    */
-  drawCell() {
+  drawCell(x, y) {
+    const renderInfo = this.map.getRenderInfo(0, x, y);
+    this.ctx.drawImage(renderInfo.image, x * 32, y * 32);
+    return true;
   }
 }
 
-export default MapRender;
+export default MapRenderer;

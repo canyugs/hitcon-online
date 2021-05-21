@@ -74,7 +74,27 @@ class GameMap {
   }
 }
 
+class GameMapMock {
+  /**
+   * A mock object of GameMap.
+   * Used for testing before GameMap is fully implemented.
+   */
+  constructor () {
+    this.tile = new Image();
+    this.tile.src = '../../sites/game-client/test.png';
+    window.testImg = this.tile;
+  }
+
+  getRenderInfo (layer, x, y) {
+    return {
+      image: this.tile
+    }
+  }
+}
+
 export default GameMap;
+
+export { GameMapMock };
 
 /*
 Sample format for the map:
