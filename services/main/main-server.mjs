@@ -46,6 +46,7 @@ function mainServer() {
   // gatewayService.initialize();
 
   // TODO: Set the port once configuration is done.
+  console.log(`Server is listening on port ${config.get('server.port')} ...`);
   server.listen(config.get('server.port'));
 }
 
