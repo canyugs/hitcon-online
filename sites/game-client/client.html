@@ -5,40 +5,53 @@ SPDX-License-Identifier: BSD-2-Clause
 -->
 
 <html lang="zh-tw">
-<head>
-  <meta charset="utf-8">
-  <title>HITCON Online</title>
-  <link rel="stylesheet" href="client.css">
-  <script src="/socket.io/socket.io.js"></script>
-</head>
-<body>
-<div id="rootdiv">
-<canvas id="mapcanvas"></canvas>
-</div>
-<script type="module">
-import GameMap from '../../common/maplib/map.mjs';
-import GraphicAsset from '../../common/maplib/graphic-asset.mjs';
-import MapState from '../../common/maplib/map-state.mjs';
-import GameClient from './game-client.js';
+  <head>
+    <meta charset="utf-8">
+    <title>HITCON Online</title>
+    <link rel="stylesheet" href="client.css">
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="./misc.js"></script>
+  </head>
+  <body>
+    <div id="rootdiv" class="container-center">
+      <canvas id="mapcanvas"></canvas>
+    </div>
 
-// Export internal classes for ease of debugging.
-let gameClass = {};
-gameClass.GameMap = GameMap;
-gameClass.GraphicAsset = GraphicAsset;
-gameClass.MapState = MapState;
-gameClass.GameClient = GameClient;
-window.gameClass = gameClass;
+    <script type="module">
+      import GameMap from '../../common/maplib/map.mjs';
+      import GraphicAsset from '../../common/maplib/graphic-asset.mjs';
+      import MapState from '../../common/maplib/map-state.mjs';
+      import GameClient from './game-client.js';
+      import MapRenderer from './map-render.mjs';
+      import { GameMapMock } from '../../common/maplib/map.mjs'; // only used before GameMap is fully implemented
 
-// Create the various essential game classes.
-let game = {};
-window.game = game;
+      // Export internal classes for ease of debugging.
+      let gameClass = {};
+      gameClass.GameMap = GameMap;
+      gameClass.GraphicAsset = GraphicAsset;
+      gameClass.MapState = MapState;
+      gameClass.GameClient = GameClient;
+      window.gameClass = gameClass;
 
-game.io = window.io();
-game.graphicAsset = new GraphicAsset();
-game.map = new GameMap(game.graphicAsset);
-game.mapState = new MapState(game.Map);
-game.gameClient = new GameClient(game.io, game.mapState);
+      // Create the various essential game classes.
+      let game = {};
+      window.game = game;
 
-</script>
-</body>
+      game.io = window.io();
+      game.graphicAsset = new GraphicAsset();
+      // game.map = new GameMap(game.graphicAsset);
+      game.map = new GameMapMock(game.graphicAsset);
+      game.mapState = new MapState(game.map);
+      game.gameClient = new GameClient(game.io, game.mapState);
+      game.mapRenderer = new MapRenderer(document.querySelector('#mapcanvas'), game.map);
+
+      function onGameTick () {
+        game.mapRenderer.draw();
+        requestAnimationFrame(onGameTick);
+      }
+
+      requestAnimationFrame(onGameTick);
+
+    </script>
+  </body>
 </html>
