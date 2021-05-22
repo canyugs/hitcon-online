@@ -82,7 +82,7 @@ class MapRenderer {
    * @return {Boolean} success - Return true if successful.
    */
   drawCell(x, y) {
-    const renderInfo = this.map.getRenderInfo(0, x, y);
+    const renderInfo = this.map.getCellRenderInfo(0, x, y);
     this.ctx.drawImage(renderInfo.image, x * 32, y * 32);
     return true;
   }

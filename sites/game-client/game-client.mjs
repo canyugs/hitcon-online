@@ -9,21 +9,21 @@ class GameClient {
   /**
    * Create a game client.
    * @param {Socket} socket - A socket.io socket.
-   * @param {MapState} mapState - The map state object for tracking the map
+   * @param {GameState} gameState - The map state object for tracking the map
    * state.
    * @constructor
    */
-  constructor(socket, mapState) {
+  constructor(socket, gameState) {
     void socket;
     console.error('Not implemented.');
   }
 
   /**
-   * Return the MapState object. This will allow the caller to query the
+   * Return the GameState object. This will allow the caller to query the
    * current state of the map.
-   * @return {MapState} mapState - The MapState object.
+   * @return {GameState} gameState - The GameState object.
    */
-  getMapState() {
+  GameState() {
     console.error('Not implemented.');
     return undefined;
   }

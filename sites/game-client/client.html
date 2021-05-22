@@ -20,7 +20,7 @@ SPDX-License-Identifier: BSD-2-Clause
     <script type="module">
       import GameMap from '../../common/maplib/map.mjs';
       import GraphicAsset from '../../common/maplib/graphic-asset.mjs';
-      import MapState from '../../common/maplib/map-state.mjs';
+      import GameState from '../../common/maplib/game-state.mjs';
       import GameClient from './game-client.mjs';
       import MapRenderer from './map-render.mjs';
       import { GameMapMock } from '../../common/maplib/map.mjs'; // only used before GameMap is fully implemented
@@ -29,7 +29,7 @@ SPDX-License-Identifier: BSD-2-Clause
       let gameClass = {};
       gameClass.GameMap = GameMap;
       gameClass.GraphicAsset = GraphicAsset;
-      gameClass.MapState = MapState;
+      gameClass.GameState = GameState;
       gameClass.GameClient = GameClient;
       window.gameClass = gameClass;
 
@@ -41,8 +41,8 @@ SPDX-License-Identifier: BSD-2-Clause
       game.graphicAsset = new GraphicAsset();
       // game.map = new GameMap(game.graphicAsset);
       game.map = new GameMapMock(game.graphicAsset);
-      game.mapState = new MapState(game.map);
-      game.gameClient = new GameClient(game.io, game.mapState);
+      game.gameState = new GameState(game.map);
+      game.gameClient = new GameClient(game.io, game.gameState);
       game.mapRenderer = new MapRenderer(document.querySelector('#mapcanvas'), game.map);
 
       function onGameTick () {
