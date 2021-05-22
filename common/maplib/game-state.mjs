@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 /**
- * Map state represents the state of the map while the game is running.
+ * GameState represents the state of the map while the game is running.
  * For example, it records where each player is, if there's any object on the
  * map, and if doors are open... etc.
  * This is used in both the game client (browser side) and in the area
  * broadcaster (server side).
  */
-class MapState {
+class GameState {
   /**
    * Create an empty map state.
    * @constructor
@@ -56,4 +56,4 @@ class MapState {
   }
 }
 
-export default MapState;
+export default GameState;

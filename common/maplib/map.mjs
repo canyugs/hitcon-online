@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 /**
- * Map represents the loaded map. A map is multiple layers of 2D grid of cells.
+ * Map represents the whole world map of the game.
+ * A map is multiple layers of 2D grid of cells.
  * Each cell of the map is usually a string or boolean.
  * The documentation for format of the map is found at the end of this file.
  */
@@ -63,7 +64,7 @@ class GameMap {
    * - srcWidth: The width of the tile.
    * - srcHeight: The height of the tile.
    */
-  getRenderInfo(layer, x, y) {
+  getCellRenderInfo(layer, x, y) {
     void [layer, x, y];
     let tile = getCell(layer, x, y);
     if(this.myasset.loadAssets()){
@@ -85,7 +86,7 @@ class GameMapMock {
     window.testImg = this.tile;
   }
 
-  getRenderInfo (layer, x, y) {
+  getCellRenderInfo (layer, x, y) {
     return {
       image: this.tile
     }
