@@ -29,6 +29,31 @@ class Directory {
     assert.fail('Not implemented');
     return undefined;
   }
+
+  /**
+   * Add a gateway service service name.
+   * This is called so that we know which service name belongs to gateway
+   * service.
+   * @param {string} name - Name of the gateway service.
+   */
+  addGatewayServiceName(name) {
+  }
+  
+  /**
+   * Return the list of gateway service service name.
+   * @param {object} arr - An array of gateway service name.
+   */
+  getGatewayServices() {
+    return [];
+  }
+
+  /**
+   * Retrieve the redis client.
+   * @return {redis} redis - A redis client.
+   */
+  getRedis() {
+    return undefined;
+  }
 }
 
 export default Directory;
