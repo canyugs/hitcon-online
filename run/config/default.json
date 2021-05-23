@@ -1,5 +1,9 @@
 {
   "server": {
     "port": 5000
-  }
+  },
+  "map": [
+    "map/map.json"
+  ],
+  "assets": "map/assets.json"
 }
