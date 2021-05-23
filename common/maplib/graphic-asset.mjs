@@ -10,9 +10,8 @@ class GraphicAsset {
    * Construct an empty graphic asset manager.
    */
   constructor() {
-    this.asset_manager;
-    this.images_arr;
-    console.error('Not implemented');
+    this.asset_manager = undefined;
+    this.images_arr = [];
   }
 
   /**
@@ -24,7 +23,6 @@ class GraphicAsset {
   loadAssetConfig(assetConfig) {
     this.asset_manager = assetConfig;
     if(this.asset_manager) return true;
-    console.error('Not implemented');
     return false;
   }
 
@@ -34,14 +32,13 @@ class GraphicAsset {
    * @return {Boolean} success - Return true if all assets are loaded.
    */
   async loadAssets() {
-    for(img in this.asset_manager.images){
+    for(let img in this.asset_manager.images){
       let image = new Image();
       image.onerror = function(){
         this.images_arr.push(image);
       }
       image.src = img.src;
     }
-    console.error('Not implemented');
     return false;
   }
 
@@ -80,7 +77,7 @@ class GraphicAsset {
     info.imageRef = this.asset_manager.layerMap[layer][tile][0];
     info.srcX = this.asset_manager.layerMap[layer][tile][1];
     info.srcY = this.asset_manager.layerMap[layer][tile][2];
-    info.image = getImage(info.imageRef);
+    info.image = this.getImage(info.imageRef);
     for (let i = 0; i < this.asset_manager.images.length; i++){
       if(this.asset_manager.images[i].name == info.imageRef){
         info.srcWidth = this.asset_manager.images[i].gridWidth;
