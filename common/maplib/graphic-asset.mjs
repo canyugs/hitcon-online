@@ -86,6 +86,17 @@ class GraphicAsset {
     }
     return info;
   }
+
+  /**
+   * Return drawing information for a particular character.
+   * @param {String} char - The character's name.
+   * @param {String} facing - The direction the character is facing.
+   * @return {Object} info - See the info parameter in getTile.
+   */
+  getCharacter(char, facing) {
+    console.error("Not implemented");
+    return undefined;
+  }
 }
 
 export default GraphicAsset;
