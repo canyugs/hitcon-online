@@ -44,11 +44,9 @@ SPDX-License-Identifier: BSD-2-Clause
         // TODO: Change map URL to follow the config in server side.
         game.mapData = await $.ajax({url: "/static/run/map/map.json", type: "GET",});
         game.assetData = await $.ajax({url: "/static/run/map/assets.json", type: "GET",});
-        game.graphicAsset = new GraphicAsset();
-        game.graphicAsset.loadAssetConfig(game.assetData);
+        game.graphicAsset = new GraphicAsset(game.assetData);
         await game.graphicAsset.loadAssets();
-        game.map = new GameMap(game.graphicAsset);
-        game.map.appendMap(game.mapData);
+        game.map = new GameMap(game.graphicAsset, game.mapData);
         game.gameState = new GameState(game.map);
         // TODO: Uncomment after GameClient is implemented.
         //game.gameClient = new GameClient(game.io, game.gameState);

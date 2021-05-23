@@ -8,22 +8,16 @@
 class GraphicAsset {
   /**
    * Construct an empty graphic asset manager.
-   */
-  constructor() {
-    this.asset_manager = undefined;
-    this.images_arr = [];
-  }
-
-  /**
-   * Load an asset config.
+   * @constructor
    * @param {Object} assetConfig - The JSON object represeting the asset
    * config. It's format is at the end of this file.
-   * @return {Boolean} success - Return true if successful.
    */
-  loadAssetConfig(assetConfig) {
+  constructor(assetConfig) {
     this.asset_manager = assetConfig;
-    if(this.asset_manager) return true;
-    return false;
+    if (!this.asset_manager) {
+      throw "No asset config supplied for new GraphicAsset()";
+    }
+    this.images_arr = [];
   }
 
   /**
