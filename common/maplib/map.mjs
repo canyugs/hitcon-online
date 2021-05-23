@@ -66,9 +66,9 @@ class GameMap {
    */
   getCellRenderInfo(layer, x, y) {
     void [layer, x, y];
-    let tile = getCell(layer, x, y);
+    let tile = this.getCell(layer, x, y);
     if(this.myasset.loadAssets()){
-      return this.myasset.getTitle(layer, tile);
+      return this.myasset.getTile(layer, tile);
     }
     console.error('Not implemented');
     return undefined;
