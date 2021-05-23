@@ -1,12 +1,13 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
-import assert from 'assert';
-import { Server } from "socket.io";
-import { redis } from "redis";
+// Boilerplate for getting require() in es module.
+import {createRequire} from 'module';
+const require = createRequire(import.meta.url);
 
-import { RPCDirectory } from "../../common/rpc-directory"
-import { map } from "../../common/maplib"
+import assert from 'assert';
+const {Server} = require('socket.io');
+
 import { get } from 'http';
 /**
  * This class handles the connections from the client and does the most
@@ -18,11 +19,12 @@ class GatewayService {
    * class/function.
    * At the time when this is called, other services are NOT constructed yet.
    * @constructor
-   * @param {RPCDirectory} dir - The RPCDirectory for calling other services.
+   * @param {Directory} dir - The RPCDirectory for calling other services.
+   * @param {Map} gameMap - The world map for this game.
    */
-  constructor(dir) {
+  constructor(dir, gameMap) {
     this.dir = dir;
-    assert.fail('Not implemented');
+    this.gameMap = gameMap;
   }
 
   /**
@@ -31,10 +33,10 @@ class GatewayService {
    * created, but their initialize() have not been called.
    */
   initialize() {
-    this.dir.register("getewayServer");
+    this.rpcHandler = this.dir.registerService("gatewayServer");
     this.servers = [];
-    this.publisher = redis.createClient();
-    assert.fail('Not implemented');
+    // TODO: Enable this after we've redis ready.
+    //this.publisher = redis.createClient();
   }
 
   /**
@@ -122,7 +124,8 @@ class GatewayService {
   async broadcastUserLocation(socket , uid, x, y, facing) {
     assert.fail('Not implemented');
 
-    this.publisher.publish("updateUserPosition",{uid:uid,x:x,y:y,facing:facing});
+    // TODO: Enable this after we have redis ready.
+    //this.publisher.publish("updateUserPosition",{uid:uid,x:x,y:y,facing:facing});
 
     // there are some logic for calling extendsion api
     socket.broadcast.emit("location",{uid:uid,x:x,y:y,facing:facing});
@@ -147,7 +150,7 @@ class GatewayService {
   }
 
   checkPositionEmpty(x,y){
-    return map.getCell(x,y);
+    return gameMap.getCell(x,y);
   }
 }
 
