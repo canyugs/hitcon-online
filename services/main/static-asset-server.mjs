@@ -34,7 +34,9 @@ class StaticAssetServer {
     // Not sure if all static files are in sites
     this.app.use('/static/sites', express.static(__dirname + '/../../sites/'));
     this.app.use('/static/common', express.static(__dirname + '/../../common/'));
+    this.app.use('/static/run/map', express.static(__dirname + '/../../run/map'));
   }
+
   run() {
     // Send the user to the game client page.
     this.app.get('/', (req, res) => {
