@@ -11,6 +11,7 @@ SPDX-License-Identifier: BSD-2-Clause
     <link rel="stylesheet" href="client.css">
     <script src="/socket.io/socket.io.js"></script>
     <script src="./misc.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
   </head>
   <body>
     <div id="rootdiv" class="container-center">
@@ -37,20 +38,31 @@ SPDX-License-Identifier: BSD-2-Clause
       let game = {};
       window.game = game;
 
-      game.io = window.io();
-      game.graphicAsset = new GraphicAsset();
-      // game.map = new GameMap(game.graphicAsset);
-      game.map = new GameMapMock(game.graphicAsset);
-      game.gameState = new GameState(game.map);
-      game.gameClient = new GameClient(game.io, game.gameState);
-      game.mapRenderer = new MapRenderer(document.querySelector('#mapcanvas'), game.map);
+      async function gameMain(game) {
+        game.io = window.io();
 
-      function onGameTick () {
-        game.mapRenderer.draw();
+        // TODO: Change map URL to follow the config in server side.
+        game.mapData = await $.ajax({url: "/static/run/map/map.json", type: "GET",});
+        game.assetData = await $.ajax({url: "/static/run/map/assets.json", type: "GET",});
+        game.graphicAsset = new GraphicAsset();
+        game.graphicAsset.loadAssetConfig(game.assetData);
+        await game.graphicAsset.loadAssets();
+        game.map = new GameMap(game.graphicAsset);
+        game.map.appendMap(game.mapData);
+        game.gameState = new GameState(game.map);
+        // TODO: Uncomment after GameClient is implemented.
+        //game.gameClient = new GameClient(game.io, game.gameState);
+        game.mapRenderer = new MapRenderer(document.querySelector('#mapcanvas'), game.map);
+
+        function onGameTick () {
+          game.mapRenderer.draw();
+          requestAnimationFrame(onGameTick);
+        }
+
         requestAnimationFrame(onGameTick);
       }
 
-      requestAnimationFrame(onGameTick);
+      gameMain(game);
 
     </script>
   </body>
