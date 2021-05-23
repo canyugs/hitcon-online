@@ -10,25 +10,16 @@
 class GameMap {
   /**
    * Construct an empty map.
+   * @constructor
    * @param {GraphicAsset} asset - The asset that is used with this set of map.
-   */
-  constructor(asset) {
-    this.myasset = asset;
-    this.mymap;
-  }
-
-  /**
-   * Load a map from the JSON object.
    * @param {Object} map - The JSON object representing the map.
-   * @return {Boolean} success - Return true if successful.
    */
-  appendMap(map) {
+  constructor(asset, map) {
+    this.myasset = asset;
     this.mymap = map;
     if(!this.mymap){
-      console.error('Not implemented');
-      return false;
+      throw "No map json supplied with new GameMap()";
     }
-    return true;
   }
 
   /**

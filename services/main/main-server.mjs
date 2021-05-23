@@ -37,19 +37,17 @@ async function mainServer() {
   const io = new Server(server);
 
   /* Create all utility classes */
+  // Load the map.
+  const mapList = config.get("map");
+  const rawMapJSON = fs.readFileSync(mapList[0]);
+  const mapJSON = JSON.parse(rawMapJSON);
   // We do not have GraphicAsset on the server side.
-  const gameMap = new GameMap(undefined);
+  const gameMap = new GameMap(undefined, mapJSON);
 
   /* Create all services */
   const staticAssetServer = new StaticAssetServer(app);
   const rpcDirectory = new SingleProcessRPCDirectory();
   const gatewayService = new GatewayService(rpcDirectory, gameMap);
-
-  /* Initialize utility classes */
-  const mapList = config.get("map");
-  const rawMapJSON = fs.readFileSync(mapList[0]);
-  const mapJSON = JSON.parse(rawMapJSON);
-  gameMap.appendMap(mapJSON);
 
   /* Initialize static asset server */
   staticAssetServer.initialize();
