@@ -18,6 +18,7 @@ class Handler {
   constructor(serviceName, RPCDirectory) {
     this.serviceName = serviceName;
     this.RPCDirectory = RPCDirectory;
+    this.methods = {}
     this.methods.serviceName = {};
   }
 
