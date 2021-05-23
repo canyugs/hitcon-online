@@ -11,6 +11,7 @@ const config = require('config');
 const redis = require('redis');
 const {Server} = require('socket.io');
 const http = require('http');
+import fs from 'fs';
 
 /* Import all servers */
 import GatewayService from '../gateway/gateway-service.mjs';
@@ -19,7 +20,10 @@ import SingleProcessRPCDirectory from
   '../../common/rpc-directory/SingleProcessRPCDirectory.mjs';
 import StaticAssetServer from './static-asset-server.mjs';
 
-function mainServer() {
+/* Import all utility classes */
+import GameMap from '../../common/maplib/map.mjs';
+
+async function mainServer() {
   /* Redis integration */
   // TODO: Uncomment once configuration for redis is done.
   // redisClient = redis.createClient();
@@ -32,18 +36,26 @@ function mainServer() {
   const server = http.createServer(app);
   const io = new Server(server);
 
+  /* Create all utility classes */
+  // We do not have GraphicAsset on the server side.
+  const gameMap = new GameMap(undefined);
+
   /* Create all services */
   const staticAssetServer = new StaticAssetServer(app);
   const rpcDirectory = new SingleProcessRPCDirectory();
-  // TODO: Uncomment the following when Gateway Service is implemented.
-  // let gatewayService = new GatewayService(rpcDirectory);
+  const gatewayService = new GatewayService(rpcDirectory, gameMap);
+
+  /* Initialize utility classes */
+  const mapList = config.get("map");
+  const rawMapJSON = fs.readFileSync(mapList[0]);
+  const mapJSON = JSON.parse(rawMapJSON);
+  gameMap.appendMap(mapJSON);
 
   /* Initialize static asset server */
   staticAssetServer.initialize();
   /* Start static asset server */
   staticAssetServer.run();
-  // TODO: Uncomment the following when Gateway Service is implemented.
-  // gatewayService.initialize();
+  gatewayService.initialize();
 
   // TODO: Set the port once configuration is done.
   console.log(`Server is listening on port ${config.get('server.port')} ...`);
