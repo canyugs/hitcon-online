@@ -1163,6 +1163,8 @@ __metadata:
 "hitcon-online-gateway@workspace:services/gateway":
   version: 0.0.0-use.local
   resolution: "hitcon-online-gateway@workspace:services/gateway"
+  dependencies:
+    socket.io: ^4.1.2
   languageName: unknown
   linkType: soft
 
