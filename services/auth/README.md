@@ -12,6 +12,7 @@ const authServer = AuthServer(app);
 
 * 啟動 route
     * /auth: 接收 POST request，把 request 的 token 參數做 JWT 驗證，如果成功就寫進 cookie
+    * /get\_test\_token: 取得測試 JWT token 字串，並寫進 cookie
 ```
 authServer.run();
 ```
