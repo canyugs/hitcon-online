@@ -26,14 +26,26 @@ class GraphicAsset {
    * @return {Boolean} success - Return true if all assets are loaded.
    */
   async loadAssets() {
-    for(let img in this.asset_manager.images){
-      let image = new Image();
-      image.onerror = function(){
-        this.images_arr.push(image);
-      }
-      image.src = img.src;
+    const arr_promise = [];
+    const this_ = this;
+    for(let img of this.asset_manager.images){
+      arr_promise.push(new Promise((resolve, reject) => {
+        let image = new Image();
+        this_.images_arr.push(image);
+        image.onload = resolve;
+        image.onerror = () => {
+          reject(`error on loading ${img.url}`);
+        };
+        image.src = img.url;
+      }));
     }
-    return false;
+
+    let success = true;
+    await Promise.all(arr_promise).catch((err_msg) => {
+      console.error(err_msg);
+      success = false;
+    });
+    return success;
   }
 
   /**
@@ -44,7 +56,7 @@ class GraphicAsset {
   getImage(getname) {
     for (let i = 0; i < this.asset_manager.images.length; i++){
       if(this.asset_manager.images[i].name == getname){
-        if(this.images_arr[i].complete) return this.images_arr[i];
+        return this.images_arr[i];
       }
     }
     return undefined;
@@ -69,15 +81,15 @@ class GraphicAsset {
     void [layer, tile];
     var info = new Object();
     info.imageRef = this.asset_manager.layerMap[layer][tile][0];
-    info.srcX = this.asset_manager.layerMap[layer][tile][1];
-    info.srcY = this.asset_manager.layerMap[layer][tile][2];
     info.image = this.getImage(info.imageRef);
-    for (let i = 0; i < this.asset_manager.images.length; i++){
-      if(this.asset_manager.images[i].name == info.imageRef){
-        info.srcWidth = this.asset_manager.images[i].gridWidth;
-        info.srcHeight = this.asset_manager.images[i].gridHeight;
+    for (let img of this.asset_manager.images) {
+      if (img.name === info.imageRef) {
+        info.srcWidth = img.gridWidth;
+        info.srcHeight = img.gridHeight;
       }
     }
+    info.srcX = this.asset_manager.layerMap[layer][tile][1] * info.srcWidth;
+    info.srcY = this.asset_manager.layerMap[layer][tile][2] * info.srcHeight;
     return info;
   }
 
