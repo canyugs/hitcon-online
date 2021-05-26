@@ -19,6 +19,7 @@ import Directory from '../../common/rpc-directory/directory.mjs';
 import SingleProcessRPCDirectory from
   '../../common/rpc-directory/SingleProcessRPCDirectory.mjs';
 import StaticAssetServer from './static-asset-server.mjs';
+import AuthServer from '../auth/AuthServer.mjs';
 
 /* Import all utility classes */
 import GameMap from '../../common/maplib/map.mjs';
@@ -48,12 +49,14 @@ async function mainServer() {
   const staticAssetServer = new StaticAssetServer(app);
   const rpcDirectory = new SingleProcessRPCDirectory();
   const gatewayService = new GatewayService(rpcDirectory, gameMap);
+  const authServer = new AuthServer(app);
 
   /* Initialize static asset server */
   staticAssetServer.initialize();
   /* Start static asset server */
   staticAssetServer.run();
   gatewayService.initialize();
+  authServer.run();
 
   // TODO: Set the port once configuration is done.
   console.log(`Server is listening on port ${config.get('server.port')} ...`);
