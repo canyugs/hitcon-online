@@ -65,6 +65,15 @@ class AuthServer{
                 })
             }   
         })
+
+        this.app.get('/get_test_token', function(req, res){
+            const token = jwt.sign({'test': 'test_token'}, secret);
+            res.cookie('token', token, {httpOnly: true})
+            res.json({
+                success: true,
+                token: token
+            })
+        })
     }
 }
 
