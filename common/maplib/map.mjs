@@ -31,7 +31,7 @@ class GameMap {
    */
   getCell(layer, x, y) {
     void [layer, x, y];
-    let cell = this.mymap[layer][x][y];
+    let cell = this.mymap[layer][y*this.mymap.width + x];
     if(cell == undefined){
       console.error('Not implemented');
       return '';
@@ -100,3 +100,18 @@ Sample format for the map:
   "height": 2
 }
 */
+
+/*
+The map coordinate:
+Be careful not to get confused with "canvas coordinate".
+notation: (y, x)
+
+          ...
+
+  (2,0)   (2,1)   (2,2)
+
+  (1,0)   (1,1)   (1,2)   ...
+
+  (0,0)   (0,1)   (0,2)
+
+ */
