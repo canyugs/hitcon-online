@@ -1,19 +1,31 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
+const mapCellSize = 32; // pixel
+
 /**
  * MapRender renders the map onto the a canvas element.
+ * The coordinate of canvas is shown at the end of the file.
  */
 class MapRenderer {
   /**
    * Create a new MapRender.
    * @param {Canvas} canvas - The canvas to draw onto.
    * @param {GameMap} map - The map object to retrieve the map information.
+   * @param {GameState} gameState - The game state.
    */
-  constructor(canvas, map) {
+  constructor(canvas, map, gameState) {
     this.canvas = canvas;
     this.map = map;
+    this.gameState = gameState;
     this.ctx = canvas.getContext('2d');
+
+    /**
+     * viewerPosition is the **map coordinate** of the center of canvas.
+     * It is a real number, which enables smooth moving of the camera;
+     */
+    this.viewerPosition = {x: 10, y: 10}; // only used before GameState.getPlayerLocations() is fully implemented
+    // this.viewerPosition = this.gameState.getPlayerLocations();
   }
 
   /**
@@ -34,17 +46,8 @@ class MapRenderer {
    * @param {Number} y - The y coordinate.
    */
   setViewerPosition(x, y) {
-  }
-
-  /**
-   * Add or set the position of user/player that should be drawn on the canvas.
-   * @param {Object} player - User information. It should include:
-   *  - uid: UID of the user.
-   *  - x: X coordinate.
-   *  - y: Y coordinate.
-   *  - facing: 'U', 'D', 'L', 'R'. The direction the user is facing.
-   */
-  setPlayerPosition(player) {
+    this.viewerPosition.x = x;
+    this.viewerPosition.y = y;
   }
 
   /**
@@ -52,40 +55,108 @@ class MapRenderer {
    * @param {Number} x - The x coordinate in the canvas.
    * @param {Number} y - The y coordinate in the canvas.
    * @return {Object} coordinate - The map coordinate. coordinate.x and
-   * coordinate.y is available.
+   * coordinate.y is available. Both x and y are floating numbers.
    */
   canvasToMapCoordinate(x, y) {
+    const canvasCenter = {x: this.canvas.width / 2, y: this.canvas.height / 2};
+    return {
+      x: this.viewerPosition.x + (x - canvasCenter.x) / mapCellSize + 0.5,
+      y: this.viewerPosition.y + (y - canvasCenter.y) / mapCellSize + 0.5,
+    };
   }
 
   /**
-   * Draw everything onto the canvas. If there's something in the canvas,
-   * clean it up then draw.
+   * Converts map coordinate to canvas coordinate.
+   * @param {Number} x - The x coordinate in the map.
+   * @param {Number} y - The y coordinate in the map.
+   * @return {Object} coordinate - The canvas coordinate. coordinate.x and
+   * coordinate.y is available. Both x and y are integer.
+   */
+  mapToCanvasCoordinate(x, y) {
+    const canvasCenter = {x: this.canvas.width / 2, y: this.canvas.height / 2};
+    return {
+      x: Math.floor(canvasCenter.x + (x - this.viewerPosition.x - 0.5) * mapCellSize),
+      y: Math.floor(canvasCenter.y + (y - this.viewerPosition.y - 0.5) * mapCellSize),
+    };
+  }
+
+  /**
+   * Draw everything onto the canvas.
    * @return {Boolean} success - Return true if successful.
    */
   draw() {
     let ret = true;
-    for (let y = 0; y < 15; ++y) {
-      for (let x = 0; x < 9; ++x) {
-        ret &&= this.drawCell(x, y);
+    ret &&= this._drawGround();
+    ret &&= this._drawPlayers();
+
+    return ret;
+  }
+
+  /**
+   * Draw layer "ground" onto the canvas.
+   * @return {Boolean} success - Return true if successful.
+   */
+  _drawGround() {
+    const firstCellMapCoordFloat = this.canvasToMapCoordinate(0, 0);
+    const firstCellMapCoordInt = {
+      x: Math.floor(firstCellMapCoordFloat.x),
+      y: Math.floor(firstCellMapCoordFloat.y),
+    };
+    const lastCellMapCoordFloat = this.canvasToMapCoordinate(this.canvas.width, this.canvas.height);
+    const lastCellMapCoordInt = {
+      x: Math.floor(lastCellMapCoordFloat.x),
+      y: Math.floor(lastCellMapCoordFloat.y),
+    };
+
+    const ret = true;
+    for (let mapY = firstCellMapCoordInt.y; mapY <= lastCellMapCoordInt.y; ++mapY) {
+      for (let mapX = firstCellMapCoordInt.x; mapX <= lastCellMapCoordInt.x; ++mapX) {
+        const renderInfo = this.map.getCellRenderInfo('ground', mapX, mapY);
+        const canvasCoordinate = this.mapToCanvasCoordinate(mapX, mapY);
+        this.ctx.drawImage(
+            renderInfo.image,
+            renderInfo.srcX,
+            renderInfo.srcY,
+            renderInfo.srcWidth,
+            renderInfo.srcHeight,
+            canvasCoordinate.x,
+            canvasCoordinate.y,
+            mapCellSize,
+            mapCellSize,
+        );
       }
     }
     return ret;
   }
 
   /**
-   * Draw a specific cell. All layers at that location is drawn.
-   * If there is something at that cell, clean it up then draw.
-   * If the specified coordinate is not within the current viewport/canvas,
-   * then do nothing and return true.
-   * @param {Number} x - The x coordinate.
-   * @param {Number} y - The y coordinate.
+   * Draw players onto the canvas.
    * @return {Boolean} success - Return true if successful.
    */
-  drawCell(x, y) {
-    const renderInfo = this.map.getCellRenderInfo("ground", x, y);
-    this.ctx.drawImage(renderInfo.image, x * 32, y * 32);
+  _drawPlayers() {
+    // TODO: draw real players after GameState is fully implemented
+    // for (let player of this.gameState.getPlayerLocations()) {
+    //   this.ctx.drawImage(...);
+    // }
     return true;
   }
 }
 
 export default MapRenderer;
+
+
+/*
+Below demonstrates the coordinate of the canvas:
+Be careful not to get confused with "map coordinate".
+format: (y, x)
+unit: pixel
+
+  (0,0)   (0,1)   (0,2)
+
+  (1,0)   (1,1)   (1,2)   ...
+
+  (2,0)   (2,1)   (2,2)
+
+          ...
+
+*/

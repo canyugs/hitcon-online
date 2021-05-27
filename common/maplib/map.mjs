@@ -17,8 +17,8 @@ class GameMap {
   constructor(asset, map) {
     this.myasset = asset;
     this.mymap = map;
-    if(!this.mymap){
-      throw "No map json supplied with new GameMap()";
+    if (!this.mymap) {
+      throw 'No map json supplied with new GameMap()';
     }
   }
 
@@ -31,11 +31,7 @@ class GameMap {
    */
   getCell(layer, x, y) {
     void [layer, x, y];
-    let cell = this.mymap[layer][y*this.mymap.width + x];
-    if(cell == undefined){
-      console.error('Not implemented');
-      return '';
-    }
+    const cell = this.mymap[layer][y*this.mymap.width + x];
     return cell;
   }
 
@@ -56,13 +52,8 @@ class GameMap {
    * - srcHeight: The height of the tile.
    */
   getCellRenderInfo(layer, x, y) {
-    void [layer, x, y];
-    let tile = this.getCell(layer, x, y);
-    if(this.myasset.loadAssets()){
-      return this.myasset.getTile(layer, tile);
-    }
-    console.error('Not implemented');
-    return undefined;
+    const tile = this.getCell(layer, x, y);
+    return this.myasset.getTile(layer, tile);
   }
 }
 
@@ -71,22 +62,22 @@ class GameMapMock {
    * A mock object of GameMap.
    * Used for testing before GameMap is fully implemented.
    */
-  constructor () {
+  constructor() {
     this.tile = new Image();
     this.tile.src = '../../sites/game-client/test.png';
     window.testImg = this.tile;
   }
 
-  getCellRenderInfo (layer, x, y) {
+  getCellRenderInfo(layer, x, y) {
     return {
-      image: this.tile
-    }
+      image: this.tile,
+    };
   }
 }
 
 export default GameMap;
 
-export { GameMapMock };
+export {GameMapMock};
 
 /*
 Sample format for the map:
@@ -105,6 +96,7 @@ Sample format for the map:
 The map coordinate:
 Be careful not to get confused with "canvas coordinate".
 notation: (y, x)
+unit: grid (or cell, in other words)
 
           ...
 
