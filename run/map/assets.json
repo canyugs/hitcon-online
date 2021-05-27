@@ -4,13 +4,13 @@
       "name":"base",
       "url":"/static/run/map/base.png",
       "gridWidth":32,
-      "gridheight":32
+      "gridHeight":32
     },
     {
       "name":"char1img",
       "url":"/static/run/map/su1_Student_male_01.png",
       "gridWidth":32,
-      "gridheight":32
+      "gridHeight":32
     }
   ],
   "layerMap": {
@@ -18,6 +18,11 @@
       "G": [
         "base",
         2,
+        0
+      ],
+      "P": [
+        "base",
+        3,
         0
       ]
     }
