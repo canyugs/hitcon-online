@@ -15,7 +15,7 @@ class GraphicAsset {
   constructor(assetConfig) {
     this.asset_manager = assetConfig;
     if (!this.asset_manager) {
-      throw "No asset config supplied for new GraphicAsset()";
+      throw 'No asset config supplied for new GraphicAsset()';
     }
     this.images_arr = [];
   }
@@ -28,9 +28,9 @@ class GraphicAsset {
   async loadAssets() {
     const arr_promise = [];
     const this_ = this;
-    for(let img of this.asset_manager.images){
+    for (const img of this.asset_manager.images) {
       arr_promise.push(new Promise((resolve, reject) => {
-        let image = new Image();
+        const image = new Image();
         this_.images_arr.push(image);
         image.onload = resolve;
         image.onerror = () => {
@@ -54,8 +54,8 @@ class GraphicAsset {
    * @return {HTMLImageElement} element - The image
    */
   getImage(getname) {
-    for (let i = 0; i < this.asset_manager.images.length; i++){
-      if(this.asset_manager.images[i].name == getname){
+    for (let i = 0; i < this.asset_manager.images.length; i++) {
+      if (this.asset_manager.images[i].name == getname) {
         return this.images_arr[i];
       }
     }
@@ -78,11 +78,10 @@ class GraphicAsset {
    * - srcHeight: The height of the tile.
    */
   getTile(layer, tile) {
-    void [layer, tile];
-    var info = new Object();
+    const info = {};
     info.imageRef = this.asset_manager.layerMap[layer][tile][0];
     info.image = this.getImage(info.imageRef);
-    for (let img of this.asset_manager.images) {
+    for (const img of this.asset_manager.images) {
       if (img.name === info.imageRef) {
         info.srcWidth = img.gridWidth;
         info.srcHeight = img.gridHeight;
@@ -100,7 +99,7 @@ class GraphicAsset {
    * @return {Object} info - See the info parameter in getTile.
    */
   getCharacter(char, facing) {
-    console.error("Not implemented");
+    console.error('Not implemented');
     return undefined;
   }
 }

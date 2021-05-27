@@ -23,6 +23,14 @@ class GameMap {
   }
 
   /**
+   * Get the size of the entire map.
+   * @return {Object} size - size.height and size.width are available.
+   */
+  getMapSize() {
+    return {width: this.mymap.width, height: this.mymap.height};
+  }
+
+  /**
    * Get the raw cell content at the coordinate.
    * @param {String} layer - The raw layer designation.
    * @param {Number} x - The X coordinate, must be integer.
@@ -30,7 +38,7 @@ class GameMap {
    * @return {String} cell - The raw content of the cell. '' if any error.
    */
   getCell(layer, x, y) {
-    void [layer, x, y];
+    if (x < 0 || x >= this.mymap.width || y < 0 || y >= this.mymap.height) throw 'map index out of bound';
     const cell = this.mymap[layer][y*this.mymap.width + x];
     return cell;
   }
