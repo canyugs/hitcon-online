@@ -24,7 +24,7 @@ class MapRenderer {
      * viewerPosition is the **map coordinate** of the center of canvas.
      * It is a real number, which enables smooth moving of the camera;
      */
-    this.viewerPosition = {x: 10, y: 10}; // only used before GameState.getPlayerLocations() is fully implemented
+    this.setViewerPosition(10.5, 10.5); // only used before GameState.getPlayerLocations() is fully implemented
     // this.viewerPosition = this.gameState.getPlayerLocations();
   }
 
@@ -37,15 +37,21 @@ class MapRenderer {
   }
 
   /**
-   * Set the position of the viewer, that is, the player that is playing right
-   * now.
-   * Calling this method only updates the parameters for calculating the
-   * viewport location. (which part of the map is visible) It doesn't draw the
-   * player.
-   * @param {Number} x - The x coordinate.
-   * @param {Number} y - The y coordinate.
+   * Set the position of the viewer.
+   * More precisely, the center of canvas will become (x, y).
+   * If (x, y) is beyond the bound of the map, this function will clip the
+   * coordinate to fit in the range of the map.
+   * @param {Number} x - The x coordinate (map coordinate).
+   * @param {Number} y - The y coordinate (map coordinate).
    */
   setViewerPosition(x, y) {
+    const mapSize = this.map.getMapSize();
+    const minX = (this.canvas.width / 2) / mapCellSize;
+    const maxX = mapSize.width - minX;
+    const minY = (this.canvas.height / 2) / mapCellSize;
+    const maxY = mapSize.height - minY;
+    x = Math.min(Math.max(x, minX), maxX);
+    y = Math.min(Math.max(y, minY), maxY);
     this.viewerPosition.x = x;
     this.viewerPosition.y = y;
   }
@@ -60,8 +66,8 @@ class MapRenderer {
   canvasToMapCoordinate(x, y) {
     const canvasCenter = {x: this.canvas.width / 2, y: this.canvas.height / 2};
     return {
-      x: this.viewerPosition.x + (x - canvasCenter.x) / mapCellSize + 0.5,
-      y: this.viewerPosition.y + (y - canvasCenter.y) / mapCellSize + 0.5,
+      x: this.viewerPosition.x + (x - canvasCenter.x) / mapCellSize,
+      y: this.viewerPosition.y + (y - canvasCenter.y) / mapCellSize,
     };
   }
 
@@ -75,8 +81,8 @@ class MapRenderer {
   mapToCanvasCoordinate(x, y) {
     const canvasCenter = {x: this.canvas.width / 2, y: this.canvas.height / 2};
     return {
-      x: Math.floor(canvasCenter.x + (x - this.viewerPosition.x - 0.5) * mapCellSize),
-      y: Math.floor(canvasCenter.y + (y - this.viewerPosition.y - 0.5) * mapCellSize),
+      x: Math.floor(canvasCenter.x + (x - this.viewerPosition.x) * mapCellSize),
+      y: Math.floor(canvasCenter.y + (y - this.viewerPosition.y) * mapCellSize),
     };
   }
 
@@ -107,10 +113,12 @@ class MapRenderer {
       x: Math.floor(lastCellMapCoordFloat.x),
       y: Math.floor(lastCellMapCoordFloat.y),
     };
+    const mapSize = this.map.getMapSize();
 
     const ret = true;
     for (let mapY = firstCellMapCoordInt.y; mapY <= lastCellMapCoordInt.y; ++mapY) {
       for (let mapX = firstCellMapCoordInt.x; mapX <= lastCellMapCoordInt.x; ++mapX) {
+        if (mapX < 0 || mapX >= mapSize.width || mapY < 0 || mapY >= mapSize.height) continue;
         const renderInfo = this.map.getCellRenderInfo('ground', mapX, mapY);
         const canvasCoordinate = this.mapToCanvasCoordinate(mapX, mapY);
         this.ctx.drawImage(
