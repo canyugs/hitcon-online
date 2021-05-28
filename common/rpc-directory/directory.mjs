@@ -1,7 +1,17 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
+// Boilerplate for getting require() in es module.
+import {createRequire} from 'module';
+const require = createRequire(import.meta.url);
+
+const config = require('config');
+const redis = require('redis');
+
 import assert from 'assert';
+import { promisify } from 'util';
+
+import DataStore from './data-store.mjs'
 
 /**
  * This class is the base class for class that is in charge of handling all RPC
@@ -15,7 +25,26 @@ class Directory {
    * @constructor
    */
   constructor() {
-    // Do nothing, this is the base class.
+    this.storage = new DataStore();
+    this.redis = undefined;
+    if (config.get('redis.type') == 'real') {
+      this._createRealRedis();
+    } else {
+      throw 'invalid redis type ' + config.get('type');
+    }
+  }
+
+  /**
+   * Create the real redis client and create the async functions.
+   */
+  _createRealRedis() {
+    this.redis = redis.createClient(config.get('redis.option'));
+    this.redis.getAsync = promisify(this.redis.get);
+    this.redis.setAsync = promisify(this.redis.set);
+    this.redis.subscribeAsync = promisify(this.redis.subscribe);
+    this.redis.publishAsync = promisify(this.redis.publish);
+    this.redis.hsetAsync = promisify(this.redis.hset);
+    this.redis.hgetAsync = promisify(this.redis.hget);
   }
 
   /**
@@ -37,6 +66,9 @@ class Directory {
    * @param {string} name - Name of the gateway service.
    */
   addGatewayServiceName(name) {
+    void name;
+    assert.fail('Not implemented');
+    return undefined;
   }
   
   /**
@@ -44,6 +76,7 @@ class Directory {
    * @param {object} arr - An array of gateway service name.
    */
   getGatewayServices() {
+    assert.fail('Not implemented');
     return [];
   }
 
@@ -52,7 +85,7 @@ class Directory {
    * @return {redis} redis - A redis client.
    */
   getRedis() {
-    return undefined;
+    return this.redis;
   }
 }
 
