@@ -55,6 +55,14 @@ class Handler {
 
     return await this.RPCDirectory.handlers[serviceName].methods[methodName].apply(args); // now it only takes list, WIP...
   }
+
+  /**
+   * Return the data storage class for storing data.
+   * @return {DataStore} storage - The data storage.
+   */
+  dataStore() {
+    return this.storage;
+  }
 }
 
 export default Handler;
