@@ -1,4 +1,8 @@
 {
   "name": "hitcon-online-rpc-directory",
-  "version": "0.0.1"
+  "version": "0.0.1",
+  "dependencies": {
+    "config": "^3.3.6",
+    "redis": "^3.1.2"
+  }
 }

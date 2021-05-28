@@ -1282,6 +1282,9 @@ __metadata:
 "hitcon-online-rpc-directory@workspace:common/rpc-directory":
   version: 0.0.0-use.local
   resolution: "hitcon-online-rpc-directory@workspace:common/rpc-directory"
+  dependencies:
+    config: ^3.3.6
+    redis: ^3.1.2
   languageName: unknown
   linkType: soft
 
