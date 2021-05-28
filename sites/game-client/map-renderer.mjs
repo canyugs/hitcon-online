@@ -19,6 +19,7 @@ class MapRenderer {
     this.map = map;
     this.gameState = gameState;
     this.ctx = canvas.getContext('2d');
+    this.viewerPosition = {x: NaN, y: NaN};
 
     /**
      * viewerPosition is the **map coordinate** of the center of canvas.
