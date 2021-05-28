@@ -1676,7 +1676,9 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         ["workspace:common/rpc-directory", {
           "packageLocation": "./common/rpc-directory/",
           "packageDependencies": [
-            ["hitcon-online-rpc-directory", "workspace:common/rpc-directory"]
+            ["hitcon-online-rpc-directory", "workspace:common/rpc-directory"],
+            ["config", "npm:3.3.6"],
+            ["redis", "npm:3.1.2"]
           ],
           "linkType": "SOFT",
         }]
