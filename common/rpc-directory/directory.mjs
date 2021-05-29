@@ -14,6 +14,8 @@ import { promisify } from 'util';
 import DataStore from './data-store.mjs'
 import MockRedis from './mock-redis.mjs'
 
+const mockRedis = new MockRedis();
+
 /**
  * This class is the base class for class that is in charge of handling all RPC
  * calls internal to HITCON online.
@@ -66,10 +68,7 @@ class Directory {
    * Create the real redis client and create the async functions.
    */
   _createMockRedis() {
-    if(!this.mockRedis){
-      this.mockRedis = new MockRedis();
-    }
-    this.redis = this.mockRedis.createClient();
+    this.redis = mockRedis.createClient();
     this.redis.getAsync = promisify(this.redis.get);
     this.redis.setAsync = promisify(this.redis.set);
     this.redis.subscribeAsync = promisify(this.redis.subscribe);
