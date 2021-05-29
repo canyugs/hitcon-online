@@ -47,7 +47,15 @@ class DataStore {
       // If no auto flush, then we'll need to flush periodically.
       this._routineFlusher();
     }
-    fs.mkdirSync(this.dataDir);
+    try {
+      fs.mkdirSync(this.dataDir);
+    } catch (e) {
+      // Doesn't matter, the directory might already exist.
+    }
+
+    // Check that the directory exists.
+    let stat = fs.statSync(this.dataDir);
+    assert.equal(stat.isDirectory(), true);
   }
 
   /**
