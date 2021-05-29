@@ -17,11 +17,12 @@ class AuthServer{
         this.urlencodedParser = bodyParser.urlencoded({ extended: false })
     }
 
-    /*
-    * Verify the token and return the token parameter if valid
-    * @verifyToken
-    * @param {token} - a string of token which can be verified by jwt
-    */
+    /**
+     * Verify the token and return the token parameter if valid
+     * @param {object} token - a string of token which can be verified by jwt
+     * @return {object} token - null if the verification failed. The actual
+     * token if verification is successful.
+     */
     verifyToken(token){
         var ret = null;
         if (token){
@@ -35,7 +36,13 @@ class AuthServer{
         } else {
             return null
         }
-        return ret
+        // Check for valid subject in the token.
+        if (!('sub' in ret) || typeof ret.sub != 'string') {
+            console.error('Invalid subject in token found for verifyToken.');
+            // Reject the client.
+            return null;
+        }
+        return ret;
     }
     
     /*
@@ -66,13 +73,26 @@ class AuthServer{
             }   
         })
 
-        this.app.get('/get_test_token', function(req, res){
-            const token = jwt.sign({'test': 'test_token'}, secret);
-            res.cookie('token', token, {httpOnly: true})
+        this.app.get('/get_test_token', function(req, res) {
+            function genRandomStr(l) {
+              const sourceSet = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz';
+              let result = '';
+              for (let i = 0; i < l; i++) {
+                result += sourceSet[Math.floor(Math.random()*sourceSet.length)];
+              }
+              return result;
+            }
+            const payload = {};
+            payload.iss = 'https://hitcon.org';
+            payload.sub = genRandomStr(5);
+            payload.iat = Math.floor(Date.now() / 1000);
+            payload.exp = 1630425600; // 2021/09/01
+            const token = jwt.sign(payload, secret);
+            res.cookie('token', token);
             res.json({
                 success: true,
                 token: token
-            })
+            });
         })
     }
 }
