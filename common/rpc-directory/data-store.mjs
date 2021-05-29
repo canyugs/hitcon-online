@@ -32,6 +32,8 @@ class DataStore {
      * writeInProgress {boolean} - True if we are currently writing.
      * pending {boolean} - True if we wanted to flush dirty data when write is
      * in progress.
+     * flushActive {boolean} - True if _flushDirtyData() is running.
+     * onFlushDone {function} - Called when _flushDirtyData() finishes.
      */
 
     // Where to store the data files?
@@ -70,9 +72,15 @@ class DataStore {
    * @return {object} data - The data that is loaded.
    */
   async loadData(dataName) {
-    if (!(dataName in this.opened)) {
-      this.opened = await this._loadDataFromDisk(dataName);
+    if (dataName in this.opened) {
+      return this.opened[dataName].data;
     }
+    
+    let newData = await this._loadDataFromDisk(dataName);
+    if (dataName in this.opened) {
+      console.warn(`Concurrent loadData() on dataName, overwriting.`);
+    }
+    this.opened = newData;
     return this.opened[dataName].data;
   }
   
@@ -88,6 +96,8 @@ class DataStore {
     result.dirty = false;
     result.writeInProgress = false;
     result.pending = false;
+    result.flushActive = false;
+    result.onFlushDone = undefined;
 
     let filePath = this._getPath(dataName, true);
     let readFd = undefined;
@@ -128,11 +138,14 @@ class DataStore {
       this.opened[dataName].dirty = true;
       this.opened[dataName].writeInProgress = false;
       this.opened[dataName].pending = false;
+      this.opened[dataName].flushActive = false;
+      this.opened[dataName].onFlushDone = undefined;
     }
     this.opened[dataName].data = dataObj;
     this.opened[dataName].dirty = true;
     // Possibly trigger the save action here.
     if (this.autoFlush) {
+      // We trigger it, but doesn't wait for it.
       _flushDirtyData(dataName);
     }
   }
@@ -145,24 +158,32 @@ class DataStore {
     if (!(dataName in this.opened)) {
       throw 'Attempting to flush non-existent data.';
     }
+    let obj = this.opened[dataName];
+    if (obj.flushActive) {
+      console.warn('Concurrent _flushDirtyData()');
+      return;
+    }
+    
+    obj.flushActive = true;
+
     // Wait a tick so we don't delay anything.
     await new Promise(resolve => setTimeout(resolve, 0));
-
+    
     while (true) {
-      if (!this.opened[dataName].dirty) {
+      if (!obj.dirty) {
         // Not dirty? Not our problem.
         break;
       }
-      if (this.opened[dataName].writeInProgress) {
+      if (obj.writeInProgress) {
         // Somebody else is writing.
-        console.warn('Concurrent _flushDirtyData()');
-        this.opened[dataName].pending = true;
+        console.warn('Concurrent write in _flushDirtyData()');
+        obj.pending = true;
         break;
       }
-      this.opened[dataName].writeInProgress = true;
-      this.opened[dataName].pending = false;
-      this.opened[dataName].dirty = false;
-      let fileContent = JSON.stringify(this.opened[dataName].data);
+      obj.writeInProgress = true;
+      obj.pending = false;
+      obj.dirty = false;
+      let fileContent = JSON.stringify(obj.data);
       
       // Write to temp file first.
       let filePath = this._getPath(dataName, false);
@@ -180,9 +201,9 @@ class DataStore {
       }
       
       // We're done.
-      this.opened[dataName].writeInProgress = false;
+      obj.writeInProgress = false;
       
-      if (this.opened[dataName].pending) {
+      if (obj.pending) {
         // We've pending flush, so flush it again.
         continue;
       }
@@ -192,6 +213,13 @@ class DataStore {
       }
       break;
     }
+    
+    obj.flushActive = false;
+    if (obj.onFlushDone) {
+      obj.onFlushDone();
+      obj.onFlushDone = undefined;
+    }
+
     return true;
   };
   
@@ -213,6 +241,26 @@ class DataStore {
         this._flushDirtyData(dataName);
       }
     }
+  }
+  
+  /**
+   * Unloads a data from our cache.
+   * @param {string} dataName - The name of the data to save.
+   * @return {boolean} success - True if unloaded.
+   */
+  async unloadData(dataName) {
+    if (!(dataName in this.opened)) {
+      throw `Attempting to unload data ${dataName} that is not loaded.`
+    }
+    let obj = this.opened[dataName];
+    delete this.opened[dataName];
+    if (obj.flushActive) {
+      let p = new Promise(function (resolve, reject) {
+        obj.onFlushDone = resolve;
+      });
+      await p;
+    }
+    return true;
   }
 };
 
