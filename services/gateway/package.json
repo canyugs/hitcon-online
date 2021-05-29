@@ -2,6 +2,8 @@
   "name": "hitcon-online-gateway",
   "version": "0.0.1",
   "dependencies": {
-    "socket.io": "^4.1.2"
+    "config": "^3.3.6",
+    "socket.io": "^4.1.2",
+    "socketio-jwt": "^4.6.2"
   }
 }
