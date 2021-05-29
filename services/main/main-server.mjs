@@ -48,15 +48,18 @@ async function mainServer() {
   /* Create all services */
   const staticAssetServer = new StaticAssetServer(app);
   const rpcDirectory = new SingleProcessRPCDirectory();
-  const gatewayService = new GatewayService(rpcDirectory, gameMap);
+  await rpcDirectory.asyncConstruct();
   const authServer = new AuthServer(app);
+  const gatewayService = new GatewayService(rpcDirectory, gameMap, authServer);
 
   /* Initialize static asset server */
   staticAssetServer.initialize();
   /* Start static asset server */
   staticAssetServer.run();
-  gatewayService.initialize();
+  await gatewayService.initialize();
   authServer.run();
+
+  gatewayService.addServer(io);
 
   // TODO: Set the port once configuration is done.
   console.log(`Server is listening on port ${config.get('server.port')} ...`);
