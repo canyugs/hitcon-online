@@ -50,6 +50,7 @@ class Directory {
     this.redis = redis.createClient(config.get('redis.option'));
     this.redis.getAsync = promisify(this.redis.get);
     this.redis.setAsync = promisify(this.redis.set);
+    this.redis.delAsync = promisify(this.redis.del);
     this.redis.subscribeAsync = promisify(this.redis.subscribe);
     this.redis.publishAsync = promisify(this.redis.publish);
     this.redis.hsetAsync = promisify(this.redis.hset);
@@ -167,7 +168,7 @@ class Directory {
   async getPlayerData(playerName) {
     const dataName = this._getPlayerDataName(playerName);
     let data = await this.storage.loadData(dataName);
-    data = ensurePlayerData(data);
+    data = this.ensurePlayerData(playerName, data);
     return data;
   }
   
@@ -191,7 +192,7 @@ class Directory {
   ensurePlayerData(playerName, playerData) {
     function setDefaultValue(obj, key, val) {
       if (!(key in obj)) {
-        key[obj] = val;
+        obj[key] = val;
       }
     }
     // {string} playerName - The player's ID. The primary key used in our

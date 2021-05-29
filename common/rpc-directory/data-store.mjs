@@ -3,6 +3,7 @@
 
 import assert from 'assert';
 import fs from 'fs';
+import path from 'path';
 import { promises as fsPromises } from 'fs';
 
 /**
@@ -70,7 +71,7 @@ class DataStore {
     if (!real) {
       ext = '.json.tmp';
     }
-    return path.join(this.dataDir, dataNme+ext);
+    return path.join(this.dataDir, dataName+ext);
   }
   /**
    * Load a data file either from cache or disk.
@@ -88,7 +89,7 @@ class DataStore {
     if (dataName in this.opened) {
       console.warn(`Concurrent loadData() on dataName, overwriting.`);
     }
-    this.opened = newData;
+    this.opened[dataName] = newData;
     return this.opened[dataName].data;
   }
   
@@ -112,7 +113,11 @@ class DataStore {
     try {
       readFd = await fsPromises.open(filePath, 'r');
     } catch (e) {
-      console.warn('Unable to open \'' + filePath + '\' for reading. Reason: '+e);
+      if (e.code === 'ENOENT') {
+        // Nothing to do. This is expected.
+      } else {
+        console.warn(`Unable to open ${filePath} for reading. Reason: ${e}`);
+      }
       readFd = undefined;
     }
     if (readFd === undefined) {
