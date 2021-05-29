@@ -119,8 +119,9 @@ class DataStore {
       // It is normal for read to fail, when we first read the data.
       return result;
     }
+    let fileContent;
     try {
-      let fileContent = await readFd.read('utf-8');
+      fileContent = await readFd.read('utf-8');
       await readFd.close();
     } catch (e) {
       console.error('Failed to read \'' + filePath + '\'. Reason: '+e);
