@@ -39,8 +39,27 @@ SPDX-License-Identifier: BSD-2-Clause
       let game = {};
       window.game = game;
 
+      function getTokenFromDocument() {
+        try {
+          const token = document.cookie
+              .split('; ').find(row => row.startsWith('token='))
+              .split('=')[1];
+          return token;
+        } catch (e) {
+          return '';
+        }
+      }
+
       async function gameMain(game) {
-        game.io = window.io();
+        game.io = window.io;
+
+        // WARNING: The following is developer mode only.
+        // Try to get a test token.
+        let testToken = getTokenFromDocument();
+        if (testToken == '') {
+          testToken = await $.ajax({url: "/get_test_token", type: "GET",});
+        }
+        game.token = testToken;
 
         // TODO: Change map URL to follow the config in server side.
         game.mapData = await $.ajax({url: "/static/run/map/map.json", type: "GET",});
@@ -52,9 +71,11 @@ SPDX-License-Identifier: BSD-2-Clause
         }
         game.map = new GameMap(game.graphicAsset, game.mapData);
         game.gameState = new GameState(game.map);
-        // TODO: Uncomment after GameClient is implemented.
-        //game.gameClient = new GameClient(game.io, game.gameState);
+        game.socket = game.io();
+        game.gameClient = new GameClient(game.io(), game.gameState);
         game.mapRenderer = new MapRenderer(document.querySelector('#mapcanvas'), game.map, game.gameState);
+
+        game.gameClient.initialize(game.token);
 
         function onGameTick () {
           game.mapRenderer.draw();

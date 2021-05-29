@@ -14,8 +14,49 @@ class GameClient {
    * @constructor
    */
   constructor(socket, gameState) {
-    void socket;
-    console.error('Not implemented.');
+    this.socket = socket;
+    this.gameState = gameState;
+    // This function is called if server disconnects us or if any fatal
+    // error occurs.
+    this.disconnectCallback = undefined;
+  }
+
+  /**
+   * Register the callback for disconnect event.
+   * @param {function} callback - The callback for disconnect event.
+   */
+  registerDisconnectCallback(callback) {
+    this.disconnectCallback = callback;
+  }
+
+  /**
+   * Initialize the game client by connecting to the server.
+   * @param {string} token - The token to authorize ourself.
+   */
+  async initialize(token) {
+    this.token = token;
+    let socket = this.socket;
+    socket.on('connect', () => {
+      socket.emit('authenticate', {token: token});
+      socket.on('authenticated', () => {
+        console.log('Authenticated!');
+        // We need to wait for the gameStart event.
+      });
+      socket.on('unauthorized', (msg) => {
+        console.error(`Authorization failed: ${JSON.stringify(msg.data)}`);
+        this.onDisconnect();
+      });
+      socket.on('gameStart', (msg) => {
+        this.onStartup(msg);
+      });
+    });
+  }
+
+  /**
+   * This is called when we're authenticated, and ready to start the game.
+   */
+  async onStartup() {
+    console.log('Game starting');
   }
 
   /**
@@ -24,8 +65,7 @@ class GameClient {
    * @return {GameState} gameState - The GameState object.
    */
   GameState() {
-    console.error('Not implemented.');
-    return undefined;
+    return this.gameState;
   }
 }
 
