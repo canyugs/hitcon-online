@@ -12,6 +12,7 @@ import assert from 'assert';
 import { promisify } from 'util';
 
 import DataStore from './data-store.mjs'
+import MockRedis from './mock-redis.mjs'
 
 /**
  * This class is the base class for class that is in charge of handling all RPC
@@ -29,6 +30,8 @@ class Directory {
     this.redis = undefined;
     if (config.get('redis.type') == 'real') {
       this._createRealRedis();
+    } else if(config.get('redis.type') == 'mock') {
+      this._createMockRedis();
     } else {
       throw 'invalid redis type ' + config.get('type');
     }
@@ -57,6 +60,22 @@ class Directory {
     this.redis.hgetAsync = promisify(this.redis.hget);
     this.redis.hgetallAsync = promisify(this.redis.hgetall);
     this.redis.flushallAsync = promisify(this.redis.flushall);
+  }
+
+  /**
+   * Create the real redis client and create the async functions.
+   */
+  _createMockRedis() {
+    if(!this.mockRedis){
+      this.mockRedis = new MockRedis();
+    }
+    this.redis = this.mockRedis.createClient();
+    this.redis.getAsync = promisify(this.redis.get);
+    this.redis.setAsync = promisify(this.redis.set);
+    this.redis.subscribeAsync = promisify(this.redis.subscribe);
+    this.redis.publishAsync = promisify(this.redis.publish);
+    this.redis.hsetAsync = promisify(this.redis.hset);
+    this.redis.hgetAsync = promisify(this.redis.hget);
   }
 
   /**
