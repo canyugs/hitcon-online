@@ -1645,7 +1645,9 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./services/gateway/",
           "packageDependencies": [
             ["hitcon-online-gateway", "workspace:services/gateway"],
-            ["socket.io", "npm:4.1.2"]
+            ["config", "npm:3.3.6"],
+            ["socket.io", "npm:4.1.2"],
+            ["socketio-jwt", "npm:4.6.2"]
           ],
           "linkType": "SOFT",
         }]
