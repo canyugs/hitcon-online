@@ -40,7 +40,7 @@ class Directory {
    * Note that this is called right after the constructor.
    */
   async asyncConstruct() {
-    // Nothing here.
+    // Nothing here, see derived classes.
   }
 
   /**
@@ -55,6 +55,7 @@ class Directory {
     this.redis.hsetAsync = promisify(this.redis.hset);
     this.redis.hgetAsync = promisify(this.redis.hget);
     this.redis.hgetallAsync = promisify(this.redis.hgetall);
+    this.redis.flushallAsync = promisify(this.redis.flushall);
   }
 
   /**
@@ -76,7 +77,7 @@ class Directory {
    * @param {string} name - Name of the gateway service.
    */
   async addGatewayServiceName(name) {
-    let ret = await getRedis().hsetAsync(['gatewayServers', name, name]);
+    let ret = await this.getRedis().hsetAsync(['gatewayServers', name, name]);
     if (ret !== 1) {
       throw 'Failed to add gateway service name to redis: '+ret;
     }
@@ -87,7 +88,7 @@ class Directory {
    * @param {object} arr - An array of gateway service name.
    */
   async getGatewayServices() {
-    let ret = await getRedis().hgetallAsync('gatewayServers');
+    let ret = await this.getRedis().hgetallAsync('gatewayServers');
     let result = [];
     for (const p in ret) {
       result.push(p);
@@ -113,7 +114,7 @@ class Directory {
    */
   async registerPlayer(playerName, serviceName) {
     // NX: Only set if it doesn't exist.
-    let ret = await getRedis().setAsync(
+    let ret = await this.getRedis().setAsync(
         [this._getPlayerKey(playerName), serviceName, 'NX']);
     if (ret === null) {
       // Player already connected with another connection.
@@ -137,12 +138,12 @@ class Directory {
    */
   async unregisterPlayer(playerName, serviceName) {
     // Get the key to check that we're indeed the service holding the user.
-    let ret = await getRedis().getAsync([this._getPlayerKey(playerName)]);
+    let ret = await this.getRedis().getAsync([this._getPlayerKey(playerName)]);
     if (ret !== serviceName) {
       throw (`Service ${serviceName} trying to unregister ${playerName} ` +
           `ownered by ${ret}`);
     }
-    ret = await getRedis().delAsync([this._getPlayerKey(playerName)]);
+    ret = await this.getRedis().delAsync([this._getPlayerKey(playerName)]);
     if (ret !== 1) {
       throw `${ret} keys deleted when trying to unregister ${playerName}`;
     }
