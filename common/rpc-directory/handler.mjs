@@ -91,7 +91,7 @@ class Handler {
    * disconnects.
    * @param {string} playerName - The player's ID.
    */
-  async UnregisterPlayer(playerName) {
+  async unregisterPlayer(playerName) {
     return await this.RPCDirectory.unregisterPlayer(
         playerName, this.serviceName);
   }
