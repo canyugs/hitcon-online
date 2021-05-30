@@ -82,10 +82,13 @@ class Directory {
     this.redis = mockRedis.createClient();
     this.redis.getAsync = promisify(this.redis.get);
     this.redis.setAsync = promisify(this.redis.set);
+    this.redis.delAsync = promisify(this.redis.del);
     this.redis.subscribeAsync = promisify(this.redis.subscribe);
     this.redis.publishAsync = promisify(this.redis.publish);
     this.redis.hsetAsync = promisify(this.redis.hset);
     this.redis.hgetAsync = promisify(this.redis.hget);
+    this.redis.hgetallAsync = promisify(this.redis.hgetall);
+    this.redis.flushallAsync = promisify(this.redis.flushall);
   }
 
   /**
