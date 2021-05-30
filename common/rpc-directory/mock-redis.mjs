@@ -35,6 +35,12 @@ class MockRedisClient{
     }
 
     set(kv, cb) {
+        if(kv.length < 2) throw 'Missing key and value';
+        if(kv.length == 3 && kv[2] == "NX" && this._data.has(kv[0])){
+            if(typeof cb === 'function') cb(null, null);
+            return;
+        }
+
         this._data.set(kv[0], kv[1]);
         if(typeof cb === 'function') cb(null, true);
     }
@@ -60,6 +66,7 @@ class MockRedisClient{
     }
 
     hget(kf, cb) {
+        if(kf.length < 2) throw 'Missing key and value';
         let key = kf[0], field = kf[1];
         if (this._data.has(key) && (this._data.get(key) instanceof Map) && this._data.get(key).has(field)){
             if(typeof cb === 'function') cb(null, this._data.get(key).get(field))
@@ -69,6 +76,7 @@ class MockRedisClient{
     }
 
     hset(kfv, cb) {
+        if(kfv.length < 2) throw 'Missing key, field, and value';
         let key = kfv[0], field = kfv[1], value = kfv[2];
         if(!this._data.has(key) || !(this._data.get(key) instanceof Map)){
             this._data.set(key, new Map());
