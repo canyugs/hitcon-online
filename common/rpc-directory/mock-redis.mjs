@@ -28,14 +28,14 @@ class MockRedisClient{
 
     get(key, cb) {
         if (this._data.has(key)){
-            cb(null, this._data.get(key));
+            if(typeof cb === 'function') cb(null, this._data.get(key));
         } else {
-            cb(null, null); // If the key does not exist the special value nil is returned.
+            if(typeof cb === 'function') cb(null, null); // If the key does not exist the special value nil is returned.
         }
     }
 
-    set(key, value, cb) {
-        this._data.set(key, value);
+    set(kv, cb) {
+        this._data.set(kv[0], kv[1]);
         if(typeof cb === 'function') cb(null, true);
     }
 
@@ -59,16 +59,21 @@ class MockRedisClient{
         }
     }
 
-    hget(key, cb) {
-        if (this._data.has(key)){
-            cb(null, this._data.get(key));
+    hget(kf, cb) {
+        let key = kf[0], field = kf[1];
+        if (this._data.has(key) && (this._data.get(key) instanceof Map) && this._data.get(key).has(field)){
+            if(typeof cb === 'function') cb(null, this._data.get(key).get(field))
         } else {
-            cb(null, null);
+            if(typeof cb === 'function') cb(null, null);
         }
     }
 
-    hset(key, value, cb) {
-        if(typeof cb === 'function') cb(null, this._data.set(key, value));
+    hset(kfv, cb) {
+        let key = kfv[0], field = kfv[1], value = kfv[2];
+        if(!this._data.has(key) || !(this._data.get(key) instanceof Map)){
+            this._data.set(key, new Map());
+        }
+        if(typeof cb === 'function') cb(null, this._data.get(key).set(field, value));
     }
 }
 
