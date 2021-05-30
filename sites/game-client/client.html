@@ -25,6 +25,7 @@ SPDX-License-Identifier: BSD-2-Clause
       import GameState from '../../common/maplib/game-state.mjs';
       import GameClient from './game-client.mjs';
       import MapRenderer from './map-renderer.mjs';
+      import InputManager from './input-manager.mjs';
       import { GameMapMock } from '../../common/maplib/map.mjs'; // only used before GameMap is fully implemented
 
       // Export internal classes for ease of debugging.
@@ -58,6 +59,7 @@ SPDX-License-Identifier: BSD-2-Clause
         let testToken = getTokenFromDocument();
         if (testToken == '') {
           testToken = await $.ajax({url: "/get_test_token", type: "GET",});
+          testToken = testToken.token;
         }
         game.token = testToken;
 
@@ -71,9 +73,10 @@ SPDX-License-Identifier: BSD-2-Clause
         }
         game.map = new GameMap(game.graphicAsset, game.mapData);
         game.gameState = new GameState(game.map);
-        game.socket = game.io();
-        game.gameClient = new GameClient(game.io(), game.gameState);
+        game.socket = game.io({reconnection: false});
         game.mapRenderer = new MapRenderer(document.querySelector('#mapcanvas'), game.map, game.gameState);
+        game.inputManager = new InputManager(game.mapRenderer);
+        game.gameClient = new GameClient(game.io(), game.gameState, game.inputManager);
 
         game.gameClient.initialize(game.token);
 
