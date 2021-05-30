@@ -144,12 +144,11 @@ class MapRenderer {
    */
   _drawPlayers() {
     const players = this.gameState.getPlayers();
-    for (const playerID in players) {
-      let p = players[playerID];
+    for (const {x, y, displayChar, facing} of Object.values(players)) {
       // TODO: Check if player is within the map's view port.
-      const canvasCoordinate = this.mapToCanvasCoordinate(p.x, p.y);
-      const renderInfo = this.map.graphicAsset().getCharacter(p.displayChar,
-          p.facing);
+      const canvasCoordinate = this.mapToCanvasCoordinate(x, y);
+      const renderInfo = this.map.graphicAsset.getCharacter(displayChar,
+          facing);
       this.ctx.drawImage(
             renderInfo.image,
             renderInfo.srcX,
