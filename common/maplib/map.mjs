@@ -15,19 +15,11 @@ class GameMap {
    * @param {Object} map - The JSON object representing the map.
    */
   constructor(asset, map) {
-    this.myasset = asset;
-    this.mymap = map;
-    if (!this.mymap) {
+    this.graphicAsset = asset;
+    this.gameMap = map;
+    if (!this.gameMap) {
       throw 'No map json supplied with new GameMap()';
     }
-  }
-
-  /**
-   * Return the GraphicAsset that is in use with this class.
-   * @return {GraphicAsset} asset
-   */
-  graphicAsset() {
-    return this.myasset;
   }
 
   /**
@@ -35,7 +27,7 @@ class GameMap {
    * @return {Object} size - size.height and size.width are available.
    */
   getMapSize() {
-    return {width: this.mymap.width, height: this.mymap.height};
+    return {width: this.gameMap.width, height: this.gameMap.height};
   }
 
   /**
@@ -46,8 +38,11 @@ class GameMap {
    * @return {String} cell - The raw content of the cell. '' if any error.
    */
   getCell(layer, x, y) {
-    if (x < 0 || x >= this.mymap.width || y < 0 || y >= this.mymap.height) throw 'map index out of bound';
-    const cell = this.mymap[layer][y*this.mymap.width + x];
+    if (x < 0 || x >= this.gameMap.width ||
+        y < 0 || y >= this.gameMap.height) {
+      throw 'map index out of bound';
+    }
+    const cell = this.gameMap[layer][y*this.gameMap.width + x];
     return cell;
   }
 
@@ -69,7 +64,7 @@ class GameMap {
    */
   getCellRenderInfo(layer, x, y) {
     const tile = this.getCell(layer, x, y);
-    return this.myasset.getTile(layer, tile);
+    return this.graphicAsset.getTile(layer, tile);
   }
 }
 
