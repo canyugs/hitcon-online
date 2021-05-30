@@ -76,24 +76,24 @@ class Handler {
   /**
    * Register a player to this service.
    * Should only be called by gateway service.
-   * @param {string} playerName - The player's ID.
+   * @param {string} playerID - The player's ID.
    * @return {boolean} success - True if successful, and player may proceed.
    * False if someone else is already logged in as that user.
    */
-  async registerPlayer(playerName) {
+  async registerPlayer(playerID) {
     return await this.RPCDirectory.registerPlayer(
-        playerName, this.serviceName);
+        playerID, this.serviceName);
   }
 
   /**
    * Unregister a player.
    * Should only be called by gateway service, usually when a client
    * disconnects.
-   * @param {string} playerName - The player's ID.
+   * @param {string} playerID - The player's ID.
    */
-  async unregisterPlayer(playerName) {
+  async unregisterPlayer(playerID) {
     return await this.RPCDirectory.unregisterPlayer(
-        playerName, this.serviceName);
+        playerID, this.serviceName);
   }
 }
 

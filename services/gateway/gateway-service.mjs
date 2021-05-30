@@ -95,10 +95,11 @@ class GatewayService {
 
     // Load the player data.
     socket.playerData = await this.dir.getPlayerData(playerID);
+    socket.playerID = playerID;
 
     // Register all events.
     socket.on('location', (location) => {
-      this.onUserLocation(location);
+      this.onUserLocation(socket, location);
       // onUserLocation is async, so returns immediately.
     });
     socket.on('disconnect', (reason) => {
@@ -119,8 +120,9 @@ class GatewayService {
     }
 
     // Emit the gameStart event.
-    let startPack = {playerData: {}};
-    for (const k in ['playerName', 'displayName', 'displayChar', 'x', 'y']) {
+    let startPack = {};
+    startPack.playerData = {};
+    for (const k of ['playerID', 'displayName', 'displayChar']) {
       startPack.playerData[k] = socket.playerData[k];
     }
     socket.emit('gameStart', startPack);
@@ -134,15 +136,19 @@ class GatewayService {
   async onDisconnect(socket, reason) {
     const playerID = socket.decoded_token.sub;
     if (!(playerID in this.socks)) {
-      // Shouldn't happen.
-      console.assert(`Player ${playerID} is non-existent when disconnected.`);
+      // This could happen in possible race condition between setting up 
+      // on('disconnect') and when we check connection state again.
+      console.error(`Player ${playerID} is non-existent when disconnected.`);
+      return;
     }
-    // Try to unregister the player.
-    await this.rpcHandler.unregisterPlayer(playerID);
     if (this.socks[playerID] !== socket) {
+      // This should not happen.
       console.error(`Player ${playerID}'s socket mismatch when disconnected.`);
     }
+    // Take socket off first to avoid race condition in the await below.
     delete this.socks[playerID];
+    // Try to unregister the player.
+    await this.rpcHandler.unregisterPlayer(playerID);
     console.log(`Player ${playerID} disconnected`);
   }
 

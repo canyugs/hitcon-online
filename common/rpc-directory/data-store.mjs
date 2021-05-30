@@ -264,7 +264,8 @@ class DataStore {
    */
   async unloadData(dataName) {
     if (!(dataName in this.opened)) {
-      throw `Attempting to unload data ${dataName} that is not loaded.`
+      console.error(`Attempting to unload data ${dataName} that is not loaded.`);
+      return false;
     }
     let obj = this.opened[dataName];
     delete this.opened[dataName];
