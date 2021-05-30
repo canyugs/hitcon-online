@@ -29,7 +29,11 @@ class Directory {
    */
   constructor() {
     this.storage = new DataStore();
+    // Redis connection for everything.
     this.redis = undefined;
+    // Redis connection for subscribe. This is needed because redis requires
+    // subscribe connection to be standalone.
+    this.redisSub = undefined;
     if (config.get('redis.type') == 'real') {
       this._createRealRedis();
     } else if(config.get('redis.type') == 'mock') {
@@ -37,6 +41,11 @@ class Directory {
     } else {
       throw 'invalid redis type ' + config.get('type');
     }
+    // An object that maps channel ID to a list of callbacks for pub/sub.
+    // callback is of the format: function (channel, message)
+    this.channelSub = {};
+    // Set to true if on('message') have been set.
+    this.subscribed = false;
   }
 
   /**
@@ -56,12 +65,14 @@ class Directory {
     this.redis.getAsync = promisify(this.redis.get);
     this.redis.setAsync = promisify(this.redis.set);
     this.redis.delAsync = promisify(this.redis.del);
-    this.redis.subscribeAsync = promisify(this.redis.subscribe);
     this.redis.publishAsync = promisify(this.redis.publish);
     this.redis.hsetAsync = promisify(this.redis.hset);
     this.redis.hgetAsync = promisify(this.redis.hget);
     this.redis.hgetallAsync = promisify(this.redis.hgetall);
     this.redis.flushallAsync = promisify(this.redis.flushall);
+
+    this.redisSub = redis.createClient(config.get('redis.option'));
+    this.redisSub.subscribeAsync = promisify(this.redis.subscribe);
   }
 
   /**
@@ -234,11 +245,49 @@ class Directory {
   }
 
   /**
+   * Subscribe to a redis pub/sub channel.
+   * @param {string} channel - The channel to subscribe to.
+   * @param {function} callback - The callback to call.
+   */
+  async subChannel(channel, callback) {
+    if (!this.subscribed) {
+      this.getRedis().on('message', (channel, message) => {
+        this.onPubSubMessage(channel, message);
+      });
+      this.subscribed = true;
+    }
+    if (!(channel in this.channelSub)) {
+      this.channelSub[channel] = [];
+      await this.getRedis().subscribeAsync(channel);
+    }
+    this.channelSub.push(callback);
+  }
+
+  /**
+   * Called when we've a pub/sub message.
+   */
+  async onPubSubMessage(channel, message) {
+    if (channel in this.channelSub) {
+      for (const f in this.channelSub) {
+        f(channel, message);
+      }
+    }
+  }
+
+  /**
    * Retrieve the redis client.
    * @return {redis} redis - A redis client.
    */
   getRedis() {
     return this.redis;
+  }
+
+  /**
+   * Retrieve the redis client for subscription.
+   * @return {redis} redis - A redis client.
+   */
+  getRedisSub() {
+    return this.redisSub;
   }
 }
 
