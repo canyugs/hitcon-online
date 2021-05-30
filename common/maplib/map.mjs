@@ -23,6 +23,14 @@ class GameMap {
   }
 
   /**
+   * Return the GraphicAsset that is in use with this class.
+   * @return {GraphicAsset} asset
+   */
+  graphicAsset() {
+    return this.myasset;
+  }
+
+  /**
    * Get the size of the entire map.
    * @return {Object} size - size.height and size.width are available.
    */

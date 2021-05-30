@@ -143,10 +143,25 @@ class MapRenderer {
    * @return {Boolean} success - Return true if successful.
    */
   _drawPlayers() {
-    // TODO: draw real players after GameState is fully implemented
-    // for (let player of this.gameState.getPlayerLocations()) {
-    //   this.ctx.drawImage(...);
-    // }
+    const players = this.gameState.getPlayers();
+    for (const playerID in players) {
+      let p = players[playerID];
+      // TODO: Check if player is within the map's view port.
+      const canvasCoordinate = this.mapToCanvasCoordinate(p.x, p.y);
+      const renderInfo = this.map.graphicAsset().getCharacter(p.displayChar,
+          p.facing);
+      this.ctx.drawImage(
+            renderInfo.image,
+            renderInfo.srcX,
+            renderInfo.srcY,
+            renderInfo.srcWidth,
+            renderInfo.srcHeight,
+            canvasCoordinate.x,
+            canvasCoordinate.y,
+            mapCellSize,
+            mapCellSize,
+      );
+    }
     return true;
   }
 }

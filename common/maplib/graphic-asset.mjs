@@ -31,6 +31,10 @@ class GraphicAsset {
     for (const img of this.asset_manager.images) {
       arr_promise.push(new Promise((resolve, reject) => {
         const image = new Image();
+        image.assetName = img.name;
+        image.assetGridWidth = img.gridWidth;
+        image.assetGridHeight = img.gridHeight;
+
         this_.images_arr.push(image);
         image.onload = resolve;
         image.onerror = () => {
@@ -56,6 +60,11 @@ class GraphicAsset {
   getImage(getname) {
     for (let i = 0; i < this.asset_manager.images.length; i++) {
       if (this.asset_manager.images[i].name == getname) {
+        if (this.images_arr[i].assetName != getname) {
+          // Shouldn't happen.
+          console.log(this.images_arr[i]);
+          console.assert('Image name mismatch in image and asset');
+        }
         return this.images_arr[i];
       }
     }
@@ -81,12 +90,8 @@ class GraphicAsset {
     const info = {};
     info.imageRef = this.asset_manager.layerMap[layer][tile][0];
     info.image = this.getImage(info.imageRef);
-    for (const img of this.asset_manager.images) {
-      if (img.name === info.imageRef) {
-        info.srcWidth = img.gridWidth;
-        info.srcHeight = img.gridHeight;
-      }
-    }
+    info.srcWidth = info.image.assetGridWidth;
+    info.srcHeight = info.image.assetGridHeight;
     info.srcX = this.asset_manager.layerMap[layer][tile][1] * info.srcWidth;
     info.srcY = this.asset_manager.layerMap[layer][tile][2] * info.srcHeight;
     return info;
@@ -99,8 +104,15 @@ class GraphicAsset {
    * @return {Object} info - See the info parameter in getTile.
    */
   getCharacter(char, facing) {
-    console.error('Not implemented');
-    return undefined;
+    const info = {};
+    const charObj = this.asset_manager.characters[char][facing];
+    info.imageRef = charObj[0];
+    info.image = this.getImage(info.imageRef);
+    info.srcWidth = info.image.assetGridWidth;
+    info.srcHeight = info.image.assetGridHeight;
+    info.srcX = charObj[1] * info.srcWidth;
+    info.srcY = charObj[2] * info.srcHeight;
+    return info;
   }
 }
 
