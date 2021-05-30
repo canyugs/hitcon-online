@@ -17,6 +17,17 @@ class GameState {
    */
   constructor(gameMap) {
     this.gameMap = gameMap;
+    this.players = {};
+    /*
+     * Format of player in players:
+     * {string} playerID - ID of the player. Key in players.
+     * {string} displayName - The name to display for the player.
+     * {Number} x - The x coordinate.
+     * {Number} y - The y coordinate.
+     * {string} facing - 'U', 'D', 'L', 'R', the direction user's facing.
+     */
+
+    this.locationCallbacks = [];
   }
 
   /**
@@ -28,8 +39,26 @@ class GameState {
    * format. It is the same format as the one on socket.on('location')
    */
   onLocation(loc) {
-    void loc;
-    console.error('Not implemented.');
+    const playerID = loc.playerID;
+    if ('removed' in loc && loc['removed']) {
+      // Player is removed. Disconnected.
+      if (playerID in this.players) {
+        delete this.players[playerID];
+      }
+    } else {
+      if (!(playerID in this.players)) {
+        this.players[playerID] = {playerID: playerID};
+        // The default, wait for it to be updated later.
+        this.players[playerID].displayName = playerID;
+      }
+      let obj = this.players[playerID];
+      if ('displayName' in loc) obj.displayName = loc.displayName;
+      if ('displayChar' in loc) obj.displayChar = loc.displayChar;
+      [obj.x, obj.y, obj.facing] = [loc.x, loc.y, loc.facing];
+    }
+    for (const f of this.locationCallbacks) {
+      f(loc);
+    }
   }
 
   /**
@@ -39,20 +68,40 @@ class GameState {
    * user's location. Its signature is:
    * function (loc)
    * Where loc is the location object.
+   * The callback is called after any state update.
    */
   registerPlayerLocationChange(callback) {
-    void callback;
-    console.error('Not implemented.');
+    this.locationCallbacks.push(callback);
   }
 
   /**
-   * Get a list of all player's location.
-   * @return {object} locations - An array of location object. For
-   * documentation on location object, see above.
+   * Get a list of all player's state/location.
+   * @return {object} state - An array of location/state object. For
+   * documentation on location object, see constructor on this.players.
    */
-  getPlayerLocations() {
-    console.error('Not implemented.');
-    return [];
+  getPlayers() {
+    return this.players;
+  }
+
+  /**
+   * Get information regarding a player.
+   * @param {string} playerID - The player's ID.
+   * @return {object} state - An object representing player's state.
+   */
+  getPlayer(playerID) {
+    if (playerID in this.players) {
+      return this.players[playerID];
+    }
+    return null;
+  }
+
+  /**
+   * Accept a state transfer from upstream. Synchronizing the state of this
+   * class with that of the upstream.
+   * @param {object} players - The this.players object.
+   */
+  acceptStateTransfer(players) {
+    this.players = players;
   }
 }
 
