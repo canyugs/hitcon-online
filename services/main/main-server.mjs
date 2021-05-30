@@ -15,6 +15,7 @@ import fs from 'fs';
 
 /* Import all servers */
 import GatewayService from '../gateway/gateway-service.mjs';
+import AllAreaBroadcaster from '../gateway/all-area-broadcaster.mjs';
 import Directory from '../../common/rpc-directory/directory.mjs';
 import SingleProcessRPCDirectory from
   '../../common/rpc-directory/SingleProcessRPCDirectory.mjs';
@@ -23,6 +24,7 @@ import AuthServer from '../auth/AuthServer.mjs';
 
 /* Import all utility classes */
 import GameMap from '../../common/maplib/map.mjs';
+import GameState from '../../common/maplib/game-state.mjs';
 
 async function mainServer() {
   /* Redis integration */
@@ -44,18 +46,22 @@ async function mainServer() {
   const mapJSON = JSON.parse(rawMapJSON);
   // We do not have GraphicAsset on the server side.
   const gameMap = new GameMap(undefined, mapJSON);
+  const gameState = new GameState(gameMap);
 
   /* Create all services */
   const staticAssetServer = new StaticAssetServer(app);
   const rpcDirectory = new SingleProcessRPCDirectory();
   await rpcDirectory.asyncConstruct();
   const authServer = new AuthServer(app);
-  const gatewayService = new GatewayService(rpcDirectory, gameMap, authServer);
+  const broadcaster = new AllAreaBroadcaster(io, rpcDirectory, gameMap);
+  const gatewayService = new GatewayService(rpcDirectory, gameMap, authServer,
+      broadcaster);
 
   /* Initialize static asset server */
   staticAssetServer.initialize();
   /* Start static asset server */
   staticAssetServer.run();
+  await broadcaster.initialize();
   await gatewayService.initialize();
   authServer.run();
 

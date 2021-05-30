@@ -23,11 +23,14 @@ class GatewayService {
    * @param {Directory} dir - The RPCDirectory for calling other services.
    * @param {Map} gameMap - The world map for this game.
    * @param {AuthServer} authServer - Auth server for verifying the token.
+   * @param {AllAreaBroadcaster} broadcaster - The broadcaster of game state
+   * and player locations.
    */
-  constructor(dir, gameMap, authServer) {
+  constructor(dir, gameMap, authServer, broadcaster) {
     this.dir = dir;
     this.gameMap = gameMap;
     this.authServer = authServer;
+    this.broadcaster = broadcaster;
     // A map that tracks the current connected clients.
     // key is the player ID. value is the socket.
     this.socks = {};
@@ -119,6 +122,16 @@ class GatewayService {
       console.log(`Player ${playerID} connected.`);
     }
 
+    // Synchronize the state.
+    let firstLocation = {playerID: playerID, displayName:
+      socket.playerData.displayName};
+    firstLocation.x = socket.playerData.x;
+    firstLocation.y = socket.playerData.y;
+    firstLocation.facing = 'D';
+    firstLocation.displayChar = socket.playerData.displayChar;
+    await this._broadcastUserLocation(firstLocation);
+    this.broadcaster.sendStateTransfer(socket);
+
     // Emit the gameStart event.
     let startPack = {};
     startPack.playerData = {};
@@ -155,13 +168,27 @@ class GatewayService {
   /**
    * Callback for the location message from the client. i.e.
    * socket.on('location')
-   * @param {String} uid - The User ID.
+   * @param {Socket} socket - The socket from which this is sent.
    * @param {Object} msg - The location message. It includes the following:
    * - x: The x coordinate
    * - y: The y coordinate
    * - facing: One of 'U', 'D', 'L', 'R'. The direction the user is facing.
+   * It'll also contain other fields that's added elsewhere.
+   * - playerID: The player's ID.
+   * - displayName: The name to show for this player.
+   * - displayChar: The character asset to display.
    */
-  async onUserLocation(uid, msg) {
+  async onUserLocation(socket, msg) {
+    msg.playerID = socket.playerID;
+    msg.displayName = socket.playerData.displayName;
+    msg.displayChar = socket.playerData.displayChar;
+    // TODO: Check if facing is valid.
+    // TODO: Check if movement is legal.
+    
+    await this._broadcastUserLocation(msg);
+    
+    return;
+    /*
     // todo : checking movement is ligal
     // 取出uid 上一個位置
     // 計算距離< 最大可移動距離
@@ -180,33 +207,25 @@ class GatewayService {
 
     //enter none empty grid
     if(this.checkPositionEmpty(positionB)){
-      this.broadcastResetUser(socket,uid,positionA.x,positionA.y,positionA.facing)
+      this._broadcastResetUser(socket,uid,positionA.x,positionA.y,positionA.facing)
       return
     }
 
     // todo : store user location in server
 
     //this.broadcastUserLocation(socket,msg);
+    */
   }
 
   /**
    * Broadcast the user's location and direction.
    * @private
-   * @param {String} uid - User ID
-   * @param {Number} x - X coordinate
-   * @param {Number} y - Y coordinate
-   * @param {String} facing - 'U', 'D', 'L', 'R', the direction user's facing.
+   * @param {Object} msg - The location message.
    * @return {Boolean} success - true if successful.
    */
-  async broadcastUserLocation(socket , uid, x, y, facing) {
-    assert.fail('Not implemented');
-
-    // TODO: Enable this after we have redis ready.
-    //this.publisher.publish("updateUserPosition",{uid:uid,x:x,y:y,facing:facing});
-
-    // there are some logic for calling extendsion api
-    socket.broadcast.emit("location",{uid:uid,x:x,y:y,facing:facing});
-    return false;
+  async _broadcastUserLocation(msg) {
+    await this.broadcaster.notifyPlayerLocationChange(msg);
+    return true;
   }
 
   async broadcastResetUser(socket , uid, x, y, facing){
