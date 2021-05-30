@@ -76,7 +76,7 @@ class MockRedisClient{
     }
 
     hset(kfv, cb) {
-        if(kfv.length < 2) throw 'Missing key, field, and value';
+        if(kfv.length < 3) throw 'Missing key, field, and value';
         let key = kfv[0], field = kfv[1], value = kfv[2];
         if(!this._data.has(key) || !(this._data.get(key) instanceof Map)){
             this._data.set(key, new Map());
