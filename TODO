@@ -1,0 +1,12 @@
+- extension
+  - standalone
+  - in gateway
+  - rpc passthrough in gateway
+- chat (text)
+- inventory
+- UI
+  - character displayName / displayChar setting
+  - online list
+  - dialogs
+- jitsi integration
+- Productionization
