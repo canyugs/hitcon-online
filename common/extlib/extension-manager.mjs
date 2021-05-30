@@ -19,6 +19,17 @@ class ExtensionManager {
   }
 
   /**
+   * Initialize the extension manager.
+   * This adds an API in the http server to list the extensions.
+   * @param {App} app - An express.js (or compatible) app.
+   */
+  async initialize(app) {
+    app.get('/list_extensions', (req, res) => {
+      res.json(this.listExtensions());
+    });
+  }
+
+  /**
    * Create the extension server for the specified extension, but does
    * NOT start it.
    * This function is usually called in the construction phase of the
