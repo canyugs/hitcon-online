@@ -63,6 +63,38 @@ class Handler {
   dataStore() {
     return this.storage;
   }
+
+  /**
+   * This is called to let the handler know that this service is a gateway
+   * service.
+   * Should only be called by gateway service.
+   */
+  async registerAsGateway() {
+    await this.RPCDirectory.addGatewayServiceName(this.serviceName);
+  }
+
+  /**
+   * Register a player to this service.
+   * Should only be called by gateway service.
+   * @param {string} playerName - The player's ID.
+   * @return {boolean} success - True if successful, and player may proceed.
+   * False if someone else is already logged in as that user.
+   */
+  async registerPlayer(playerName) {
+    return await this.RPCDirectory.registerPlayer(
+        playerName, this.serviceName);
+  }
+
+  /**
+   * Unregister a player.
+   * Should only be called by gateway service, usually when a client
+   * disconnects.
+   * @param {string} playerName - The player's ID.
+   */
+  async UnregisterPlayer(playerName) {
+    return await this.RPCDirectory.unregisterPlayer(
+        playerName, this.serviceName);
+  }
 }
 
 export default Handler;
