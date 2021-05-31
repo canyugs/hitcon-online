@@ -70,6 +70,7 @@ class Directory {
     this.redis.hgetAsync = promisify(this.redis.hget);
     this.redis.hgetallAsync = promisify(this.redis.hgetall);
     this.redis.flushallAsync = promisify(this.redis.flushall);
+    this.redis.scanAsync = promisify(this.redis.scan);
 
     this.redisSub = redis.createClient(config.get('redis.option'));
     this.redisSub.subscribeAsync = promisify(this.redis.subscribe);
@@ -89,6 +90,7 @@ class Directory {
     this.redis.hgetAsync = promisify(this.redis.hget);
     this.redis.hgetallAsync = promisify(this.redis.hgetall);
     this.redis.flushallAsync = promisify(this.redis.flushall);
+    this.redis.scanAsync = promisify(this.redis.scan);
   }
 
   /**

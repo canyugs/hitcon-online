@@ -1,5 +1,6 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
+import assert from 'assert';
 
 class MockRedis {
     /**
@@ -104,6 +105,10 @@ class MockRedisClient{
     flushall(cb) {
         this._data.clear();
         if(typeof cb === 'function') cb(null, null);
+    } 
+
+    scan(cb) {
+        cb(null, [0, Array.from(this._data.keys())])
     } 
 }
 
