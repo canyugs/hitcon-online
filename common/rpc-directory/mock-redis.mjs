@@ -28,8 +28,8 @@ class MockRedisClient{
     }
 
     get(key, cb) {
-        if (this._data.has(key)){
-            if(typeof cb === 'function') cb(null, this._data.get(key));
+        if (this._data.has(key[0])){
+            if(typeof cb === 'function') cb(null, this._data.get(key[0]));
         } else {
             if(typeof cb === 'function') cb(null, null); // If the key does not exist the special value nil is returned.
         }
@@ -50,7 +50,7 @@ class MockRedisClient{
         for(let key of keys) {
             this._data.delete(key);
         }
-        if(typeof cb === 'function') cb(null, true);
+        if(typeof cb === 'function') cb(null, 1);
     }
 
     subscribe(channel, cb) {
