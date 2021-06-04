@@ -43,7 +43,7 @@ class MockRedisClient{
         }
 
         this._data.set(kv[0], kv[1]);
-        if(typeof cb === 'function') cb(null, true);
+        if(typeof cb === 'function') cb(null, 'OK');
     }
 
     del(keys, cb) {
