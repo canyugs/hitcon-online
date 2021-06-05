@@ -26,11 +26,12 @@ class GatewayService {
    * @param {AllAreaBroadcaster} broadcaster - The broadcaster of game state
    * and player locations.
    */
-  constructor(dir, gameMap, authServer, broadcaster) {
+  constructor(dir, gameMap, authServer, broadcaster, extMan) {
     this.dir = dir;
     this.gameMap = gameMap;
     this.authServer = authServer;
     this.broadcaster = broadcaster;
+    this.extMan = extMan;
     // A map that tracks the current connected clients.
     // key is the player ID. value is the socket.
     this.socks = {};
@@ -104,6 +105,9 @@ class GatewayService {
     socket.on('location', (location) => {
       this.onUserLocation(socket, location);
       // onUserLocation is async, so returns immediately.
+    });
+    socket.on('callStandaloneAPI', (msg, callback) => {
+      // TODO
     });
     socket.on('disconnect', (reason) => {
       this.onDisconnect(socket, reason);

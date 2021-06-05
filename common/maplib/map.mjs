@@ -149,6 +149,7 @@ Sample format for the map:
     }
   ]
 }
+TODO: Add more elaborate documentation on what cellSet is.
 */
 
 /*
