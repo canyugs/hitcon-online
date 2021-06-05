@@ -1272,6 +1272,8 @@ __metadata:
 "hitcon-online-extlib@workspace:common/extlib":
   version: 0.0.0-use.local
   resolution: "hitcon-online-extlib@workspace:common/extlib"
+  dependencies:
+    config: ^3.3.6
   languageName: unknown
   linkType: soft
 

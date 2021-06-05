@@ -1657,7 +1657,8 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         ["workspace:common/extlib", {
           "packageLocation": "./common/extlib/",
           "packageDependencies": [
-            ["hitcon-online-extlib", "workspace:common/extlib"]
+            ["hitcon-online-extlib", "workspace:common/extlib"],
+            ["config", "npm:3.3.6"]
           ],
           "linkType": "SOFT",
         }]
