@@ -1,12 +1,14 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
-import assert from 'assert';
-import { Server } from "socket.io";
-import { redis } from "redis";
+// Boilerplate for getting require() in es module.
+import {createRequire} from 'module';
+const require = createRequire(import.meta.url);
 
-import { RPCDirectory } from "../../common/rpc-directory"
-import { map } from "../../common/maplib"
+import assert from 'assert';
+const {Server} = require('socket.io');
+const config = require('config');
+
 import { get } from 'http';
 /**
  * This class handles the connections from the client and does the most
@@ -18,11 +20,20 @@ class GatewayService {
    * class/function.
    * At the time when this is called, other services are NOT constructed yet.
    * @constructor
-   * @param {RPCDirectory} dir - The RPCDirectory for calling other services.
+   * @param {Directory} dir - The RPCDirectory for calling other services.
+   * @param {Map} gameMap - The world map for this game.
+   * @param {AuthServer} authServer - Auth server for verifying the token.
+   * @param {AllAreaBroadcaster} broadcaster - The broadcaster of game state
+   * and player locations.
    */
-  constructor(dir) {
+  constructor(dir, gameMap, authServer, broadcaster) {
     this.dir = dir;
-    assert.fail('Not implemented');
+    this.gameMap = gameMap;
+    this.authServer = authServer;
+    this.broadcaster = broadcaster;
+    // A map that tracks the current connected clients.
+    // key is the player ID. value is the socket.
+    this.socks = {};
   }
 
   /**
@@ -30,11 +41,10 @@ class GatewayService {
    * At the time this is called, other services and extensions have been
    * created, but their initialize() have not been called.
    */
-  initialize() {
-    this.dir.register("getewayServer");
+  async initialize() {
+    this.rpcHandler = await this.dir.registerService("gatewayServer");
+    await this.rpcHandler.registerAsGateway();
     this.servers = [];
-    this.publisher = redis.createClient();
-    assert.fail('Not implemented');
   }
 
   /**
@@ -44,21 +54,26 @@ class GatewayService {
    */
   addServer(server) {
     this.servers.push(server);
-    server
-    .on('connection', socketioJwt.authorize({
-      secret: 'your secret or public key',
-      timeout: 15000 
-    }))
-    .on('authenticated', (socket) => {
-      addSocket(socket);
-     
-    })
-    .on('location',(socket)=>{
-      onUserLocation(socket);
-      
+    server.on('connection', (socket) => {
+      socket.on('authenticate', (msg) => {
+        if (!('token' in msg)) {
+          socket.emit('unauthorized', {data: 'No token found'});
+          return;
+        }
+        if (typeof msg.token !== 'string') {
+          socket.emit('unauthorized', {data: 'Token is not string'});
+          return;
+        }
+        let verified = this.authServer.verifyToken(msg.token);
+        if (verified === null) {
+          socket.emit('unauthorized', {data: 'Token verification failed'});
+          return;
+        }
+        socket.emit('authenticated', {});
+        socket.decoded_token = verified;
+        this.addSocket(socket);
+      });
     });
-
-    assert.fail('Not implemented');
   }
 
   /**
@@ -67,22 +82,113 @@ class GatewayService {
    * socket.decoded_token.uid should be populated and is the User ID.
    * @param {Socket} socket - The socket.io socket of the authorized user.
    */
-  addSocket(socket) {
-    //this socket is authenticated, we are good to handle more events from it.
-    console.log(`hello! ${socket.decoded_token.name}`);
-    assert.fail('Not implemented');
+  async addSocket(socket) {
+    // This socket is authenticated, we are good to handle more events from it.
+
+    const playerID = socket.decoded_token.sub;
+
+    // Let everyone know we've accepted this player.
+    let ret = await this.rpcHandler.registerPlayer(playerID);
+    if (!ret) {
+      // Player already connected.
+      console.warn(`Player ${playerID} already connected`);
+      socket.disconnect();
+      return;
+    }
+
+    // Load the player data.
+    socket.playerData = await this.dir.getPlayerData(playerID);
+    socket.playerID = playerID;
+
+    // Register all events.
+    socket.on('location', (location) => {
+      this.onUserLocation(socket, location);
+      // onUserLocation is async, so returns immediately.
+    });
+    socket.on('disconnect', (reason) => {
+      this.onDisconnect(socket, reason);
+      // onDisconnect is async, so returns immediately.
+    });
+
+    // Add it to our records.
+    this.socks[playerID] = socket;
+
+    if (socket.disconnected) {
+      // Disconnected halfway.
+      console.warn(`Player ${playerID} disconnected halfway through.`);
+      await this.onDisconnect(socket.reason);
+      return;
+    } else {
+      console.log(`Player ${playerID} connected.`);
+    }
+
+    // Synchronize the state.
+    let firstLocation = {playerID: playerID, displayName:
+      socket.playerData.displayName};
+    firstLocation.x = socket.playerData.x;
+    firstLocation.y = socket.playerData.y;
+    firstLocation.facing = 'D';
+    firstLocation.displayChar = socket.playerData.displayChar;
+    await this._broadcastUserLocation(firstLocation);
+    this.broadcaster.sendStateTransfer(socket);
+
+    // Emit the gameStart event.
+    let startPack = {};
+    startPack.playerData = {};
+    for (const k of ['playerID', 'displayName', 'displayChar']) {
+      startPack.playerData[k] = socket.playerData[k];
+    }
+    socket.emit('gameStart', startPack);
+  }
+
+  /**
+   * Called when the user disconnects.
+   * @param {Socket} socket - The socket that disconnected.
+   * @param {reason} reason - The reason why we disconnected.
+   */
+  async onDisconnect(socket, reason) {
+    const playerID = socket.decoded_token.sub;
+    if (!(playerID in this.socks)) {
+      // This could happen in possible race condition between setting up 
+      // on('disconnect') and when we check connection state again.
+      console.error(`Player ${playerID} is non-existent when disconnected.`);
+      return;
+    }
+    if (this.socks[playerID] !== socket) {
+      // This should not happen.
+      console.error(`Player ${playerID}'s socket mismatch when disconnected.`);
+    }
+    // Take socket off first to avoid race condition in the await below.
+    delete this.socks[playerID];
+    // Try to unregister the player.
+    await this.rpcHandler.unregisterPlayer(playerID);
+    console.log(`Player ${playerID} disconnected`);
   }
 
   /**
    * Callback for the location message from the client. i.e.
    * socket.on('location')
-   * @param {String} uid - The User ID.
+   * @param {Socket} socket - The socket from which this is sent.
    * @param {Object} msg - The location message. It includes the following:
    * - x: The x coordinate
    * - y: The y coordinate
    * - facing: One of 'U', 'D', 'L', 'R'. The direction the user is facing.
+   * It'll also contain other fields that's added elsewhere.
+   * - playerID: The player's ID.
+   * - displayName: The name to show for this player.
+   * - displayChar: The character asset to display.
    */
-  async onUserLocation(uid, msg) {
+  async onUserLocation(socket, msg) {
+    msg.playerID = socket.playerID;
+    msg.displayName = socket.playerData.displayName;
+    msg.displayChar = socket.playerData.displayChar;
+    // TODO: Check if facing is valid.
+    // TODO: Check if movement is legal.
+    
+    await this._broadcastUserLocation(msg);
+    
+    return;
+    /*
     // todo : checking movement is ligal
     // 取出uid 上一個位置
     // 計算距離< 最大可移動距離
@@ -101,32 +207,46 @@ class GatewayService {
 
     //enter none empty grid
     if(this.checkPositionEmpty(positionB)){
-      this.broadcastResetUser(socket,uid,positionA.x,positionA.y,positionA.facing)
+      this._broadcastResetUser(socket,uid,positionA.x,positionA.y,positionA.facing)
       return
     }
 
     // todo : store user location in server
 
     //this.broadcastUserLocation(socket,msg);
+    */
   }
 
   /**
    * Broadcast the user's location and direction.
    * @private
-   * @param {String} uid - User ID
-   * @param {Number} x - X coordinate
-   * @param {Number} y - Y coordinate
-   * @param {String} facing - 'U', 'D', 'L', 'R', the direction user's facing.
+   * @param {Object} msg - The location message.
    * @return {Boolean} success - true if successful.
    */
-  async broadcastUserLocation(socket , uid, x, y, facing) {
-    assert.fail('Not implemented');
+  async _broadcastUserLocation(msg) {
+    await this.broadcaster.notifyPlayerLocationChange(msg);
+    return true;
+  }
 
-    this.publisher.publish("updateUserPosition",{uid:uid,x:x,y:y,facing:facing});
-
-    // there are some logic for calling extendsion api
+  async broadcastResetUser(socket , uid, x, y, facing){
     socket.broadcast.emit("location",{uid:uid,x:x,y:y,facing:facing});
-    return false;
+  }
+
+  getLastPosition(uid){
+    assert.fail('Not implemented');
+    return {x:0,y:0,facing:'up'}
+  }
+
+  updatePosition(uid,x,y,facing){
+    assert.fail('Not implemented');
+  }
+
+  getDistanceSquare(a,b){
+    return Math.abs(a.x - b.x)^2 + Math.abs(a.y - b.y)^2
+  }
+
+  checkPositionEmpty(x,y){
+    return gameMap.getCell(x,y);
   }
 
   async broadcastResetUser(socket , uid, x, y, facing){

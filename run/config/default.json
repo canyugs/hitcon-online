@@ -1,5 +1,15 @@
 {
+  "debug": true,
   "server": {
     "port": 5000
-  }
+  },
+  "map": [
+    "map/map.json"
+  ],
+  "assets": "map/assets.json",
+  "redis": {
+    "type": "real",
+    "option": {}
+  },
+  "secret": "secret"
 }

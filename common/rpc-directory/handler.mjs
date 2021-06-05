@@ -15,9 +15,11 @@ class Handler {
    * @constructor
    * @param {String} serviceName - The name of the service.
    */
-  constructor(serviceName) {
-    void serviceName;
-    assert.fail('Not implemented');
+  constructor(serviceName, RPCDirectory) {
+    this.serviceName = serviceName;
+    this.RPCDirectory = RPCDirectory;
+    this.methods = {}
+    this.methods.serviceName = {};
   }
 
   /**
@@ -29,8 +31,10 @@ class Handler {
    * service is the caller, args is the call arguments.
    */
   registerRPC(methodName, callback) {
-    void [methodName, callback];
-    assert.fail('Not implemented');
+    if(methodName in this.methods){
+      throw 'A method with the same name has been registered';
+    }
+    this.methods[methodName] = callback;
   }
 
   /**
@@ -40,10 +44,56 @@ class Handler {
    * @param {Object} args - The arguments.
    * @return {Object} result - The result of the call.
    */
-  callRPC(serviceName, methodName, args) {
+  async callRPC(serviceName, methodName, args) {
     void [serviceName, methodName, args];
-    assert.fail('Not implemented');
-    return undefined;
+    if(!(serviceName in this.RPCDirectory.handlers)){
+      throw 'serviceName not found.';
+    }
+    if(!(serviceName in this.RPCDirectory.handlers[serviceName].methods)){
+      throw 'Method not found.';
+    }
+
+    return await this.RPCDirectory.handlers[serviceName].methods[methodName].apply(args); // now it only takes list, WIP...
+  }
+
+  /**
+   * Return the data storage class for storing data.
+   * @return {DataStore} storage - The data storage.
+   */
+  dataStore() {
+    return this.storage;
+  }
+
+  /**
+   * This is called to let the handler know that this service is a gateway
+   * service.
+   * Should only be called by gateway service.
+   */
+  async registerAsGateway() {
+    await this.RPCDirectory.addGatewayServiceName(this.serviceName);
+  }
+
+  /**
+   * Register a player to this service.
+   * Should only be called by gateway service.
+   * @param {string} playerID - The player's ID.
+   * @return {boolean} success - True if successful, and player may proceed.
+   * False if someone else is already logged in as that user.
+   */
+  async registerPlayer(playerID) {
+    return await this.RPCDirectory.registerPlayer(
+        playerID, this.serviceName);
+  }
+
+  /**
+   * Unregister a player.
+   * Should only be called by gateway service, usually when a client
+   * disconnects.
+   * @param {string} playerID - The player's ID.
+   */
+  async unregisterPlayer(playerID) {
+    return await this.RPCDirectory.unregisterPlayer(
+        playerID, this.serviceName);
   }
 }
 

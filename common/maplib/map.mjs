@@ -1,32 +1,33 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
-import assert from 'assert';
-
 /**
- * Map represents the loaded map. A map is multiple layers of 2D grid of cells.
+ * Map represents the whole world map of the game.
+ * A map is multiple layers of 2D grid of cells.
  * Each cell of the map is usually a string or boolean.
  * The documentation for format of the map is found at the end of this file.
  */
-class Map {
+class GameMap {
   /**
    * Construct an empty map.
+   * @constructor
    * @param {GraphicAsset} asset - The asset that is used with this set of map.
+   * @param {Object} map - The JSON object representing the map.
    */
-  constructor(asset) {
-    void asset;
-    assert.fail('Not implemented');
+  constructor(asset, map) {
+    this.graphicAsset = asset;
+    this.gameMap = map;
+    if (!this.gameMap) {
+      throw 'No map json supplied with new GameMap()';
+    }
   }
 
   /**
-   * Load a map from the JSON object.
-   * @param {Object} map - The JSON object representing the map.
-   * @return {Boolean} success - Return true if successful.
+   * Get the size of the entire map.
+   * @return {Object} size - size.height and size.width are available.
    */
-  appendMap(map) {
-    void map;
-    assert.fail('Not implemented');
-    return false;
+  getMapSize() {
+    return {width: this.gameMap.width, height: this.gameMap.height};
   }
 
   /**
@@ -37,9 +38,12 @@ class Map {
    * @return {String} cell - The raw content of the cell. '' if any error.
    */
   getCell(layer, x, y) {
-    void [layer, x, y];
-    assert.fail('Not implemented');
-    return '';
+    if (x < 0 || x >= this.gameMap.width ||
+        y < 0 || y >= this.gameMap.height) {
+      throw 'map index out of bound';
+    }
+    const cell = this.gameMap[layer][y*this.gameMap.width + x];
+    return cell;
   }
 
   /**
@@ -58,19 +62,38 @@ class Map {
    * - srcWidth: The width of the tile.
    * - srcHeight: The height of the tile.
    */
-  getRenderInfo(layer, x, y) {
-    void [layer, x, y];
-    assert.fail('Not implemented');
-    return undefined;
+  getCellRenderInfo(layer, x, y) {
+    const tile = this.getCell(layer, x, y);
+    return this.graphicAsset.getTile(layer, tile);
   }
 }
 
-export default Map;
+class GameMapMock {
+  /**
+   * A mock object of GameMap.
+   * Used for testing before GameMap is fully implemented.
+   */
+  constructor() {
+    this.tile = new Image();
+    this.tile.src = '../../sites/game-client/test.png';
+    window.testImg = this.tile;
+  }
+
+  getCellRenderInfo(layer, x, y) {
+    return {
+      image: this.tile,
+    };
+  }
+}
+
+export default GameMap;
+
+export {GameMapMock};
 
 /*
 Sample format for the map:
 {
-  "ground": ["ground","ground","ground","ground","ground"],
+  "ground": ["ground","ground","ground","ground","ground","ground"],
   "wall": [true, true, true, false, false, false],
   "object": [null, null, null, "bar0", null, null],
   "startX": 0,
@@ -79,3 +102,19 @@ Sample format for the map:
   "height": 2
 }
 */
+
+/*
+The map coordinate:
+Be careful not to get confused with "canvas coordinate".
+notation: (y, x)
+unit: grid (or cell, in other words)
+
+          ...
+
+  (2,0)   (2,1)   (2,2)
+
+  (1,0)   (1,1)   (1,2)   ...
+
+  (0,0)   (0,1)   (0,2)
+
+ */

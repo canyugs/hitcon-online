@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 // Boilerplate for getting the __dirname.
-import {dirname} from 'path';
+import {dirname,resolve} from 'path';
 import {fileURLToPath} from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -31,9 +31,15 @@ class StaticAssetServer {
    */
   initialize() {
     // TODO: Restrict the visible pages.
-    this.app.use('/static', express.static(__dirname+'/../../'));
+    // Not sure if all static files are in sites
+    this.app.use('/static/sites', express.static(__dirname + '/../../sites/'));
+    this.app.use('/static/common', express.static(__dirname + '/../../common/'));
+    this.app.use('/static/run/map', express.static(__dirname + '/../../run/map'));
+  }
+
+  run() {
     // Send the user to the game client page.
-    this.app.get('/', function(req, res) {
+    this.app.get('/', (req, res) => {
       res.redirect('/static/sites/game-client/client.html');
     });
   }

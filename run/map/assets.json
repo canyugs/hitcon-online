@@ -1,0 +1,54 @@
+{
+  "images":[
+    {
+      "name":"base",
+      "url":"/static/run/map/base.png",
+      "gridWidth":32,
+      "gridHeight":32
+    },
+    {
+      "name":"char1img",
+      "url":"/static/run/map/su1_Student_male_01.png",
+      "gridWidth":32,
+      "gridHeight":32
+    }
+  ],
+  "layerMap": {
+    "ground": {
+      "G": [
+        "base",
+        2,
+        0
+      ],
+      "P": [
+        "base",
+        3,
+        0
+      ]
+    }
+  },
+  "characters":{
+    "char1":{
+      "L":[
+        "char1img",
+        1,
+        1
+      ],
+      "R":[
+        "char1img",
+        1,
+        2
+      ],
+      "U":[
+        "char1img",
+        1,
+        3
+      ],
+      "D":[
+        "char1img",
+        1,
+        0
+      ]
+    }
+  }
+}

@@ -1,8 +1,6 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
-import assert from 'assert';
-
 /**
  * Manages the graphic assets for a map. This will tell which part of which
  * image file represents which value in a layer of the map.
@@ -10,20 +8,16 @@ import assert from 'assert';
 class GraphicAsset {
   /**
    * Construct an empty graphic asset manager.
-   */
-  constructor() {
-    assert.fail('Not implemented');
-  }
-
-  /**
-   * Load an asset config.
+   * @constructor
    * @param {Object} assetConfig - The JSON object represeting the asset
    * config. It's format is at the end of this file.
-   * @return {Boolean} success - Return true if successful.
    */
-  loadAssetConfig(assetConfig) {
-    assert.fail('Not implemented');
-    return false;
+  constructor(assetConfig) {
+    this.asset_manager = assetConfig;
+    if (!this.asset_manager) {
+      throw 'No asset config supplied for new GraphicAsset()';
+    }
+    this.images_arr = [];
   }
 
   /**
@@ -32,18 +26,48 @@ class GraphicAsset {
    * @return {Boolean} success - Return true if all assets are loaded.
    */
   async loadAssets() {
-    assert.fail('Not implemented');
-    return false;
+    const arr_promise = [];
+    const this_ = this;
+    for (const img of this.asset_manager.images) {
+      arr_promise.push(new Promise((resolve, reject) => {
+        const image = new Image();
+        image.assetName = img.name;
+        image.assetGridWidth = img.gridWidth;
+        image.assetGridHeight = img.gridHeight;
+
+        this_.images_arr.push(image);
+        image.onload = resolve;
+        image.onerror = () => {
+          reject(`error on loading ${img.url}`);
+        };
+        image.src = img.url;
+      }));
+    }
+
+    let success = true;
+    await Promise.all(arr_promise).catch((err_msg) => {
+      console.error(err_msg);
+      success = false;
+    });
+    return success;
   }
 
   /**
    * Return the HTMLImageElement for the name of the image.
-   * @param {String} name - The name of the image in the asset config.
+   * @param {String} getname - The name of the image in the asset config.
    * @return {HTMLImageElement} element - The image
    */
-  getImage(name) {
-    void name;
-    assert.fail('Not implemented');
+  getImage(getname) {
+    for (let i = 0; i < this.asset_manager.images.length; i++) {
+      if (this.asset_manager.images[i].name === getname) {
+        if (this.images_arr[i].assetName !== getname) {
+          // Shouldn't happen.
+          console.log(this.images_arr[i]);
+          console.assert('Image name mismatch in image and asset');
+        }
+        return this.images_arr[i];
+      }
+    }
     return undefined;
   }
 
@@ -63,9 +87,32 @@ class GraphicAsset {
    * - srcHeight: The height of the tile.
    */
   getTile(layer, tile) {
-    void [layer, tile];
-    assert.fail('Not implemented');
-    return undefined;
+    const info = {};
+    info.imageRef = this.asset_manager.layerMap[layer][tile][0];
+    info.image = this.getImage(info.imageRef);
+    info.srcWidth = info.image.assetGridWidth;
+    info.srcHeight = info.image.assetGridHeight;
+    info.srcX = this.asset_manager.layerMap[layer][tile][1] * info.srcWidth;
+    info.srcY = this.asset_manager.layerMap[layer][tile][2] * info.srcHeight;
+    return info;
+  }
+
+  /**
+   * Return drawing information for a particular character.
+   * @param {String} char - The character's name.
+   * @param {String} facing - The direction the character is facing.
+   * @return {Object} info - See the info parameter in getTile.
+   */
+  getCharacter(char, facing) {
+    const info = {};
+    const charObj = this.asset_manager.characters[char][facing];
+    info.imageRef = charObj[0];
+    info.image = this.getImage(info.imageRef);
+    info.srcWidth = info.image.assetGridWidth;
+    info.srcHeight = info.image.assetGridHeight;
+    info.srcX = charObj[1] * info.srcWidth;
+    info.srcY = charObj[2] * info.srcHeight;
+    return info;
   }
 }
 

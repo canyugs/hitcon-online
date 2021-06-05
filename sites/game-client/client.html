@@ -5,16 +5,91 @@ SPDX-License-Identifier: BSD-2-Clause
 -->
 
 <html lang="zh-tw">
-<head>
-  <meta charset="utf-8">
-  <title>HITCON Online</title>
-  <link rel="stylesheet" href="client.css">
-</head>
-<body>
-<div id="rootdiv">
-<canvas id="mapcanvas"></canvas>
-</div>
-<script>
-</script>
-</body>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>HITCON Online</title>
+    <link rel="stylesheet" href="client.css">
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="./misc.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  </head>
+  <body>
+    <div id="rootdiv" class="container-center">
+      <canvas id="mapcanvas"></canvas>
+    </div>
+
+    <script type="module">
+      import GameMap from '../../common/maplib/map.mjs';
+      import GraphicAsset from '../../common/maplib/graphic-asset.mjs';
+      import GameState from '../../common/maplib/game-state.mjs';
+      import GameClient from './game-client.mjs';
+      import MapRenderer from './map-renderer.mjs';
+      import InputManager from './input-manager.mjs';
+      import { GameMapMock } from '../../common/maplib/map.mjs'; // only used before GameMap is fully implemented
+
+      // Export internal classes for ease of debugging.
+      let gameClass = {};
+      gameClass.GameMap = GameMap;
+      gameClass.GraphicAsset = GraphicAsset;
+      gameClass.GameState = GameState;
+      gameClass.GameClient = GameClient;
+      window.gameClass = gameClass;
+
+      // Create the various essential game classes.
+      let game = {};
+      window.game = game;
+
+      function getTokenFromDocument() {
+        try {
+          const token = document.cookie
+              .split('; ').find(row => row.startsWith('token='))
+              .split('=')[1];
+          return token;
+        } catch (e) {
+          return '';
+        }
+      }
+
+      async function gameMain(game) {
+        game.io = window.io;
+
+        // WARNING: The following is developer mode only.
+        // Try to get a test token.
+        let testToken = getTokenFromDocument();
+        if (testToken == '') {
+          testToken = await $.ajax({url: "/get_test_token", type: "GET",});
+          testToken = testToken.token;
+        }
+        game.token = testToken;
+
+        // TODO: Change map URL to follow the config in server side.
+        game.mapData = await $.ajax({url: "/static/run/map/map.json", type: "GET",});
+        game.assetData = await $.ajax({url: "/static/run/map/assets.json", type: "GET",});
+        game.graphicAsset = new GraphicAsset(game.assetData);
+        if (await game.graphicAsset.loadAssets() == false) {
+          console.error('error on loadAssets(), cannot start game');
+          return;
+        }
+        game.map = new GameMap(game.graphicAsset, game.mapData);
+        game.gameState = new GameState(game.map);
+        game.socket = game.io({reconnection: false});
+        game.mapRenderer = new MapRenderer(document.querySelector('#mapcanvas'), game.map, game.gameState);
+        game.inputManager = new InputManager(game.mapRenderer);
+        game.gameClient = new GameClient(game.io(), game.gameState, game.inputManager);
+
+        game.gameClient.initialize(game.token);
+
+        function onGameTick () {
+          game.mapRenderer.draw();
+          requestAnimationFrame(onGameTick);
+        }
+
+        requestAnimationFrame(onGameTick);
+      }
+
+      gameMain(game);
+
+    </script>
+  </body>
 </html>
