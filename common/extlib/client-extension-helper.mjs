@@ -1,14 +1,19 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
+import { io } from "socket.io-client";
+
 class ClientExtensionHelper {
   /**
    * Create the ClientExtensionHelper object.
    * This is usually called by the ClientExtensionManager.
    * @constructor
    */
-  constructor() {
-    console.assert('Not implemented');
+
+  constructor(extName) {
+    this.extName = extName;
+    this.socket = io();
+    this.clientAPIs = {};
   }
 
   /**
@@ -19,8 +24,21 @@ class ClientExtensionHelper {
    * @param {Number} timeout - An optional timeout in ms.
    * @return {object} result - The result from the call.
    */
-  callStandaloneAPI(methodName, args, timeout) {
+  async callStandaloneAPI(methodName, args, timeout) {
     // TODO: Emit the corresponding event through socket in game client.
+    if (methodName in this.clientAPIs) {
+      if (!timeout) timeout = 0;
+      const resultPromise = new Promise((resolve, reject) => {
+        setTimeout(() => {
+          this.socket.emit(methodName, args);
+          this.socket.on('blablabla', (apiResult) => {
+            const finalResult = clientAPIs[methodName].callback(apiResult);
+            resolve(finalResult);
+          })
+        }, timeout);
+      });
+      return await resultPromise;
+    }
   }
 
   /**
@@ -31,7 +49,7 @@ class ClientExtensionHelper {
    * Whereby args is an object. It returns another object that is the result.
    */
   registerClientAPI(methodName, callback) {
-    console.assert('Not implemented');
+    this.clientAPIs[methodName] = callback;
   }
 };
 
