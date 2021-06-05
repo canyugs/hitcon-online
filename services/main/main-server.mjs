@@ -19,7 +19,7 @@ import AllAreaBroadcaster from '../gateway/all-area-broadcaster.mjs';
 import Directory from '../../common/rpc-directory/directory.mjs';
 import SingleProcessRPCDirectory from
   '../../common/rpc-directory/SingleProcessRPCDirectory.mjs';
-import AssetServer from './static-asset-server.mjs';
+import AssetServer from './asset-server.mjs';
 import AuthServer from '../auth/AuthServer.mjs';
 
 /* Import all utility classes */
