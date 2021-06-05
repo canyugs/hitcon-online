@@ -188,14 +188,25 @@ class GatewayService {
     // TODO: Check if movement is legal.
     let mapShift = {x: 6 , y: 3};
     let mapSize = this.gameMap.getMapSize();
+    let lastRecord = await this.dir.getPlayerData(socket.playerID);
     console.log(msg);
-    console.log(mapSize);
-    if(msg.x > mapSize.width + mapShift.x || msg.x < mapShift.x){
-      return 
+    // target position is in the map
+    if(!this._borderCheck(msg,mapSize,mapShift)){
+      msg.x = lastRecord.x;
+      msg.y = lastRecord.y;
+      await this._broadcastUserLocation(msg);
+      return;
     }
-    if(msg.y > mapSize.height + mapShift.y || msg.y < mapShift.y){
-      return 
+    
+
+    // speed check  
+    if(!this._speedCheck(msg,lastRecord)){
+      return ;
     }
+
+    
+    // not implement yet
+    //await this.dir.setPlayerData(socket.playerID,msg);
     await this._broadcastUserLocation(msg);
     
     return;
@@ -229,6 +240,8 @@ class GatewayService {
     */
   }
 
+  
+
   /**
    * Broadcast the user's location and direction.
    * @private
@@ -240,46 +253,37 @@ class GatewayService {
     return true;
   }
 
-  async broadcastResetUser(socket , uid, x, y, facing){
-    socket.broadcast.emit("location",{uid:uid,x:x,y:y,facing:facing});
-  }
+  // async broadcastResetUser(socket , uid, x, y, facing){
+  //   socket.broadcast.emit("location",{uid:uid,x:x,y:y,facing:facing});
+  // }
 
-  getLastPosition(uid){
-    assert.fail('Not implemented');
-    return {x:0,y:0,facing:'up'}
-  }
-
-  updatePosition(uid,x,y,facing){
-    assert.fail('Not implemented');
-  }
-
-  getDistanceSquare(a,b){
-    return Math.abs(a.x - b.x)^2 + Math.abs(a.y - b.y)^2
-  }
-
-  checkPositionEmpty(x,y){
+  _checkPositionEmpty(x,y){
     return gameMap.getCell(x,y);
   }
 
-  async broadcastResetUser(socket , uid, x, y, facing){
-    socket.broadcast.emit("location",{uid:uid,x:x,y:y,facing:facing});
+  _getDistanceSquare(a,b){
+    return Math.pow(Math.abs(a.x - b.x),2) + Math.pow(Math.abs(a.y - b.y),2);
   }
 
-  getLastPosition(uid){
-    assert.fail('Not implemented');
-    return {x:0,y:0,facing:'up'}
+  _borderCheck(msg,mapSize,mapShift){
+    if(msg.x > mapSize.width + mapShift.x || msg.x < mapShift.x){
+      return false;
+    }
+    if(msg.y > mapSize.height + mapShift.y || msg.y < mapShift.y){
+      return false;
+    }
+    return true;
   }
 
-  updatePosition(uid,x,y,facing){
-    assert.fail('Not implemented');
-  }
-
-  getDistanceSquare(a,b){
-    return Math.abs(a.x - b.x)^2 + Math.abs(a.y - b.y)^2
-  }
-
-  checkPositionEmpty(x,y){
-    return map.getCell(x,y);
+  _speedCheck(msg,lastRecord){
+    let lastPosition = {x:lastRecord.x , y:lastRecord.y};
+    let targetPosition = {x:msg.x , y:msg.y};
+    let distanceSquire = this._getDistanceSquare(lastPosition,targetPosition);
+    let speed = lastRecord.speed ? lastRecord.speed ^ 2 : 1;
+    if(distanceSquire > speed){
+      return false;
+    } 
+    return true;
   }
 }
 
