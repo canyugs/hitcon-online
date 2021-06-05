@@ -36,6 +36,7 @@ absolute URL.
       import MapRenderer from '/static/sites/game-client/map-renderer.mjs';
       import InputManager from '/static/sites/game-client/input-manager.mjs';
       import { GameMapMock } from '/static/common/maplib/map.mjs'; // only used before GameMap is fully implemented
+      import ClientExtensionManager from '/static/common/extlib/client-extension-manager.mjs';
 
       // Export internal classes for ease of debugging.
       let gameClass = {};
@@ -43,6 +44,7 @@ absolute URL.
       gameClass.GraphicAsset = GraphicAsset;
       gameClass.GameState = GameState;
       gameClass.GameClient = GameClient;
+      gameClass.ClientExtensionManager = ClientExtensionManager;
       window.gameClass = gameClass;
 
       // Create the various essential game classes.
@@ -75,6 +77,8 @@ absolute URL.
         // TODO: Change map URL to follow the config in server side.
         game.mapData = await $.ajax({url: "/static/run/map/map.json", type: "GET",});
         game.assetData = await $.ajax({url: "/static/run/map/assets.json", type: "GET",});
+        game.extensionList = await $.ajax({url: "/list_extensions", type: "GET",});
+
         game.graphicAsset = new GraphicAsset(game.assetData);
         if (await game.graphicAsset.loadAssets() == false) {
           console.error('error on loadAssets(), cannot start game');
@@ -83,6 +87,7 @@ absolute URL.
         game.map = new GameMap(game.graphicAsset, game.mapData);
         game.gameState = new GameState(game.map);
         game.socket = game.io({reconnection: false});
+        game.extMan = new ClientExtensionManager(game.socket, game.extensionList);
         game.mapRenderer = new MapRenderer(document.querySelector('#mapcanvas'), game.map, game.gameState);
         game.inputManager = new InputManager(game.mapRenderer);
         game.gameClient = new GameClient(game.io(), game.gameState, game.inputManager);

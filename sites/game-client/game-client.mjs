@@ -13,10 +13,11 @@ class GameClient {
    * state.
    * @constructor
    */
-  constructor(socket, gameState, inputManager) {
+  constructor(socket, gameState, inputManager, extMan) {
     this.socket = socket;
     this.gameState = gameState;
     this.inputManager = inputManager;
+    this.extMan = extMan;
     this.gameStarted = false;
     // playerInfo stores information regarding the current player.
     this.playerInfo = {};
@@ -59,6 +60,16 @@ class GameClient {
       });
       socket.on('location', (msg) => {
         this.gameState.onLocation(msg);
+      });
+      socket.on('extBC', (msg) => {
+        // Note: The method below is async but we ignore its promise.
+        this.extMan.onExtensionBroadcast(msg);
+      });
+      socket.on('clientAPICalled', (msg, callback) => {
+        let p = this.extMan.onClientAPICalled(msg);
+        p.then((result) => {
+          callback(result);
+        });
       });
     });
   }
