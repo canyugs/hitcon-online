@@ -22,6 +22,9 @@ absolute URL.
   </head>
   <body>
     <div id="rootdiv" class="container-center">
+      <% inDiv.forEach((i) => { %>
+        <%- include(i); %>
+      <% }); %>
       <canvas id="mapcanvas"></canvas>
     </div>
 

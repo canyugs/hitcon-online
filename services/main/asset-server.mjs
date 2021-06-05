@@ -2,11 +2,10 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 // Boilerplate for getting the __dirname.
-import {dirname,resolve} from 'path';
-import {fileURLToPath} from 'url';
+import url from 'url';
 import path from 'path';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
+const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
 // Boilerplate for getting require() in es module.
 import {createRequire} from 'module';
@@ -32,9 +31,9 @@ class AssetServer {
   /**
    * Initialize and start the asset server.
    */
-  initialize() {
+  async initialize() {
     this.staticRoutes();
-    this.clientRoutes();
+    await this.clientRoutes();
     this.extRoutes();
   }
 
@@ -52,7 +51,7 @@ class AssetServer {
   /**
    * Prepare the route for serving the client.
    */
-  clientRoutes() {
+  async clientRoutes() {
     // We're using ejs;
     this.app.set('view engine', 'ejs');
 
@@ -60,8 +59,16 @@ class AssetServer {
     this.app.get('/', (req, res) => {
       res.redirect('/client.html');
     });
+
+    // Prepare the client params beforehand.
+    this.clientParams = {};
+    let partials = await this.extMan.collectPartials(this.extMan.listExtensions());
+    this.clientParams.inDiv = [];
+    if (typeof partials.inDiv == 'object') {
+      this.clientParams.inDiv = partials.inDiv;
+    }
     this.app.get('/client.html', (req, res) => {
-      res.render(path.resolve(__dirname + '/../../sites/game-client/client.ejs'));
+      res.render(path.resolve(__dirname + '/../../sites/game-client/client.ejs'), this.clientParams);
     });
   }
 

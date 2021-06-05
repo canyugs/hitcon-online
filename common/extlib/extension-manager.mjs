@@ -1,6 +1,9 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
+import path from 'path';
+import url from 'url';
+
 // Boilerplate for getting require() in es module.
 import {createRequire} from 'module';
 const require = createRequire(import.meta.url);
@@ -8,6 +11,8 @@ const require = createRequire(import.meta.url);
 const config = require('config');
 
 import assert from 'assert';
+const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
+
 import ExtensionHelper from './extension-helper.mjs';
 
 /**
@@ -114,6 +119,28 @@ class ExtensionManager {
   listExtensions() {
     // TODO: Check if these extensions really exists.
     return config.get('ext.enabled');
+  }
+
+  /**
+   * Collect and return the partials from all the extensions listed.
+   * @param {Object} names - An array of extension name.
+   * @return {Object} partials - An object, each element is the array of paths
+   * for each location.
+   */
+  async collectPartials(names) {
+    let result = {};
+    for (const name of names) {
+      // Load the classes if they are not loaded.
+      await this.ensureClass(name);
+      let p = this.ext[name].standaloneClass.getPartials();
+      for (const loc in p) {
+        if (!(loc in result)) {
+          result[loc] = [];
+        }
+        result[loc].push(path.resolve(__dirname + `/../../extensions/${name}/${p[loc]}`));
+      }
+    }
+    return result;
   }
 }
 

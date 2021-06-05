@@ -65,7 +65,7 @@ async function mainServer() {
   }
 
   /* Initialize static asset server */
-  assetServer.initialize();
+  await assetServer.initialize();
   /* Start static asset server */
   assetServer.run();
   await broadcaster.initialize();
