@@ -50,12 +50,15 @@ class AssetServer {
    * Prepare the route for serving the client.
    */
   clientRoutes() {
+    // We're using ejs;
+    this.app.set('view engine', 'ejs');
+
     // Send the user to the game client page.
     this.app.get('/', (req, res) => {
       res.redirect('/client.html');
     });
     this.app.get('/client.html', (req, res) => {
-      res.sendFile(path.resolve(__dirname + '/../../sites/game-client/client.html'));
+      res.render(path.resolve(__dirname + '/../../sites/game-client/client.ejs'));
     });
   }
 
