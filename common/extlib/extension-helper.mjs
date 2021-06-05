@@ -15,12 +15,15 @@ class ExtensionHelper {
    * @constructor
    * @param {ExtensionManager} extMan - The extension manager.
    * @param {Directory} dir - An RPC Directory instance.
+   * @param {AllAreaBroadcaster} broadcaster - A broadcaster for broadcasting
+   * message.
    * @param {string} name - The name of the extension.
    */
-  constructor(extMan, dir, name) {
+  constructor(extMan, dir, broadcaster, name) {
     this.extMan = extMan;
     this.dir = dir;
     this.name = name;
+    this.broadcaster = broadcaster;
   }
 
   /**
@@ -147,6 +150,15 @@ class ExtensionHelper {
   loadData() {
     assert.fail('Not implemented');
     return {};
+  }
+
+  /**
+   * Broadcast a message to all clients.
+   * @param {object} msg - The message.
+   */
+  async broadcastToAllUser(msg) {
+    msg.extName = this.extName;
+    this.broadcaster.broadcastExtensionMessage(msg);
   }
 }
 

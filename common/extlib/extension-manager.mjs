@@ -24,9 +24,12 @@ class ExtensionManager {
    * Create the ExtensionManager.
    * @constructor
    * @param {Directory} directory - An RPC Directory instance.
+   * @param {AllAreaBroadcaster} broadcaster - A broadcaster for broadcasting
+   * message.
    */
-  constructor(directory) {
+  constructor(directory, broadcaster) {
     this.dir = directory;
+    this.broadcaster = broadcaster;
     // This maps the extension name to an object that have the following:
     // standaloneClass - The standalone class of the extension.
     // inGatewayClass - The inGateway class of the extension.

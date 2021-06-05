@@ -50,14 +50,14 @@ async function mainServer() {
   // We do not have GraphicAsset on the server side.
   const gameMap = new GameMap(undefined, mapJSON);
   const gameState = new GameState(gameMap);
-  const extensionManager = new ExtensionManager(rpcDirectory);
+  const broadcaster = new AllAreaBroadcaster(io, rpcDirectory, gameMap);
+  const extensionManager = new ExtensionManager(rpcDirectory, broadcaster);
 
   await extensionManager.ensureClass('blank');
 
   /* Create all services */
   const assetServer = new AssetServer(app, extensionManager);
   const authServer = new AuthServer(app);
-  const broadcaster = new AllAreaBroadcaster(io, rpcDirectory, gameMap);
   const gatewayService = new GatewayService(rpcDirectory, gameMap, authServer,
       broadcaster);
   for (const extName of extensionManager.listExtensions()) {
