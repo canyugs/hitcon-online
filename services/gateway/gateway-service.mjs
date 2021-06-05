@@ -160,6 +160,10 @@ class GatewayService {
     }
     // Take socket off first to avoid race condition in the await below.
     delete this.socks[playerID];
+
+    let lastLocation = {playerID: playerID, removed: true};
+    await this._broadcastUserLocation(lastLocation);
+
     // Try to unregister the player.
     await this.rpcHandler.unregisterPlayer(playerID);
     console.log(`Player ${playerID} disconnected`);
