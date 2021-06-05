@@ -72,8 +72,8 @@ class AllAreaBroadcaster {
     // We transfer the state at this moment, but some previous 'location' might
     // still be in the pipeline, resulting in duplicated messages delivered.
     // NOTE: We might need to filter the player data.
-    let players = this.gameState.getPlayers();
-    socket.emit('stateTransfer', players);
+    let state = this.gameState.getStateTransfer();
+    socket.emit('stateTransfer', state);
   }
 
   /**

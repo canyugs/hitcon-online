@@ -26,6 +26,7 @@ class GameState {
      * {Number} y - The y coordinate.
      * {string} facing - 'U', 'D', 'L', 'R', the direction user's facing.
      */
+    this.cellSet = {};
 
     this.locationCallbacks = [];
   }
@@ -62,6 +63,27 @@ class GameState {
   }
 
   /**
+   * This is called when a cell set event (set or clear) is received from the
+   * game server or upper layer.
+   * Usually this is called by the game client or redis client.
+   * @param {object} cset - The cell set update object.
+   * It have an attribute "type", it's either set or unset.
+   * Then it have another attribute "name", the name of the cell set.
+   * Lastly, if type is set, then attribute "cellSet" is the cell set object.
+   */
+  onCellSet(cset) {
+    if (cset.type == 'unset') {
+      delete this.cellSet[cset.name];
+      this.gameMap.unsetDynamicCellSet(cset.name);
+    } else if (cset.type == 'set') {
+      this.cellSet[cset.name] = cset.cellSet;
+      this.gameMap.setDynamicCellSet(cset.cellSet);
+    } else {
+      throw `Unknown cellSet update object with type ${cset.type}`;
+    }
+  }
+
+  /**
    * Register a callback whenever user's location is changed or user is
    * removed.
    * @param {object} callback - A callback whenever there's any update on
@@ -84,6 +106,13 @@ class GameState {
   }
 
   /**
+   * Get a map of all cell set that's active.
+   */
+  getCellSets() {
+    return this.cellSet;
+  }
+
+  /**
    * Get information regarding a player.
    * @param {string} playerID - The player's ID.
    * @return {object} state - An object representing player's state.
@@ -96,12 +125,25 @@ class GameState {
   }
 
   /**
+   * Get an object for state transfer.
+   * @return {object} state - The game state.
+   */
+  getStateTransfer() {
+    return {players: this.players, cellSet: this.cellSet};
+  }
+
+  /**
    * Accept a state transfer from upstream. Synchronizing the state of this
    * class with that of the upstream.
-   * @param {object} players - The this.players object.
+   * @param {object} state - State returned by getStateTransfer().
    */
-  acceptStateTransfer(players) {
-    this.players = players;
+  acceptStateTransfer(state) {
+    this.players = state.players;
+    this.cellSet = state.cellSet;
+    this.gameMap.removeAllDynamicCellSet();
+    for (const name in this.cellSet) {
+      this.gameMap.setDynamicCellSet(this.cellSet[name]);
+    }
   }
 }
 
