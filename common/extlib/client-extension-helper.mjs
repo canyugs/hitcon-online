@@ -1,19 +1,30 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
-import { io } from "socket.io-client";
-
 class ClientExtensionHelper {
   /**
    * Create the ClientExtensionHelper object.
    * This is usually called by the ClientExtensionManager.
+   * @param {Socket} socket - The socket.io socket from the game client.
    * @constructor
    */
-
-  constructor(extName) {
+  constructor(extName, socket) {
     this.extName = extName;
-    this.socket = io();
+    this.socket = socket;
     this.clientAPIs = {};
+    this.responseTable = {};
+  }
+
+  /**
+   * This is called when the game starts.
+   * @param {GameMap} gameMap - The GameMap object.
+   * @param {GameState} gameState - The GameState object.
+   * @param {GameClient} gameClient - The GameClient object.
+   */
+  async gameStart(gameMap, gameState, gameClient) {
+    this.gameMap = gameMap;
+    this.gameState = gameState;
+    this.gameClient = gameClient;
   }
 
   /**
@@ -29,16 +40,26 @@ class ClientExtensionHelper {
     if (methodName in this.clientAPIs) {
       if (!timeout) timeout = 0;
       const resultPromise = new Promise((resolve, reject) => {
-        setTimeout(() => {
-          this.socket.emit(methodName, args);
-          this.socket.on('blablabla', (apiResult) => {
-            const finalResult = clientAPIs[methodName].callback(apiResult);
-            resolve(finalResult);
-          })
-        }, timeout);
+        // TODO: Fill in callArgs so gateway service knows how to handle it.
+        let callArgs = {};
+        // TODO: Handle timeout.
+        this.socket.emit('callStandaloneAPI', callArgs, (result) => {
+          // TODO: Resolve the promise and return the result.
+        });
       });
       return await resultPromise;
     }
+  }
+
+  /**
+   * This is called by client extension manager when there's an API of this
+   * extension being called from the server side.
+   * @param {string} methodName - Which method is called?
+   * @param {object} args - The argument to the call.
+   * @return {object} result - Result from the call.
+   */
+  async onClientAPICalled(methodName, args) {
+    // TODO: Forward to corresponding method in client.mjs.
   }
 
   /**
