@@ -1,6 +1,14 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
+import _axios from 'axios';
+import ClientExtensionHelper from './client-extension-helper.mjs';
+
+const axios = _axios.create({
+    baseURL: 'http://localhost:5000',
+    timeout: 1000
+});
+
 /**
  * This class manages the extensions on the client side.
  * It is in charge of loading them and providing them with a helper
@@ -11,7 +19,9 @@ class ClientExtensionManager {
    * Create the ClientExtensionManager.
    * @constructor
    */
-  constructor() {
+  constructor(extensionName) {
+    this.extModules = {};
+    this.extHelpers = {};
   }
 
   /**
@@ -20,7 +30,8 @@ class ClientExtensionManager {
    */
   async listExtensions() {
     // TODO: Call server through '/list_extensions' to get the result.
-    return null;
+    const extList = await axios.get('/list_extensions');
+    this.extNameList = JSON.parse(extList);
   }
 
   /**
@@ -29,6 +40,16 @@ class ClientExtensionManager {
    * @param {String} extName - The name of the extension.
    */
   async loadExtensionClient(extName) {
+    // ignore invalid extensions
+    if (this.extNameList.includes(extName)) {
+      const modulePath = `../../extensions/${extName}`;
+      const extModule = await import(modulePath);
+      this.extModules[extName] = extModule;
+
+      const extHelper = new ClientExtensionHelper(extName);
+      /* register APIs to extension helper. */
+      this.extHelpers[extName] = extHelper;
+    }
     // TODO: Load the extension with dynamic import.
   }
 
@@ -40,6 +61,9 @@ class ClientExtensionManager {
    */
   async startExtensionClient(extName) {
     // TODO: Call gameStart() on each of the extensions.
+    if (this.extNameList.includes(extName)) {
+      this.extModules[extName].gameStart();
+    }
   }
 };
 
