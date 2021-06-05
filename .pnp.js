@@ -76,6 +76,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@typescript-eslint/parser", "virtual:c008340e8a5e0f84b982166dce6fa3bbb719ec395ad370a1168cabe867a22d930d921f1ccc2f859ea9035d7fd6f11cfd72423e5065a99a574406cbd088651e88#npm:4.22.0"],
             ["body-parser", "npm:1.19.0"],
             ["config", "npm:3.3.6"],
+            ["ejs", "npm:3.1.6"],
             ["eslint", "npm:7.24.0"],
             ["eslint-config-google", "virtual:c008340e8a5e0f84b982166dce6fa3bbb719ec395ad370a1168cabe867a22d930d921f1ccc2f859ea9035d7fd6f11cfd72423e5065a99a574406cbd088651e88#npm:0.14.0"],
             ["eslint-config-prettier", "virtual:c008340e8a5e0f84b982166dce6fa3bbb719ec395ad370a1168cabe867a22d930d921f1ccc2f859ea9035d7fd6f11cfd72423e5065a99a574406cbd088651e88#npm:8.2.0"],
@@ -522,6 +523,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD",
         }]
       ]],
+      ["async", [
+        ["npm:0.9.2", {
+          "packageLocation": "./.yarn/cache/async-npm-0.9.2-d8cafe6cc3-78c0aad8ad.zip/node_modules/async/",
+          "packageDependencies": [
+            ["async", "npm:0.9.2"]
+          ],
+          "linkType": "HARD",
+        }]
+      ]],
       ["balanced-match", [
         ["npm:1.0.2", {
           "packageLocation": "./.yarn/cache/balanced-match-npm-1.0.2-a53c126459-690643f300.zip/node_modules/balanced-match/",
@@ -926,6 +936,16 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/ee-first-npm-1.1.1-33f8535b39-ba74f91398.zip/node_modules/ee-first/",
           "packageDependencies": [
             ["ee-first", "npm:1.1.1"]
+          ],
+          "linkType": "HARD",
+        }]
+      ]],
+      ["ejs", [
+        ["npm:3.1.6", {
+          "packageLocation": "./.yarn/cache/ejs-npm-3.1.6-03db39fd15-cb77a9368e.zip/node_modules/ejs/",
+          "packageDependencies": [
+            ["ejs", "npm:3.1.6"],
+            ["jake", "npm:10.8.2"]
           ],
           "linkType": "HARD",
         }]
@@ -1380,6 +1400,16 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD",
         }]
       ]],
+      ["filelist", [
+        ["npm:1.0.2", {
+          "packageLocation": "./.yarn/cache/filelist-npm-1.0.2-d98495ab20-f8bf29d317.zip/node_modules/filelist/",
+          "packageDependencies": [
+            ["filelist", "npm:1.0.2"],
+            ["minimatch", "npm:3.0.4"]
+          ],
+          "linkType": "HARD",
+        }]
+      ]],
       ["fill-range", [
         ["npm:7.0.1", {
           "packageLocation": "./.yarn/cache/fill-range-npm-7.0.1-b8b1817caa-efca43d59b.zip/node_modules/fill-range/",
@@ -1599,6 +1629,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@typescript-eslint/parser", "virtual:c008340e8a5e0f84b982166dce6fa3bbb719ec395ad370a1168cabe867a22d930d921f1ccc2f859ea9035d7fd6f11cfd72423e5065a99a574406cbd088651e88#npm:4.22.0"],
             ["body-parser", "npm:1.19.0"],
             ["config", "npm:3.3.6"],
+            ["ejs", "npm:3.1.6"],
             ["eslint", "npm:7.24.0"],
             ["eslint-config-google", "virtual:c008340e8a5e0f84b982166dce6fa3bbb719ec395ad370a1168cabe867a22d930d921f1ccc2f859ea9035d7fd6f11cfd72423e5065a99a574406cbd088651e88#npm:0.14.0"],
             ["eslint-config-prettier", "virtual:c008340e8a5e0f84b982166dce6fa3bbb719ec395ad370a1168cabe867a22d930d921f1ccc2f859ea9035d7fd6f11cfd72423e5065a99a574406cbd088651e88#npm:8.2.0"],
@@ -1658,6 +1689,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageDependencies": [
             ["hitcon-online-main-server", "workspace:services/main"],
             ["config", "npm:3.3.6"],
+            ["ejs", "npm:3.1.6"],
             ["express", "npm:4.16.4"],
             ["redis", "npm:3.1.2"],
             ["socket.io", "npm:4.1.2"]
@@ -1882,6 +1914,19 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/isexe-npm-2.0.0-b58870bd2e-7b437980bb.zip/node_modules/isexe/",
           "packageDependencies": [
             ["isexe", "npm:2.0.0"]
+          ],
+          "linkType": "HARD",
+        }]
+      ]],
+      ["jake", [
+        ["npm:10.8.2", {
+          "packageLocation": "./.yarn/cache/jake-npm-10.8.2-e211473cb9-c60d3f491c.zip/node_modules/jake/",
+          "packageDependencies": [
+            ["jake", "npm:10.8.2"],
+            ["async", "npm:0.9.2"],
+            ["chalk", "npm:2.4.2"],
+            ["filelist", "npm:1.0.2"],
+            ["minimatch", "npm:3.0.4"]
           ],
           "linkType": "HARD",
         }]
