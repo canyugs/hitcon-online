@@ -22,9 +22,11 @@ class AssetServer {
    * Create an asset server, but doesn't start it.
    * @constructor
    * @param {App} app - An express app or router compatible with express.js.
+   * @param {ExtensionManager} extMan - An extension manager.
    */
-  constructor(app) {
+  constructor(app, extMan) {
     this.app = app;
+    this.extMan = extMan;
   }
 
   /**
@@ -33,6 +35,7 @@ class AssetServer {
   initialize() {
     this.staticRoutes();
     this.clientRoutes();
+    this.extRoutes();
   }
 
   /**
@@ -59,6 +62,15 @@ class AssetServer {
     });
     this.app.get('/client.html', (req, res) => {
       res.render(path.resolve(__dirname + '/../../sites/game-client/client.ejs'));
+    });
+  }
+
+  /**
+   * Prepare the routes for extensions.
+   */
+  extRoutes() {
+    this.app.get('/list_extensions', (req, res) => {
+      res.json(this.extMan.listExtensions());
     });
   }
 

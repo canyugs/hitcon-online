@@ -13,11 +13,21 @@ class ExtensionHelper {
    * Create the ExtensionHelper object.
    * This is usually called by the ExtensionManager.
    * @constructor
-   * @param {Directory} directory - An RPC Directory instance.
+   * @param {ExtensionManager} extMan - The extension manager.
+   * @param {Directory} dir - An RPC Directory instance.
+   * @param {string} name - The name of the extension.
    */
-  ExtensionHelper(directory) {
-    void directory;
-    assert.fail('Not implemented');
+  constructor(extMan, dir, name) {
+    this.extMan = extMan;
+    this.dir = dir;
+    this.name = name;
+  }
+
+  /**
+   * The async part of the constructor.
+   */
+  async asyncConstructor() {
+    this.rpcHandler = await this.dir.registerService(`ext_${this.name}`);
   }
 
   /**

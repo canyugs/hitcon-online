@@ -25,6 +25,7 @@ import AuthServer from '../auth/AuthServer.mjs';
 /* Import all utility classes */
 import GameMap from '../../common/maplib/map.mjs';
 import GameState from '../../common/maplib/game-state.mjs';
+import ExtensionManager from '../../common/extlib/extension-manager.mjs';
 
 async function mainServer() {
   /* Redis integration */
@@ -40,6 +41,8 @@ async function mainServer() {
   const io = new Server(server);
 
   /* Create all utility classes */
+  const rpcDirectory = new SingleProcessRPCDirectory();
+  await rpcDirectory.asyncConstruct();
   // Load the map.
   const mapList = config.get("map");
   const rawMapJSON = fs.readFileSync(mapList[0]);
@@ -47,15 +50,19 @@ async function mainServer() {
   // We do not have GraphicAsset on the server side.
   const gameMap = new GameMap(undefined, mapJSON);
   const gameState = new GameState(gameMap);
+  const extensionManager = new ExtensionManager(rpcDirectory);
+
+  await extensionManager.ensureClass('blank');
 
   /* Create all services */
-  const assetServer = new AssetServer(app);
-  const rpcDirectory = new SingleProcessRPCDirectory();
-  await rpcDirectory.asyncConstruct();
+  const assetServer = new AssetServer(app, extensionManager);
   const authServer = new AuthServer(app);
   const broadcaster = new AllAreaBroadcaster(io, rpcDirectory, gameMap);
   const gatewayService = new GatewayService(rpcDirectory, gameMap, authServer,
       broadcaster);
+  for (const extName of extensionManager.listExtensions()) {
+    await extensionManager.createExtensionService(extName);
+  }
 
   /* Initialize static asset server */
   assetServer.initialize();
@@ -64,6 +71,9 @@ async function mainServer() {
   await broadcaster.initialize();
   await gatewayService.initialize();
   authServer.run();
+  for (const extName of extensionManager.listExtensions()) {
+    await extensionManager.startExtensionService(extName);
+  }
 
   gatewayService.addServer(io);
 

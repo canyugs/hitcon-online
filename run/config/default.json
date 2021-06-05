@@ -11,5 +11,8 @@
     "type": "real",
     "option": {}
   },
-  "secret": "secret"
+  "secret": "secret",
+  "ext": {
+    "enabled": []
+  }
 }

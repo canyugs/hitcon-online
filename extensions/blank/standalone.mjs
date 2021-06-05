@@ -19,6 +19,12 @@ class Standalone {
   }
 
   /**
+   * Initializes the extension.
+   */
+  async initialize() {
+  }
+
+  /**
    * Returns true if this extension have a standalone part.
    * If this returns false, the constructor for Standalone will not be called.
    * Otherwise, a Standalone object is instanciated.
