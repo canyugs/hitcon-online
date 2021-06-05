@@ -186,7 +186,16 @@ class GatewayService {
     msg.displayChar = socket.playerData.displayChar;
     // TODO: Check if facing is valid.
     // TODO: Check if movement is legal.
-    
+    let mapShift = {x: 6 , y: 3};
+    let mapSize = this.gameMap.getMapSize();
+    console.log(msg);
+    console.log(mapSize);
+    if(msg.x > mapSize.width + mapShift.x || msg.x < mapShift.x){
+      return 
+    }
+    if(msg.y > mapSize.height + mapShift.y || msg.y < mapShift.y){
+      return 
+    }
     await this._broadcastUserLocation(msg);
     
     return;
