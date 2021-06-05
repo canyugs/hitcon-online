@@ -19,7 +19,7 @@ import AllAreaBroadcaster from '../gateway/all-area-broadcaster.mjs';
 import Directory from '../../common/rpc-directory/directory.mjs';
 import SingleProcessRPCDirectory from
   '../../common/rpc-directory/SingleProcessRPCDirectory.mjs';
-import StaticAssetServer from './static-asset-server.mjs';
+import AssetServer from './static-asset-server.mjs';
 import AuthServer from '../auth/AuthServer.mjs';
 
 /* Import all utility classes */
@@ -49,7 +49,7 @@ async function mainServer() {
   const gameState = new GameState(gameMap);
 
   /* Create all services */
-  const staticAssetServer = new StaticAssetServer(app);
+  const assetServer = new AssetServer(app);
   const rpcDirectory = new SingleProcessRPCDirectory();
   await rpcDirectory.asyncConstruct();
   const authServer = new AuthServer(app);
@@ -58,9 +58,9 @@ async function mainServer() {
       broadcaster);
 
   /* Initialize static asset server */
-  staticAssetServer.initialize();
+  assetServer.initialize();
   /* Start static asset server */
-  staticAssetServer.run();
+  assetServer.run();
   await broadcaster.initialize();
   await gatewayService.initialize();
   authServer.run();

@@ -4,14 +4,20 @@ Copyright 2021 HITCON Online Contributors
 SPDX-License-Identifier: BSD-2-Clause
 -->
 
+<!--
+NOTE: The URL of this page is /client.html
+It is recommended that all references various resources be in
+absolute URL.
+-->
+
 <html lang="zh-tw">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>HITCON Online</title>
-    <link rel="stylesheet" href="client.css">
+    <link rel="stylesheet" href="/static/sites/game-client/client.css">
     <script src="/socket.io/socket.io.js"></script>
-    <script src="./misc.js"></script>
+    <script src="/static/sites/game-client/misc.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
   </head>
   <body>
@@ -20,13 +26,13 @@ SPDX-License-Identifier: BSD-2-Clause
     </div>
 
     <script type="module">
-      import GameMap from '../../common/maplib/map.mjs';
-      import GraphicAsset from '../../common/maplib/graphic-asset.mjs';
-      import GameState from '../../common/maplib/game-state.mjs';
-      import GameClient from './game-client.mjs';
-      import MapRenderer from './map-renderer.mjs';
-      import InputManager from './input-manager.mjs';
-      import { GameMapMock } from '../../common/maplib/map.mjs'; // only used before GameMap is fully implemented
+      import GameMap from '/static/common/maplib/map.mjs';
+      import GraphicAsset from '/static/common/maplib/graphic-asset.mjs';
+      import GameState from '/static/common/maplib/game-state.mjs';
+      import GameClient from '/static/sites/game-client/game-client.mjs';
+      import MapRenderer from '/static/sites/game-client/map-renderer.mjs';
+      import InputManager from '/static/sites/game-client/input-manager.mjs';
+      import { GameMapMock } from '/static/common/maplib/map.mjs'; // only used before GameMap is fully implemented
 
       // Export internal classes for ease of debugging.
       let gameClass = {};

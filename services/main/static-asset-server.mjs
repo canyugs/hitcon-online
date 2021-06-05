@@ -4,6 +4,7 @@
 // Boilerplate for getting the __dirname.
 import {dirname,resolve} from 'path';
 import {fileURLToPath} from 'url';
+import path from 'path';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -14,11 +15,11 @@ const require = createRequire(import.meta.url);
 const express = require('express');
 
 /**
- * Static asset server serves static assets.
+ * Asset server serves static and dynamic assets.
  */
-class StaticAssetServer {
+class AssetServer {
   /**
-   * Create a static asset server, but doesn't start it.
+   * Create an asset server, but doesn't start it.
    * @constructor
    * @param {App} app - An express app or router compatible with express.js.
    */
@@ -27,9 +28,17 @@ class StaticAssetServer {
   }
 
   /**
-   * Initialize and start the static asset server.
+   * Initialize and start the asset server.
    */
   initialize() {
+    this.staticRoutes();
+    this.clientRoutes();
+  }
+
+  /**
+   * Prepare the static routes.
+   */
+  staticRoutes() {
     // TODO: Restrict the visible pages.
     // Not sure if all static files are in sites
     this.app.use('/static/sites', express.static(__dirname + '/../../sites/'));
@@ -37,12 +46,21 @@ class StaticAssetServer {
     this.app.use('/static/run/map', express.static(__dirname + '/../../run/map'));
   }
 
-  run() {
+  /**
+   * Prepare the route for serving the client.
+   */
+  clientRoutes() {
     // Send the user to the game client page.
     this.app.get('/', (req, res) => {
-      res.redirect('/static/sites/game-client/client.html');
+      res.redirect('/client.html');
     });
+    this.app.get('/client.html', (req, res) => {
+      res.sendFile(path.resolve(__dirname + '/../../sites/game-client/client.html'));
+    });
+  }
+
+  run() {
   }
 }
 
-export default StaticAssetServer;
+export default AssetServer;
