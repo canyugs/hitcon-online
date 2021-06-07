@@ -37,18 +37,27 @@ class ClientExtensionHelper {
    */
   async callStandaloneAPI(methodName, args, timeout) {
     // TODO: Emit the corresponding event through socket in game client.
-    if (methodName in this.clientAPIs) {
-      if (!timeout) timeout = 0;
-      const resultPromise = new Promise((resolve, reject) => {
-        // TODO: Fill in callArgs so gateway service knows how to handle it.
-        let callArgs = {};
-        // TODO: Handle timeout.
-        this.socket.emit('callStandaloneAPI', callArgs, (result) => {
-          // TODO: Resolve the promise and return the result.
-        });
+    if (!timeout) timeout = 0;
+    const resultPromise = new Promise((resolve, reject) => {
+      // TODO: Fill in callArgs so gateway service knows how to handle it.
+      const timeoutTimer = setTimeout(() => {
+        reject(new Error('Request timeout'));
+      }, timeout);
+
+      let callArgs = {
+        extName: this.extName,
+        methodName: methodName,
+        args: args
+      };
+      // TODO: Handle timeout.
+      this.socket.emit('callStandaloneAPI', callArgs, (result) => {
+        console.log('here');
+        // TODO: Resolve the promise and return the result.
+        clearTimeout(timeoutTimer);
+        resolve(result);
       });
-      return await resultPromise;
-    }
+    });
+    return await resultPromise;
   }
 
   /**
@@ -69,8 +78,13 @@ class ClientExtensionHelper {
    * async function (args)
    * Whereby args is an object. It returns another object that is the result.
    */
-  registerClientAPI(methodName, callback) {
-    this.clientAPIs[methodName] = callback;
+  registerClientAPI(methodName, methodFunctionName) {
+    if (typeof methodName !== 'string' || typeof methodFunctionName !== 'string') {
+      throw 'Api name or api function name is not a string';
+    }
+    if (!methodName in this.clientAPIs) {
+      this.clientAPIs[methodName] = methodFunctionName;
+    }
   }
 };
 

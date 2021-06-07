@@ -87,12 +87,16 @@ absolute URL.
         game.map = new GameMap(game.graphicAsset, game.mapData);
         game.gameState = new GameState(game.map);
         game.socket = game.io({reconnection: false});
-        game.extMan = new ClientExtensionManager(game.socket, game.extensionList);
+
         game.mapRenderer = new MapRenderer(document.querySelector('#mapcanvas'), game.map, game.gameState);
         game.inputManager = new InputManager(game.mapRenderer);
-        game.gameClient = new GameClient(game.io(), game.gameState, game.inputManager);
+        game.gameClient = new GameClient(game.socket, game.gameState, game.inputManager); // bug
 
         game.gameClient.initialize(game.token);
+
+        game.extMan = new ClientExtensionManager(game.socket, game.extensionList);
+        await game.extMan.initialize(game.map, game.gameState, game.gameClient);
+        await game.extMan.loadAllExtensionClient();
 
         function onGameTick () {
           game.mapRenderer.draw();

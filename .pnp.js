@@ -39,6 +39,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         "reference": "workspace:extensions/blank"
       },
       {
+        "name": "hitcon-online-helloworld",
+        "reference": "workspace:extensions/helloworld"
+      },
+      {
         "name": "hitcon-online-gateway",
         "reference": "workspace:services/gateway"
       },
@@ -59,6 +63,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
       ["hitcon-online-extlib", ["workspace:common/extlib"]],
       ["hitcon-online-game-client", ["workspace:sites/game-client"]],
       ["hitcon-online-gateway", ["workspace:services/gateway"]],
+      ["hitcon-online-helloworld", ["workspace:extensions/helloworld"]],
       ["hitcon-online-main-server", ["workspace:services/main"]],
       ["hitcon-online-maplib", ["workspace:common/maplib"]],
       ["hitcon-online-rpc-directory", ["workspace:common/rpc-directory"]]
@@ -921,6 +926,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD",
         }]
       ]],
+      ["dotenv", [
+        ["npm:10.0.0", {
+          "packageLocation": "./.yarn/cache/dotenv-npm-10.0.0-36b272df25-9c45712e21.zip/node_modules/dotenv/",
+          "packageDependencies": [
+            ["dotenv", "npm:10.0.0"]
+          ],
+          "linkType": "HARD",
+        }]
+      ]],
       ["ecdsa-sig-formatter", [
         ["npm:1.0.11", {
           "packageLocation": "./.yarn/cache/ecdsa-sig-formatter-npm-1.0.11-b6784e7852-9d07775ee2.zip/node_modules/ecdsa-sig-formatter/",
@@ -1658,7 +1672,8 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./common/extlib/",
           "packageDependencies": [
             ["hitcon-online-extlib", "workspace:common/extlib"],
-            ["config", "npm:3.3.6"]
+            ["config", "npm:3.3.6"],
+            ["dotenv", "npm:10.0.0"]
           ],
           "linkType": "SOFT",
         }]
@@ -1680,6 +1695,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["config", "npm:3.3.6"],
             ["socket.io", "npm:4.1.2"],
             ["socketio-jwt", "npm:4.6.2"]
+          ],
+          "linkType": "SOFT",
+        }]
+      ]],
+      ["hitcon-online-helloworld", [
+        ["workspace:extensions/helloworld", {
+          "packageLocation": "./extensions/helloworld/",
+          "packageDependencies": [
+            ["hitcon-online-helloworld", "workspace:extensions/helloworld"]
           ],
           "linkType": "SOFT",
         }]

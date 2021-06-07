@@ -54,15 +54,15 @@ async function mainServer() {
   const extensionManager = new ExtensionManager(rpcDirectory, broadcaster);
 
   await extensionManager.ensureClass('blank');
+  for (const extName of extensionManager.listExtensions()) {
+    await extensionManager.createExtensionService(extName);
+  }
 
   /* Create all services */
   const assetServer = new AssetServer(app, extensionManager);
   const authServer = new AuthServer(app);
   const gatewayService = new GatewayService(rpcDirectory, gameMap, authServer,
-      broadcaster);
-  for (const extName of extensionManager.listExtensions()) {
-    await extensionManager.createExtensionService(extName);
-  }
+      broadcaster, extensionManager);
 
   /* Initialize static asset server */
   await assetServer.initialize();
