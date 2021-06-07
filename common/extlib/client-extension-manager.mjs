@@ -44,6 +44,12 @@ class ClientExtensionManager {
     return this.extNameList;
   }
 
+  async loadAllExtensionClient() {
+    for (let extName of this.extNameList) {
+      this.loadExtensionClient(extName);
+    }
+  }
+
   /**
    * Load the browser side of an extension.
    * This is usually called when the page loads by loadAllExtensionClient().
@@ -52,16 +58,28 @@ class ClientExtensionManager {
   async loadExtensionClient(extName) {
     // ignore invalid extensions
     if (this.extNameList.includes(extName)) {
-      const modulePath = `../../extensions/${extName}`;
+      const modulePath = `/extension/${extName}`;
       const extModule = await import(modulePath);
       // TODO: check the type of extModule.default is a function.
-      this.extModules[extName] = extModule;
+      if (typeof extModule.default !== 'function') {
+        throw `Default export of client extension ${name} is not a function.`;
+      }
+      else {
+        this.extModules[extName] = extModule;
+      }
 
-      const extHelper = new ClientExtensionHelper(extName);
+      const extHelper = new ClientExtensionHelper(extName, this.socket);
       /* register APIs to extension helper. */
       this.extHelpers[extName] = extHelper;
+        
+      const moduleAPIs = extModule.default.getAPIs();
+      for (const apiName in moduleAPIs) {
+        const apiFunctionName = moduleAPIs[apiName];
+        extHelper.registerClientAPI(apiName, apiFunctionName);
+      }
 
       this.extObjects[extName] = new this.extModules[extName].default();
+      this.startExtensionClient(extName);
     }
   }
 
@@ -75,7 +93,6 @@ class ClientExtensionManager {
     // TODO: Call gameStart() on each of the extensions.
     if (extName in this.extObjects) {
       await this.extHelpers[extName].gameStart(this.gameMap, this.gameState, this.gameClient);
-      this.extObjects[extName].gameStart();
     } else {
       throw `Extension ${extName} not loaded`;
     }

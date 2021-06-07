@@ -661,6 +661,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"dotenv@npm:^10.0.0":
+  version: 10.0.0
+  resolution: "dotenv@npm:10.0.0"
+  checksum: 9c45712e213de63bdb646b8e5344749b7566e25a67bbd3f03711d54e40eff10066c1f23eff0081d0949fda7c8efcc6e9e8bf18d0f023a8274f55f5d5f97bb6db
+  languageName: node
+  linkType: hard
+
 "ecdsa-sig-formatter@npm:1.0.11":
   version: 1.0.11
   resolution: "ecdsa-sig-formatter@npm:1.0.11"
@@ -1274,6 +1281,7 @@ __metadata:
   resolution: "hitcon-online-extlib@workspace:common/extlib"
   dependencies:
     config: ^3.3.6
+    dotenv: ^10.0.0
   languageName: unknown
   linkType: soft
 
@@ -1290,6 +1298,12 @@ __metadata:
     config: ^3.3.6
     socket.io: ^4.1.2
     socketio-jwt: ^4.6.2
+  languageName: unknown
+  linkType: soft
+
+"hitcon-online-helloworld@workspace:extensions/helloworld":
+  version: 0.0.0-use.local
+  resolution: "hitcon-online-helloworld@workspace:extensions/helloworld"
   languageName: unknown
   linkType: soft
 

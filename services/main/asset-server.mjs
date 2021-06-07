@@ -70,6 +70,15 @@ class AssetServer {
     this.app.get('/client.html', (req, res) => {
       res.render(path.resolve(__dirname + '/../../sites/game-client/client.ejs'), this.clientParams);
     });
+    this.app.get('/extension/:extName', (req, res) => {
+      /* waf */
+      const extName = req.params.extName;
+      if (/^[a-zA-Z0-9_]+$/.test(extName) === false) {
+        res.status(404).send('Extension Not Found');
+        return;
+      }
+      res.sendFile(path.resolve(__dirname + `/../../extensions/${extName}/client.mjs`));
+    });
   }
 
   /**
