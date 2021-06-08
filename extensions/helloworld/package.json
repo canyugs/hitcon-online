@@ -1,0 +1,8 @@
+{
+  "name": "hitcon-online-helloworld",
+  "version": "0.0.1",
+  "exports": {
+    "standalone": "./standalone.mjs",
+    "in-gateway": "./in-gateway.mjs"
+  }
+}
