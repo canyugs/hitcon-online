@@ -28,12 +28,10 @@ class ClientExtensionManager {
    * Initialize the ClientExtensionManager.
    * @param {GameMap} gameMap - The GameMap object.
    * @param {GameState} gameState - The GameState object.
-   * @param {GameClient} gameClient - The GameClient object.
    */
-  async initialize(gameMap, gameState, gameClient) {
+  async initialize(gameMap, gameState) {
     this.gameMap = gameMap;
     this.gameState = gameState;
-    this.gameClient = gameClient;
   }
 
   /**
@@ -72,13 +70,14 @@ class ClientExtensionManager {
       /* register APIs to extension helper. */
       this.extHelpers[extName] = extHelper;
         
-      const moduleAPIs = extModule.default.getAPIs();
+      this.extObjects[extName] = new this.extModules[extName].default();
+
+      const moduleAPIs = extModule.default.apis;
       for (const apiName in moduleAPIs) {
-        const apiFunctionName = moduleAPIs[apiName];
-        extHelper.registerClientAPI(apiName, apiFunctionName);
+        const methodName = moduleAPIs[apiName];
+        extHelper.registerClientAPI(apiName, this.extObjects[extName][methodName]);
       }
 
-      this.extObjects[extName] = new this.extModules[extName].default();
       this.startExtensionClient(extName);
     }
   }
@@ -92,7 +91,7 @@ class ClientExtensionManager {
   async startExtensionClient(extName) {
     // TODO: Call gameStart() on each of the extensions.
     if (extName in this.extObjects) {
-      await this.extHelpers[extName].gameStart(this.gameMap, this.gameState, this.gameClient);
+      await this.extHelpers[extName].gameStart(this.gameMap, this.gameState);
     } else {
       throw `Extension ${extName} not loaded`;
     }
@@ -106,6 +105,13 @@ class ClientExtensionManager {
     const methodName = msg.methodName;
     const args = msg.args;
     // TODO: Pass it to the extension.
+    if (!extName in this.extNameList) {
+      return {
+        "status": "failed",
+        "message": "Extension name not found"
+      }
+    }
+    return await this.extHelpers[extName].onClientAPICalled(methodName, args);
   }
 
   /**

@@ -108,6 +108,15 @@ class GatewayService {
     });
     socket.on('callStandaloneAPI', (msg, callback) => {
       // TODO
+      const { extName, methodName, args } = msg;
+      /*
+        Call server side extension API
+      */
+      /* Testing */
+      callback('Client is able to call standalone API');
+      socket.emit('clientAPICalled', { extName: 'helloworld', methodName: 'SayHello', args: ['OK'] }, (result) => {
+        console.log(result);
+      });
     });
     socket.on('disconnect', (reason) => {
       this.onDisconnect(socket, reason);

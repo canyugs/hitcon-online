@@ -13,6 +13,6 @@
   },
   "secret": "secret",
   "ext": {
-    "enabled": []
+    "enabled": ["helloworld"]
   }
 }

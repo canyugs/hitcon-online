@@ -19,12 +19,10 @@ class ClientExtensionHelper {
    * This is called when the game starts.
    * @param {GameMap} gameMap - The GameMap object.
    * @param {GameState} gameState - The GameState object.
-   * @param {GameClient} gameClient - The GameClient object.
    */
-  async gameStart(gameMap, gameState, gameClient) {
+  async gameStart(gameMap, gameState) {
     this.gameMap = gameMap;
     this.gameState = gameState;
-    this.gameClient = gameClient;
   }
 
   /**
@@ -51,7 +49,6 @@ class ClientExtensionHelper {
       };
       // TODO: Handle timeout.
       this.socket.emit('callStandaloneAPI', callArgs, (result) => {
-        console.log('here');
         // TODO: Resolve the promise and return the result.
         clearTimeout(timeoutTimer);
         resolve(result);
@@ -69,6 +66,14 @@ class ClientExtensionHelper {
    */
   async onClientAPICalled(methodName, args) {
     // TODO: Forward to corresponding method in client.mjs.
+    if (typeof methodName !== 'string' || !methodName in this.clientAPIs) {
+      return {
+        "status": "failed",
+        "message": "Api name not found"
+      }
+    }
+    const methodFunctionName = this.clientAPIs[methodName];
+    return await this.clientAPIs[methodName](...args);
   }
 
   /**
@@ -78,12 +83,15 @@ class ClientExtensionHelper {
    * async function (args)
    * Whereby args is an object. It returns another object that is the result.
    */
-  registerClientAPI(methodName, methodFunctionName) {
-    if (typeof methodName !== 'string' || typeof methodFunctionName !== 'string') {
-      throw 'Api name or api function name is not a string';
+  registerClientAPI(methodName, methodFunction) {
+    if (typeof methodName !== 'string') {
+      throw 'Api name is not a string';
     }
-    if (!methodName in this.clientAPIs) {
-      this.clientAPIs[methodName] = methodFunctionName;
+    if (typeof methodFunction !== 'function') {
+      throw 'Method name is not a function';
+    }
+    if (!(methodName in this.clientAPIs)) {
+      this.clientAPIs[methodName] = methodFunction;
     }
   }
 };
