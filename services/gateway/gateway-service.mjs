@@ -242,8 +242,8 @@ class GatewayService {
     }
     
 
-    // speed check  
-    if(!this._speedCheck(msg,lastRecord)){
+    // near by grid check  
+    if(!this._nearByGridCheck(msg,lastRecord)){
       return ;
     }
 
@@ -312,11 +312,11 @@ class GatewayService {
     return true;
   }
 
-  _speedCheck(msg,lastRecord){
+  _nearByGridCheck(msg,lastRecord){
     let lastPosition = {x:lastRecord.x , y:lastRecord.y};
     let targetPosition = {x:msg.x , y:msg.y};
     let distanceSquire = this._getDistanceSquare(lastPosition,targetPosition);
-    let speed = lastRecord.speed ? lastRecord.speed ^ 2 : 1;
+    let speed = 1 ;
     if(distanceSquire > speed){
       return false;
     } 
