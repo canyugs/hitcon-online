@@ -8,8 +8,9 @@ class ClientExtensionHelper {
    * @param {Socket} socket - The socket.io socket from the game client.
    * @constructor
    */
-  constructor(extName, socket) {
+  constructor(extName, extMan, socket) {
     this.extName = extName;
+    this.extMan = extMan;
     this.socket = socket;
     this.clientAPIs = {};
     this.responseTable = {};
@@ -93,6 +94,13 @@ class ClientExtensionHelper {
     if (!(methodName in this.clientAPIs)) {
       this.clientAPIs[methodName] = methodFunction;
     }
+  }
+
+  /**
+   * Return the game map.
+   */
+  getMap() {
+    return this.extMan.gameMap;
   }
 };
 

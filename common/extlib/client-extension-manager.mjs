@@ -66,11 +66,11 @@ class ClientExtensionManager {
         this.extModules[extName] = extModule;
       }
 
-      const extHelper = new ClientExtensionHelper(extName, this.socket);
+      const extHelper = new ClientExtensionHelper(extName, this, this.socket);
       /* register APIs to extension helper. */
       this.extHelpers[extName] = extHelper;
         
-      this.extObjects[extName] = new this.extModules[extName].default();
+      this.extObjects[extName] = new this.extModules[extName].default(extHelper);
 
       const moduleAPIs = extModule.default.apis;
       for (const apiName in moduleAPIs) {
@@ -99,6 +99,9 @@ class ClientExtensionManager {
       return;
     }
     await this.extHelpers[extName].gameStart(this.gameMap, this.gameState);
+    if (typeof this.extObjects[extName].gameStart === 'function') {
+      await this.extObjects[extName].gameStart();
+    }
   }
 
   /**
@@ -158,6 +161,18 @@ class ClientExtensionManager {
       }
     }
     await onExtBc(msg);
+  }
+
+  /**
+   * This is called when we received an update of our own position from the
+   * server.
+   */
+  async notifySelfLocationUpdate(loc) {
+    for (const name in this.extObjects) {
+      if (typeof this.extObjects[name].onSelfLocationUpdated === 'function') {
+        this.extObjects[name].onSelfLocationUpdated(loc);
+      }
+    }
   }
 };
 

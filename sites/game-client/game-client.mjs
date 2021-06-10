@@ -96,6 +96,8 @@ class GameClient {
       if (loc.playerID == this.playerInfo.playerID) {
         [this.playerInfo.x, this.playerInfo.y, this.playerInfo.facing] =
             [loc.x, loc.y, loc.facing];
+        // Notify the extensions as well.
+        this.extMan.notifySelfLocationUpdate(loc);
       }
     });
     this._initializeInputs();
