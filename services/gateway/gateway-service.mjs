@@ -188,27 +188,35 @@ class GatewayService {
     // TODO: Check if movement is legal.
     let mapShift = {x: 6 , y: 3};
     let mapSize = this.gameMap.getMapSize();
-    let lastRecord = await this.dir.getPlayerData(socket.playerID);
-    console.log(msg);
+    let lastRecord = await this.broadcaster.gameState.getPlayer(socket.playerID);
     // target position is in the map
     if(!this._borderCheck(msg,mapSize,mapShift)){
+      // restrict user position
       msg.x = lastRecord.x;
       msg.y = lastRecord.y;
       await this._broadcastUserLocation(msg);
       return;
     }
-    
 
     // near by grid check  
     if(!this._nearByGridCheck(msg,lastRecord)){
       return ;
     }
 
+    // obstacle check
+    let players = this.broadcaster.gameState.getPlayers();
+    let playerIDs = Object.keys(players);
+    let obstacle = playerIDs.find( playerID => players[playerID].x === msg.x && players[playerID].y === msg.y)
+    if(obstacle !== undefined){
+      // restrict user position
+      msg.x = lastRecord.x;
+      msg.y = lastRecord.y;
+      await this._broadcastUserLocation(msg);
+      return;
+    }
     
-    // not implement yet
-    //await this.dir.setPlayerData(socket.playerID,msg);
+    
     await this._broadcastUserLocation(msg);
-    
     return;
     /*
     // todo : checking movement is ligal
@@ -285,6 +293,8 @@ class GatewayService {
     } 
     return true;
   }
+
+  _
 }
 
 export default GatewayService;
