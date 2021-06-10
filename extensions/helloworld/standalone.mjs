@@ -41,6 +41,15 @@ class Standalone {
   static getPartials() {
     return {inDiv: 'in-div.ejs'};
   }
+
+  serverHello() {
+    console.log('Server says: Hello World');
+  }
+
+  static apis = {
+    "SayHello": "serverHello"
+  }
+
 }
 
 export default Standalone;

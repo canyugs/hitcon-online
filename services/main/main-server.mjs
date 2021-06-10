@@ -19,12 +19,13 @@ import AllAreaBroadcaster from '../gateway/all-area-broadcaster.mjs';
 import Directory from '../../common/rpc-directory/directory.mjs';
 import SingleProcessRPCDirectory from
   '../../common/rpc-directory/SingleProcessRPCDirectory.mjs';
-import StaticAssetServer from './static-asset-server.mjs';
+import AssetServer from './asset-server.mjs';
 import AuthServer from '../auth/AuthServer.mjs';
 
 /* Import all utility classes */
 import GameMap from '../../common/maplib/map.mjs';
 import GameState from '../../common/maplib/game-state.mjs';
+import ExtensionManager from '../../common/extlib/extension-manager.mjs';
 
 async function mainServer() {
   /* Redis integration */
@@ -40,6 +41,8 @@ async function mainServer() {
   const io = new Server(server);
 
   /* Create all utility classes */
+  const rpcDirectory = new SingleProcessRPCDirectory();
+  await rpcDirectory.asyncConstruct();
   // Load the map.
   const mapList = config.get("map");
   const rawMapJSON = fs.readFileSync(mapList[0]);
@@ -47,23 +50,30 @@ async function mainServer() {
   // We do not have GraphicAsset on the server side.
   const gameMap = new GameMap(undefined, mapJSON);
   const gameState = new GameState(gameMap);
+  const broadcaster = new AllAreaBroadcaster(io, rpcDirectory, gameMap);
+  const extensionManager = new ExtensionManager(rpcDirectory, broadcaster);
+
+  await extensionManager.ensureClass('blank');
+  for (const extName of extensionManager.listExtensions()) {
+    await extensionManager.createExtensionService(extName);
+  }
 
   /* Create all services */
-  const staticAssetServer = new StaticAssetServer(app);
-  const rpcDirectory = new SingleProcessRPCDirectory();
-  await rpcDirectory.asyncConstruct();
+  const assetServer = new AssetServer(app, extensionManager);
   const authServer = new AuthServer(app);
-  const broadcaster = new AllAreaBroadcaster(io, rpcDirectory, gameMap);
   const gatewayService = new GatewayService(rpcDirectory, gameMap, authServer,
-      broadcaster);
+      broadcaster, extensionManager);
 
   /* Initialize static asset server */
-  staticAssetServer.initialize();
+  await assetServer.initialize();
   /* Start static asset server */
-  staticAssetServer.run();
+  assetServer.run();
   await broadcaster.initialize();
   await gatewayService.initialize();
   authServer.run();
+  for (const extName of extensionManager.listExtensions()) {
+    await extensionManager.startExtensionService(extName);
+  }
 
   gatewayService.addServer(io);
 

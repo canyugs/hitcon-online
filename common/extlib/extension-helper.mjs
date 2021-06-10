@@ -13,11 +13,24 @@ class ExtensionHelper {
    * Create the ExtensionHelper object.
    * This is usually called by the ExtensionManager.
    * @constructor
-   * @param {Directory} directory - An RPC Directory instance.
+   * @param {ExtensionManager} extMan - The extension manager.
+   * @param {Directory} dir - An RPC Directory instance.
+   * @param {AllAreaBroadcaster} broadcaster - A broadcaster for broadcasting
+   * message.
+   * @param {string} name - The name of the extension.
    */
-  ExtensionHelper(directory) {
-    void directory;
-    assert.fail('Not implemented');
+  constructor(extMan, dir, broadcaster, name) {
+    this.extMan = extMan;
+    this.dir = dir;
+    this.name = name;
+    this.broadcaster = broadcaster;
+  }
+
+  /**
+   * The async part of the constructor.
+   */
+  async asyncConstructor() {
+    this.rpcHandler = await this.dir.registerService(`ext_${this.name}`);
   }
 
   /**
@@ -137,6 +150,15 @@ class ExtensionHelper {
   loadData() {
     assert.fail('Not implemented');
     return {};
+  }
+
+  /**
+   * Broadcast a message to all clients.
+   * @param {object} msg - The message.
+   */
+  async broadcastToAllUser(msg) {
+    msg.extName = this.extName;
+    this.broadcaster.broadcastExtensionMessage(msg);
   }
 }
 

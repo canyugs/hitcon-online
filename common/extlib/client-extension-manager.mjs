@@ -1,6 +1,8 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
+import ClientExtensionHelper from './client-extension-helper.mjs';
+
 /**
  * This class manages the extensions on the client side.
  * It is in charge of loading them and providing them with a helper
@@ -9,9 +11,27 @@
 class ClientExtensionManager {
   /**
    * Create the ClientExtensionManager.
+   * @param {Socket} socket - The connection to backend.
+   * @param {object} extNameList - An array of string, representing the list of
+   * active extensions.
    * @constructor
    */
-  constructor() {
+  constructor(socket, extNameList) {
+    this.socket = socket;
+    this.extNameList = extNameList;
+    this.extModules = {};
+    this.extObjects = {};
+    this.extHelpers = {};
+  }
+
+  /**
+   * Initialize the ClientExtensionManager.
+   * @param {GameMap} gameMap - The GameMap object.
+   * @param {GameState} gameState - The GameState object.
+   */
+  async initialize(gameMap, gameState) {
+    this.gameMap = gameMap;
+    this.gameState = gameState;
   }
 
   /**
@@ -19,8 +39,13 @@ class ClientExtensionManager {
    * @return {object} extensions - An array of string of extensions.
    */
   async listExtensions() {
-    // TODO: Call server through '/list_extensions' to get the result.
-    return null;
+    return this.extNameList;
+  }
+
+  async loadAllExtensionClient() {
+    for (let extName of this.extNameList) {
+      this.loadExtensionClient(extName);
+    }
   }
 
   /**
@@ -29,7 +54,32 @@ class ClientExtensionManager {
    * @param {String} extName - The name of the extension.
    */
   async loadExtensionClient(extName) {
-    // TODO: Load the extension with dynamic import.
+    // ignore invalid extensions
+    if (this.extNameList.includes(extName)) {
+      const modulePath = `/extension/${extName}`;
+      const extModule = await import(modulePath);
+      // TODO: check the type of extModule.default is a function.
+      if (typeof extModule.default !== 'function') {
+        throw `Default export of client extension ${name} is not a function.`;
+      }
+      else {
+        this.extModules[extName] = extModule;
+      }
+
+      const extHelper = new ClientExtensionHelper(extName, this.socket);
+      /* register APIs to extension helper. */
+      this.extHelpers[extName] = extHelper;
+        
+      this.extObjects[extName] = new this.extModules[extName].default();
+
+      const moduleAPIs = extModule.default.apis;
+      for (const apiName in moduleAPIs) {
+        const methodName = moduleAPIs[apiName];
+        extHelper.registerClientAPI(apiName, this.extObjects[extName][methodName]);
+      }
+
+      this.startExtensionClient(extName);
+    }
   }
 
   /**
@@ -40,6 +90,36 @@ class ClientExtensionManager {
    */
   async startExtensionClient(extName) {
     // TODO: Call gameStart() on each of the extensions.
+    if (extName in this.extObjects) {
+      await this.extHelpers[extName].gameStart(this.gameMap, this.gameState);
+    } else {
+      throw `Extension ${extName} not loaded`;
+    }
+  }
+
+  /**
+   * This is called when the server side calls a client extension's API.
+   */
+  async onClientAPICalled(msg) {
+    const extName = msg.extName;
+    const methodName = msg.methodName;
+    const args = msg.args;
+    // TODO: Pass it to the extension.
+    if (!extName in this.extNameList) {
+      return {
+        "status": "failed",
+        "message": "Extension name not found"
+      }
+    }
+    return await this.extHelpers[extName].onClientAPICalled(methodName, args);
+  }
+
+  /**
+   * This is called when server broadcasts something.
+   * @param {object} msg - The message from the server.
+   */
+  async onExtensionBroadcast(msg) {
+    // TODO: Pass message to extensions.
   }
 };
 

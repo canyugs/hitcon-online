@@ -8,6 +8,9 @@ import GameState from '../../common/maplib/game-state.mjs';
  * other game state.
  */
 class AllAreaBroadcaster {
+  // redis channel on which we broadcast the messages.
+  static gameStateChannel = 'gameState';
+
   /**
    * Create the all area broadcaster.
    * @constructor
@@ -19,8 +22,7 @@ class AllAreaBroadcaster {
     this.io = io;
     this.dir = dir;
     this.gameMap = gameMap;
-    // redis channel on which we broadcast the messages.
-    this.gameStateChannel = 'gameState';
+    this.gameStateChannel = AllAreaBroadcaster.gameStateChannel;
     // GameState object for storing the game state/player location.
     this.gameState = new GameState(gameMap);
   }
@@ -31,11 +33,15 @@ class AllAreaBroadcaster {
   async initialize() {
     this.dir.getRedisSub().on('message', (channel, message) => {
       if (channel === this.gameStateChannel) {
-        let loc = message;
+        let obj = message;
         if (typeof message === 'string') {
-          loc = JSON.parse(message);
+          obj = JSON.parse(message);
         }
-        this.onLocation(loc);
+        if (obj.type == 'loc') {
+          this.onLocation(obj.msg);
+        } else if (obj.type == 'extBC') {
+          this.onExtensionBroadcast(obj.msg);
+        }
       }
     });
     await this.dir.getRedisSub().subscribeAsync(this.gameStateChannel);
@@ -47,9 +53,19 @@ class AllAreaBroadcaster {
    */
   async notifyPlayerLocationChange(loc) {
     this.gameState.onLocation(loc);
+    let msg = {type: 'loc', msg: loc};
     await this.dir.getRedis().publishAsync(this.gameStateChannel,
-        JSON.stringify(loc));
+        JSON.stringify(msg));
   };
+
+  /**
+   * Broadcast a message for extension.
+   * @param {object} msg - The message.
+   */
+  async broadcastExtensionMessage(msg) {
+    await this.dir.getRedis().publishAsync(this.gameStateChannel,
+        JSON.stringify({type: 'extBC', msg: msg}));
+  }
   
   /**
    * This is called when we've a location message from redis.
@@ -60,6 +76,15 @@ class AllAreaBroadcaster {
     this.io.emit('location', loc);
   }
   
+  /**
+   * This is called when we've an extension broadcast from redis.
+   * @param {object} bc - The broadcast message.
+   */
+  onExtensionBroadcast(bc) {
+    // Broadcast the extension broadcast.
+    this.io.emit('extBC', bc);
+  }
+
   /**
    * Do a state transfer for the specified socket.
    * It'll emit a message that contains all the current state, intending
@@ -72,8 +97,8 @@ class AllAreaBroadcaster {
     // We transfer the state at this moment, but some previous 'location' might
     // still be in the pipeline, resulting in duplicated messages delivered.
     // NOTE: We might need to filter the player data.
-    let players = this.gameState.getPlayers();
-    socket.emit('stateTransfer', players);
+    let state = this.gameState.getStateTransfer();
+    socket.emit('stateTransfer', state);
   }
 
   /**

@@ -26,11 +26,12 @@ class GatewayService {
    * @param {AllAreaBroadcaster} broadcaster - The broadcaster of game state
    * and player locations.
    */
-  constructor(dir, gameMap, authServer, broadcaster) {
+  constructor(dir, gameMap, authServer, broadcaster, extMan) {
     this.dir = dir;
     this.gameMap = gameMap;
     this.authServer = authServer;
     this.broadcaster = broadcaster;
+    this.extMan = extMan;
     // A map that tracks the current connected clients.
     // key is the player ID. value is the socket.
     this.socks = {};
@@ -105,6 +106,18 @@ class GatewayService {
       this.onUserLocation(socket, location);
       // onUserLocation is async, so returns immediately.
     });
+    socket.on('callStandaloneAPI', (msg, callback) => {
+      // TODO
+      const { extName, methodName, args } = msg;
+      /*
+        Call server side extension API
+      */
+      /* Testing */
+      callback('Client is able to call standalone API');
+      socket.emit('clientAPICalled', { extName: 'helloworld', methodName: 'SayHello', args: ['OK'] }, (result) => {
+        console.log(result);
+      });
+    });
     socket.on('disconnect', (reason) => {
       this.onDisconnect(socket, reason);
       // onDisconnect is async, so returns immediately.
@@ -160,6 +173,10 @@ class GatewayService {
     }
     // Take socket off first to avoid race condition in the await below.
     delete this.socks[playerID];
+
+    let lastLocation = {playerID: playerID, removed: true};
+    await this._broadcastUserLocation(lastLocation);
+
     // Try to unregister the player.
     await this.rpcHandler.unregisterPlayer(playerID);
     console.log(`Player ${playerID} disconnected`);

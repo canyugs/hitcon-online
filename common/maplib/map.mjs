@@ -20,6 +20,41 @@ class GameMap {
     if (!this.gameMap) {
       throw 'No map json supplied with new GameMap()';
     }
+    this.dynamicCellSet = {};
+  }
+
+  /**
+   * Return a cell set in the original map.
+   * @param {string} name - The name of the cell set.
+   * @return {Object} cellset - The cell set.
+   * Return undefined if not found.
+   */
+  getOriginalCellSet() {
+    throw 'Not implemented';
+    return undefined;
+  }
+
+  /**
+   * Remove all the dynamic cell set.
+   */
+  removeAllDynamicCellSet() {
+    this.dynamicCellSet = {};
+  }
+
+  /**
+   * Set a dynamic cell set.
+   * @param {Object} cellSet - A cell set object.
+   */
+  setDynamicCellSet(cellSet) {
+    this.dynamicCellSet[cellSet.name] = cellSet;
+  }
+
+  /**
+   * Unset a dynamic cell set.
+   * @param {string} name - Name of the cell set.
+   */
+  unsetDynamicCellSet(name) {
+    delete this.dynamicCellSet[name];
   }
 
   /**
@@ -100,7 +135,21 @@ Sample format for the map:
   "startY": 0,
   "width": 3,
   "height": 2
+  "cellSet": [
+    {
+      name: "meeting01",
+      priority: 1,
+      cells: [
+        { x: 5, y: 6, w: 3, h: 3 },
+        { x: 1, y: 2 }
+      ],
+      layers: [
+        {"meeting": "example01"},
+      ],
+    }
+  ]
 }
+TODO: Add more elaborate documentation on what cellSet is.
 */
 
 /*
