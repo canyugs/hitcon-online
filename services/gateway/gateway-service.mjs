@@ -186,55 +186,36 @@ class GatewayService {
     // TODO: Check if movement is legal.
     let mapShift = {x: 6 , y: 3};
     let mapSize = this.gameMap.getMapSize();
-    let lastRecord = await this.dir.getPlayerData(socket.playerID);
-    console.log(msg);
+    let lastRecord = await this.broadcaster.gameState.getPlayer(socket.playerID);
     // target position is in the map
     if(!this._borderCheck(msg,mapSize,mapShift)){
+      // restrict user position
       msg.x = lastRecord.x;
       msg.y = lastRecord.y;
       await this._broadcastUserLocation(msg);
       return;
     }
-    
 
     // near by grid check  
     if(!this._nearByGridCheck(msg,lastRecord)){
       return ;
     }
 
+    // obstacle check
+    let players = this.broadcaster.gameState.getPlayers();
+    let playerIDs = Object.keys(players);
+    let obstacle = playerIDs.find( playerID => players[playerID].x === msg.x && players[playerID].y === msg.y)
+    if(obstacle !== undefined){
+      // restrict user position
+      msg.x = lastRecord.x;
+      msg.y = lastRecord.y;
+      await this._broadcastUserLocation(msg);
+      return;
+    }
     
-    // not implement yet
-    //await this.dir.setPlayerData(socket.playerID,msg);
+    
     await this._broadcastUserLocation(msg);
-    
     return;
-    /*
-    // todo : checking movement is ligal
-    // 取出uid 上一個位置
-    // 計算距離< 最大可移動距離
-    // 確認目標點是可以走的
-    let speed = 1; // this can be adjust later
-
-    let positionA = this.getLastPosition(uid)
-    let positionB = {x:msg.x,y:msg.y};
-    let distanceSquire = this.getDistanceSquare(positionA,positionB);
-
-    //overspeed , are you fly?
-    if(distanceSquire > speed ^ 2){
-      this.broadcastResetUser(socket,uid,positionA.x,positionA.y,positionA.facing)
-      return
-    }
-
-    //enter none empty grid
-    if(this.checkPositionEmpty(positionB)){
-      this._broadcastResetUser(socket,uid,positionA.x,positionA.y,positionA.facing)
-      return
-    }
-
-    // todo : store user location in server
-
-    //this.broadcastUserLocation(socket,msg);
-    */
   }
 
   
@@ -282,6 +263,8 @@ class GatewayService {
     } 
     return true;
   }
+
+  _
 }
 
 export default GatewayService;
