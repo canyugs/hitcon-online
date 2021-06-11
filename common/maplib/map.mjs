@@ -20,7 +20,26 @@ class GameMap {
     if (!this.gameMap) {
       throw 'No map json supplied with new GameMap()';
     }
+
     this.dynamicCellSet = {};
+    this.layerToCellSet = new Map();
+    for(let cellSet of this.gameMap.cellSet){
+      for(let layer of cellSet.layers){
+        if(!this.layerToCellSet.has(Object.keys(layer)[0])){
+          this.layerToCellSet.set(Object.keys(layer)[0], []);
+        }
+        this.layerToCellSet.get(Object.keys(layer)[0]).push({ 
+          name: cellSet.name, 
+          cells: cellSet.cells, 
+          priority: cellSet.priority, 
+          cellContent: Object.values(layer)[0],
+          dynamic: false
+        });
+      }
+    }
+    for(let k of this.layerToCellSet.keys()){
+      this.layerToCellSet.get(k).sort((first, second) => (second.priority ?? -1) - (first.priority ?? -1));
+    }
   }
 
   /**
@@ -39,6 +58,9 @@ class GameMap {
    */
   removeAllDynamicCellSet() {
     this.dynamicCellSet = {};
+    for(let k of this.layerToCellSet.keys()){
+      this.layerToCellSet.set(k, this.layerToCellSet.get(k).filter(cs => !cs.dynamic));
+    }
   }
 
   /**
@@ -47,6 +69,20 @@ class GameMap {
    */
   setDynamicCellSet(cellSet) {
     this.dynamicCellSet[cellSet.name] = cellSet;
+
+    for(let layer of cellSet.layers){
+      if(!this.layerToCellSet.has(Object.keys(layer)[0])){
+        this.layerToCellSet.set(Object.keys(layer)[0], []);
+      }
+      this.layerToCellSet.get(Object.keys(layer)[0]).push({ 
+        name: cellSet.name, 
+        cells: cellSet.cells, 
+        priority: cellSet.priority, 
+        cellContent: Object.values(layer)[0],
+        dynamic: true
+      });
+      this.layerToCellSet.get(Object.keys(layer)[0]).sort((first, second) => (second.priority ?? -1) - (first.priority ?? -1));
+    }
   }
 
   /**
@@ -54,6 +90,10 @@ class GameMap {
    * @param {string} name - Name of the cell set.
    */
   unsetDynamicCellSet(name) {
+    for(let layer of this.dynamicCellSet[name].layers){
+      this.layerToCellSet.set(Object.keys(layer)[0], this.layerToCellSet.get(Object.keys(layer)[0]).filter(cs => cs.name != name));
+    }
+    
     delete this.dynamicCellSet[name];
   }
 
@@ -77,8 +117,22 @@ class GameMap {
         y < 0 || y >= this.gameMap.height) {
       throw 'map index out of bound';
     }
-    const cell = this.gameMap[layer][y*this.gameMap.width + x];
-    return cell;
+
+    if(this.layerToCellSet.has(layer)){
+      for(let cellSet of this.layerToCellSet.get(layer)){
+        for(let cells of cellSet.cells){
+          if(x >= cells.x && x < cells.x + (cells.w ?? 1) && y >= cells.y && y < cells.y + (cells.h ?? 1)){
+            return cellSet.cellContent;
+          }
+        }
+      }
+    }
+    
+    if(layer in this.gameMap){
+      const cell = this.gameMap[layer][y*this.gameMap.width + x];
+      return cell;
+    }
+    return null;
   }
 
   /**
