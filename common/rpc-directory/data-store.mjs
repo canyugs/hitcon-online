@@ -126,7 +126,7 @@ class DataStore {
     }
     let fileContent;
     try {
-      fileContent = await readFd.read('utf-8');
+      fileContent = await readFd.readFile('utf-8');
       await readFd.close();
     } catch (e) {
       console.error('Failed to read \'' + filePath + '\'. Reason: '+e);
@@ -160,7 +160,7 @@ class DataStore {
     // Possibly trigger the save action here.
     if (this.autoFlush) {
       // We trigger it, but doesn't wait for it.
-      _flushDirtyData(dataName);
+      this._flushDirtyData(dataName);
     }
   }
   
