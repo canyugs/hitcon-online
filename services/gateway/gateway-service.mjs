@@ -241,6 +241,12 @@ class GatewayService {
    * @return {Boolean} success - true if successful.
    */
   async _broadcastUserLocation(msg) {
+    if (msg.playerID in this.socks) {
+      const playerData = this.socks[msg.playerID].playerData;
+      playerData.x = msg.x;
+      playerData.y = msg.y;
+      await this.dir.setPlayerData(msg.playerID, playerData);
+    }
     await this.broadcaster.notifyPlayerLocationChange(msg);
     return true;
   }
