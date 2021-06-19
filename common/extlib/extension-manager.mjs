@@ -13,7 +13,8 @@ const config = require('config');
 import assert from 'assert';
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
-import ExtensionHelper from './extension-helper.mjs';
+import ExtensionHelperStandalone from './extension-helper-standalone.mjs';
+import ExtensionHelperInGateway from './extension-helper-in-gateway.mjs';
 
 /**
  * This class manages the extensions, allowing callers to start an instance of
@@ -90,7 +91,8 @@ class ExtensionManager {
     // Load the classes if they are not loaded.
     await this.ensureClass(name);
 
-    this.ext[name].standaloneHelper = new ExtensionHelper(
+    // TODO: Check if already created?
+    this.ext[name].standaloneHelper = new ExtensionHelperStandalone(
         this, this.dir, this.broadcaster, name);
     await this.ext[name].standaloneHelper.asyncConstructor();
     this.ext[name].standalone = new this.ext[name].standaloneClass(
