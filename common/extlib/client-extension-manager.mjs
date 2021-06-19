@@ -90,11 +90,15 @@ class ClientExtensionManager {
    */
   async startExtensionClient(extName) {
     // TODO: Call gameStart() on each of the extensions.
-    if (extName in this.extObjects) {
-      await this.extHelpers[extName].gameStart(this.gameMap, this.gameState);
-    } else {
-      throw `Extension ${extName} not loaded`;
+    if (!typeof extName === 'string') {
+      console.error('Expected extName to be string');
+      return;
     }
+    if (!extName in this.extObjects) {
+      console.error(`Extension ${extName} not loaded`);
+      return;
+    }
+    await this.extHelpers[extName].gameStart(this.gameMap, this.gameState);
   }
 
   /**
@@ -105,6 +109,18 @@ class ClientExtensionManager {
     const methodName = msg.methodName;
     const args = msg.args;
     // TODO: Pass it to the extension.
+    if (!typeof extName === 'string') {
+      return {
+        "status": "failed",
+        "message": "Expected extName to be string"
+      }
+    }
+    if (!typeof methodName === 'string') {
+      return {
+        "status": "failed",
+        "message": "Expected methodName to be string"
+      }
+    }
     if (!extName in this.extNameList) {
       return {
         "status": "failed",
@@ -120,6 +136,28 @@ class ClientExtensionManager {
    */
   async onExtensionBroadcast(msg) {
     // TODO: Pass message to extensions.
+    const extName = msg.extName;
+    if (!typeof extName === 'string') {
+      return {
+        "status": "failed",
+        "message": "Expected extName to be string"
+      }
+    }
+    if (!extName in this.extNameList) {
+      return {
+        "status": "failed",
+        "message": "Extension name not found"
+      }
+    }
+
+    const onExtBc = this.extObjects[extName].onExtensionBroadcast;
+    if (!typeof onExtBc === 'function') {
+      return {
+        "status": "failed",
+        "message": "Expected onExtensionBroadcast to be function"
+      }
+    }
+    await onExtBc(msg);
   }
 };
 

@@ -27,11 +27,18 @@ class Client {
     return false;
   }
 
+  onExtensionBroadcast(msg) {
+    console.log(msg);
+  }
+
   clientHello(message) {
     console.log('Client Says: Hello ', message);
     return 'Server is able to call client API';
   }
 
+  /**
+   * The below static variable is used to configure the api functions that you want to expose to the client
+   */
   static apis = {
     "SayHello": "clientHello",
   };
