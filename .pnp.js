@@ -43,6 +43,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         "reference": "workspace:extensions/helloworld"
       },
       {
+        "name": "hitcon-online-jitsi",
+        "reference": "workspace:extensions/jitsi"
+      },
+      {
         "name": "hitcon-online-gateway",
         "reference": "workspace:services/gateway"
       },
@@ -64,6 +68,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
       ["hitcon-online-game-client", ["workspace:sites/game-client"]],
       ["hitcon-online-gateway", ["workspace:services/gateway"]],
       ["hitcon-online-helloworld", ["workspace:extensions/helloworld"]],
+      ["hitcon-online-jitsi", ["workspace:extensions/jitsi"]],
       ["hitcon-online-main-server", ["workspace:services/main"]],
       ["hitcon-online-maplib", ["workspace:common/maplib"]],
       ["hitcon-online-rpc-directory", ["workspace:common/rpc-directory"]]
@@ -537,6 +542,25 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD",
         }]
       ]],
+      ["axios", [
+        ["npm:0.21.1", {
+          "packageLocation": "./.yarn/cache/axios-npm-0.21.1-d192f6b3b3-864fb7b5d0.zip/node_modules/axios/",
+          "packageDependencies": [
+            ["axios", "npm:0.21.1"],
+            ["follow-redirects", "virtual:d192f6b3b31cd5d11a443145a3883a70c04cbd7c813c53085dbaf50263735f1162f10fdbddd53c24e162ec3bc37b90966413084323739b7cf942b8bfb4da8831#npm:1.14.1"]
+          ],
+          "linkType": "HARD",
+        }]
+      ]],
+      ["backo2", [
+        ["npm:1.0.2", {
+          "packageLocation": "./.yarn/cache/backo2-npm-1.0.2-e933aab18a-72f19a0fd2.zip/node_modules/backo2/",
+          "packageDependencies": [
+            ["backo2", "npm:1.0.2"]
+          ],
+          "linkType": "HARD",
+        }]
+      ]],
       ["balanced-match", [
         ["npm:1.0.2", {
           "packageLocation": "./.yarn/cache/balanced-match-npm-1.0.2-a53c126459-690643f300.zip/node_modules/balanced-match/",
@@ -993,7 +1017,25 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["cors", "npm:2.8.5"],
             ["debug", "virtual:901e1408cc8bfef5550e648cc3ee4f1ec6e307e3f5baab3ad60f0ba461a3df0a2fb4207ed57f6ec68edeacbb88063dcc84f3c35bb45638ba421a021eb350b42b#npm:4.3.2"],
             ["engine.io-parser", "npm:4.0.2"],
-            ["ws", "virtual:c14adf15d7d476642f4a4f4d56c2cb76950f9580fa5968c25b3ac748c9ec032d47dc1ea756d3236d3f635c5358fd3deb2d83176b2e97edb2cddfb9970419d136#npm:7.4.5"]
+            ["ws", "virtual:35188532add38f6c3fc5c502180a771d8e12e3e996d7adb7777cc8fb2a3f61f2493e0595ea8f3eaf7e2a07bdfaf247018090843133cfac4564373b8ea390ac90#npm:7.4.5"]
+          ],
+          "linkType": "HARD",
+        }]
+      ]],
+      ["engine.io-client", [
+        ["npm:5.1.1", {
+          "packageLocation": "./.yarn/cache/engine.io-client-npm-5.1.1-35188532ad-4d918ab302.zip/node_modules/engine.io-client/",
+          "packageDependencies": [
+            ["engine.io-client", "npm:5.1.1"],
+            ["base64-arraybuffer", "npm:0.1.4"],
+            ["component-emitter", "npm:1.3.0"],
+            ["debug", "virtual:901e1408cc8bfef5550e648cc3ee4f1ec6e307e3f5baab3ad60f0ba461a3df0a2fb4207ed57f6ec68edeacbb88063dcc84f3c35bb45638ba421a021eb350b42b#npm:4.3.2"],
+            ["engine.io-parser", "npm:4.0.2"],
+            ["has-cors", "npm:1.1.0"],
+            ["parseqs", "npm:0.0.6"],
+            ["parseuri", "npm:0.0.6"],
+            ["ws", "virtual:35188532add38f6c3fc5c502180a771d8e12e3e996d7adb7777cc8fb2a3f61f2493e0595ea8f3eaf7e2a07bdfaf247018090843133cfac4564373b8ea390ac90#npm:7.4.5"],
+            ["yeast", "npm:0.1.2"]
           ],
           "linkType": "HARD",
         }]
@@ -1484,6 +1526,26 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD",
         }]
       ]],
+      ["follow-redirects", [
+        ["npm:1.14.1", {
+          "packageLocation": "./.yarn/cache/follow-redirects-npm-1.14.1-e6bdc0f8e5-761a186996.zip/node_modules/follow-redirects/",
+          "packageDependencies": [
+            ["follow-redirects", "npm:1.14.1"]
+          ],
+          "linkType": "SOFT",
+        }],
+        ["virtual:d192f6b3b31cd5d11a443145a3883a70c04cbd7c813c53085dbaf50263735f1162f10fdbddd53c24e162ec3bc37b90966413084323739b7cf942b8bfb4da8831#npm:1.14.1", {
+          "packageLocation": "./.yarn/$$virtual/follow-redirects-virtual-0c4ea90a75/0/cache/follow-redirects-npm-1.14.1-e6bdc0f8e5-761a186996.zip/node_modules/follow-redirects/",
+          "packageDependencies": [
+            ["follow-redirects", "virtual:d192f6b3b31cd5d11a443145a3883a70c04cbd7c813c53085dbaf50263735f1162f10fdbddd53c24e162ec3bc37b90966413084323739b7cf942b8bfb4da8831#npm:1.14.1"],
+            ["debug", null]
+          ],
+          "packagePeers": [
+            "debug"
+          ],
+          "linkType": "HARD",
+        }]
+      ]],
       ["forwarded", [
         ["npm:0.1.2", {
           "packageLocation": "./.yarn/cache/forwarded-npm-0.1.2-6143c1ba42-568d862ad1.zip/node_modules/forwarded/",
@@ -1609,6 +1671,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD",
         }]
       ]],
+      ["has-cors", [
+        ["npm:1.1.0", {
+          "packageLocation": "./.yarn/cache/has-cors-npm-1.1.0-d60e35705d-c8257cbe3f.zip/node_modules/has-cors/",
+          "packageDependencies": [
+            ["has-cors", "npm:1.1.0"]
+          ],
+          "linkType": "HARD",
+        }]
+      ]],
       ["has-flag", [
         ["npm:3.0.0", {
           "packageLocation": "./.yarn/cache/has-flag-npm-3.0.0-16ac11fe05-63aade480d.zip/node_modules/has-flag/",
@@ -1672,8 +1743,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./common/extlib/",
           "packageDependencies": [
             ["hitcon-online-extlib", "workspace:common/extlib"],
+            ["axios", "npm:0.21.1"],
             ["config", "npm:3.3.6"],
-            ["dotenv", "npm:10.0.0"]
+            ["dotenv", "npm:10.0.0"],
+            ["socket.io-client", "npm:4.1.2"]
           ],
           "linkType": "SOFT",
         }]
@@ -1704,6 +1777,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./extensions/helloworld/",
           "packageDependencies": [
             ["hitcon-online-helloworld", "workspace:extensions/helloworld"]
+          ],
+          "linkType": "SOFT",
+        }]
+      ]],
+      ["hitcon-online-jitsi", [
+        ["workspace:extensions/jitsi", {
+          "packageLocation": "./extensions/jitsi/",
+          "packageDependencies": [
+            ["hitcon-online-jitsi", "workspace:extensions/jitsi"]
           ],
           "linkType": "SOFT",
         }]
@@ -2385,6 +2467,24 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD",
         }]
       ]],
+      ["parseqs", [
+        ["npm:0.0.6", {
+          "packageLocation": "./.yarn/cache/parseqs-npm-0.0.6-7d7191eb92-9e095b898b.zip/node_modules/parseqs/",
+          "packageDependencies": [
+            ["parseqs", "npm:0.0.6"]
+          ],
+          "linkType": "HARD",
+        }]
+      ]],
+      ["parseuri", [
+        ["npm:0.0.6", {
+          "packageLocation": "./.yarn/cache/parseuri-npm-0.0.6-0c11d6eb7b-ff7ad178b0.zip/node_modules/parseuri/",
+          "packageDependencies": [
+            ["parseuri", "npm:0.0.6"]
+          ],
+          "linkType": "HARD",
+        }]
+      ]],
       ["parseurl", [
         ["npm:1.3.3", {
           "packageLocation": "./.yarn/cache/parseurl-npm-1.3.3-1542397e00-52c9e86cb5.zip/node_modules/parseurl/",
@@ -2842,6 +2942,22 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD",
         }]
       ]],
+      ["socket.io-client", [
+        ["npm:4.1.2", {
+          "packageLocation": "./.yarn/cache/socket.io-client-npm-4.1.2-33b9c3b5ba-932a1eb0fe.zip/node_modules/socket.io-client/",
+          "packageDependencies": [
+            ["socket.io-client", "npm:4.1.2"],
+            ["@types/component-emitter", "npm:1.2.10"],
+            ["backo2", "npm:1.0.2"],
+            ["component-emitter", "npm:1.3.0"],
+            ["debug", "virtual:901e1408cc8bfef5550e648cc3ee4f1ec6e307e3f5baab3ad60f0ba461a3df0a2fb4207ed57f6ec68edeacbb88063dcc84f3c35bb45638ba421a021eb350b42b#npm:4.3.2"],
+            ["engine.io-client", "npm:5.1.1"],
+            ["parseuri", "npm:0.0.6"],
+            ["socket.io-parser", "npm:4.0.4"]
+          ],
+          "linkType": "HARD",
+        }]
+      ]],
       ["socket.io-parser", [
         ["npm:4.0.4", {
           "packageLocation": "./.yarn/cache/socket.io-parser-npm-4.0.4-1dfc284556-ee2ffffa30.zip/node_modules/socket.io-parser/",
@@ -3159,10 +3275,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           ],
           "linkType": "SOFT",
         }],
-        ["virtual:c14adf15d7d476642f4a4f4d56c2cb76950f9580fa5968c25b3ac748c9ec032d47dc1ea756d3236d3f635c5358fd3deb2d83176b2e97edb2cddfb9970419d136#npm:7.4.5", {
-          "packageLocation": "./.yarn/$$virtual/ws-virtual-290e903ffb/0/cache/ws-npm-7.4.5-5c28d7e14e-20731aa107.zip/node_modules/ws/",
+        ["virtual:35188532add38f6c3fc5c502180a771d8e12e3e996d7adb7777cc8fb2a3f61f2493e0595ea8f3eaf7e2a07bdfaf247018090843133cfac4564373b8ea390ac90#npm:7.4.5", {
+          "packageLocation": "./.yarn/$$virtual/ws-virtual-53e363164f/0/cache/ws-npm-7.4.5-5c28d7e14e-20731aa107.zip/node_modules/ws/",
           "packageDependencies": [
-            ["ws", "virtual:c14adf15d7d476642f4a4f4d56c2cb76950f9580fa5968c25b3ac748c9ec032d47dc1ea756d3236d3f635c5358fd3deb2d83176b2e97edb2cddfb9970419d136#npm:7.4.5"],
+            ["ws", "virtual:35188532add38f6c3fc5c502180a771d8e12e3e996d7adb7777cc8fb2a3f61f2493e0595ea8f3eaf7e2a07bdfaf247018090843133cfac4564373b8ea390ac90#npm:7.4.5"],
             ["@types/bufferutil", null],
             ["@types/utf-8-validate", null],
             ["bufferutil", null],
@@ -3192,6 +3308,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/yallist-npm-4.0.0-b493d9e907-a2960ef879.zip/node_modules/yallist/",
           "packageDependencies": [
             ["yallist", "npm:4.0.0"]
+          ],
+          "linkType": "HARD",
+        }]
+      ]],
+      ["yeast", [
+        ["npm:0.1.2", {
+          "packageLocation": "./.yarn/cache/yeast-npm-0.1.2-19a347595d-ce326a71c7.zip/node_modules/yeast/",
+          "packageDependencies": [
+            ["yeast", "npm:0.1.2"]
           ],
           "linkType": "HARD",
         }]
