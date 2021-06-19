@@ -23,6 +23,10 @@ class GameMap {
 
     this.dynamicCellSet = {};
     this.layerToCellSet = new Map();
+    // If cellSet is not in the map data, add it back.
+    if (typeof this.gameMap.cellSet === 'undefined') {
+      this.gameMap.cellSet = [];
+    }
     for(let cellSet of this.gameMap.cellSet){
       for(let layer of cellSet.layers){
         if(!this.layerToCellSet.has(Object.keys(layer)[0])){

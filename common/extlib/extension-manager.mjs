@@ -91,7 +91,7 @@ class ExtensionManager {
     await this.ensureClass(name);
 
     this.ext[name].standaloneHelper = new ExtensionHelper(
-        this, this.dir, name);
+        this, this.dir, this.broadcaster, name);
     await this.ext[name].standaloneHelper.asyncConstructor();
     this.ext[name].standalone = new this.ext[name].standaloneClass(
         this.ext[name].standaloneHelper);
