@@ -117,6 +117,64 @@ class ExtensionManager {
   }
 
   /**
+   * Create the InGateway portion of an extension.
+   * This is usually created in the initialization phase of gateway service.
+   * If there's any failure, an exception will be thrown.
+   * @param {String} name - The name of the extension.
+   * @param {RPCHandler} rpcHandler - The RPC Handler for the gateway service.
+   * @param {GatewayService) gateway - The gateway service object.
+   */
+  async createExtensionInGateway(name, rpcHandler, gateway) {
+    // Load the classes if they are not loaded.
+    await this.ensureClass(name);
+
+    // TODO: Check if already created?
+    this.ext[name].inGatewayHelper = new ExtensionHelperInGateway(
+        this, this.dir, rpcHandler, gateway, this.broadcaster, name);
+    await this.ext[name].inGatewayHelper.asyncConstructor();
+    this.ext[name].inGateway = new this.ext[name].inGatewayClass(
+        this.ext[name].inGatewayHelper);
+  }
+
+  /**
+   * Start the in gateway part of extension service for the specified
+   * extension.
+   * This is usually called in the initialization phase of gateway service.
+   * If there's any failure, an exception will be thrown.
+   * @param {String} name - The name of the extension.
+   */
+  async startExtensionInGateway(name) {
+    if (!(name in this.ext) || !('inGateway' in this.ext[name]) || typeof this.ext[name].inGateway != 'object') {
+      throw `InGateway part of Extension ${name} not created`;
+    }
+    if (typeof this.ext[name].inGateway.initialize === 'function') {
+      await this.ext[name].inGateway.initialize();
+    } else {
+      console.warn(`Extension ${name}'s InGateway part doesn't have initialize().`);
+    }
+  }
+
+  /**
+   * Create all extensions in gateway.
+   * @param {RPCHandler} rpcHandler - The RPC Handler for the gateway service.
+   * @param {GatewayService) gateway - The gateway service object.
+   */
+  async createAllInGateway(rpcHandler, gateway) {
+    for (const extName of this.listExtensions()) {
+      await this.createExtensionInGateway(extName, rpcHandler, gateway);
+    }
+  }
+
+  /**
+   * Start all extensions in gateway.
+   */
+  async startAllInGateway() {
+    for (const extName of this.listExtensions()) {
+      await this.startExtensionInGateway(extName);
+    }
+  }
+
+  /**
    * Return an array of String that is the list of extensions available.
    * @return {object} names - An array of String, each is an available
    * extension.
