@@ -46,6 +46,8 @@ class GatewayService {
     this.rpcHandler = await this.dir.registerService("gatewayServer");
     await this.rpcHandler.registerAsGateway();
     this.servers = [];
+    await this.extMan.createAllInGateway(this.rpcHandler, this);
+    await this.extMan.startAllInGateway();
   }
 
   /**

@@ -17,7 +17,13 @@ class InGateway {
    */
   constructor(helper) {
     void helper;
-    assert.fail('Not implemented');
+  }
+
+  /**
+   * This is called by gateway service to initialie the in gateway part of
+   * the extension.
+   */
+  async initialize() {
   }
 
   /**
