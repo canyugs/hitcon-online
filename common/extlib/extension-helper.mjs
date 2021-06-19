@@ -115,7 +115,8 @@ class ExtensionHelper {
 
   /**
    * Call the API of another extension.
-   * @param {String} extensionName - The name of the extension.
+   * @param {String} extensionName - The name of the extension. Leave empty
+   * for current extension.
    * @param {String} methodName - The name of the method.
    * @param {object} args - The arguments to the API.
    * @return {object} result - The result from the call.
