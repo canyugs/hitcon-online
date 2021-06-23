@@ -117,7 +117,7 @@ class ExtensionHelperBase {
    * @param {object} msg - The message.
    */
   async broadcastToAllUser(msg) {
-    msg.extName = this.extName;
+    msg.extName = this.name;
     this.broadcaster.broadcastExtensionMessage(msg);
   }
 }

@@ -114,6 +114,25 @@ class GatewayService {
       /*
         Call server side extension API
       */
+      // check extension exist
+      if(!extName in this.extMan.ext){
+        console.log('No ' + extName);
+        return;
+      }
+      // check there is standalone object
+      if(!this.extMan.ext[extName].standalone){
+        console.log('No standalone');
+        return;
+      }
+      // check the method in the extension exist
+      if (methodName in this.extMan.ext[extName].standalone){
+        this.extMan.ext[extName].standalone[methodName](args);
+      }
+      else{
+        console.log('No ' + methodName + ' in ' + extName);
+        return;
+      }
+
       /* Testing */
       callback('Client is able to call standalone API');
       socket.emit('clientAPICalled', { extName: 'helloworld', methodName: 'SayHello', args: ['OK'] }, (result) => {
