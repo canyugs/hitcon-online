@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 const mapCellSize = 32; // pixel
+const fontStyle = '12px serif';
 
 /**
  * MapRender renders the map onto the a canvas element.
@@ -145,8 +146,14 @@ class MapRenderer {
   _drawPlayers() {
     const players = this.gameState.getPlayers();
     for (const {x, y, displayChar, facing} of Object.values(players)) {
-      // TODO: Check if player is within the map's view port.
       const canvasCoordinate = this.mapToCanvasCoordinate(x, y);
+      // check if this player is out of viewport
+      if (canvasCoordinate.x < -mapCellSize ||
+          canvasCoordinate.x >= this.canvas.width ||
+          canvasCoordinate.y < -mapCellSize ||
+          canvasCoordinate.y >= this.canvas.height) {
+        continue;
+      }
       const renderInfo = this.map.graphicAsset.getCharacter(displayChar,
           facing);
       this.ctx.drawImage(
@@ -161,6 +168,18 @@ class MapRenderer {
             mapCellSize,
       );
     }
+
+    // draw displayName
+    this.ctx.save();
+    this.ctx.font = fontStyle;
+    this.ctx.textAlign = 'center';
+    this.ctx.textBaseline = 'bottom';
+    for (const {x, y, displayName} of Object.values(players)) {
+      const canvasCoordinate = this.mapToCanvasCoordinate(x + 0.5, y);
+      // there is no need for out-of-canvas check
+      this.ctx.fillText(displayName, canvasCoordinate.x, canvasCoordinate.y);
+    }
+    this.ctx.restore();
     return true;
   }
 }
