@@ -1,6 +1,7 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
+
 /**
  * The game client. This is in charge of interacting with the gateway service
  * on the server side.
@@ -10,12 +11,16 @@ class GameClient {
    * Create a game client.
    * @param {Socket} socket - A socket.io socket.
    * @param {GameState} gameState - The map state object for tracking the map
+   * @param {MapRenderer} mapRenderer
+   * @param {InputManager} inputManager
+   * @param {ClientExtensionManager} extMan
    * state.
    * @constructor
    */
-  constructor(socket, gameState, inputManager, extMan) {
+  constructor(socket, gameState, mapRenderer, inputManager, extMan) {
     this.socket = socket;
     this.gameState = gameState;
+    this.mapRenderer = mapRenderer;
     this.inputManager = inputManager;
     this.extMan = extMan;
     this.gameStarted = false;
@@ -100,6 +105,7 @@ class GameClient {
         this.extMan.notifySelfLocationUpdate(loc);
       }
     });
+    this.mapRenderer.initializeViewerPosition();
     this._initializeInputs();
   }
 

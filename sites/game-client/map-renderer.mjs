@@ -18,6 +18,7 @@ class MapRenderer {
     this.canvas = canvas;
     this.map = map;
     this.gameState = gameState;
+    this.gameClient = null; // will be initialized in this.setGameClient()
     this.ctx = canvas.getContext('2d');
     this.viewerPosition = {x: NaN, y: NaN};
 
@@ -25,8 +26,30 @@ class MapRenderer {
      * viewerPosition is the **map coordinate** of the center of canvas.
      * It is a real number, which enables smooth moving of the camera;
      */
-    this.setViewerPosition(10.5, 10.5); // only used before GameState.getPlayerLocations() is fully implemented
-    // this.viewerPosition = this.gameState.getPlayerLocations();
+    this.viewportFollow = null; // will be initialized in this.initializeViewerPosition()
+    this.gameState.registerPlayerLocationChange((loc) => {
+      if (this.viewportFollow === loc.playerID) {
+        // TODO: smoothly update viewer position
+        this.setViewerPosition(loc.x + 0.5, loc.y + 0.5);
+      }
+    });
+  }
+
+  /**
+   * Set the GameClient of MapRenderer.
+   * @param {GameClient} gameClient - The game state.
+   */
+  setGameClient(gameClient) {
+    this.gameClient = gameClient;
+  }
+
+  /**
+   * This function should be called after GameClient.onStartup()
+   */
+  initializeViewerPosition() {
+    this.viewportFollow = this.gameClient.playerInfo.playerID;
+    const {x, y} = this.gameState.getPlayer(this.viewportFollow);
+    this.setViewerPosition(x + 0.5, y + 0.5);
   }
 
   /**
@@ -150,15 +173,15 @@ class MapRenderer {
       const renderInfo = this.map.graphicAsset.getCharacter(displayChar,
           facing);
       this.ctx.drawImage(
-            renderInfo.image,
-            renderInfo.srcX,
-            renderInfo.srcY,
-            renderInfo.srcWidth,
-            renderInfo.srcHeight,
-            canvasCoordinate.x,
-            canvasCoordinate.y,
-            mapCellSize,
-            mapCellSize,
+          renderInfo.image,
+          renderInfo.srcX,
+          renderInfo.srcY,
+          renderInfo.srcWidth,
+          renderInfo.srcHeight,
+          canvasCoordinate.x,
+          canvasCoordinate.y,
+          mapCellSize,
+          mapCellSize,
       );
     }
     return true;
