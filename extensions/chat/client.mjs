@@ -14,7 +14,6 @@ class Client {
    */
   constructor(helper) {
     this.helper = helper;
-    console.assert('Not implemented');
     document.getElementById('chat_message').addEventListener('keypress', this.send_msg(this));
   }
 
