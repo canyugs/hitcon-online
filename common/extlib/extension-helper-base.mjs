@@ -80,7 +80,7 @@ class ExtensionHelperBase {
    * Whereby player is the Player object and args is an object.
    * It returns another object that is the result.
    */
-  registerPlayerAPI(methodName, callback) {
+  registerC2sAPI(methodName, callback) {
     void [methodName, callback];
     assert.fail('Not implemented');
   }
@@ -94,7 +94,7 @@ class ExtensionHelperBase {
    * @param {Number} timeout - An optional timeout in ms.
    * @return {object} result - The result from the call.
    */
-  callPlayerAPI(playerID, extensionName, methodName, args, timeout) {
+  callS2cAPI(playerID, extensionName, methodName, args, timeout) {
     void [playerID, extensionName, methodName, args, timeout];
     assert.fail('Not implemented');
   }
@@ -107,7 +107,7 @@ class ExtensionHelperBase {
    * @param {object} args - The arguments to the API.
    * @return {object} result - The result from the call.
    */
-  callExtensionAPI(extensionName, methodName, args) {
+  callS2sAPI(extensionName, methodName, args) {
     void [extensionName, methodName, args];
     assert.fail('Not implemented');
   }

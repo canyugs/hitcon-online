@@ -108,7 +108,7 @@ class GatewayService {
       this.onUserLocation(socket, location);
       // onUserLocation is async, so returns immediately.
     });
-    socket.on('callStandaloneAPI', (msg, callback) => {
+    socket.on('callC2sAPI', (msg, callback) => {
       // TODO
       const { extName, methodName, args } = msg;
       /*

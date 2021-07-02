@@ -71,11 +71,12 @@ class ClientExtensionManager {
       this.extHelpers[extName] = extHelper;
         
       this.extObjects[extName] = new this.extModules[extName].default(extHelper);
+      extHelper.setExt(this.extObjects[extName]);
 
       const moduleAPIs = extModule.default.apis;
       for (const apiName in moduleAPIs) {
         const methodName = moduleAPIs[apiName];
-        extHelper.registerClientAPI(apiName, this.extObjects[extName][methodName]);
+        extHelper.registerS2cAPI(apiName, this.extObjects[extName][methodName]);
       }
 
       this.startExtensionClient(extName);
@@ -107,7 +108,7 @@ class ClientExtensionManager {
   /**
    * This is called when the server side calls a client extension's API.
    */
-  async onClientAPICalled(msg) {
+  async onS2cAPICalled(msg) {
     const extName = msg.extName;
     const methodName = msg.methodName;
     const args = msg.args;
@@ -130,7 +131,7 @@ class ClientExtensionManager {
         "message": "Extension name not found"
       }
     }
-    return await this.extHelpers[extName].onClientAPICalled(methodName, args);
+    return await this.extHelpers[extName].onS2cAPICalled(methodName, args);
   }
 
   /**

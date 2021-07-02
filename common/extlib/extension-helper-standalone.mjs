@@ -52,7 +52,7 @@ class ExtensionHelperStandalone extends ExtensionHelperBase {
    * Whereby user is the Player object and args is an object.
    * It returns another object that is the result.
    */
-  registerExtensionAPI(methodName, callback) {
+  registerS2sAPI(methodName, callback) {
     void [methodName, callback];
     assert.fail('Not implemented');
   }
