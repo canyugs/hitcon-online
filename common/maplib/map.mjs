@@ -14,7 +14,7 @@ class GameMap {
    * @param {GraphicAsset} asset - The asset that is used with this set of map.
    * @param {Object} map - The JSON object representing the map.
    */
-   constructor(asset, map) {
+  constructor(asset, map) {
     this.graphicAsset = asset;
     this.gameMap = map;
     if (!this.gameMap) {
