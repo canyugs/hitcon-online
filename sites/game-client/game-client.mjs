@@ -71,15 +71,7 @@ class GameClient {
         this.extMan.onExtensionBroadcast(msg);
       });
       socket.on('cset', (cset) => {
-        if (cset.type == 'unset') {
-          delete this.gameState.cellSet[cset.name];
-          this.gameState.gameMap.unsetDynamicCellSet(cset.name);
-        } else if (cset.type == 'set') {
-          this.gameState.cellSet[cset.name] = cset.cellSet;
-          this.gameState.gameMap.setDynamicCellSet(cset.cellSet);
-        } else {
-          throw `Unknown cellSet update object with type ${cset.type}`;
-        }
+        this.gameState.onCellSet(cset);
       });
       socket.on('clientAPICalled', (msg, callback) => {
         let p = this.extMan.onClientAPICalled(msg);
