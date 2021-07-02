@@ -245,19 +245,6 @@ class GatewayService {
     if(!this._nearByGridCheck(msg,lastRecord)){
       return ;
     }
-
-    // // obstacle check
-    // let players = this.broadcaster.gameState.getPlayers();
-    // let playerIDs = Object.keys(players);
-    // let obstacle = playerIDs.find( playerID => players[playerID].x === msg.x && players[playerID].y === msg.y)
-    // if(obstacle !== undefined){
-    //   // restrict user position
-    //   msg.x = lastRecord.x;
-    //   msg.y = lastRecord.y;
-    //   await this._broadcastUserLocation(msg);
-    //   return;
-    // }
-
     //try occupy grid
     let ret = await this.dir.redis.setAsync(
       [`${msg.x}-${msg.y}`, 'occupied', 'NX']);
@@ -274,34 +261,7 @@ class GatewayService {
     await this.dir.redis.delAsync(`${lastRecord.x}-${lastRecord.y}`);
     await this._broadcastUserLocation(msg);
     return;
-    /*
-    // todo : checking movement is ligal
-    // 取出uid 上一個位置
-    // 計算距離< 最大可移動距離
-    // 確認目標點是可以走的
-    let speed = 1; // this can be adjust later
-
-    let positionA = this.getLastPosition(uid)
-    let positionB = {x:msg.x,y:msg.y};
-    let distanceSquire = this.getDistanceSquare(positionA,positionB);
-
-    //overspeed , are you fly?
-    if(distanceSquire > speed ^ 2){
-      this.broadcastResetUser(socket,uid,positionA.x,positionA.y,positionA.facing)
-      return
-    }
-
-    //enter none empty grid
-    if(this.checkPositionEmpty(positionB)){
-      this._broadcastResetUser(socket,uid,positionA.x,positionA.y,positionA.facing)
-
-      return
-    }
-
-    // todo : store user location in server
-
-    //this.broadcastUserLocation(socket,msg);
-    */
+   
   }
 
   
