@@ -21,7 +21,7 @@ class Client {
     return function(evt){
       if(evt.keyCode == 13){
         let id = document.getElementById('chat_message');
-        client.helper.callStandaloneAPI('broadcastMessage', {'msg': id.value}, 5000);
+        client.helper.callC2sAPI('broadcastMessage', {'msg': id.value}, 5000);
         id.value = '';
       }
     }

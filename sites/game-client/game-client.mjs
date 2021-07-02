@@ -71,7 +71,7 @@ class GameClient {
         this.extMan.onExtensionBroadcast(msg);
       });
       socket.on('clientAPICalled', (msg, callback) => {
-        let p = this.extMan.onClientAPICalled(msg);
+        let p = this.extMan.onS2cAPICalled(msg);
         p.then((result) => {
           callback(result);
         });

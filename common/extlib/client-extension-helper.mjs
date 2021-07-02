@@ -17,6 +17,13 @@ class ClientExtensionHelper {
   }
 
   /**
+   * Called by the client extension manager to set the extension object.
+   */
+  setExt(ext) {
+    this.ext = ext;
+  }
+
+  /**
    * This is called when the game starts.
    * @param {GameMap} gameMap - The GameMap object.
    * @param {GameState} gameState - The GameState object.
@@ -34,7 +41,7 @@ class ClientExtensionHelper {
    * @param {Number} timeout - An optional timeout in ms.
    * @return {object} result - The result from the call.
    */
-  async callStandaloneAPI(methodName, args, timeout) {
+  async callC2sAPI(methodName, args, timeout) {
     // TODO: Emit the corresponding event through socket in game client.
     if (!timeout) timeout = 0;
     const resultPromise = new Promise((resolve, reject) => {
@@ -49,7 +56,7 @@ class ClientExtensionHelper {
         args: args
       };
       // TODO: Handle timeout.
-      this.socket.emit('callStandaloneAPI', callArgs, (result) => {
+      this.socket.emit('callC2sAPI', callArgs, (result) => {
         // TODO: Resolve the promise and return the result.
         clearTimeout(timeoutTimer);
         resolve(result);
@@ -65,7 +72,7 @@ class ClientExtensionHelper {
    * @param {object} args - The argument to the call.
    * @return {object} result - Result from the call.
    */
-  async onClientAPICalled(methodName, args) {
+  async onS2cAPICalled(methodName, args) {
     // TODO: Forward to corresponding method in client.mjs.
     if (typeof methodName !== 'string' || !methodName in this.clientAPIs) {
       return {
@@ -74,7 +81,7 @@ class ClientExtensionHelper {
       }
     }
     const methodFunctionName = this.clientAPIs[methodName];
-    return await this.clientAPIs[methodName](...args);
+    return await this.clientAPIs[methodName].call(this.ext, ...args);
   }
 
   /**
@@ -84,7 +91,7 @@ class ClientExtensionHelper {
    * async function (args)
    * Whereby args is an object. It returns another object that is the result.
    */
-  registerClientAPI(methodName, methodFunction) {
+  registerS2cAPI(methodName, methodFunction) {
     if (typeof methodName !== 'string') {
       throw 'Api name is not a string';
     }
@@ -93,6 +100,8 @@ class ClientExtensionHelper {
     }
     if (!(methodName in this.clientAPIs)) {
       this.clientAPIs[methodName] = methodFunction;
+    } else {
+      throw `Duplicate registration of method ${methodNam}`;
     }
   }
 
