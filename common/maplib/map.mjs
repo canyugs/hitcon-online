@@ -32,13 +32,6 @@ class GameMap {
         if(!this.layerToCellSet.has(Object.keys(layer)[0])){
           this.layerToCellSet.set(Object.keys(layer)[0], []);
         }
-        this.layerToCellSet.get(Object.keys(layer)[0]).push({ 
-          name: cellSet.name, 
-          cells: cellSet.cells, 
-          priority: cellSet.priority, 
-          cellContent: Object.values(layer)[0],
-          dynamic: false
-        });
       }
     }
     for(let k of this.layerToCellSet.keys()){
