@@ -246,11 +246,23 @@ class GatewayService {
       return ;
     }
 
-    // obstacle check
-    let players = this.broadcaster.gameState.getPlayers();
-    let playerIDs = Object.keys(players);
-    let obstacle = playerIDs.find( playerID => players[playerID].x === msg.x && players[playerID].y === msg.y)
-    if(obstacle !== undefined){
+    // // obstacle check
+    // let players = this.broadcaster.gameState.getPlayers();
+    // let playerIDs = Object.keys(players);
+    // let obstacle = playerIDs.find( playerID => players[playerID].x === msg.x && players[playerID].y === msg.y)
+    // if(obstacle !== undefined){
+    //   // restrict user position
+    //   msg.x = lastRecord.x;
+    //   msg.y = lastRecord.y;
+    //   await this._broadcastUserLocation(msg);
+    //   return;
+    // }
+
+    //try occupy grid
+    let ret = await this.dir.redis.setAsync(
+      [`${msg.x}-${msg.y}`, 'occupied', 'NX']);
+    // grid has be occupied
+    if(ret === null){
       // restrict user position
       msg.x = lastRecord.x;
       msg.y = lastRecord.y;
@@ -258,6 +270,8 @@ class GatewayService {
       return;
     }
     
+    //release old grid 
+    await this.dir.redis.delAsync(`${lastRecord.x}-${lastRecord.y}`);
     await this._broadcastUserLocation(msg);
     return;
     /*
