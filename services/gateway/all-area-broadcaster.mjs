@@ -97,9 +97,13 @@ class AllAreaBroadcaster {
     // Broadcast the extension broadcast.
     this.io.emit('extBC', bc);
   }
-
+  
+  /**
+   * This is called when we've a cell set modification broadcast from redis.
+   * @param {object} cset - The cell set.
+   */
   onCellSetBroadcast(cset) {
-    // Broadcast the extension broadcast.
+    // Broadcast the cell set modification.
     this.io.emit('cset', cset);
   }
 
