@@ -14,7 +14,7 @@ class GameMap {
    * @param {GraphicAsset} asset - The asset that is used with this set of map.
    * @param {Object} map - The JSON object representing the map.
    */
-  constructor(asset, map) {
+   constructor(asset, map) {
     this.graphicAsset = asset;
     this.gameMap = map;
     if (!this.gameMap) {
@@ -32,6 +32,13 @@ class GameMap {
         if(!this.layerToCellSet.has(Object.keys(layer)[0])){
           this.layerToCellSet.set(Object.keys(layer)[0], []);
         }
+        this.layerToCellSet.get(Object.keys(layer)[0]).push({ 
+          name: cellSet.name, 
+          cells: cellSet.cells, 
+          priority: cellSet.priority, 
+          cellContent: Object.values(layer)[0],
+          dynamic: false
+        });
       }
     }
     for(let k of this.layerToCellSet.keys()){
