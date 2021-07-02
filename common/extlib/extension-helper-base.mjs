@@ -131,6 +131,14 @@ class ExtensionHelperBase {
     msg.extName = this.name;
     this.broadcaster.broadcastExtensionMessage(msg);
   }
+
+  /**
+   * Broadcast a cell set update to all clients.
+   * @param {object} cset - The cell set.
+   */
+   async broadcastCellSetUpdateToAllUser(cset) {
+    this.broadcaster.notifyPlayerCellSetChange(cset);
+  }
 }
 
 export default ExtensionHelperBase;
