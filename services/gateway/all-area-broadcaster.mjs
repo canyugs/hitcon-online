@@ -41,6 +41,8 @@ class AllAreaBroadcaster {
           this.onLocation(obj.msg);
         } else if (obj.type == 'extBC') {
           this.onExtensionBroadcast(obj.msg);
+        } else if (obj.type == 'cset') {
+          this.onCellSetBroadcast(obj.msg);
         }
       }
     });
@@ -54,6 +56,17 @@ class AllAreaBroadcaster {
   async notifyPlayerLocationChange(loc) {
     this.gameState.onLocation(loc);
     let msg = {type: 'loc', msg: loc};
+    await this.dir.getRedis().publishAsync(this.gameStateChannel,
+        JSON.stringify(msg));
+  };
+
+  /**
+   * Call this to notify player cell set change. This will send data to redis.
+   * @param {object} cset - The cell set object, see Gateway Service for doc.
+   */
+  async notifyPlayerCellSetChange(cset) {
+    this.gameState.onCellSet(cset);
+    let msg = {type: 'cset', msg: cset};
     await this.dir.getRedis().publishAsync(this.gameStateChannel,
         JSON.stringify(msg));
   };
@@ -83,6 +96,11 @@ class AllAreaBroadcaster {
   onExtensionBroadcast(bc) {
     // Broadcast the extension broadcast.
     this.io.emit('extBC', bc);
+  }
+
+  onCellSetBroadcast(cset) {
+    // Broadcast the extension broadcast.
+    this.io.emit('cset', cset);
   }
 
   /**

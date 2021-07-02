@@ -21,7 +21,7 @@ class GatewayService {
    * At the time when this is called, other services are NOT constructed yet.
    * @constructor
    * @param {Directory} dir - The RPCDirectory for calling other services.
-   * @param {Map} gameMap - The world map for this game.
+   * @param {GameMap} gameMap - The world map for this game.
    * @param {AuthServer} authServer - Auth server for verifying the token.
    * @param {AllAreaBroadcaster} broadcaster - The broadcaster of game state
    * and player locations.
