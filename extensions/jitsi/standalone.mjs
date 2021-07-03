@@ -24,16 +24,6 @@ class Standalone {
   }
 
   /**
-   * Returns true if this extension have a standalone part.
-   * If this returns false, the constructor for Standalone will not be called.
-   * Otherwise, a Standalone object is instanciated.
-   * @return {Boolean} haveStandalone - See above.
-   */
-  static haveStandalone() {
-    return false;
-  }
-
-  /**
    * Return the ejs partials for the client part of this extension.
    * @return {object} partials - An object, it could have the following:
    * inDiv - A string to the path of ejs partial for the location inDiv.

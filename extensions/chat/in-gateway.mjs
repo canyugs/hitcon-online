@@ -25,17 +25,6 @@ class InGateway {
    */
   async initialize() {
   }
-
-  /**
-   * Returns true if this extension have an in-gateway part.
-   * If this returns false, the constructor for InGateway will not be called.
-   * Otherwise, a InGateway object is instanciated for each gateway service
-   * instance launched.
-   * @return {Boolean} haveInGateway - See above.
-   */
-  static haveInGateway() {
-    return false;
-  }
 }
 
 export default InGateway;
