@@ -116,11 +116,22 @@ class Directory {
    */
   async addGatewayServiceName(name) {
     let ret = await this.getRedis().hsetAsync(['gatewayServers', name, name]);
-    if (ret !== 1) {
-      throw 'Failed to add gateway service name to redis: '+ret;
+    if (!(ret === 1)) {
+      throw `Failed to add gateway service name to redis: ${ret}`;
     }
   }
   
+  /**
+   * Add an extension service service name to redis.
+   * This is called so that we know how to reach each extension service.
+   */
+  async addExtensionServiceName(extName, serviceName) {
+    let ret = await this.getRedis().hsetAsync(['extServers', extName, serviceName]);
+    if (!(ret === 1)) {
+      throw `Failed to add extension service name to redis: ${ret}`;
+    }
+  }
+
   /**
    * Return the list of gateway service service name.
    * @param {object} arr - An array of gateway service name.
@@ -132,6 +143,22 @@ class Directory {
       result.push(p);
     }
     return result;
+  }
+
+  /**
+   * Return the service name of the extension.
+   * @param {string} extName - The name of the extension.
+   * @return {string} serviceName - Its service name. null if failed.
+   */
+  async getExtensionServiceName(extName) {
+    // TODO: Cache this because service name doesn't change throughout the
+    // current instance of server. i.e. Only restart results in name change.
+    let ret = await this.getRedis().hgetAsync(['extServers', extName]);
+    // Will get null if failed.
+    if (typeof ret != 'string' || ret === '') {
+      return null;
+    }
+    return ret;
   }
 
   /**
@@ -186,6 +213,20 @@ class Directory {
       throw `${ret} keys deleted when trying to unregister ${playerID}`;
     }
     await this.storage.unloadData(this._getPlayerDataName(playerID));
+  }
+
+  /**
+   * Return the service name of the gateway service on which the user is on.
+   * @param {string} playerID - The player's ID.
+   * @return {string} serviceName - The service name of the gateway service
+   * on which the player is on. undefined if failed.
+   */
+  async getPlayerGatewayService(playerID) {
+    let ret = await this.getRedis().getAsync([this._getPlayerKey(playerID)]);
+    if (typeof ret === 'string') {
+      return ret;
+    }
+    return undefined;
   }
 
   /**
