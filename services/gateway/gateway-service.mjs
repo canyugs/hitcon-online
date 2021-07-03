@@ -166,19 +166,25 @@ class GatewayService {
     let firstLocation = {playerID: playerID, displayName:
       socket.playerData.displayName};
     firstLocation.mapCoord = socket.playerData.mapCoord;
-    firstLocation.x = socket.playerData.x;
-    firstLocation.y = socket.playerData.y;
-    if(socket.playerData.x == -1 && socket.playerData.y == -1){
-      let set_location = -1, index = 0;
-      let spawn_point = this.gameMap.getSpawnPoint(firstLocation.mapCoord);
+    firstLocation.x = firstLocation.mapCoord.x;
+    firstLocation.y = firstLocation.mapCoord.y;
+    if (firstLocation.x === undefined && firstLocation.y === undefined) {
+      let setLocation = -1, index = 0;
+      let spawnPoint = this.gameMap.getSpawnPoint(firstLocation.mapCoord.mapName);
+      console.log(spawn_point);
       spawn_point.sort(() => Math.random() - 0.5);
-      while(set_location == -1 && index < spawn_point.length){
-        set_location = 1 ;/*set spawn point */
-        if(set_location != -1){
-          firstLocation.x = spawn_point[index].x;
-          firstLocation.y = spawn_point[index].y;
+      while (setLocation === -1 && index < spawnPoint.length) {
+        setLocation = 1; /*set spawn point */
+        if (setLocation != -1) {
+          firstLocation.x = spawnPoint[index].x;
+          firstLocation.y = spawnPoint[index].y;
         }
         index = index + 1;
+      }
+      if(setLocation === -1){
+        console.warn(`No free spawn point.`);
+        socket.disconnect();
+        return;
       }
     }
     firstLocation.facing = 'D';
