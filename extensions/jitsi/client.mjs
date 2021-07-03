@@ -85,15 +85,6 @@ class Client {
       this.updateMeeting(m);
     }
   }
-
-  /**
-   * Returns true if this extension have a browser side part.
-   * If this returns false, the constructor for Client will not be called.
-   * @return {Boolean} haveClient - See above.
-   */
-  static haveClient() {
-    return false;
-  }
 };
 
 export default Client;

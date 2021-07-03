@@ -24,17 +24,7 @@ class Standalone {
   async initialize() {
   }
 
-  /**
-   * Returns true if this extension have a standalone part.
-   * If this returns false, the constructor for Standalone will not be called.
-   * Otherwise, a Standalone object is instanciated.
-   * @return {Boolean} haveStandalone - See above.
-   */
-  static haveStandalone() {
-    return false;
-  }
-
-  broadcastMessage(arg){
+  c2s_broadcastMessage(player, arg){
     // TODO: Check whether message is command like /help
     this.helper.broadcastToAllUser(arg);
   }
