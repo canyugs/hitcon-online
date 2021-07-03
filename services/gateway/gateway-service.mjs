@@ -166,6 +166,21 @@ class GatewayService {
     let firstLocation = {playerID: playerID, displayName:
       socket.playerData.displayName};
     firstLocation.mapCoord = socket.playerData.mapCoord;
+    firstLocation.x = socket.playerData.x;
+    firstLocation.y = socket.playerData.y;
+    if(socket.playerData.x == -1 && socket.playerData.y == -1){
+      let set_location = -1, index = 0;
+      const spawn_x = this.gameMap.spawn_x;
+      const spawn_y = this.gameMap.spawn_y;
+      while(set_location == -1 && index < spawn_x.length){
+        set_location = /*set spawn point */
+        if(set_location != -1){
+          firstLocation.x = spawn_x[index];
+          firstLocation.x = spawn_y[index];
+        }
+        index = index + 1;
+      }
+    }
     firstLocation.facing = 'D';
     firstLocation.displayChar = socket.playerData.displayChar;
     await this._broadcastUserLocation(firstLocation);
