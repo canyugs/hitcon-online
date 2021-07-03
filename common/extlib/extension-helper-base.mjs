@@ -57,6 +57,7 @@ class ExtensionHelperBase {
    */
   listPlayerID() {
     assert.fail('Not implemented');
+    return [];
   }
 
   /**
@@ -67,6 +68,7 @@ class ExtensionHelperBase {
   getPlayer(playerID) {
     void playerID;
     assert.fail('Not implemented');
+    return undefined;
   }
 
   /**
