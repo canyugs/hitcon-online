@@ -229,11 +229,10 @@ class GatewayService {
     // TODO: Check if facing is valid.
     // TODO: Check if movement is legal.
 
-    let mapShift = {x: 6 , y: 3};
     let mapSize = this.gameMap.getMapSize();
     let lastRecord = await this.broadcaster.gameState.getPlayer(socket.playerID);
     // target position is in the map
-    if(!this._borderCheck(msg,mapSize,mapShift)){
+    if(!this._borderCheck(msg,mapSize)){
       // restrict user position
       msg.x = lastRecord.x;
       msg.y = lastRecord.y;
@@ -287,10 +286,10 @@ class GatewayService {
   }
 
   _borderCheck(msg,mapSize,mapShift){
-    if(msg.x > mapSize.width + mapShift.x || msg.x < mapShift.x){
+    if(msg.x > mapSize.width || msg.x < 0){
       return false;
     }
-    if(msg.y > mapSize.height + mapShift.y || msg.y < mapShift.y){
+    if(msg.y > mapSize.height || msg.y < 0){
       return false;
     }
     return true;
@@ -306,8 +305,6 @@ class GatewayService {
     } 
     return true;
   }
-
-  _
 }
 
 export default GatewayService;
