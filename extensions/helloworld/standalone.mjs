@@ -14,13 +14,19 @@ class Standalone {
    * various functionalities of the extension.
    */
   constructor(helper) {
-    void helper;
+    this.helper = helper;
   }
 
   /**
    * Initializes the extension.
    */
   async initialize() {
+  }
+
+  /**
+   * For asyncConstructor to register API automentally (test only);
+   */
+  async apiHelloword(){
   }
 
   /**

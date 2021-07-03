@@ -30,7 +30,16 @@ class ExtensionHelperStandalone extends ExtensionHelperBase {
    */
   async asyncConstructor() {
     this.rpcHandler = await this.dir.registerService(`ext_${this.name}`);
-    await super.asyncConstructor();
+    await super.asyncConstructor();    
+
+    for(const standaloneMethod of Object.getOwnPropertyNames(this.extMan.ext[this.name].standaloneClass.prototype)){
+      if(standaloneMethod.substring(0,3) === 'api'){
+        let registerApiMethodName = standaloneMethod.replace(`api`, "");
+        await this.registerExtensionAPI(registerApiMethodName, this.extMan.ext[this.name].standaloneClass.prototype[standaloneMethod]);
+      }
+    }
+
+    //todo: in-gateway API and player API also need to register automentally;
   }
 
   /**
@@ -54,7 +63,7 @@ class ExtensionHelperStandalone extends ExtensionHelperBase {
    */
   registerExtensionAPI(methodName, callback) {
     void [methodName, callback];
-    assert.fail('Not implemented');
+    // assert.fail('Not implemented');
   }
 
   /**
@@ -68,9 +77,8 @@ class ExtensionHelperStandalone extends ExtensionHelperBase {
    * write operation in the background.
    * @param {object} data - The data to store.
    */
-  storeData(data) {
-    void data;
-    assert.fail('Not implemented');
+   async storeData(data) {
+    await this.dir.storage.saveData(`ext_${this.name}`, data);
   }
 
   /**
@@ -79,9 +87,9 @@ class ExtensionHelperStandalone extends ExtensionHelperBase {
    * empty object.
    * @return {object} data - The stored data.
    */
-  loadData() {
-    assert.fail('Not implemented');
-    return {};
+   async loadData() {
+    let data = await this.dir.storage.loadData(`ext_${this.name}`);
+    return data;
   }
 }
 
