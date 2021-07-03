@@ -13,35 +13,29 @@ class Client {
    * servicing various functionalities of the extension.
    */
   constructor(helper) {
-    void helper;
-    console.assert('Not implemented');
-    this.socket = io();
+    this.helper = helper;
+    window.testCallServer1 = () => {
+      this.testCallServer1();
+    };
+    window.testCallServer2 = () => {
+      this.testCallServer2();
+    };
   }
 
-  /**
-   * Returns true if this extension have a browser side part.
-   * If this returns false, the constructor for Client will not be called.
-   * @return {Boolean} haveClient - See above.
-   */
-  static haveClient() {
-    return false;
+  async s2c_Hello(name) {
+    console.log(`Received hello from ${name}`);
+    return `Hello ${name}~~~`;
   }
 
-  onExtensionBroadcast(msg) {
-    console.log(msg);
+  async testCallServer1() {
+    const result = await this.helper.callC2sAPI('helloworld', 'trySayHello', 5000, 'client', 'server');
+    console.log(`Server said ${JSON.stringify(result)} after we called trySayHello()`);
   }
 
-  clientHello(message) {
-    console.log('Client Says: Hello ', message);
-    return 'Server is able to call client API';
+  async testCallServer2() {
+    const result = await this.helper.callC2sAPI(null, 'doMultiplyAccumulate', 5000, 3, 7, 2);
+    console.log(`doMultiplyAccumulate(3, 7, 2) = ${result}`);
   }
-
-  /**
-   * The below static variable is used to configure the api functions that you want to expose to the client
-   */
-  static apis = {
-    "SayHello": "clientHello",
-  };
 }
 
 export default Client;
