@@ -70,7 +70,7 @@ class GameClient {
         // Note: The method below is async but we ignore its promise.
         this.extMan.onExtensionBroadcast(msg);
       });
-      socket.on('clientAPICalled', (msg, callback) => {
+      socket.on('callS2cAPI', (msg, callback) => {
         let p = this.extMan.onS2cAPICalled(msg);
         p.then((result) => {
           callback(result);

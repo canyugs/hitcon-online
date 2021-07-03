@@ -15,6 +15,7 @@ const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
 import ExtensionHelperStandalone from './extension-helper-standalone.mjs';
 import ExtensionHelperInGateway from './extension-helper-in-gateway.mjs';
+import Player from './player.mjs';
 
 /**
  * This class manages the extensions, allowing callers to start an instance of
@@ -45,6 +46,14 @@ class ExtensionManager {
    * Initialize the extension manager.
    */
   async initialize() {
+  }
+
+  /**
+   * This is called by gateway service to set the rpc handler used to call
+   * standalone services.
+   */
+  setRpcHandlerFromGateway(rpcHandler) {
+    this.rpcHandler = rpcHandler;
   }
 
   /**
@@ -94,9 +103,12 @@ class ExtensionManager {
     // TODO: Check if already created?
     this.ext[name].standaloneHelper = new ExtensionHelperStandalone(
         this, this.dir, this.broadcaster, name);
-    await this.ext[name].standaloneHelper.asyncConstructor();
     this.ext[name].standalone = new this.ext[name].standaloneClass(
         this.ext[name].standaloneHelper);
+    await this.ext[name].standaloneHelper.asyncConstructor(this.ext[name].standalone);
+    if (typeof this.ext[name].standalone.initialize === 'function') {
+      await this.ext[name].standalone.initialize();
+    }
   }
 
   /**
@@ -203,6 +215,53 @@ class ExtensionManager {
         result[loc].push(path.resolve(__dirname + `/../../extensions/${name}/${p[loc]}`));
       }
     }
+    return result;
+  }
+
+  /**
+   * Return a player object for use in the extension.
+   * @param {String} playerID
+   * @return {Player} player - The player object.
+   */
+  getPlayerObj(playerID) {
+    return new Player(playerID);
+  }
+
+  /**
+   * This is called by gateway service when any C2s APIs are called.
+   * It'll either call the corresponding APIs in standalone or in-gateway,
+   * or respond to the client with a fail message.
+   * This should ONLY be called by gateway service.
+   * @param {Object} msg - The message passed from the client.
+   * @param {string} playerID - The name of the player.
+   * @return {Object} result - The result of the call.
+   */
+  async onC2sCalled(msg, playerID) {
+    const { extName, methodName, args } = msg;
+    if (!(typeof extName === 'string')) {
+      return {'error': 'extName not string'};
+    }
+    if (!(typeof methodName === 'string')) {
+      return {'error': 'methodName not string'};
+    }
+    if (!(typeof args === 'object') || !Array.isArray(args)) {
+      return {'error': 'args not array'};
+    }
+    // TODO: Try C2s in InGateway.
+    return await this.callC2sInStandalone(extName, methodName, args, playerID);
+  }
+
+  /**
+   * Call the C2s RPC API in standalone service through RPC Directory.
+   * This should ONLY be called from gateway service process.
+   */
+  async callC2sInStandalone(extName, methodName, args, playerID) {
+    const extService = await this.dir.getExtensionServiceName(extName);
+    if (typeof extService != 'string') {
+      console.error(`Service ${extName} unavailable in tryC2sInStandalone, got ${extService}`);
+      return {'error': 'Service unavailable'};
+    }
+    const result = await this.rpcHandler.callRPC(extService, 'callC2s', playerID, methodName, args);
     return result;
   }
 }

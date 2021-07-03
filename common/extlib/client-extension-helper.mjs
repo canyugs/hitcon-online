@@ -1,6 +1,10 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
+import ExtConst from './ext-const.mjs';
+
+const S2C_RPC_FUNC_PREFIX = ExtConst.S2C_RPC_FUNC_PREFIX();
+
 class ClientExtensionHelper {
   /**
    * Create the ClientExtensionHelper object.
@@ -18,9 +22,16 @@ class ClientExtensionHelper {
 
   /**
    * Called by the client extension manager to set the extension object.
+   * @param {Object} ext - The actual client extension object.
    */
   setExt(ext) {
     this.ext = ext;
+    // Automatically registers all the s2c APIs.
+    for (const propertyName of Object.getOwnPropertyNames(Object.getPrototypeOf(ext))) {
+      if (typeof ext[propertyName] === 'function' && propertyName.substr(0, S2C_RPC_FUNC_PREFIX.length) == S2C_RPC_FUNC_PREFIX) {
+        this.registerS2cAPI(propertyName.substr(S2C_RPC_FUNC_PREFIX.length), ext[propertyName]);
+      }
+    }
   }
 
   /**
@@ -36,22 +47,26 @@ class ClientExtensionHelper {
   /**
    * Call an API provided by the same extension's standalone part
    * on the server side.
+   * @param {string} extName - The name of the extension.
    * @param {string} methodName - The name of the API.
-   * @param {object} args - An object representing the argument.
    * @param {Number} timeout - An optional timeout in ms.
+   * @param {Array} args - Arguments to the call.
    * @return {object} result - The result from the call.
    */
-  async callC2sAPI(methodName, args, timeout) {
+  async callC2sAPI(extName, methodName, timeout, ...args) {
     // TODO: Emit the corresponding event through socket in game client.
     if (!timeout) timeout = 0;
+    if (typeof extName != 'string' || extName == '') {
+      extName = this.extName;
+    }
     const resultPromise = new Promise((resolve, reject) => {
       // TODO: Fill in callArgs so gateway service knows how to handle it.
       const timeoutTimer = setTimeout(() => {
-        reject(new Error('Request timeout'));
+        resolve({error: 'timeout'});
       }, timeout);
 
       let callArgs = {
-        extName: this.extName,
+        extName: extName,
         methodName: methodName,
         args: args
       };
@@ -75,13 +90,13 @@ class ClientExtensionHelper {
   async onS2cAPICalled(methodName, args) {
     // TODO: Forward to corresponding method in client.mjs.
     if (typeof methodName !== 'string' || !methodName in this.clientAPIs) {
-      return {
-        "status": "failed",
-        "message": "Api name not found"
-      }
+      return {'error': 'Api name not found'};
     }
-    const methodFunctionName = this.clientAPIs[methodName];
-    return await this.clientAPIs[methodName].call(this.ext, ...args);
+    const fn = this.clientAPIs[methodName];
+    if (typeof fn != 'function') {
+      return {'error': 'Api not function'};
+    }
+    return await fn.call(this.ext, ...args);
   }
 
   /**

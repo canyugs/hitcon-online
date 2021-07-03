@@ -73,12 +73,6 @@ class ClientExtensionManager {
       this.extObjects[extName] = new this.extModules[extName].default(extHelper);
       extHelper.setExt(this.extObjects[extName]);
 
-      const moduleAPIs = extModule.default.apis;
-      for (const apiName in moduleAPIs) {
-        const methodName = moduleAPIs[apiName];
-        extHelper.registerS2cAPI(apiName, this.extObjects[extName][methodName]);
-      }
-
       this.startExtensionClient(extName);
     }
   }
@@ -114,24 +108,23 @@ class ClientExtensionManager {
     const args = msg.args;
     // TODO: Pass it to the extension.
     if (!typeof extName === 'string') {
-      return {
-        "status": "failed",
-        "message": "Expected extName to be string"
-      }
+      return {'error': 'Expected extName to be string'};
     }
     if (!typeof methodName === 'string') {
-      return {
-        "status": "failed",
-        "message": "Expected methodName to be string"
-      }
+      return {'error': 'Expected methodName to be string'};
     }
     if (!extName in this.extNameList) {
-      return {
-        "status": "failed",
-        "message": "Extension name not found"
-      }
+      return {'error': 'Extension name not found'};
     }
-    return await this.extHelpers[extName].onS2cAPICalled(methodName, args);
+    if (!typeof args === 'object' || !Array.isArray(args)) {
+      return {'error': 'args is not array'};
+    }
+    try {
+      return await this.extHelpers[extName].onS2cAPICalled(methodName, args);
+    } catch (e) {
+      console.error(`Exception ${e} calling S2cAPI ${methodName} in ${extName}`);
+      return {'error': 'exception'};
+    }
   }
 
   /**
