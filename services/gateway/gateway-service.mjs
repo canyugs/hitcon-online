@@ -44,10 +44,34 @@ class GatewayService {
    */
   async initialize() {
     this.rpcHandler = await this.dir.registerService("gatewayServer");
+    this.extMan.setRpcHandlerFromGateway(this.rpcHandler);
     await this.rpcHandler.registerAsGateway();
+    this.rpcHandler.registerRPC('callS2c', this.callS2c.bind(this));
     this.servers = [];
     await this.extMan.createAllInGateway(this.rpcHandler, this);
     await this.extMan.startAllInGateway();
+  }
+
+  async callS2c(serviceName, playerID, extName, methodName, timeout, args) {
+    if (playerID in this.socks) {
+      const resultPromise = new Promise((resolve, reject) => {
+        const timeoutTimer = setTimeout(() => {
+          resolve({error: 'timeout'});
+        }, timeout);
+        let callArgs = {
+          extName: extName,
+          methodName: methodName,
+          args: args
+        };
+        this.socks[playerID].emit('callS2cAPI', callArgs, (result) => {
+          clearTimeout(timeoutTimer);
+          resolve(result);
+        });
+      });
+      return await resultPromise;
+    }
+
+    return {error: `Player ${playerID} doesn't exist`};
   }
 
   /**
@@ -109,34 +133,16 @@ class GatewayService {
       // onUserLocation is async, so returns immediately.
     });
     socket.on('callC2sAPI', (msg, callback) => {
-      // TODO
-      const { extName, methodName, args } = msg;
-      /*
-        Call server side extension API
-      */
-      // check extension exist
-      if(!extName in this.extMan.ext){
-        console.log('No ' + extName);
-        return;
-      }
-      // check there is standalone object
-      if(!this.extMan.ext[extName].standalone){
-        console.log('No standalone');
-        return;
-      }
-      // check the method in the extension exist
-      if (methodName in this.extMan.ext[extName].standalone){
-        this.extMan.ext[extName].standalone[methodName](args);
-      }
-      else{
-        console.log('No ' + methodName + ' in ' + extName);
-        return;
-      }
-
-      /* Testing */
-      callback('Client is able to call standalone API');
-      socket.emit('clientAPICalled', { extName: 'helloworld', methodName: 'SayHello', args: ['OK'] }, (result) => {
-        console.log(result);
+      const p = this.extMan.onC2sCalled(msg, socket.playerID);
+      p.then((msg) => {
+        if (typeof msg === 'object' && 'error' in msg && typeof msg.error === 'string') {
+          console.error(`c2s call error: ${msg.error}`);
+        }
+        callback(msg);
+      }, (reason) => {
+        console.error(`c2s call exception: ${reason}`);
+        // Full exception detailed NOT provided for security reason.
+        callback({'error': 'exception'});
       });
     });
     socket.on('disconnect', (reason) => {
