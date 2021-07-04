@@ -39,6 +39,14 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         "reference": "workspace:extensions/blank"
       },
       {
+        "name": "hitcon-online-cellsettest",
+        "reference": "workspace:extensions/cellsettest"
+      },
+      {
+        "name": "hitcon-online-chat",
+        "reference": "workspace:extensions/chat"
+      },
+      {
         "name": "hitcon-online-helloworld",
         "reference": "workspace:extensions/helloworld"
       },
@@ -64,6 +72,8 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
     "fallbackExclusionList": [
       ["hitcon-online", ["workspace:."]],
       ["hitcon-online-blank", ["workspace:extensions/blank"]],
+      ["hitcon-online-cellsettest", ["workspace:extensions/cellsettest"]],
+      ["hitcon-online-chat", ["workspace:extensions/chat"]],
       ["hitcon-online-extlib", ["workspace:common/extlib"]],
       ["hitcon-online-game-client", ["workspace:sites/game-client"]],
       ["hitcon-online-gateway", ["workspace:services/gateway"]],
@@ -1734,6 +1744,24 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./extensions/blank/",
           "packageDependencies": [
             ["hitcon-online-blank", "workspace:extensions/blank"]
+          ],
+          "linkType": "SOFT",
+        }]
+      ]],
+      ["hitcon-online-cellsettest", [
+        ["workspace:extensions/cellsettest", {
+          "packageLocation": "./extensions/cellsettest/",
+          "packageDependencies": [
+            ["hitcon-online-cellsettest", "workspace:extensions/cellsettest"]
+          ],
+          "linkType": "SOFT",
+        }]
+      ]],
+      ["hitcon-online-chat", [
+        ["workspace:extensions/chat", {
+          "packageLocation": "./extensions/chat/",
+          "packageDependencies": [
+            ["hitcon-online-chat", "workspace:extensions/chat"]
           ],
           "linkType": "SOFT",
         }]
