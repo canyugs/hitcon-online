@@ -21,7 +21,7 @@ class GatewayService {
    * At the time when this is called, other services are NOT constructed yet.
    * @constructor
    * @param {Directory} dir - The RPCDirectory for calling other services.
-   * @param {Map} gameMap - The world map for this game.
+   * @param {GameMap} gameMap - The world map for this game.
    * @param {AuthServer} authServer - Auth server for verifying the token.
    * @param {AllAreaBroadcaster} broadcaster - The broadcaster of game state
    * and player locations.
@@ -165,8 +165,7 @@ class GatewayService {
     // Synchronize the state.
     let firstLocation = {playerID: playerID, displayName:
       socket.playerData.displayName};
-    firstLocation.x = socket.playerData.x;
-    firstLocation.y = socket.playerData.y;
+    firstLocation.mapCoord = socket.playerData.mapCoord;
     firstLocation.facing = 'D';
     firstLocation.displayChar = socket.playerData.displayChar;
     await this._broadcastUserLocation(firstLocation);
@@ -189,7 +188,7 @@ class GatewayService {
   async onDisconnect(socket, reason) {
     const playerID = socket.decoded_token.sub;
     if (!(playerID in this.socks)) {
-      // This could happen in possible race condition between setting up 
+      // This could happen in possible race condition between setting up
       // on('disconnect') and when we check connection state again.
       console.error(`Player ${playerID} is non-existent when disconnected.`);
       return;
@@ -214,8 +213,7 @@ class GatewayService {
    * socket.on('location')
    * @param {Socket} socket - The socket from which this is sent.
    * @param {Object} msg - The location message. It includes the following:
-   * - x: The x coordinate
-   * - y: The y coordinate
+   * - mapCoord: The map coordinate, whose type is MapCoord.
    * - facing: One of 'U', 'D', 'L', 'R'. The direction the user is facing.
    * It'll also contain other fields that's added elsewhere.
    * - playerID: The player's ID.
@@ -228,9 +226,9 @@ class GatewayService {
     msg.displayChar = socket.playerData.displayChar;
     // TODO: Check if facing is valid.
     // TODO: Check if movement is legal.
-    
+
     await this._broadcastUserLocation(msg);
-    
+
     return;
     /*
     // todo : checking movement is ligal
@@ -270,16 +268,15 @@ class GatewayService {
   async _broadcastUserLocation(msg) {
     if (msg.playerID in this.socks) {
       const playerData = this.socks[msg.playerID].playerData;
-      playerData.x = msg.x;
-      playerData.y = msg.y;
+      playerData.mapCoord = msg.mapCoord;
       await this.dir.setPlayerData(msg.playerID, playerData);
     }
     await this.broadcaster.notifyPlayerLocationChange(msg);
     return true;
   }
 
-  async broadcastResetUser(socket , uid, x, y, facing){
-    socket.broadcast.emit("location",{uid:uid,x:x,y:y,facing:facing});
+  async broadcastResetUser(socket, uid, mapCoord, facing) {
+    socket.broadcast.emit('location', {uid, mapCoord, facing});
   }
 
   getLastPosition(uid){
@@ -295,8 +292,8 @@ class GatewayService {
     return Math.abs(a.x - b.x)^2 + Math.abs(a.y - b.y)^2
   }
 
-  checkPositionEmpty(x,y){
-    return gameMap.getCell(x,y);
+  checkPositionEmpty(mapCoord) {
+    return this.gameMap.getCell(mapCoord);
   }
 }
 

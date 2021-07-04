@@ -1,6 +1,8 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
+import {MapCoord} from './map.mjs';
+
 /**
  * GameState represents the state of the map while the game is running.
  * For example, it records where each player is, if there's any object on the
@@ -52,10 +54,11 @@ class GameState {
         // The default, wait for it to be updated later.
         this.players[playerID].displayName = playerID;
       }
-      let obj = this.players[playerID];
+      const obj = this.players[playerID];
       if ('displayName' in loc) obj.displayName = loc.displayName;
       if ('displayChar' in loc) obj.displayChar = loc.displayChar;
-      [obj.x, obj.y, obj.facing] = [loc.x, loc.y, loc.facing];
+      obj.mapCoord = MapCoord.fromObject(loc.mapCoord);
+      obj.facing = loc.facing;
     }
     for (const f of this.locationCallbacks) {
       f(loc);
@@ -67,17 +70,17 @@ class GameState {
    * game server or upper layer.
    * Usually this is called by the game client or redis client.
    * @param {object} cset - The cell set update object.
-   * It have an attribute "type", it's either set or unset.
-   * Then it have another attribute "name", the name of the cell set.
-   * Lastly, if type is set, then attribute "cellSet" is the cell set object.
+   * - attribute "type": Either "set" or "unset".
+   * - attribute "name": The name of the cell set.
+   * - attribute "cellSet": The cell set object. Must contain a "mapName" attribute.
    */
   onCellSet(cset) {
     if (cset.type == 'unset') {
       delete this.cellSet[cset.name];
-      this.gameMap.unsetDynamicCellSet(cset.name);
+      this.gameMap.unsetDynamicCellSet(cset.cellSet.mapName, cset.name);
     } else if (cset.type == 'set') {
       this.cellSet[cset.name] = cset.cellSet;
-      this.gameMap.setDynamicCellSet(cset.cellSet);
+      this.gameMap.setDynamicCellSet(cset.cellSet.mapName, cset.cellSet);
     } else {
       throw `Unknown cellSet update object with type ${cset.type}`;
     }
@@ -141,8 +144,8 @@ class GameState {
     this.players = state.players;
     this.cellSet = state.cellSet;
     this.gameMap.removeAllDynamicCellSet();
-    for (const name in this.cellSet) {
-      this.gameMap.setDynamicCellSet(this.cellSet[name]);
+    for (const cs of this.cellSet) {
+      this.gameMap.setDynamicCellSet(cs.mapName, cs);
     }
   }
 }
