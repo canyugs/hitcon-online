@@ -13,6 +13,7 @@ import { promisify } from 'util';
 
 import DataStore from './data-store.mjs'
 import MockRedis from './mock-redis.mjs'
+import {MapCoord} from '../maplib/map.mjs';
 
 const mockRedis = new MockRedis();
 
@@ -120,7 +121,7 @@ class Directory {
       throw `Failed to add gateway service name to redis: ${ret}`;
     }
   }
-  
+
   /**
    * Add an extension service service name to redis.
    * This is called so that we know how to reach each extension service.
@@ -236,7 +237,7 @@ class Directory {
   _getPlayerDataName(playerID) {
     return `p-${playerID}`;
   }
-  
+
   /**
    * Return the stored data for player.
    * @param {string} playerID - The player's ID.
@@ -249,7 +250,7 @@ class Directory {
     data = this.ensurePlayerData(playerID, data);
     return data;
   }
-  
+
   /**
    * Save the player's data.
    * @param {string} playerID - The player's ID.
@@ -284,11 +285,15 @@ class Directory {
     // passed to GraphicAssets.
     setDefaultValue(playerData, 'displayChar', 'char1');
 
+    // If the playerData is loaded from storage, convert playerData.mapCoord
+    // (which is an object) to MapCoord class.
+    if ('mapCoord' in playerData) {
+      playerData.mapCoord = MapCoord.fromObject(playerData.mapCoord);
+    }
+
     // TODO: Set them to a spawn point specified by map.json.
-    // {Number} x - Character's x coordinate.
-    setDefaultValue(playerData, 'x', 10);
-    // {Number} y - Characetr's y coordinate.
-    setDefaultValue(playerData, 'y', 10);
+    // {MapCoord} mapCoord - Character's map coordinate.
+    setDefaultValue(playerData, 'mapCoord', new MapCoord('world1', 10, 10));
 
     return playerData;
   }
