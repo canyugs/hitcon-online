@@ -81,7 +81,7 @@ class Client {
   onSelfLocationUpdated(loc) {
     const map = this.helper.getMap();
     if (typeof map === 'object') {
-      let m = map.getCell('jitsi', loc.mapCoord.x, loc.mapCoord.y);
+      let m = map.getCell(loc.mapCoord, 'jitsi');
       this.updateMeeting(m);
     }
   }
