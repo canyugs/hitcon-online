@@ -26,7 +26,7 @@ class AllAreaBroadcaster {
     // GameState object for storing the game state/player location.
     this.gameState = new GameState(gameMap);
   }
-  
+
   /**
    * Initialize the AllAreaBroadcaster.
    */
@@ -58,7 +58,7 @@ class AllAreaBroadcaster {
     let msg = {type: 'loc', msg: loc};
     await this.dir.getRedis().publishAsync(this.gameStateChannel,
         JSON.stringify(msg));
-  };
+  }
 
   /**
    * Call this to notify player cell set change. This will send data to redis.
@@ -69,7 +69,7 @@ class AllAreaBroadcaster {
     let msg = {type: 'cset', msg: cset};
     await this.dir.getRedis().publishAsync(this.gameStateChannel,
         JSON.stringify(msg));
-  };
+  }
 
   /**
    * Broadcast a message for extension.
@@ -79,7 +79,7 @@ class AllAreaBroadcaster {
     await this.dir.getRedis().publishAsync(this.gameStateChannel,
         JSON.stringify({type: 'extBC', msg: msg}));
   }
-  
+
   /**
    * This is called when we've a location message from redis.
    * @param {object} loc - The location object, see Gateway Service for doc.
@@ -88,7 +88,7 @@ class AllAreaBroadcaster {
     // Broadcast the location message.
     this.io.emit('location', loc);
   }
-  
+
   /**
    * This is called when we've an extension broadcast from redis.
    * @param {object} bc - The broadcast message.
@@ -97,7 +97,7 @@ class AllAreaBroadcaster {
     // Broadcast the extension broadcast.
     this.io.emit('extBC', bc);
   }
-  
+
   /**
    * This is called when we've a cell set modification broadcast from redis.
    * @param {object} cset - The cell set.
@@ -130,6 +130,6 @@ class AllAreaBroadcaster {
   gameState() {
     return this.gameState;
   }
-};
+}
 
 export default AllAreaBroadcaster;

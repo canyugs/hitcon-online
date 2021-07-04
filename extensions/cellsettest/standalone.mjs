@@ -35,25 +35,25 @@ class Standalone {
     return false;
   }
 
-  changeCellSet(){
-    if(!this.set){
+  changeCellSet() {
+    if (!this.set) {
       this.helper.broadcastCellSetUpdateToAllUser({
-        type: "set",
-        cellSet:{
-          "name": "testDynamic",
-          "priority": 4,
-          "cells": [
-              { "x": 1, "y": 1, "h": 18, "w": 18 }
+        type: 'set',
+        cellSet: {
+          'name': 'testDynamic',
+          'priority': 4,
+          'cells': [
+            {'x': 1, 'y': 1, 'h': 18, 'w': 18},
           ],
-          "layers": [
-              {"ground": "P"},
-          ]
-        }
+          'layers': [
+            {'ground': 'P'},
+          ],
+        },
       });
-    }else{
+    } else {
       this.helper.broadcastCellSetUpdateToAllUser({
-        type: "unset",
-        name: "testDynamic"
+        type: 'unset',
+        name: 'testDynamic',
       });
     }
     this.set = !this.set;

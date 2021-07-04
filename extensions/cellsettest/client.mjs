@@ -5,7 +5,7 @@
  * This class is the browser/client side of an extension.
  * One instance is created for each connected player.
  */
- class Client {
+class Client {
   /**
    * Create the client side of the extension.
    * @constructor
@@ -14,7 +14,7 @@
    */
   constructor(helper) {
     this.helper = helper;
-    document.getElementById('ccs').addEventListener('click', () => {this.requestChangeCellset(this)});
+    document.getElementById('ccs').addEventListener('click', () => {this.requestChangeCellset(this);});
     console.log("cellset extension loaded");
     this.socket = io();
   }
