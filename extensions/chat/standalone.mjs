@@ -3,7 +3,6 @@
 
 import assert from 'assert';
 
-
 /**
  * This represents the standalone extension service for this extension.
  */
@@ -24,9 +23,16 @@ class Standalone {
   async initialize() {
   }
 
-  c2s_broadcastMessage(player, arg){
+  async c2s_broadcastMessage(player, arg){
     // TODO: Check whether message is command like /help
-    this.helper.broadcastToAllUser(arg);
+    arg['msg_from'] = player.playerID;
+    await this.helper.broadcastToAllUser(arg);
+  }
+
+  async c2s_privateMessage(player, arg){
+    arg['msg_from'] = player.playerID;
+    await this.helper.callS2cAPI(arg.msg_to, 'chat', 'getPrivateMessage', 5000, arg);
+    await this.helper.callS2cAPI(player.playerID, 'chat', 'sendedPrivateMessage', 5000, arg);
   }
 
   /**
