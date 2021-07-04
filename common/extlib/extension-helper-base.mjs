@@ -136,7 +136,7 @@ class ExtensionHelperBase {
    * Broadcast a cell set update to all clients.
    * @param {object} cset - The cell set.
    */
-   async broadcastCellSetUpdateToAllUser(cset) {
+  async broadcastCellSetUpdateToAllUser(cset) {
     this.broadcaster.notifyPlayerCellSetChange(cset);
   }
 }
