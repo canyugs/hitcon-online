@@ -16,6 +16,7 @@ class Standalone {
    */
   constructor(helper) {
     this.helper = helper;
+    this.set = false;
   }
 
   /**
@@ -24,9 +25,38 @@ class Standalone {
   async initialize() {
   }
 
-  c2s_broadcastMessage(player, arg){
-    // TODO: Check whether message is command like /help
-    this.helper.broadcastToAllUser(arg);
+  /**
+   * Returns true if this extension have a standalone part.
+   * If this returns false, the constructor for Standalone will not be called.
+   * Otherwise, a Standalone object is instanciated.
+   * @return {Boolean} haveStandalone - See above.
+   */
+  static haveStandalone() {
+    return false;
+  }
+
+  changeCellSet(){
+    if(!this.set){
+      this.helper.broadcastCellSetUpdateToAllUser({
+        type: "set",
+        cellSet:{
+          "name": "testDynamic",
+          "priority": 4,
+          "cells": [
+              { "x": 1, "y": 1, "h": 18, "w": 18 }
+          ],
+          "layers": [
+              {"ground": "P"},
+          ]
+        }
+      });
+    }else{
+      this.helper.broadcastCellSetUpdateToAllUser({
+        type: "unset",
+        name: "testDynamic"
+      });
+    }
+    this.set = !this.set;
   }
 
   /**

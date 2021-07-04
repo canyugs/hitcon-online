@@ -31,8 +31,9 @@ class ExtensionHelperInGateway extends ExtensionHelperBase {
    * The async part of the constructor.
    * @override
    */
-  async asyncConstructor() {
-    await super.asyncConstructor();
+  async asyncConstructor(ext) {
+    this.ext = ext;
+    await super.asyncConstructor(ext);
   }
 
   /**

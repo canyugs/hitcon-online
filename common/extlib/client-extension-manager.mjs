@@ -71,12 +71,7 @@ class ClientExtensionManager {
       this.extHelpers[extName] = extHelper;
         
       this.extObjects[extName] = new this.extModules[extName].default(extHelper);
-
-      const moduleAPIs = extModule.default.apis;
-      for (const apiName in moduleAPIs) {
-        const methodName = moduleAPIs[apiName];
-        extHelper.registerClientAPI(apiName, this.extObjects[extName][methodName]);
-      }
+      extHelper.setExt(this.extObjects[extName]);
 
       this.startExtensionClient(extName);
     }
@@ -107,30 +102,29 @@ class ClientExtensionManager {
   /**
    * This is called when the server side calls a client extension's API.
    */
-  async onClientAPICalled(msg) {
+  async onS2cAPICalled(msg) {
     const extName = msg.extName;
     const methodName = msg.methodName;
     const args = msg.args;
     // TODO: Pass it to the extension.
     if (!typeof extName === 'string') {
-      return {
-        "status": "failed",
-        "message": "Expected extName to be string"
-      }
+      return {'error': 'Expected extName to be string'};
     }
     if (!typeof methodName === 'string') {
-      return {
-        "status": "failed",
-        "message": "Expected methodName to be string"
-      }
+      return {'error': 'Expected methodName to be string'};
     }
     if (!extName in this.extNameList) {
-      return {
-        "status": "failed",
-        "message": "Extension name not found"
-      }
+      return {'error': 'Extension name not found'};
     }
-    return await this.extHelpers[extName].onClientAPICalled(methodName, args);
+    if (!typeof args === 'object' || !Array.isArray(args)) {
+      return {'error': 'args is not array'};
+    }
+    try {
+      return await this.extHelpers[extName].onS2cAPICalled(methodName, args);
+    } catch (e) {
+      console.error(`Exception ${e} calling S2cAPI ${methodName} in ${extName}`);
+      return {'error': 'exception'};
+    }
   }
 
   /**

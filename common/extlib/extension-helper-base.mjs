@@ -30,9 +30,10 @@ class ExtensionHelperBase {
 
   /**
    * The async part of the constructor.
+   * @param {Extension} ext - The actual extension object.
    */
-  async asyncConstructor() {
-    // Nothing by default.
+  async asyncConstructor(ext) {
+    this.ext = ext;
   }
 
   /**
@@ -80,7 +81,7 @@ class ExtensionHelperBase {
    * Whereby player is the Player object and args is an object.
    * It returns another object that is the result.
    */
-  registerPlayerAPI(methodName, callback) {
+  registerC2sAPI(methodName, callback) {
     void [methodName, callback];
     assert.fail('Not implemented');
   }
@@ -90,26 +91,36 @@ class ExtensionHelperBase {
    * @param {String} playerID - The ID of the player to call.
    * @param {String} extensionName - Name of the extension.
    * @param {String} methodName - Name of the method.
-   * @param {object} args - The arguments.
    * @param {Number} timeout - An optional timeout in ms.
+   * @param {object} args - The arguments.
    * @return {object} result - The result from the call.
    */
-  callPlayerAPI(playerID, extensionName, methodName, args, timeout) {
-    void [playerID, extensionName, methodName, args, timeout];
-    assert.fail('Not implemented');
+  async callS2cAPI(playerID, extensionName, methodName, timeout, ...args) {
+    const playerService = await this.dir.getPlayerGatewayService(playerID);
+    const result = await this.rpcHandler.callRPC(playerService, 'callS2c', playerID, extensionName, methodName, timeout, args);
+    return result;
   }
 
   /**
    * Call the API of another extension.
-   * @param {String} extensionName - The name of the extension. Leave empty
+   * @param {String} extName - The name of the extension. Leave empty
    * for current extension.
    * @param {String} methodName - The name of the method.
    * @param {object} args - The arguments to the API.
    * @return {object} result - The result from the call.
    */
-  callExtensionAPI(extensionName, methodName, args) {
-    void [extensionName, methodName, args];
-    assert.fail('Not implemented');
+  async callS2sAPI(extName, methodName, ...args) {
+    if (typeof extName != 'string') {
+      console.error(`extName for callS2sAPI() should be a string`);
+      return {'error': 'Invalid extName'};
+    }
+    const extService = await this.dir.getExtensionServiceName(extName);
+    if (typeof extService != 'string') {
+      console.error(`Service ${extName} unavailable, got ${extService}`);
+      return {'error': 'Service unavailable'};
+    }
+    const result = await this.rpcHandler.callRPC(extService, 'callS2s', this.name, methodName, args);
+    return result;
   }
 
   /**
@@ -119,6 +130,14 @@ class ExtensionHelperBase {
   async broadcastToAllUser(msg) {
     msg.extName = this.name;
     this.broadcaster.broadcastExtensionMessage(msg);
+  }
+
+  /**
+   * Broadcast a cell set update to all clients.
+   * @param {object} cset - The cell set.
+   */
+   async broadcastCellSetUpdateToAllUser(cset) {
+    this.broadcaster.notifyPlayerCellSetChange(cset);
   }
 }
 

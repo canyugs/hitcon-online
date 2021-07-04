@@ -21,7 +21,7 @@ class Client {
     return function(evt){
       if(evt.keyCode == 13){
         let id = document.getElementById('chat_message');
-        client.helper.callStandaloneAPI('broadcastMessage', {'msg': id.value}, 5000);
+        client.helper.callC2sAPI(null, 'broadcastMessage', 5000, {'msg': id.value});
         id.value = '';
       }
     }
@@ -29,15 +29,6 @@ class Client {
 
   onExtensionBroadcast(arg){
     document.getElementById('message_history').innerHTML += '<span>' + encodeURI(arg.msg) + '</span><br>';
-  }
-
-  /**
-   * Returns true if this extension have a browser side part.
-   * If this returns false, the constructor for Client will not be called.
-   * @return {Boolean} haveClient - See above.
-   */
-  static haveClient() {
-    return false;
   }
 };
 

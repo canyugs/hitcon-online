@@ -24,22 +24,6 @@ class Standalone {
   }
 
   /**
-   * For asyncConstructor to register API automentally (test only);
-   */
-  async apiHelloword(){
-  }
-
-  /**
-   * Returns true if this extension have a standalone part.
-   * If this returns false, the constructor for Standalone will not be called.
-   * Otherwise, a Standalone object is instanciated.
-   * @return {Boolean} haveStandalone - See above.
-   */
-  static haveStandalone() {
-    return false;
-  }
-
-  /**
    * Return the ejs partials for the client part of this extension.
    * @return {object} partials - An object, it could have the following:
    * inDiv - A string to the path of ejs partial for the location inDiv.
@@ -48,14 +32,29 @@ class Standalone {
     return {inDiv: 'in-div.ejs'};
   }
 
-  serverHello() {
-    console.log('Server says: Hello World');
+  async c2s_trySayHello(player, src, dst) {
+    console.log(`Player ${player.playerID} asked to try say hello, from ${src} to ${dst}`);
+    const res = await this.helper.callS2cAPI(player.playerID, 'helloworld', 'Hello', 4000, 'The Server');
+    console.log(`Client said ${JSON.stringify(res)} after calling Hello`);
+    return 'I tried!';
   }
 
-  static apis = {
-    "SayHello": "serverHello"
+  async c2s_doMultiplyAccumulate(player, a, b, c) {
+    console.log(`${player.playerID} wanted to multiply accumulate ${a}, ${b} and ${c}`);
+    return await this.helper.callS2sAPI('helloworld', 'multiplyAccumulate', a, b, c);
   }
 
+  async s2s_multiplyAccumulate(serviceName, a, b, c) {
+    console.log(`${serviceName} asked to multiply accumulate ${a}, ${b} and ${c}`);
+    const ab = a+b;
+    const result = await this.helper.callS2sAPI(serviceName, 'multiply', ab, c);
+    return result;
+  }
+
+  async s2s_multiply(serviceName, a, b) {
+    console.log(`${serviceName} asked to multiply ${a} and ${b}`);
+    return a*b;
+  }
 }
 
 export default Standalone;
