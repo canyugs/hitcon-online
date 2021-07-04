@@ -11,7 +11,16 @@ class Player {
    * Create the player object.
    * @constructor
    */
-  constructor() {
+  constructor(playerID) {
+    this.playerID = playerID;
+  }
+
+  /**
+   * Return the player's ID.
+   * @return {string} playerID
+   */
+  getPlayerID() {
+    return this.playerID;
   }
 
   /**
@@ -67,3 +76,5 @@ class Player {
     assert.fail('Not impemented');
   }
 };
+
+export default Player;

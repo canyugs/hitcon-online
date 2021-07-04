@@ -73,8 +73,8 @@ class GameClient {
       socket.on('cset', (cset) => {
         this.gameState.onCellSet(cset);
       });
-      socket.on('clientAPICalled', (msg, callback) => {
-        let p = this.extMan.onClientAPICalled(msg);
+      socket.on('callS2cAPI', (msg, callback) => {
+        let p = this.extMan.onS2cAPICalled(msg);
         p.then((result) => {
           callback(result);
         });

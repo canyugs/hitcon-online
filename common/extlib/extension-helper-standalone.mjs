@@ -3,6 +3,7 @@
 
 import assert from 'assert';
 import ExtensionHelperBase from './extension-helper-base.mjs';
+import ExtConst from './ext-const.mjs';
 
 /**
  * One ExtensionHelper class is created for each instance of Standalone object
@@ -26,11 +27,58 @@ class ExtensionHelperStandalone extends ExtensionHelperBase {
 
   /**
    * The async part of the constructor.
+   * @param {Extension} ext - The actual extension object.
    * @override
    */
-  async asyncConstructor() {
+  async asyncConstructor(ext) {
+    this.ext = ext;
     this.rpcHandler = await this.dir.registerService(`ext_${this.name}`);
-    await super.asyncConstructor();
+    await this.rpcHandler.registerAsExtension(this.name);
+    this.rpcHandler.registerRPC('callS2s', this.onCallS2s.bind(this));
+    this.rpcHandler.registerRPC('callC2s', this.onCallC2s.bind(this));
+    await super.asyncConstructor(ext);
+  }
+
+  /**
+   * This is called when another extension wants to call s2s rpc apis.
+   */
+  async onCallS2s(serviceName, srcExtName, methodName, args) {
+    if (typeof methodName != 'string') {
+      return {'error': 'methodName not string'};
+    }
+    if (!Array.isArray(args)) {
+      return {'error': 'args is not array'};
+    }
+    const actualMethodName = ExtConst.S2S_RPC_FUNC_PREFIX() + methodName;
+    if (typeof this.ext[actualMethodName] != 'function') {
+      return {'error': 'method not found'};
+    }
+    try {
+      return this.ext[actualMethodName](srcExtName, ...args);
+    } catch (e) {
+      console.error(e);
+      console.error(`Error calling ${methodName} in ${this.name}`);
+      return {'error': 'exception'};
+    }
+  }
+
+  /**
+   * This is called when gateway service wants to call a C2s RPC API for a
+   * client.
+   */
+  async onCallC2s(serviceName, playerID, methodName, args) {
+    const actualMethodName = ExtConst.C2S_RPC_FUNC_PREFIX() + methodName;
+    if (typeof this.ext[actualMethodName] != 'function') {
+      return {'error': `Extension ${this.name} doesn't have ${methodName}`};
+    }
+    const player = this.extMan.getPlayerObj(playerID);
+    try {
+      return await this.ext[actualMethodName](player, ...args);
+    } catch (e) {
+      console.error(`Exception ${e} calling standalone[${actualMethodName}]`);
+      // Full exception detailed NOT provided for security reason.
+      return {'error': 'exception'};
+    }
   }
 
   /**
@@ -39,21 +87,6 @@ class ExtensionHelperStandalone extends ExtensionHelperBase {
    */
   registerInteraction(x, y, callback) {
     void [x, y, callback];
-    assert.fail('Not implemented');
-  }
-
-  /**
-   * Register an API for other extensions to call.
-   * This should only be called from the Standalone extension service.
-   * In-gateway part of the extension should not export any APIs.
-   * @param {String} methodName - The name of the method.
-   * @param {function} callback - The callback to execute. Its signature is:
-   * async function (args)
-   * Whereby user is the Player object and args is an object.
-   * It returns another object that is the result.
-   */
-  registerExtensionAPI(methodName, callback) {
-    void [methodName, callback];
     assert.fail('Not implemented');
   }
 

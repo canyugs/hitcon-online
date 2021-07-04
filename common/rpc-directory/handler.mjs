@@ -29,6 +29,7 @@ class Handler {
    * It's signature is:
    * async function(service, args) and it returns the result object.
    * service is the caller, args is the call arguments.
+   * Caller should bind the callback to this before calling registerRPC.
    */
   registerRPC(methodName, callback) {
     if(methodName in this.methods){
@@ -44,16 +45,22 @@ class Handler {
    * @param {Object} args - The arguments.
    * @return {Object} result - The result of the call.
    */
-  async callRPC(serviceName, methodName, args) {
+  async callRPC(serviceName, methodName, ...args) {
     void [serviceName, methodName, args];
     if(!(serviceName in this.RPCDirectory.handlers)){
-      throw 'serviceName not found.';
+      throw `Service ${serviceName} not found.`;
     }
-    if(!(serviceName in this.RPCDirectory.handlers[serviceName].methods)){
-      throw 'Method not found.';
+    if(!(methodName in this.RPCDirectory.handlers[serviceName].methods)){
+      throw `Method ${methodName} not found.`;
     }
 
-    return await this.RPCDirectory.handlers[serviceName].methods[methodName].apply(args); // now it only takes list, WIP...
+    try {
+      return await this.RPCDirectory.handlers[serviceName].methods[methodName](this.serviceName, ...args); // now it only takes list, WIP...
+    } catch (e) {
+      console.error(`Error calling rpc function ${methodName} of ${serviceName}`);
+      console.error(e);
+      return {'error': 'exception'};
+    }
   }
 
   /**
@@ -73,6 +80,15 @@ class Handler {
     await this.RPCDirectory.addGatewayServiceName(this.serviceName);
   }
 
+  /**
+   * This is called to let the handler know that this service is a standalone
+   * extension service.
+   * Should only be called by extension helper.
+   * @param {string} extName - The name of the extension.
+   */
+  async registerAsExtension(extName) {
+    await this.RPCDirectory.addExtensionServiceName(extName, this.serviceName);
+  }
   /**
    * Register a player to this service.
    * Should only be called by gateway service.
