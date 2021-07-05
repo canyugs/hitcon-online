@@ -1,67 +1,11 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
-class Modal {
-  constructor() {}
-
-  // Modal size? Modal position?
-
-  // If true, user can dismiss the modal.
-  canDismiss() {}
-  
-  showToolbarButton() {}
-
-  // Return root dom element.
-  getDOM() {}
-
-  // Unset visibility=hidden or display=none and update MainUI.
-  show() {}
-
-  // Set visibility=hidden or display=none and update MainUI.
-  dismiss() {}
-
-  // onDismiss(), onShow()
-}
-
 // enum
-class UIState {
-  static NORMAL_UI() { return 1; }
-  static MODAL_SHOWN() { return 2; }
-}
-
-// Represents an overlay
-class Overlay {
-  constructor(dom) {}
-
-  // Overlay hide/show related properties.
-  canHide() {}
-  canDismiss() {}
-  showToolbarButton() {}
-
-  /*
-  -> HIDDEN -> SHOW -+
-     |  ^-------|    |
-     +---------------+
-     V
-  DISMISSED
-  */
-
-  // HIDDEN -> SHOW
-  show();
-  
-  // SHOW -> HIDE
-  hide();
-  
-  // SHOW/HIDDEN -> DISMISS
-  dismiss();
-
-  // onDismiss(), onShow(), onHide()
-};
-
-class OverlayPosition {
-  static LEFT_BOTTOM();
-  static RIGHT();
-};
+const UIState = Object.freeze({
+  NORMAL_UI: Symbol(1),
+  MODAL_SHOWN: Symbol(2),
+});
 
 class MainUI {
   constructor() {
@@ -71,18 +15,32 @@ class MainUI {
   // Called by extension.
   showModal(modal) {}
 
-  // Return one of UIState.
+  /**
+   *  Return one of UIState.
+   */ 
   getState() {}
 
-  // position = one of OverlayPosition.
+  /**
+   *  @param {OverlayPosition} position one of OverlayPosition.
+   */
   setOverlay(position, overlay) {}
+  
+  /**
+   * set what MainView should display.
+   * @param {Overlay} overlay 
+   */
   setMainView(overlay) {}
 
-  // Toolbar buttons excluding overlay hide/show.
+  // Toolbar buttons including overlay hide/show.
   addToolbarButton()
+  removeToolbarButton()
 
-  // Show notification in notification area.
   // TODO: Stack visualization? Stack height limit?
+  /**
+   * Show notification in notification area.
+   * @param msg 
+   * @param {Number} timeout 
+   */
   showNotification(msg, timeout);
 
   // If we want to use individual overlay for meeting
@@ -91,3 +49,5 @@ class MainUI {
   // count=0 for no topbar.
   // resizeTopbarOverlay(count);
 }
+
+export default MainUI;
