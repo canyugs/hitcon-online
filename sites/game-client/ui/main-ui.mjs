@@ -21,6 +21,7 @@ class MainUI {
   getState() {}
 
   /**
+   * set Overlay position.
    *  @param {OverlayPosition} position one of OverlayPosition.
    */
   setOverlay(position, overlay) {}
