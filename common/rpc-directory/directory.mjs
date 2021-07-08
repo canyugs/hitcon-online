@@ -292,15 +292,12 @@ class Directory {
     }
 
     // TODO: Set them to a spawn point specified by map.json.
-<<<<<<< HEAD
     // {MapCoord} mapCoord - Character's map coordinate.
     setDefaultValue(playerData, 'mapCoord', new MapCoord('world1', 10, 10));
-=======
     // {Number} x - Character's x coordinate.
     setDefaultValue(playerData, 'x', -1);
     // {Number} y - Characetr's y coordinate.
     setDefaultValue(playerData, 'y', -1);
->>>>>>> Set PlayerData Default Value -1
 
     return playerData;
   }

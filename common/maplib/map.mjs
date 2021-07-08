@@ -438,6 +438,15 @@ class _SingleGameMap {
     if (tile === null) return null;
     return this.graphicAsset.getTile(layer, tile);
   }
+  /**
+   * Get Spawn Point List.
+   * @param {String} mapName
+   * @return {list} spawn point - A list of the spawn point.
+   */
+  getSpawnPoint(mapName){
+    return this._maps.get(mapName).getSpawnPoint();
+  }
+
 }
 
 export default GameMap;
