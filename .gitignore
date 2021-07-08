@@ -12,3 +12,6 @@
 .yarn/sdks/integrations.yml
 .vscode
 .vim
+
+# some runtime data
+run/small_data
