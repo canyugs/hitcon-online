@@ -19,6 +19,12 @@ class Modal {
     canDismiss() {}
     
     showToolbarButton(icon) {}
+
+    /**
+     * If the modal has ToolbarButton, it should show the modal
+     * when the button is clicked.
+    */
+    onClickToolbarButton()
   
     // Return root dom element.
     getDOM() {}
@@ -29,9 +35,17 @@ class Modal {
     /**
      *  Set display=none and update MainUI.
     */
-     dismiss() {}
-  
-    // onDismiss(), onShow()
+    dismiss() {}
+    
+    /**
+     * execute when the overlay is dismissed.
+     */
+    onDismiss()
+    
+    /**
+     * execute when the overlay is shown.
+     */
+    onShow()
 }
 
 export default Modal;

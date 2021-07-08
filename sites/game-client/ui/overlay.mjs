@@ -25,6 +25,12 @@ class Overlay {
     canDismiss() {}
     
     showToolbarButton(icon) {}
+
+    /**
+     * If the overlay has ToolbarButton, it should toggle the overlay hide/show state
+     * when the button is clicked.
+    */
+    onClickToolbarButton()
   
     /*
     -> HIDDEN -> SHOW -+
@@ -55,7 +61,20 @@ class Overlay {
      */
     dismiss();
   
-    // onDismiss(), onShow(), onHide()
+    /**
+     * execute when the overlay is dismissed.
+     */
+    onDismiss()
+
+    /**
+     * execute when the overlay is shown.
+     */
+    onShow()
+
+    /**
+     * execute when the overlay is hidden.
+     */
+    onHide()
 };
 
 export default Overlay;
