@@ -92,6 +92,7 @@ class GameMap {
   constructor(asset, maps) {
     this.graphicAsset = asset;
     this._maps = new Map();
+    this.spawn_point_list = [];
     for (const [mapName, map] of Object.entries(maps)) {
       this._maps.set(mapName, new _SingleGameMap(asset, map));
     }
@@ -188,6 +189,16 @@ class GameMap {
       if (cs) ret.set(mapName, cs);
     }
     return ret;
+  /**
+   * Get Spawn Point List.
+   * @param {MapCoord} coord - The map coordinate.
+   * @return {list} spawn point - A list of the spawn point.
+   **/
+  getSpawnPoint(coord){
+    if(this.spawn_point_list.length == 0){
+      this.spawn_point_list = this._maps.get(coord.mapName).getSpawnPoint(coord.x, coord.y);
+    }
+    return this.spawn_point_list;
   }
 
   /**
@@ -225,6 +236,8 @@ class _SingleGameMap {
     }
 
     this.dynamicCellSet = {};
+    this.spawnpointCellSet = [];
+    this.spawn_point_list = [];
     this.layerToCellSet = new Map();
     // If cellSet is not in the map data, add it back.
     if (typeof this.gameMap.cellSet === 'undefined') {
@@ -242,6 +255,9 @@ class _SingleGameMap {
           cellContent: Object.values(layer)[0],
           dynamic: false
         });
+      }
+      if(cellSet.name == "SpawnPoint"){
+        this.spawnpointCellSet = cellSet.cells;
       }
     }
     for(let k of this.layerToCellSet.keys()){
@@ -390,11 +406,21 @@ class _SingleGameMap {
   }
   /**
    * Get Spawn Point List.
-   * @param {String} mapName
+   * @param {int} movex , movey
    * @return {list} spawn point - A list of the spawn point.
    */
-  getSpawnPoint(mapName){
-    return this._maps.get(mapName).getSpawnPoint();
+  getSpawnPoint(movex, movey){
+    if(this.spawn_point_list.length == 0){
+      for(cell in this.spawnpointCellSet){
+        let w = (cell.w ?? 1), h = (cell.h ?? 1);
+        for( i in range(w)){
+          for( j in range(h)){
+            this.spawnpointCellSet.push({x: movex + cell.x + i, y:  movey + cell.y + j})
+          }
+        }
+      }
+    }
+    return this.spawn_point_list;
   }
 
 }
