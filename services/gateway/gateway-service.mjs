@@ -170,13 +170,13 @@ class GatewayService {
     firstLocation.y = socket.playerData.y;
     if(socket.playerData.x == -1 && socket.playerData.y == -1){
       let set_location = -1, index = 0;
-      const spawn_x = this.gameMap.spawn_x;
-      const spawn_y = this.gameMap.spawn_y;
-      while(set_location == -1 && index < spawn_x.length){
-        set_location = /*set spawn point */
+      let spawn_point = this.gameMap.getSpawnPoint();
+      spawn_point.sort(() => Math.random() - 0.5);
+      while(set_location == -1 && index < spawn_point.length){
+        set_location = 1 ;/*set spawn point */
         if(set_location != -1){
-          firstLocation.x = spawn_x[index];
-          firstLocation.x = spawn_y[index];
+          firstLocation.x = spawn_point[index].x;
+          firstLocation.y = spawn_point[index].y;
         }
         index = index + 1;
       }

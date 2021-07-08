@@ -152,6 +152,20 @@ class GameMap {
   getCellRenderInfo(coord, layer) {
     return this._maps.get(coord.mapName).getCellRenderInfo(coord, layer);
   }
+  /**
+   * Get Spawn Point List.
+   * @param {String} mapName
+   * @return {list} spawn point - A list of the spawn point.
+   */
+  getSpawnPoint(){
+    let spawn_point_list = [{x: 2, y: 1}, {x: 1, y: 2}, {x: 3, y: 3}];
+    return spawn_point_list;
+  }
+  /*
+  getSpawnPoint(mapName){
+    return this._maps.get(mapName).getSpawnPoint();
+  }
+  */
 }
 
 
@@ -310,6 +324,15 @@ class _SingleGameMap {
     const tile = this.getCell(coord, layer);
     return this.graphicAsset.getTile(layer, tile);
   }
+  /**
+   * Get Spawn Point List.
+   * @param {String} mapName
+   * @return {list} spawn point - A list of the spawn point.
+   */
+  getSpawnPoint(mapName){
+    return this._maps.get(mapName).getSpawnPoint();
+  }
+
 }
 
 export default GameMap;
