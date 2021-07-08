@@ -409,6 +409,7 @@ class _SingleGameMap {
    * @param {int} movex , movey
    * @return {list} spawn point - A list of the spawn point.
    */
+<<<<<<< HEAD
   getSpawnPoint(movex, movey){
     if(this.spawn_point_list.length == 0){
       for(cell in this.spawnpointCellSet){
@@ -421,6 +422,18 @@ class _SingleGameMap {
       }
     }
     return this.spawn_point_list;
+=======
+  getSpawnPoint(){
+    let spawn_point_list = [];
+    for(i in range(this.gameMap.width)){
+      for(j in range(this.gameMap.height)){
+        if(getCell({i, j}, "ground") == "P"){
+          spawn_point_list.push({x: i, y: j});
+        }
+      }
+    }
+    return spawn_point_list;
+>>>>>>> Choose spawnpoint list
   }
 
 }
