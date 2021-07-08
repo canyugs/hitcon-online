@@ -192,7 +192,7 @@ class GatewayService {
     firstLocation.y = socket.playerData.y;
     if(socket.playerData.x == -1 && socket.playerData.y == -1){
       let set_location = -1, index = 0;
-      let spawn_point = this.gameMap.getSpawnPoint();
+      let spawn_point = this.gameMap.getSpawnPoint(firstLocation.mapCoord);
       spawn_point.sort(() => Math.random() - 0.5);
       while(set_location == -1 && index < spawn_point.length){
         set_location = 1 ;/*set spawn point */
