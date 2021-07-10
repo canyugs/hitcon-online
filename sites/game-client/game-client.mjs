@@ -118,7 +118,7 @@ class GameClient {
    * Initialize the inputs for the game.
    */
   _initializeInputs() {
-    this.inputManager.onMove((direction) => {
+    this.inputManager.registerMapMove((direction) => {
       this.onDirection(direction);
     });
   }
