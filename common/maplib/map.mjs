@@ -92,7 +92,7 @@ class GameMap {
    * Remove all the dynamic cell set.
    */
   removeAllDynamicCellSet() {
-    for (const map of this._maps) {
+    for (const map of this._maps.values()) {
       map.removeAllDynamicCellSet();
     }
   }
