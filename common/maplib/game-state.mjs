@@ -144,7 +144,7 @@ class GameState {
     this.players = state.players;
     this.cellSet = state.cellSet;
     this.gameMap.removeAllDynamicCellSet();
-    for (const cs of this.cellSet) {
+    for (const cs of Object.values(this.cellSet)) {
       this.gameMap.setDynamicCellSet(cs.mapName, cs);
     }
   }
