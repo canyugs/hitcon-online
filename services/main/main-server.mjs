@@ -51,7 +51,7 @@ async function mainServer() {
   const gameMap = new GameMap(undefined, mapJSON);
   const gameState = new GameState(gameMap);
   const broadcaster = new AllAreaBroadcaster(io, rpcDirectory, gameMap);
-  const extensionManager = new ExtensionManager(rpcDirectory, broadcaster);
+  const extensionManager = new ExtensionManager(rpcDirectory, broadcaster, gameMap, gameState);
 
   await extensionManager.ensureClass('blank');
   for (const extName of extensionManager.listExtensions()) {

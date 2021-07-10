@@ -20,9 +20,11 @@ class ExtensionHelperStandalone extends ExtensionHelperBase {
    * @param {AllAreaBroadcaster} broadcaster - A broadcaster for broadcasting
    * message.
    * @param {string} name - The name of the extension.
+   * @param {GameMap} gameMap
+   * @param {GameState} gameState
    */
-  constructor(extMan, dir, broadcaster, name) {
-    super(extMan, dir, undefined, broadcaster, name);
+  constructor(extMan, dir, broadcaster, name, gameMap, gameState) {
+    super(extMan, dir, undefined, broadcaster, name, gameMap, gameState);
   }
 
   /**
