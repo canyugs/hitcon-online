@@ -8,7 +8,18 @@ const fontStyle = '12px serif';
 
 /**
  * MapRender renders the map onto the a canvas element.
- * The coordinate of canvas is shown at the end of the file.
+ * The coordinate of canvas is shown below.
+ * Be careful not to get confused with "map coordinate".
+ * format: (y, x)
+ * unit: pixel
+ *
+ *   (0,0)   (0,1)   (0,2)
+ *
+ *   (1,0)   (1,1)   (1,2)   ...
+ *
+ *   (2,0)   (2,1)   (2,2)
+ *
+ *           ...
  */
 class MapRenderer {
   /**
@@ -96,7 +107,7 @@ class MapRenderer {
   canvasToMapCoordinate(x, y) {
     const canvasCenter = {x: this.canvas.width / 2, y: this.canvas.height / 2};
     const newX = this.viewerPosition.x + (x - canvasCenter.x) / mapCellSize;
-    const newY = this.viewerPosition.y + (y - canvasCenter.y) / mapCellSize;
+    const newY = this.viewerPosition.y - (y - canvasCenter.y) / mapCellSize;
     return new MapCoord(this.viewerPosition.mapName, newX, newY);
   }
 
@@ -111,7 +122,7 @@ class MapRenderer {
     const canvasCenter = {x: this.canvas.width / 2, y: this.canvas.height / 2};
     return {
       x: Math.floor(canvasCenter.x + (x - this.viewerPosition.x) * mapCellSize),
-      y: Math.floor(canvasCenter.y + (y - this.viewerPosition.y) * mapCellSize),
+      y: Math.floor(canvasCenter.y - (y - this.viewerPosition.y) * mapCellSize),
     };
   }
 
@@ -137,12 +148,12 @@ class MapRenderer {
    * @return {Boolean} success - Return true if successful.
    */
   _drawGround() {
-    const firstCellMapCoordFloat = this.canvasToMapCoordinate(0, 0);
+    const firstCellMapCoordFloat = this.canvasToMapCoordinate(0, this.canvas.height);
     const firstCellMapCoordInt = {
       x: Math.floor(firstCellMapCoordFloat.x),
       y: Math.floor(firstCellMapCoordFloat.y),
     };
-    const lastCellMapCoordFloat = this.canvasToMapCoordinate(this.canvas.width, this.canvas.height);
+    const lastCellMapCoordFloat = this.canvasToMapCoordinate(this.canvas.width, 0);
     const lastCellMapCoordInt = {
       x: Math.floor(lastCellMapCoordFloat.x),
       y: Math.floor(lastCellMapCoordFloat.y),
@@ -163,7 +174,7 @@ class MapRenderer {
             renderInfo.srcWidth,
             renderInfo.srcHeight,
             canvasCoordinate.x,
-            canvasCoordinate.y,
+            canvasCoordinate.y - renderInfo.srcHeight,
             mapCellSize,
             mapCellSize,
         );
@@ -196,7 +207,7 @@ class MapRenderer {
           renderInfo.srcWidth,
           renderInfo.srcHeight,
           canvasCoordinate.x,
-          canvasCoordinate.y,
+          canvasCoordinate.y - renderInfo.srcHeight,
           mapCellSize,
           mapCellSize,
       );
@@ -209,7 +220,7 @@ class MapRenderer {
     this.ctx.textBaseline = 'bottom';
     for (const {mapCoord, displayName} of Object.values(players)) {
       const {x, y} = mapCoord;
-      const canvasCoordinate = this.mapToCanvasCoordinate(x + 0.5, y);
+      const canvasCoordinate = this.mapToCanvasCoordinate(new MapCoord(this.viewerPosition.mapName, x + 0.5, y + 1));
       // there is no need for out-of-canvas check
       this.ctx.fillText(displayName, canvasCoordinate.x, canvasCoordinate.y);
     }
@@ -219,20 +230,3 @@ class MapRenderer {
 }
 
 export default MapRenderer;
-
-
-/*
-Below demonstrates the coordinate of the canvas:
-Be careful not to get confused with "map coordinate".
-format: (y, x)
-unit: pixel
-
-  (0,0)   (0,1)   (0,2)
-
-  (1,0)   (1,1)   (1,2)   ...
-
-  (2,0)   (2,1)   (2,2)
-
-          ...
-
-*/

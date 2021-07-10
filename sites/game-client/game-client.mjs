@@ -131,9 +131,9 @@ class GameClient {
     console.log(`On direction ${direction}`);
     const {x, y} = this.playerInfo.mapCoord;
     if (direction == 'U') {
-      await this.moveTo(x, y-1, 'U');
+      await this.moveTo(x, y+1, 'U');
     } else if (direction == 'D') {
-      await this.moveTo(x, y+1, 'D');
+      await this.moveTo(x, y-1, 'D');
     } else if (direction == 'L') {
       await this.moveTo(x-1, y, 'L');
     } else if (direction == 'R') {
