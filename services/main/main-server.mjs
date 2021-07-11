@@ -53,25 +53,25 @@ async function mainServer() {
   // We do not have GraphicAsset on the server side.
   const gameMap = new GameMap(undefined, mapJSON);
   const gameState = new GameState(gameMap);
-  const broadcaster = new AllAreaBroadcaster(io, rpcDirectory, gameMap);
-  const extensionManager = new ExtensionManager(rpcDirectory, broadcaster, gameMap, gameState);
 
+  /* Create all services */
+  const authServer = new AuthServer(app);
+  const broadcaster = new AllAreaBroadcaster(rpcDirectory, gameMap);
+  const extensionManager = new ExtensionManager(rpcDirectory, broadcaster);
+  const gatewayService = new GatewayService(rpcDirectory, gameMap, authServer,
+    broadcaster, io, extensionManager);
+  const assetServer = new AssetServer(app, extensionManager);
   await extensionManager.ensureClass('blank');
   for (const extName of extensionManager.listExtensions()) {
     await extensionManager.createExtensionService(extName);
   }
-
-  /* Create all services */
-  const assetServer = new AssetServer(app, extensionManager);
-  const authServer = new AuthServer(app);
-  const gatewayService = new GatewayService(rpcDirectory, gameMap, authServer,
-      broadcaster, extensionManager);
 
   /* Initialize static asset server */
   await assetServer.initialize();
   /* Start static asset server */
   assetServer.run();
   await broadcaster.initialize();
+  broadcaster.registerSocketIO(io);
   await gatewayService.initialize();
   authServer.run();
   for (const extName of extensionManager.listExtensions()) {

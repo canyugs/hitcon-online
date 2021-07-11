@@ -14,15 +14,14 @@ class AllAreaBroadcaster {
   /**
    * Create the all area broadcaster.
    * @constructor
-   * @param {io} io - Socket.io object.
    * @param {Directory} dir - RPC Directory.
    * @param {GameMap} gameMap - The game map.
    */
-  constructor(io, dir, gameMap) {
-    this.io = io;
+  constructor(dir, gameMap) {
     this.dir = dir;
     this.gameMap = gameMap;
     this.gameStateChannel = AllAreaBroadcaster.gameStateChannel;
+    this.io = { emit: () => {} };
     // GameState object for storing the game state/player location.
     this.gameState = new GameState(gameMap);
   }
@@ -47,6 +46,13 @@ class AllAreaBroadcaster {
       }
     });
     await this.dir.getRedisSub().subscribeAsync(this.gameStateChannel);
+  }
+  /**
+   * registerSocketIO
+   * @param {io} io - Socket.io object.
+   */
+  registerSocketIO(io) {
+    this.io = io;
   }
 
   /**
