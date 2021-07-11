@@ -133,15 +133,15 @@ class ExtensionHelperBase {
    */
   async broadcastToAllUser(msg) {
     msg.extName = this.name;
-    this.broadcaster.broadcastExtensionMessage(msg);
+    await this.broadcaster.broadcastExtensionMessage(msg);
   }
 
   /**
    * Broadcast a cell set update to all clients.
-   * @param {object} cset - The cell set.
+   * @param {object} cset - The cell set. See GameState.onCellSet for doc.
    */
   async broadcastCellSetUpdateToAllUser(cset) {
-    this.broadcaster.notifyPlayerCellSetChange(cset);
+    await this.broadcaster.notifyPlayerCellSetChange(cset);
   }
 }
 

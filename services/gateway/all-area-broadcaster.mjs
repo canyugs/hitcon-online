@@ -64,7 +64,7 @@ class AllAreaBroadcaster {
 
   /**
    * Call this to notify player cell set change. This will send data to redis.
-   * @param {object} cset - The cell set object, see Gateway Service for doc.
+   * @param {object} cset - The cell set object, see GameState.onCellSet for doc.
    */
   async notifyPlayerCellSetChange(cset) {
     this.gameState.onCellSet(cset);
