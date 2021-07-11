@@ -1,4 +1,3 @@
-// Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
 /**
