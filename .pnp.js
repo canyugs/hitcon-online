@@ -39,6 +39,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         "reference": "workspace:extensions/blank"
       },
       {
+        "name": "hitcon-online-bombman",
+        "reference": "workspace:extensions/bombman"
+      },
+      {
         "name": "hitcon-online-cellsettest",
         "reference": "workspace:extensions/cellsettest"
       },
@@ -76,6 +80,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
     "fallbackExclusionList": [
       ["hitcon-online", ["workspace:."]],
       ["hitcon-online-blank", ["workspace:extensions/blank"]],
+      ["hitcon-online-bombman", ["workspace:extensions/bombman"]],
       ["hitcon-online-cellsettest", ["workspace:extensions/cellsettest"]],
       ["hitcon-online-chat", ["workspace:extensions/chat"]],
       ["hitcon-online-extlib", ["workspace:common/extlib"]],
@@ -1917,6 +1922,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./extensions/blank/",
           "packageDependencies": [
             ["hitcon-online-blank", "workspace:extensions/blank"]
+          ],
+          "linkType": "SOFT",
+        }]
+      ]],
+      ["hitcon-online-bombman", [
+        ["workspace:extensions/bombman", {
+          "packageLocation": "./extensions/bombman/",
+          "packageDependencies": [
+            ["hitcon-online-bombman", "workspace:extensions/bombman"]
           ],
           "linkType": "SOFT",
         }]

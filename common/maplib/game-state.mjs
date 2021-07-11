@@ -70,17 +70,19 @@ class GameState {
    * game server or upper layer.
    * Usually this is called by the game client or redis client.
    * @param {object} cset - The cell set update object.
-   * - attribute "type": Either "set" or "unset".
-   * - attribute "name": The name of the cell set.
+   * - attribute "type": Either "set" or "unset" or "update".
    * - attribute "cellSet": The cell set object. Must contain a "mapName" attribute.
    */
   onCellSet(cset) {
     if (cset.type == 'unset') {
-      delete this.cellSet[cset.name];
-      this.gameMap.unsetDynamicCellSet(cset.cellSet.mapName, cset.name);
+      delete this.cellSet[cset.cellSet.name];
+      this.gameMap.unsetDynamicCellSet(cset.cellSet.mapName, cset.cellSet.name);
     } else if (cset.type == 'set') {
-      this.cellSet[cset.name] = cset.cellSet;
+      this.cellSet[cset.cellSet.name] = cset.cellSet;
       this.gameMap.setDynamicCellSet(cset.cellSet.mapName, cset.cellSet);
+    } else if (cset.type === 'update') {
+      this.cellSet[cset.cellSet.name].cells = cset.cellSet.cells;
+      this.gameMap.updateDynamicCellSet(cset.cellSet.mapName, cset.cellSet.name, cset.cellSet.cells);
     } else {
       throw `Unknown cellSet update object with type ${cset.type}`;
     }

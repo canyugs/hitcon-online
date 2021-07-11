@@ -1462,6 +1462,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"hitcon-online-bombman@workspace:extensions/bombman":
+  version: 0.0.0-use.local
+  resolution: "hitcon-online-bombman@workspace:extensions/bombman"
+  languageName: unknown
+  linkType: soft
+
 "hitcon-online-cellsettest@workspace:extensions/cellsettest":
   version: 0.0.0-use.local
   resolution: "hitcon-online-cellsettest@workspace:extensions/cellsettest"

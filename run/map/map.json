@@ -91,6 +91,31 @@
     "startX": 0,
     "startY": 0,
     "width": 20,
-    "height": 20
+    "height": 20,
+    "cellSet": [
+      {
+        "name": "bombmanArena1",
+        "priority": 1,
+        "cells": [
+          { "x": 2, "y": 2, "w": 6, "h": 6 }
+        ],
+        "layers": [
+          { "ground": "H" },
+          { "wall": false }
+        ]
+      },
+      {
+        "name": "bombmanObstacles1",
+        "priority": 2,
+        "cells": [
+          { "x": 3, "y": 5, "w": 2, "h": 1 },
+          { "x": 6, "y": 3, "w": 1, "h": 1 }
+        ],
+        "layers": [
+          { "ground": "O" },
+          { "wall": true }
+        ]
+      }
+    ]
   }
 }
