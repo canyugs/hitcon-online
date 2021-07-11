@@ -52,6 +52,20 @@ class GatewayService {
     this.servers = [];
     await this.extMan.createAllInGateway(this.rpcHandler, this);
     await this.extMan.startAllInGateway();
+
+    // register callbacks for All Area Boardcaster
+    this.broadcaster.registerOnLocation((loc) => {
+      // Broadcast the location message.
+      this.io.emit('location', loc);
+    });
+    this.broadcaster.registerOnExtensionBroadcast((bc) => {
+      // Broadcast the extension broadcast.
+      this.io.emit('extBC', bc);
+    });
+    this.broadcaster.registerOnCellSetBroadcast((cset) => {
+      // Broadcast the cell set modification.
+      this.io.emit('cset', cset);
+    });
   }
 
   async callS2c(serviceName, playerID, extName, methodName, timeout, args) {
