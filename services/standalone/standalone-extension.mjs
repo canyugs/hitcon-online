@@ -34,11 +34,6 @@ async function standaloneExtensionServer() {
   //   console.error(err);
   // });
 
-  /* Create the http service */
-  const app = express();
-  const server = http.createServer(app);
-  const io = new Server(server);
-
   /* Create all utility classes */
   const rpcDirectory = new MultiProcessRPCDirectory("localhost:5001");
   await rpcDirectory.asyncConstruct();
@@ -48,7 +43,7 @@ async function standaloneExtensionServer() {
   const mapJSON = JSON.parse(rawMapJSON);
   // We do not have GraphicAsset on the server side.
   const gameMap = new GameMap(undefined, mapJSON);
-  const broadcaster = new AllAreaBroadcaster(io, rpcDirectory, gameMap);
+  const broadcaster = new AllAreaBroadcaster(rpcDirectory, gameMap);
   const extensionManager = new ExtensionManager(rpcDirectory, broadcaster);
 
   const extName = 'helloworld';
