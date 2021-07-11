@@ -72,9 +72,9 @@ async function mainServer() {
   await assetServer.initialize();
   /* Start static asset server */
   assetServer.run();
+
+  /* Initialize broadcaster and gateway service */
   await broadcaster.initialize();
-  broadcaster.registerSocketIO(io);
-  console.log(('gateway-service' in argv) ? argv['gateway-service'] : "gatewayServer");
   await gatewayService.initialize(('gateway-service' in argv) ? argv['gateway-service'] : "gatewayServer");
   authServer.run();
   for (const extName of extensionManager.listExtensions()) {

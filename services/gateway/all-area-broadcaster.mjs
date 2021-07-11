@@ -21,7 +21,7 @@ class AllAreaBroadcaster {
     this.dir = dir;
     this.gameMap = gameMap;
     this.gameStateChannel = AllAreaBroadcaster.gameStateChannel;
-    this.io = { emit: () => {} };
+
     // GameState object for storing the game state/player location.
     this.gameState = new GameState(gameMap);
   }
@@ -46,13 +46,6 @@ class AllAreaBroadcaster {
       }
     });
     await this.dir.getRedisSub().subscribeAsync(this.gameStateChannel);
-  }
-  /**
-   * registerSocketIO
-   * @param {io} io - Socket.io object.
-   */
-  registerSocketIO(io) {
-    this.io = io;
   }
 
   /**
@@ -87,30 +80,30 @@ class AllAreaBroadcaster {
   }
 
   /**
-   * This is called when we've a location message from redis.
-   * @param {object} loc - The location object, see Gateway Service for doc.
+   * Register onLocation function.
+   * @param {Function} callback - This is called when we've a location
+   * message from redis.
    */
-  onLocation(loc) {
-    // Broadcast the location message.
-    this.io.emit('location', loc);
+  registerOnLocation(callback) {
+    this.onLocation = callback;
   }
 
   /**
-   * This is called when we've an extension broadcast from redis.
-   * @param {object} bc - The broadcast message.
+   * Register onExtensionBroadcast function.
+   * @param {Function} callback - This is called when we've an extension
+   * broadcast from redis.
    */
-  onExtensionBroadcast(bc) {
-    // Broadcast the extension broadcast.
-    this.io.emit('extBC', bc);
+  registerOnExtensionBroadcast(callback) {
+    this.onExtensionBroadcast = callback;
   }
 
   /**
-   * This is called when we've a cell set modification broadcast from redis.
-   * @param {object} cset - The cell set.
+   * Register onCellSetBroadcast function.
+   * @param {Function} callback - This is called when we've a cell
+   * set modification broadcast from redis.
    */
-  onCellSetBroadcast(cset) {
-    // Broadcast the cell set modification.
-    this.io.emit('cset', cset);
+  registerOnCellSetBroadcast(callback) {
+    this.onCellSetBroadcast = callback;
   }
 
   /**
