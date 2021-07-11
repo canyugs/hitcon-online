@@ -229,7 +229,7 @@ class GatewayService {
    * - displayName: The name to show for this player.
    * - displayChar: The character asset to display.
    */
-    async onUserLocation(socket, msg) {
+  async onUserLocation(socket, msg) {
     msg.playerID = socket.playerID;
     msg.displayName = socket.playerData.displayName;
     msg.displayChar = socket.playerData.displayChar;
@@ -298,7 +298,7 @@ class GatewayService {
     return Math.pow(Math.abs(a.x - b.x),2) + Math.pow(Math.abs(a.y - b.y),2);
   }
 
-  _borderCheck(msg,mapSize,mapShift){
+  _borderCheck(msg,mapSize){
     if(msg.x > mapSize.width || msg.x < 0){
       return false;
     }
