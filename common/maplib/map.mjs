@@ -92,7 +92,7 @@ class GameMap {
    * Remove all the dynamic cell set.
    */
   removeAllDynamicCellSet() {
-    for (const map of this._maps.values()) {
+    for (const map of this._maps) {
       map.removeAllDynamicCellSet();
     }
   }
@@ -152,8 +152,15 @@ class GameMap {
   getCellRenderInfo(coord, layer) {
     return this._maps.get(coord.mapName).getCellRenderInfo(coord, layer);
   }
+  /**
+   * Get Spawn Point List.
+   * @param {String} mapName
+   * @return {list} spawn point - A list of the spawn point.
+   */
+  getSpawnPoint(mapName) {
+    return this._maps.get(mapName).getSpawnPoint();
+  }
 }
-
 
 /**
  * The class that represents a single map.
@@ -174,14 +181,17 @@ class _SingleGameMap {
     }
 
     this.dynamicCellSet = {};
+    //this.spawnpointCellSet = [];
+    this.spawnPointList = [];
+    this.staticCellSet = new Map();
     this.layerToCellSet = new Map();
     // If cellSet is not in the map data, add it back.
     if (typeof this.gameMap.cellSet === 'undefined') {
       this.gameMap.cellSet = [];
     }
-    for(let cellSet of this.gameMap.cellSet){
-      for(let layer of cellSet.layers){
-        if(!this.layerToCellSet.has(Object.keys(layer)[0])){
+    for (const cellSet of this.gameMap.cellSet) {
+      for (const layer of cellSet.layers) {
+        if (!this.layerToCellSet.has(Object.keys(layer)[0])) {
           this.layerToCellSet.set(Object.keys(layer)[0], []);
         }
         this.layerToCellSet.get(Object.keys(layer)[0]).push({
@@ -191,9 +201,10 @@ class _SingleGameMap {
           cellContent: Object.values(layer)[0],
           dynamic: false
         });
+        this.staticCellSet.set(cellSet.name, cellSet.cells);
       }
     }
-    for(let k of this.layerToCellSet.keys()){
+    for (const k of this.layerToCellSet.keys()) {
       this.layerToCellSet.get(k).sort((first, second) => (second.priority ?? -1) - (first.priority ?? -1));
     }
   }
@@ -225,9 +236,8 @@ class _SingleGameMap {
    */
   setDynamicCellSet(cellSet) {
     this.dynamicCellSet[cellSet.name] = cellSet;
-
-    for(let layer of cellSet.layers){
-      if(!this.layerToCellSet.has(Object.keys(layer)[0])){
+    for (const layer of cellSet.layers) {
+      if (!this.layerToCellSet.has(Object.keys(layer)[0])) {
         this.layerToCellSet.set(Object.keys(layer)[0], []);
       }
       this.layerToCellSet.get(Object.keys(layer)[0]).push({
@@ -283,8 +293,7 @@ class _SingleGameMap {
         }
       }
     }
-
-    if(layer in this.gameMap){
+    if (layer in this.gameMap) {
       const cell = this.gameMap[layer][y*this.gameMap.width + x];
       return cell;
     }
@@ -309,6 +318,36 @@ class _SingleGameMap {
   getCellRenderInfo(coord, layer) {
     const tile = this.getCell(coord, layer);
     return this.graphicAsset.getTile(layer, tile);
+  }
+
+  /**
+   * Expand Cell Set List.
+   * @param {string} cellSetName
+   * @return {list} Cell Set points - A list of cell set points.
+   */
+  expandCellSet(cellSetName) {
+    let expandList = [];
+    if(this.staticCellSet.has(cellSetName))
+    for (const cell in this.staticCellSet.get(cellSetName)) {
+      const w = (cell.w ?? 1), h = (cell.h ?? 1);
+      for (let i = 0; i < w; ++i) {
+        for (let j = 0; j < h; ++j) {
+          expandList.push({x: cell.x + i, y: cell.y + j});
+        }
+      }
+    }
+    return expandList;
+  }
+
+  /**
+   * Get Spawn Point List.
+   * @return {list} spawn point - A list of the spawn point.
+   */
+  getSpawnPoint(){
+    if (this.spawnPointList == 0) {
+      this.spawnPointList = this.expandCellSet("SpawnPoint");
+    }
+    return this.spawnPointList;
   }
 }
 
