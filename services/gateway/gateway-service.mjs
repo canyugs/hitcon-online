@@ -8,9 +8,7 @@ const require = createRequire(import.meta.url);
 import assert from 'assert';
 const {Server} = require('socket.io');
 const config = require('config');
-import { get } from 'http';
-
-
+const moveingRequestThreshold = config.get('movingRequestThreshold')
 /**
  * This class handles the connections from the client and does the most
  * processing required to service the client.
@@ -165,11 +163,13 @@ class GatewayService {
     }
 
     // Synchronize the state.
-    let firstLocation = {playerID: playerID, displayName:
-      socket.playerData.displayName};
-    firstLocation.mapCoord = socket.playerData.mapCoord;
+    let firstLocation = {playerID: playerID, 
+      displayName: socket.playerData.displayName};
+    firstLocation.x = socket.playerData.x;
+    firstLocation.y = socket.playerData.y;
     firstLocation.facing = 'D';
     firstLocation.displayChar = socket.playerData.displayChar;
+    socket.playerData.lastMovingTime = Date.now();
     await this._broadcastUserLocation(firstLocation);
     this.broadcaster.sendStateTransfer(socket);
 
@@ -230,18 +230,25 @@ class GatewayService {
     // TODO: Check if movement is legal.
 
     let mapSize = this.gameMap.getMapSize();
-    let lastRecord = await this.broadcaster.gameState.getPlayer(socket.playerID);
+    let lastMsg = { x:socket.playerData.x , y:socket.playerData.y}
+    if(lastMsg.x === undefined || lastMsg.y === undefined){
+      lastMsg.x = 0;
+      lastMsg.y = 0;
+    }
+    if(!this._movementRequestSpeedCheck(socket.playerData)){
+      return;
+    }
     // target position is in the map
     if(!this._borderCheck(msg,mapSize)){
       // restrict user position
-      msg.x = lastRecord.x;
-      msg.y = lastRecord.y;
+      msg.x = lastMsg.x;
+      msg.y = lastMsg.y;
       await this._broadcastUserLocation(msg);
       return;
     }
 
     // near by grid check  
-    if(!this._nearByGridCheck(msg,lastRecord)){
+    if(!this._nearByGridCheck(msg,lastMsg)){
       return ;
     }
     //try occupy grid
@@ -250,20 +257,19 @@ class GatewayService {
     // grid has be occupied
     if(ret === null){
       // restrict user position
-      msg.x = lastRecord.x;
-      msg.y = lastRecord.y;
+      msg.x = lastMsg.x;
+      msg.y = lastMsg.y;
       await this._broadcastUserLocation(msg);
       return;
     }
     
     //release old grid 
-    await this.dir.redis.delAsync(`${lastRecord.x}-${lastRecord.y}`);
+    socket.playerData.lastMovingTime = Date.now();
+    await this.dir.redis.delAsync(`${lastMsg.x}-${lastMsg.y}`);
     await this._broadcastUserLocation(msg);
     return;
    
   }
-
-  
 
   /**
    * Broadcast the user's location and direction.
@@ -299,10 +305,20 @@ class GatewayService {
     let lastPosition = {x:lastRecord.x , y:lastRecord.y};
     let targetPosition = {x:msg.x , y:msg.y};
     let distanceSquire = this._getDistanceSquare(lastPosition,targetPosition);
-    let speed = 1 ;
-    if(distanceSquire > speed){
+    if(distanceSquire > 1){
       return false;
     } 
+    return true;
+  }
+
+  _movementRequestSpeedCheck(playerData){
+    if(playerData.lastMovingTime === undefined){
+      console.log('player has no last time record')
+      return false;
+    }
+    if( Date.now() - playerData.lastMovingTime < moveingRequestThreshold){
+      return false;
+    }
     return true;
   }
 }

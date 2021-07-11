@@ -14,5 +14,6 @@
   "secret": "secret",
   "ext": {
     "enabled": ["helloworld", "chat"]
-  }
+  },
+  "movingRequestThreshold":100
 }
