@@ -45,8 +45,9 @@ async function mainServer() {
   const io = new Server(server);
 
   /* Create all utility classes */
-  //const rpcDirectory = new SingleProcessRPCDirectory();
-  const rpcDirectory = new MultiProcessRPCDirectory();
+  const rpcDirectory = config.get('multiprocess')
+                        ? (new MultiProcessRPCDirectory())
+                        : (new SingleProcessRPCDirectory());
   await rpcDirectory.asyncConstruct();
   // Load the map.
   const mapList = config.get("map");
