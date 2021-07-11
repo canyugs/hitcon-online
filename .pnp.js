@@ -110,6 +110,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["eslint-plugin-prettier", "virtual:c008340e8a5e0f84b982166dce6fa3bbb719ec395ad370a1168cabe867a22d930d921f1ccc2f859ea9035d7fd6f11cfd72423e5065a99a574406cbd088651e88#npm:3.4.0"],
             ["express", "npm:4.17.1"],
             ["jsonwebtoken", "npm:8.5.1"],
+            ["minimist", "npm:1.2.5"],
             ["prettier", "npm:2.2.1"],
             ["redis", "npm:3.1.2"],
             ["socketio-jwt", "npm:4.6.2"],
@@ -1902,6 +1903,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["eslint-plugin-prettier", "virtual:c008340e8a5e0f84b982166dce6fa3bbb719ec395ad370a1168cabe867a22d930d921f1ccc2f859ea9035d7fd6f11cfd72423e5065a99a574406cbd088651e88#npm:3.4.0"],
             ["express", "npm:4.17.1"],
             ["jsonwebtoken", "npm:8.5.1"],
+            ["minimist", "npm:1.2.5"],
             ["prettier", "npm:2.2.1"],
             ["redis", "npm:3.1.2"],
             ["socketio-jwt", "npm:4.6.2"],
@@ -1997,6 +1999,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["config", "npm:3.3.6"],
             ["ejs", "npm:3.1.6"],
             ["express", "npm:4.16.4"],
+            ["minimist", "npm:1.2.5"],
             ["redis", "npm:3.1.2"],
             ["socket.io", "npm:4.1.2"]
           ],
@@ -2033,6 +2036,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["config", "npm:3.3.6"],
             ["ejs", "npm:3.1.6"],
             ["express", "npm:4.16.4"],
+            ["minimist", "npm:1.2.5"],
             ["redis", "npm:3.1.2"],
             ["socket.io", "npm:4.1.2"]
           ],

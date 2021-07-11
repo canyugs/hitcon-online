@@ -5,20 +5,12 @@
 import {createRequire} from 'module';
 const require = createRequire(import.meta.url);
 
-const express = require('express');
-const path = require('path');
 const config = require('config');
-const redis = require('redis');
-const {Server} = require('socket.io');
-const http = require('http');
+const argv = require('minimist')(process.argv.slice(2));
 import fs from 'fs';
 
 /* Import all servers */
-import GatewayService from '../gateway/gateway-service.mjs';
 import AllAreaBroadcaster from '../gateway/all-area-broadcaster.mjs';
-import Directory from '../../common/rpc-directory/directory.mjs';
-import SingleProcessRPCDirectory from
-  '../../common/rpc-directory/single-process-RPC-directory.mjs';
 import MultiProcessRPCDirectory from
   '../../common/rpc-directory/multi-process-RPC-directory.mjs';
 
@@ -35,7 +27,7 @@ async function standaloneExtensionServer() {
   // });
 
   /* Create all utility classes */
-  const rpcDirectory = new MultiProcessRPCDirectory("localhost:5001");
+  const rpcDirectory = new MultiProcessRPCDirectory();
   await rpcDirectory.asyncConstruct();
   // Load the map.
   const mapList = config.get("map");
@@ -46,14 +38,14 @@ async function standaloneExtensionServer() {
   const broadcaster = new AllAreaBroadcaster(rpcDirectory, gameMap);
   const extensionManager = new ExtensionManager(rpcDirectory, broadcaster);
 
-  const extName = 'helloworld';
+  if(!('ext' in argv)){
+    console.error('Please specify extension name via --ext argument.');
+    process.exit();
+  }
+  const extName = argv.ext;
   await extensionManager.ensureClass('blank');
   await extensionManager.createExtensionService(extName);
   await extensionManager.startExtensionService(extName);
-
-  const port = 5001;
-  await rpcDirectory.createGrpcServer(port);
-
 }
 
 standaloneExtensionServer();

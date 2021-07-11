@@ -12,6 +12,7 @@
     "type": "real",
     "option": {}
   },
+  "multiprocess": true,
   "secret": "secret",
   "ext": {
     "enabled": ["chat"]
