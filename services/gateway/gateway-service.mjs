@@ -193,7 +193,6 @@ class GatewayService {
     if (firstLocation.x === undefined && firstLocation.y === undefined) {
       let setLocation = -1, index = 0;
       let spawnPoint = this.gameMap.getSpawnPoint(firstLocation.mapCoord.mapName);
-      console.log(spawn_point);
       spawn_point.sort(() => Math.random() - 0.5);
       while (setLocation === -1 && index < spawnPoint.length) {
         setLocation = 1; /*set spawn point */
