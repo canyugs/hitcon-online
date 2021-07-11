@@ -32,7 +32,7 @@ class InputManager {
 
     document.addEventListener('click', (event) => {
       this.focusedElement = event.target;
-      for (const {DOMElement, callback} of this.keydownCallbacks) {
+      for (const {DOMElement, callback} of this.clickCallbacks) {
         if (event.target === DOMElement) {
           const rect = DOMElement.getBoundingClientRect();
           const x = event.clientX - rect.left;
