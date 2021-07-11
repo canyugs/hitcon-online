@@ -170,6 +170,9 @@ class GatewayService {
     firstLocation.facing = 'D';
     firstLocation.displayChar = socket.playerData.displayChar;
     socket.playerData.lastMovingTime = Date.now();
+    //try occupy grid
+    await this.dir.redis.setAsync(
+      [`${firstLocation.x}-${firstLocation.y}`, 'occupied', 'NX']);
     await this._broadcastUserLocation(firstLocation);
     this.broadcaster.sendStateTransfer(socket);
 
@@ -199,6 +202,10 @@ class GatewayService {
       // This should not happen.
       console.error(`Player ${playerID}'s socket mismatch when disconnected.`);
     }
+    
+    // release grid after disconnection
+    await this.dir.redis.delAsync(`${socket.playerData.x}-${socket.playerData.y}`);
+
     // Take socket off first to avoid race condition in the await below.
     delete this.socks[playerID];
 
