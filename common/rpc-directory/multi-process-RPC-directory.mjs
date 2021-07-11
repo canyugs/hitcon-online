@@ -109,7 +109,7 @@ class MultiProcessRPCDirectory extends Directory {
         serviceName: serviceName,
         methodName: methodName,
         args: JSON.stringify(args)
-      });
+      }, {deadline: new Date(Date.now() + 5000)});
       return JSON.parse(ret.response);
     }
 
