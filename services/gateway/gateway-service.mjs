@@ -44,8 +44,8 @@ class GatewayService {
    * At the time this is called, other services and extensions have been
    * created, but their initialize() have not been called.
    */
-  async initialize() {
-    this.rpcHandler = await this.dir.registerService("gatewayServer");
+  async initialize(gatewayServiceName) {
+    this.rpcHandler = await this.dir.registerService(gatewayServiceName);
     this.extMan.setRpcHandlerFromGateway(this.rpcHandler);
     await this.rpcHandler.registerAsGateway();
     this.rpcHandler.registerRPC('callS2c', this.callS2c.bind(this));

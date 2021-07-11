@@ -11,6 +11,8 @@ const config = require('config');
 const redis = require('redis');
 const {Server} = require('socket.io');
 const http = require('http');
+const argv = require('minimist')(process.argv.slice(2));
+
 import fs from 'fs';
 
 /* Import all servers */
@@ -44,7 +46,7 @@ async function mainServer() {
 
   /* Create all utility classes */
   //const rpcDirectory = new SingleProcessRPCDirectory();
-  const rpcDirectory = new MultiProcessRPCDirectory(config.get('server').address + ':' + config.get('server').port);
+  const rpcDirectory = new MultiProcessRPCDirectory();
   await rpcDirectory.asyncConstruct();
   // Load the map.
   const mapList = config.get("map");
@@ -72,7 +74,8 @@ async function mainServer() {
   assetServer.run();
   await broadcaster.initialize();
   broadcaster.registerSocketIO(io);
-  await gatewayService.initialize();
+  console.log(('gateway-service' in argv) ? argv['gateway-service'] : "gatewayServer");
+  await gatewayService.initialize(('gateway-service' in argv) ? argv['gateway-service'] : "gatewayServer");
   authServer.run();
   for (const extName of extensionManager.listExtensions()) {
     await extensionManager.startExtensionService(extName);
