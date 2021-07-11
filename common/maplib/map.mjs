@@ -123,7 +123,6 @@ class GameMap {
   constructor(asset, maps) {
     this.graphicAsset = asset;
     this._maps = new Map();
-    this.spawn_point_list = [];
     for (const [mapName, map] of Object.entries(maps)) {
       this._maps.set(mapName, new _SingleGameMap(asset, map));
     }
@@ -133,7 +132,7 @@ class GameMap {
    * Remove all the dynamic cell set.
    */
   removeAllDynamicCellSet() {
-    for (const map of this._maps.values()) {
+    for (const map of this._maps) {
       map.removeAllDynamicCellSet();
     }
   }
@@ -220,23 +219,13 @@ class GameMap {
       if (cs) ret.set(mapName, cs);
     }
     return ret;
-  /**
-   * Get Spawn Point List.
-   * @param {MapCoord} coord - The map coordinate.
-   * @return {list} spawn point - A list of the spawn point.
-   **/
-  getSpawnPoint(coord){
-    if(this.spawn_point_list.length == 0){
-      this.spawn_point_list = this._maps.get(coord.mapName).getSpawnPoint(coord.x, coord.y);
-    }
-    return this.spawn_point_list;
   }
-
   /**
    * Similar to getOriginalCellSet(), but matches cell set name's as prefix.
    * @param {String} csName - The prefix of cell set name.
    * @return {Map} ret - Key: mapName; Value: list of cell set.
-   */
+  **/
+
   getOriginalCellSetStartWith(csName) {
     const ret = new Map();
     for (const [mapName, map] of this._maps) {
@@ -245,13 +234,16 @@ class GameMap {
     }
     return ret;
   }
-}
+
+  getSpawnPoint(mapName){
+    return this._maps.get(mapName).getSpawnPoint();
+  }
 
 
 /**
  * The class that represents a single map.
  * The exported GameMap is composed of many _SingleGameMap.
- */
+ **/
 class _SingleGameMap {
   /**
    * Construct an empty map.
@@ -451,38 +443,36 @@ class _SingleGameMap {
     if (tile === null) return null;
     return this.graphicAsset.getTile(layer, tile);
   }
+
   /**
-   * Get Spawn Point List.
-   * @param {int} movex , movey
-   * @return {list} spawn point - A list of the spawn point.
+   * Expand Cell Set List.
+   * @param {string} cellSetName
+   * @return {list} Cell Set points - A list of cell set points.
    */
-<<<<<<< HEAD
-  getSpawnPoint(movex, movey){
-    if(this.spawn_point_list.length == 0){
-      for(cell in this.spawnpointCellSet){
-        let w = (cell.w ?? 1), h = (cell.h ?? 1);
-        for( i in range(w)){
-          for( j in range(h)){
-            this.spawnpointCellSet.push({x: movex + cell.x + i, y:  movey + cell.y + j})
-          }
+  expandCellSet(cellSetName) {
+    let expandList = [];
+    if(this.staticCellSet.has(cellSetName))
+    for (const cell in this.staticCellSet.get(cellSetName)) {
+      const w = (cell.w ?? 1), h = (cell.h ?? 1);
+      for (let i = 0; i < w; ++i) {
+        for (let j = 0; j < h; ++j) {
+          expandList.push({x: cell.x + i, y: cell.y + j});
         }
       }
     }
-    return this.spawn_point_list;
-=======
-  getSpawnPoint(){
-    let spawn_point_list = [];
-    for(i in range(this.gameMap.width)){
-      for(j in range(this.gameMap.height)){
-        if(getCell({i, j}, "ground") == "P"){
-          spawn_point_list.push({x: i, y: j});
-        }
-      }
-    }
-    return spawn_point_list;
->>>>>>> Choose spawnpoint list
+    return expandList;
   }
 
+  /**
+   * Get Spawn Point List.
+   * @return {list} spawn point - A list of the spawn point.
+   */
+  getSpawnPoint(){
+    if (this.spawnPointList == 0) {
+      this.spawnPointList = this.expandCellSet("SpawnPoint");
+    }
+    return this.spawnPointList;
+  }
 }
 
 export default GameMap;

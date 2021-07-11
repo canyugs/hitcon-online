@@ -291,6 +291,7 @@ class Directory {
       playerData.mapCoord = MapCoord.fromObject(playerData.mapCoord);
     }
 
+    // TODO: Set them to a spawn point specified by map.json.
     // {MapCoord} mapCoord - Character's map coordinate.
     setDefaultValue(playerData, 'mapCoord', new MapCoord('world1', 10, 10));
     return playerData;
