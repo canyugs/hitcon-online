@@ -6,17 +6,26 @@ const OverlayPosition = Object.freeze({
     LEFT_TOP: Symbol(),
     LEFT_CENTER: Symbol(),
     LEFT_BOTTOM: Symbol(),
+    RIGHT: Symbol()
     //CENTER_TOP: Symbol(), // overlapped with notification
+    /* 
     CENTER_BOTTOM: Symbol(),
     RIGHT_TOP: Symbol(),
     RIGHT_CENTER: Symbol(),
     RIGHT_BOTTOM: Symbol()
+    */
 });
 
 /** 
  * Represents an overlay
+ * 
+ * Those who wants to use the Overlay element should extend this class and implement the methods.
 */
 class Overlay {
+    /**
+     * 
+     * @param dom HTML DOM element.
+     */
     constructor(dom) {}
   
     // Overlay hide/show related properties.
@@ -24,7 +33,15 @@ class Overlay {
 
     canDismiss() {}
     
-    showToolbarButton(icon) {}
+    /**
+     * Unset ToolbarButton display=none.
+     */
+    showToolbarButton() { }
+
+    /**
+     * Set ToolbarButton display=none.
+     */
+    hideToolbarButton() { }
 
     /**
      * If the overlay has ToolbarButton, it should toggle the overlay hide/show state
@@ -63,16 +80,22 @@ class Overlay {
   
     /**
      * execute when the overlay is dismissed.
+     * 
+     * This method should be implemented in the derived class.
      */
     onDismiss()
 
     /**
      * execute when the overlay is shown.
+     * 
+     * This method should be implemented in the derived class.
      */
     onShow()
 
     /**
      * execute when the overlay is hidden.
+     * 
+     * This method should be implemented in the derived class.
      */
     onHide()
 };

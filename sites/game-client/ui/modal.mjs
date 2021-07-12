@@ -4,21 +4,36 @@
 /**
  * The modal is a center aligned window above the MainView.  
  * Before closing the modal, user cannot interactive with other components.
+ * 
+ * Those who wants to use the Modal element should extend this class and implement the methods.
  */
 class Modal {
-    constructor() {}
-  
+    /**
+     * The modal have a default size, can call setSize() to change it.
+     * @param dom HTML DOM element.
+     */
+    constructor(dom) {}
+
     /**
      * Set the modal size.
-     * @param {Number} width
-     * @param {Number} height
+     * @param {String} width the width of modal, should be a vaild css units.
+     * @param {String} height the height of modal, should be a vaild css units.
      */
-    setSize(width,height) {}
+    setSize(width, height) { }
   
     // If true, user can dismiss the modal.
     canDismiss() {}
     
-    showToolbarButton(icon) {}
+    /**
+     * Unset ToolbarButton display=none.
+     */
+    showToolbarButton() {}
+
+    /**
+     * Set ToolbarButton display=none.
+     */
+    hideToolbarButton() { }
+
 
     /**
      * If the modal has ToolbarButton, it should show the modal
@@ -39,11 +54,15 @@ class Modal {
     
     /**
      * execute when the overlay is dismissed.
+     * 
+     * This method should be implemented in the derived class.
      */
     onDismiss()
     
     /**
      * execute when the overlay is shown.
+     * 
+     * This method should be implemented in the derived class.
      */
     onShow()
 }
