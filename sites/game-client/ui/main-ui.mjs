@@ -13,6 +13,10 @@ class MainUI {
 
   // Return Modal class.
   // Called by extension.
+  /**
+   * When having multiple modals want to show, it should stacked by priority.
+   * @param modal one of Modal.
+   */
   showModal(modal) {}
 
   /**
@@ -22,25 +26,37 @@ class MainUI {
 
   /**
    * set Overlay position.
-   *  @param {OverlayPosition} position one of OverlayPosition.
+   * @param {OverlayPosition} position one of OverlayPosition.
    */
   setOverlay(position, overlay) {}
   
   /**
    * set what MainView should display.
-   * @param {Overlay} overlay 
+   * @param {Overlay} overlay one of Overlay.
    */
   setMainView(overlay) {}
 
   // Toolbar buttons including overlay hide/show.
-  addToolbarButton()
-  removeToolbarButton()
+  /**
+   * Add an button in the Toolbar. Default visibility determined by the target, 
+   * and the button icon should get from the target.
+   * 
+   * @param target The element which wants add button, should be an Overlay or Modal.
+   */
+  addToolbarButton(target)
+
+  /**
+   * Remove an button from the Toolbar.
+   * 
+   * @param target The element which wants remove button, should be an Overlay or Modal.
+   */
+  removeToolbarButton(target)
 
   // TODO: Stack visualization? Stack height limit?
   /**
    * Show notification in notification area.
-   * @param msg 
-   * @param {Number} timeout 
+   * @param msg The message want to be shown.
+   * @param {Number} timeout The duraion of showing notification, the unit is millisecond.
    */
   showNotification(msg, timeout);
 
