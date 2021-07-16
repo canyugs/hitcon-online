@@ -14,7 +14,7 @@ class Client {
    */
   constructor(helper) {
     this.helper = helper;
-    this.itemInfo = JSON.parse(fs.readFileSync('items.json'));
+    this.itemInfo = {};
     this.items = {};
   }
 
@@ -22,84 +22,71 @@ class Client {
    * On game start, the below function will retrieve all of the client's items from the server.
    */
   async gameStart() {
-    /* TODO: Retrieve item information from the server */
-    let retrievedItems = [];
-
-    for (let item of retrievedItems) {
-      this.items[item.name] = {
-        amount: 0
-      }
-    }
-
-    /* TODO register each item */
+    this.itemInfo = await this.helper.callC2sAPI('items', 'getItemInfo', 5000);
+    this.items = await this.helper.callC2sAPI('items', 'getAllItems', 5000);
   }
 
   /*
    * The below function is used to give an item to another player
-   * item: {
-   *    name: string;
-   *    amount: number;
-   * }
+   * itemName: string;
+   * amount: number;
+   * toPlayerID: string;
    */
-  async giveItem(item) {
-    if (!name in this.itemInfo) {
+  async giveItem(toPlayerID, itemName, amount) {
+    if (!itemName in this.itemInfo) {
       console.log("Item does not exist");
       return;
     }
-    if (!items[name].exchangeable) {
+    if (!this.itemInfo[itemName].exchangeable) {
       console.log("Item is not exchangeable");
       return;
     }
-    if (items[name].amount < item.amount) {
+    if (!itemName in this.items || this.items[itemName].amount < amount) {
       console.log("Insufficient quantity");
       return;
     }
+    this.items[itemName].amount -= amount;
+    /* Notify the server that a certain amount of items have been given */
+    const result = await this.helper.callC2sAPI('items', 'giveReceiveItem', 5000, toPlayerID, itemName, amount);
   }
 
   /*
    * The below function is used to receive an item from another player
-   * item: {
-   *    name: string;
-   *    amount: number;
-   * }
+   * itemName: string;
+   * amount: number;
+   * fromPlayerID: string;
    */
-  async onReceiveItem(item) {
+  async onReceiveItem(fromPlayerID, itemName, amount) {
     if (!name in this.itemInfo) {
       console.log("Item does not exist");
       return;
     }
-    if (!items[name].exchangeable) {
+    if (!itemInfo[name].exchangeable) {
       console.log("Item is not exchangeable");
       return;
     }
-    if (!name in this.items) {
-      this.items[item.name] = {
-        amount: item.amount
-      }
+    if (!itemName in this.items) {
+      this.items[itemName] = { amount: 0 };
     }
-    else {
-      this.items[item.name].amount += item.amount;
-    }
+    this.items[itemName] += amount;
   }
 
   /*
-   * The below function is used to use an item
-   * item: {
-   *    name: string;
-   * }
+   * The below function is used to use an item.
    */
-  async useItem(item) {
-    
+  async useItem(itemName, amount) {
+    if (!itemName in this.itemInfo) {
+      console.log("Item does not exist");
+      return;
+    }
+    const result = await this.helper.callC2sAPI('items', 'useItem', 5000, itemName, amount);
   }
 
   /*
-   * The below function is the callback function when an item is used
-   * item: {
-   *    name: string;
-   * }
+   * The below function is the callback function when an item is used.
    */
-  async onItemUse(item) {
-
+  async onUseItem(itemName, amount) {
+    /* animation */
   }
 };
 
