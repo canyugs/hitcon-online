@@ -1,0 +1,9 @@
+{
+    "url": "./items/facemask/facemask.jpg",
+    "show": true,
+    "exchangeable": true,
+    "usable": true,
+    "properties": {
+        "type": "surgical"
+    }
+}
