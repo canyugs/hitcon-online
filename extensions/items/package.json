@@ -1,5 +1,5 @@
 {
-  "name": "hitcon-online-jitsi",
+  "name": "hitcon-online-items",
   "version": "0.0.1",
   "exports": {
     "standalone": "./standalone.mjs",
