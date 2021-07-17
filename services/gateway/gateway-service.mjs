@@ -23,14 +23,16 @@ class GatewayService {
    * @param {Directory} dir - The RPCDirectory for calling other services.
    * @param {GameMap} gameMap - The world map for this game.
    * @param {AuthServer} authServer - Auth server for verifying the token.
-   * @param {AllAreaBroadcaster} broadcaster - The broadcaster of game state
+   * @param {io} io - Socket.io object.
+   * @param {ExtensionManager} extMan - Extension Manager object.
    * and player locations.
    */
-  constructor(dir, gameMap, authServer, broadcaster, extMan) {
+  constructor(dir, gameMap, authServer, broadcaster, io, extMan) {
     this.dir = dir;
     this.gameMap = gameMap;
     this.authServer = authServer;
     this.broadcaster = broadcaster;
+    this.io = io;
     this.extMan = extMan;
     // A map that tracks the current connected clients.
     // key is the player ID. value is the socket.
@@ -42,14 +44,28 @@ class GatewayService {
    * At the time this is called, other services and extensions have been
    * created, but their initialize() have not been called.
    */
-  async initialize() {
-    this.rpcHandler = await this.dir.registerService("gatewayServer");
+  async initialize(gatewayServiceName) {
+    this.rpcHandler = await this.dir.registerService(gatewayServiceName);
     this.extMan.setRpcHandlerFromGateway(this.rpcHandler);
     await this.rpcHandler.registerAsGateway();
     this.rpcHandler.registerRPC('callS2c', this.callS2c.bind(this));
     this.servers = [];
     await this.extMan.createAllInGateway(this.rpcHandler, this);
     await this.extMan.startAllInGateway();
+
+    // register callbacks for All Area Boardcaster
+    this.broadcaster.registerOnLocation((loc) => {
+      // Broadcast the location message.
+      this.io.emit('location', loc);
+    });
+    this.broadcaster.registerOnExtensionBroadcast((bc) => {
+      // Broadcast the extension broadcast.
+      this.io.emit('extBC', bc);
+    });
+    this.broadcaster.registerOnCellSetBroadcast((cset) => {
+      // Broadcast the cell set modification.
+      this.io.emit('cset', cset);
+    });
   }
 
   async callS2c(serviceName, playerID, extName, methodName, timeout, args) {

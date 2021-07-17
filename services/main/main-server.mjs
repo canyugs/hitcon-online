@@ -11,6 +11,8 @@ const config = require('config');
 const redis = require('redis');
 const {Server} = require('socket.io');
 const http = require('http');
+const argv = require('minimist')(process.argv.slice(2));
+
 import fs from 'fs';
 
 /* Import all servers */
@@ -18,7 +20,9 @@ import GatewayService from '../gateway/gateway-service.mjs';
 import AllAreaBroadcaster from '../gateway/all-area-broadcaster.mjs';
 import Directory from '../../common/rpc-directory/directory.mjs';
 import SingleProcessRPCDirectory from
-  '../../common/rpc-directory/SingleProcessRPCDirectory.mjs';
+  '../../common/rpc-directory/single-process-RPC-directory.mjs';
+import MultiProcessRPCDirectory from
+  '../../common/rpc-directory/multi-process-RPC-directory.mjs';
 import AssetServer from './asset-server.mjs';
 import AuthServer from '../auth/AuthServer.mjs';
 
@@ -41,7 +45,9 @@ async function mainServer() {
   const io = new Server(server);
 
   /* Create all utility classes */
-  const rpcDirectory = new SingleProcessRPCDirectory();
+  const rpcDirectory = config.get('multiprocess')
+                        ? (new MultiProcessRPCDirectory())
+                        : (new SingleProcessRPCDirectory());
   await rpcDirectory.asyncConstruct();
   // Load the map.
   const mapList = config.get("map");
@@ -50,26 +56,27 @@ async function mainServer() {
   // We do not have GraphicAsset on the server side.
   const gameMap = new GameMap(undefined, mapJSON);
   const gameState = new GameState(gameMap);
-  const broadcaster = new AllAreaBroadcaster(io, rpcDirectory, gameMap);
-  const extensionManager = new ExtensionManager(rpcDirectory, broadcaster, gameMap, gameState);
 
+  /* Create all services */
+  const authServer = new AuthServer(app);
+  const broadcaster = new AllAreaBroadcaster(rpcDirectory, gameMap);
+  const extensionManager = new ExtensionManager(rpcDirectory, broadcaster);
+  const gatewayService = new GatewayService(rpcDirectory, gameMap, authServer,
+    broadcaster, io, extensionManager);
+  const assetServer = new AssetServer(app, extensionManager);
   await extensionManager.ensureClass('blank');
   for (const extName of extensionManager.listExtensions()) {
     await extensionManager.createExtensionService(extName);
   }
 
-  /* Create all services */
-  const assetServer = new AssetServer(app, extensionManager);
-  const authServer = new AuthServer(app);
-  const gatewayService = new GatewayService(rpcDirectory, gameMap, authServer,
-      broadcaster, extensionManager);
-
   /* Initialize static asset server */
   await assetServer.initialize();
   /* Start static asset server */
   assetServer.run();
+
+  /* Initialize broadcaster and gateway service */
   await broadcaster.initialize();
-  await gatewayService.initialize();
+  await gatewayService.initialize(('gateway-service' in argv) ? argv['gateway-service'] : "gatewayServer");
   authServer.run();
   for (const extName of extensionManager.listExtensions()) {
     await extensionManager.startExtensionService(extName);
