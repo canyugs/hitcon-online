@@ -56,7 +56,7 @@ class MultiProcessRPCDirectory extends Directory {
    */
   createGrpcServer(name, port) {
     let server = new grpc.Server();
-    server.addService(this.rpcProto.RPC.service, { callRPC: async (call, callback) => await this.responseGrpcCall.bind(this)(call, callback, this.callRPC) });
+    server.addService(this.rpcProto.RPC.service, { callRPC: async (call, callback) => await this.responseGrpcCall.bind(this)(call, callback, this.callLocalRPC) });
     server.bindAsync('0.0.0.0:' + port, grpc.ServerCredentials.createInsecure(), () => {
       server.start();
       console.log("The gRPC server for " + name + " is running on port " + port + ".");
@@ -67,15 +67,15 @@ class MultiProcessRPCDirectory extends Directory {
    * Method for responing gRPC, should only be called by gRPC server.
    * @param {Object} call - The request content, contains the same signature as callRPC.
    * @param {Function} callback - Callback function.
-   * @param {Object} handlers - The handler of this class.
+   * @param {Object} callLocalRPC - A method to call local RPC.
    */
-  async responseGrpcCall(call, callback, callRPC) {
+  async responseGrpcCall(call, callback, callLocalRPC) {
     callback(null, {
-      response: JSON.stringify(await callRPC.bind(this)(call.request.callerServiceName, call.request.serviceName, call.request.methodName, ...JSON.parse(call.request.args)))
+      response: JSON.stringify(await callLocalRPC.bind(this)(call.request.callerServiceName, call.request.serviceName, call.request.methodName, ...JSON.parse(call.request.args)))
     });
   }
 
-   /**
+  /**
    * Call an RPC method.
    * Should be called via Handler or gRPC server, do not called this method directly.
    * @param {String} callerServiceName - The name of the caller service.
@@ -111,6 +111,29 @@ class MultiProcessRPCDirectory extends Directory {
         args: JSON.stringify(args)
       }, {deadline: new Date(Date.now() + 5000)});
       return JSON.parse(ret.response);
+    }
+
+    // no service found
+    throw `Service ${serviceName} not found.`;
+  }
+
+  /**
+   * Call a local RPC method.
+   * Should be called via gRPC handler, do not called this method directly.
+   * @param {String} callerServiceName - The name of the caller service.
+   * @param {String} serviceName - The name of the service.
+   * @param {String} methodName - The name of the method.
+   * @param {Object} args - The arguments.
+   * @return {Object} result - The result of the call.
+   */
+   async callLocalRPC(callerServiceName, serviceName, methodName, ...args) {
+    void [callerServiceName, serviceName, methodName, args];
+    // local service
+    if((serviceName in this.handlers)){
+      if(!(methodName in this.handlers[serviceName].methods)){
+        throw `Method ${methodName} not found.`;
+      }
+      return await this.handlers[serviceName].methods[methodName](callerServiceName, ...args);
     }
 
     // no service found
