@@ -29,8 +29,18 @@ class Overlay {
     constructor(dom) {}
   
     // Overlay hide/show related properties.
+    /**
+     * If true, user can hide the overlay.
+     * 
+     * This property should be implemented by the base class.
+     */
     canHide() {}
 
+    /**
+     * If true, user can dismiss the overlay.
+     *
+     * This property should be implemented by the base class.
+     */
     canDismiss() {}
     
     /**
