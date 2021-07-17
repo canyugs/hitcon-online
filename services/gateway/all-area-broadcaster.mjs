@@ -22,6 +22,8 @@ class AllAreaBroadcaster {
     this.gameMap = gameMap;
     this.gameStateChannel = AllAreaBroadcaster.gameStateChannel;
     this.onLocation = () => {};
+    this.onExtensionBroadcast = () => {};
+    this.onCellSetBroadcast = () => {};
 
     // GameState object for storing the game state/player location.
     this.gameState = new GameState(gameMap);
