@@ -11,9 +11,9 @@ class MainUI {
   constructor() {
   }
 
-  // Return Modal class.
-  // Called by extension.
   /**
+   * Return Modal class. It can called by extension.
+   * 
    * When having multiple modals want to show, it should stacked by priority.
    * @param modal one of Modal.
    */
@@ -25,7 +25,7 @@ class MainUI {
   getState() {}
 
   /**
-   * set Overlay position.
+   * set Overlay at the position.
    * @param {OverlayPosition} position one of OverlayPosition.
    */
   setOverlay(position, overlay) {}

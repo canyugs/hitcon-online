@@ -21,7 +21,11 @@ class Modal {
      */
     setSize(width, height) { }
   
-    // If true, user can dismiss the modal.
+    /**
+     * If true, user can dismiss the modal.
+     * 
+     * This property should be implemented by the base class.
+     */ 
     canDismiss() {}
     
     /**
