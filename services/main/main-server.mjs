@@ -60,7 +60,7 @@ async function mainServer() {
   /* Create all services */
   const authServer = new AuthServer(app);
   const broadcaster = new AllAreaBroadcaster(rpcDirectory, gameMap);
-  const extensionManager = new ExtensionManager(rpcDirectory, broadcaster);
+  const extensionManager = new ExtensionManager(rpcDirectory, broadcaster, gameMap, gameState);
   const gatewayService = new GatewayService(rpcDirectory, gameMap, authServer,
     broadcaster, io, extensionManager);
   const assetServer = new AssetServer(app, extensionManager);
