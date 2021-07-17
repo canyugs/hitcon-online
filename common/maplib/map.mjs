@@ -107,6 +107,20 @@ class GameMap {
   }
 
   /**
+   * Update the cells of a dynamic cell set.
+   * @param {String} mapName
+   * @param {String} name - The name of dynamic cell set.
+   * @param {Array} cells - This will overwrite current cellSet.cells.
+   * @return {Boolean} success or not
+   */
+  updateDynamicCellSet(mapName, name, cells) {
+    if (this._maps.has(mapName)) {
+      return this._maps.get(mapName).updateDynamicCellSet(name, cells);
+    }
+    return false;
+  }
+
+  /**
    * Unset a dynamic cell set of an underlying map.
    * @param {String} mapName
    * @param {string} name - Name of the cell set.
@@ -151,6 +165,34 @@ class GameMap {
    */
   getCellRenderInfo(coord, layer) {
     return this._maps.get(coord.mapName).getCellRenderInfo(coord, layer);
+  }
+
+  /**
+   * Return the a specific cell set of every _SingleGameMap.
+   * @param {String} csName - The name of the cell set.
+   * @return {Map} ret - Key: mapName; Value: cell set.
+   */
+  getOriginalCellSet(csName) {
+    const ret = new Map();
+    for (const [mapName, map] of this._maps) {
+      const cs = map.getOriginalCellSet(csName);
+      if (cs) ret.set(mapName, cs);
+    }
+    return ret;
+  }
+
+  /**
+   * Similar to getOriginalCellSet(), but matches cell set name's as prefix.
+   * @param {String} csName - The prefix of cell set name.
+   * @return {Map} ret - Key: mapName; Value: list of cell set.
+   */
+  getOriginalCellSetStartWith(csName) {
+    const ret = new Map();
+    for (const [mapName, map] of this._maps) {
+      const cs = map.getOriginalCellSetStartWith(csName);
+      if (cs.length > 0) ret.set(mapName, cs);
+    }
+    return ret;
   }
 }
 
@@ -200,13 +242,22 @@ class _SingleGameMap {
 
   /**
    * Return a cell set in the original map.
-   * @param {string} name - The name of the cell set.
+   * @param {string} csName - The name of the cell set.
    * @return {Object} cellset - The cell set.
    * Return undefined if not found.
    */
-  getOriginalCellSet() {
-    throw 'Not implemented';
-    return undefined;
+  getOriginalCellSet(csName) {
+    return this.gameMap.cellSet.find((cs) => cs.name === csName);
+  }
+
+  /**
+   * Similar to getOriginalCellSet(), but matches cell set name's as prefix.
+   * @param {String} csName - The prefix of cell set name.
+   * @return {Map} ret - Key: mapName; Value: cell set.
+   * Return undefined if not found.
+   */
+  getOriginalCellSetStartWith(csName) {
+    return this.gameMap.cellSet.filter((cs) => cs.name.startsWith(csName));
   }
 
   /**
@@ -239,6 +290,23 @@ class _SingleGameMap {
       });
       this.layerToCellSet.get(Object.keys(layer)[0]).sort((first, second) => (second.priority ?? -1) - (first.priority ?? -1));
     }
+  }
+
+  /**
+   * Update the cells of a dynamic cell set.
+   * @param {String} name - The name of dynamic cell set.
+   * @param {Array} cells - This will overwrite current cellSet.cells.
+   * @return {Boolean} success or not
+   */
+  updateDynamicCellSet(name, cells) {
+    if (name in this.dynamicCellSet) {
+      for (const layer of this.dynamicCellSet[name].layers) {
+        this.layerToCellSet.get(Object.keys(layer)[0]).find((cellset) => cellset.name === name).cells = cells;
+      }
+      this.dynamicCellSet[name].cells = cells;
+      return true;
+    }
+    return false;
   }
 
   /**

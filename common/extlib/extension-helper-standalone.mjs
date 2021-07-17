@@ -77,7 +77,7 @@ class ExtensionHelperStandalone extends ExtensionHelperBase {
     try {
       return await this.ext[actualMethodName](player, ...args);
     } catch (e) {
-      console.error(`Exception ${e} calling standalone[${actualMethodName}]`);
+      console.error(`Exception "${e}" when calling standalone[${actualMethodName}]`);
       // Full exception detailed NOT provided for security reason.
       return {'error': 'exception'};
     }

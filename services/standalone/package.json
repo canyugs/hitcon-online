@@ -1,8 +1,8 @@
 {
-  "name": "hitcon-online-main-server",
+  "name": "hitcon-online-standalone-server",
   "version": "0.0.1",
   "scripts": {
-    "start": "node main-server.js"
+    "start": "node standalone-extension.mjs"
   },
   "dependencies": {
     "config": "^3.3.6",

@@ -5,13 +5,6 @@
  * Input manager deals with all user input.
  */
 class InputManager {
-  mapRender = null
-  canvas = null
-  clickCallbacks = []
-  moveCallbacks = []
-  canvasX = NaN
-  canvasY = NaN
-
   /**
    * Create a new input manager.
    * @constructor
@@ -22,101 +15,89 @@ class InputManager {
   constructor(mapRender) {
     this.mapRender = mapRender;
     this.canvas = this.mapRender.getCanvas();
-    const {x, y} = this.canvas.getClientRects()[0];
-    this.canvasX = x;
-    this.canvasY = y;
+    this.clickCallbacks = []; // each element is a {DOMElement, callback} object
+    this.keydownCallbacks = []; // each element is a {DOMElement, callback} object
 
-    this.canvas.addEventListener('click', this.handleClick.bind(this));
+    // TODO: Better way of maintaining focused element.
+    this.focusedElement = document.activeElement;
 
-    let focus = false;
-    document.addEventListener('click', (event) => {
-      focus = event.target === this.canvas;
-    });
     document.addEventListener('keydown', (event) => {
-      focus && this.handleKeydown(event);
+      for (const {DOMElement, callback} of this.keydownCallbacks) {
+        // TODO: Send event to the focused element only.
+        if (this.focusedElement === DOMElement) {
+          callback(event);
+        }
+      }
     });
 
-    document.addEventListener('resize', () => {
-      const {x, y} = this.canvas.getClientRects()[0];
-      this.canvasX = x;
-      this.canvasY = y;
+    document.addEventListener('click', (event) => {
+      this.focusedElement = event.target;
+      for (const {DOMElement, callback} of this.clickCallbacks) {
+        if (event.target === DOMElement) {
+          const rect = DOMElement.getBoundingClientRect();
+          const x = event.clientX - rect.left;
+          const y = event.clientY - rect.top;
+          callback(x, y);
+          // TODO: preventDefault stopPropagation correctly
+        }
+      }
     });
-  }
-
-  handleClick(event) {
-    const {clientX: touchX, clientY: touchY} = event;
-    const [viewX, viewY] = [touchX - this.canvasX, touchY - this.canvasY];
-    const {x: mapX, y: mapY} = this.mapRender.canvasToMapCoordinate(viewX, viewY);
-    this.clickCallbacks.forEach((fn) => fn(mapX, mapY));
-  }
-
-  handleKeydown(event) {
-    const {keyCode} = event;
-    let direction = null;
-    switch (keyCode) {
-      case 87: // W
-      case 38: // ArrowUp
-      case 104: // NumPad 8
-        direction = 'U';
-        break;
-      case 83: // S
-      case 40: // ArrowDown
-      case 98: // NumPad 2
-        direction = 'D';
-        break;
-      case 65: // A
-      case 37: // ArrowLeft
-      case 100: // NumPad 4
-        direction = 'L';
-        break;
-      case 68: // D
-      case 39: // ArrowRight
-      case 102: // NumPad 6
-        direction = 'R';
-        break;
-    }
-    direction && this.moveCallbacks.forEach((fn) => fn(direction));
   }
 
   /**
-   * Register a callback for map click.
-   * This should only be called once.
-   * @param {function} callback - The callback to call when the player clicked
-   * @return {{off: function}} - A off function to remove callback
-   * on the map. The prototype for callback is:
-   * async function (x, y)
-   * Where x and y is the coordinate in the map.
+   * Register a callback function on clicking a DOM element.
+   * @param {Element} DOMElement
+   * @param {Function} callback - Takes two arguments: x and y coordinate
+   * relative to the DOM element.
    */
-  onMapClick(callback) {
-    this.clickCallbacks.push(callback);
-
-    return {
-      off() {
-        this.clickCallbacks = this.clickCallbacks.filter((cb) => cb !== callback);
-      },
-    };
+  registerOnClick(DOMElement, callback) {
+    this.clickCallbacks.push({DOMElement, callback});
   }
 
   /**
-   * Register a callback for player movement.
-   * Whenever player wants to move, callback will be called.
-   * Callback will be called repeatedly if the player continues to want to
-   * move. i.e. If the player holds the arrow key, callback will be called
-   * periodically.
-   * @param {function} callback - The callback to call when the player tries to
-   * @return {{off: function}} - A off function to remove callback
-   * move. The prototype for callback is:
-   * async function(direction)
-   * Where direction is one of: 'U', 'D', 'L', 'R'
+   * Register a callback function on keydown.
+   * @param {Element} DOMElement
+   * @param {Function} callback - Takes an keydown event as argument.
    */
-  onMove(callback) {
-    this.moveCallbacks.push(callback);
+  registerKeydown(DOMElement, callback) {
+    this.keydownCallbacks.push({DOMElement, callback});
+  }
 
-    return {
-      off() {
-        this.moveCallbacks = this.moveCallbacks.filter((cb) => cb !== callback);
-      },
-    };
+  /**
+   * Register a callback function on keydown if it is a player movement.
+   * @param {Function} callback - Takes the movement direction as argument.
+   */
+  registerMapMove(callback) {
+    this.registerKeydown(this.canvas, (event) => {
+      let direction;
+      switch (event.key) {
+        case 'w':
+        case 'W':
+        case 'ArrowUp':
+          direction = 'U';
+          break;
+        case 's':
+        case 'S':
+        case 'ArrowDown':
+          direction = 'D';
+          break;
+        case 'a':
+        case 'A':
+        case 'ArrowLeft':
+          direction = 'L';
+          break;
+        case 'd':
+        case 'D':
+        case 'ArrowRight':
+          direction = 'R';
+          break;
+        default:
+          direction = undefined;
+      }
+      if (direction) {
+        callback(direction);
+      }
+    });
   }
 }
 

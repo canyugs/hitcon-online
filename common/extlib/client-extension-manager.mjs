@@ -28,10 +28,16 @@ class ClientExtensionManager {
    * Initialize the ClientExtensionManager.
    * @param {GameMap} gameMap - The GameMap object.
    * @param {GameState} gameState - The GameState object.
+   * @param {GameClient} gameClient
+   * @param {InputManager} inputManager
+   * @param {MapRenderer} mapRenderer
    */
-  async initialize(gameMap, gameState) {
+  async initialize(gameMap, gameState, gameClient, inputManager, mapRenderer) {
     this.gameMap = gameMap;
     this.gameState = gameState;
+    this.gameClient = gameClient;
+    this.inputManager = inputManager;
+    this.mapRenderer = mapRenderer;
   }
 
   /**
@@ -69,7 +75,7 @@ class ClientExtensionManager {
       const extHelper = new ClientExtensionHelper(extName, this, this.socket);
       /* register APIs to extension helper. */
       this.extHelpers[extName] = extHelper;
-        
+
       this.extObjects[extName] = new this.extModules[extName].default(extHelper);
       extHelper.setExt(this.extObjects[extName]);
 
@@ -93,7 +99,8 @@ class ClientExtensionManager {
       console.error(`Extension ${extName} not loaded`);
       return;
     }
-    await this.extHelpers[extName].gameStart(this.gameMap, this.gameState);
+    await this.extHelpers[extName].gameStart(this.gameMap, this.gameState,
+      this.gameClient, this.inputManager, this.mapRenderer);
     if (typeof this.extObjects[extName].gameStart === 'function') {
       await this.extObjects[extName].gameStart();
     }

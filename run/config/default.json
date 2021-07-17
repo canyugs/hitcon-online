@@ -1,6 +1,7 @@
 {
   "debug": true,
   "server": {
+    "address": "localhost",
     "port": 5000
   },
   "map": [
@@ -11,9 +12,10 @@
     "type": "real",
     "option": {}
   },
+  "multiprocess": false,
   "secret": "secret",
   "ext": {
-    "enabled": ["helloworld", "chat"]
+    "enabled": ["chat", "bombman"]
   },
-  "movingRequestThreshold":100
+  "movingRequestThreshold": 100
 }
