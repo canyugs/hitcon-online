@@ -60,6 +60,15 @@ class MapCoord {
   }
 
   /**
+   * Return a string that can be used as the key for occupying the space in
+   * redis.
+   * @return {string}
+   */
+  toRedisKey() {
+    return `cell-${this.x}-${this.y}-${this.mapName}`;
+  }
+
+  /**
    * Deserialize a JSON object into MapCoord.
    * @param {Object} obj - the JSON object which has attribute "mapName", "x", "y"
    * @return {MapCoord}
