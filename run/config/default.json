@@ -16,5 +16,6 @@
   "secret": "secret",
   "ext": {
     "enabled": ["chat", "bombman"]
-  }
+  },
+  "movingRequestThreshold": 100
 }

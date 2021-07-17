@@ -8,8 +8,7 @@ const require = createRequire(import.meta.url);
 import assert from 'assert';
 const {Server} = require('socket.io');
 const config = require('config');
-
-import { get } from 'http';
+const moveingRequestThreshold = config.get('movingRequestThreshold')
 /**
  * This class handles the connections from the client and does the most
  * processing required to service the client.
@@ -37,6 +36,7 @@ class GatewayService {
     // A map that tracks the current connected clients.
     // key is the player ID. value is the socket.
     this.socks = {};
+
   }
 
   /**
@@ -179,11 +179,16 @@ class GatewayService {
     }
 
     // Synchronize the state.
-    let firstLocation = {playerID: playerID, displayName:
-      socket.playerData.displayName};
-    firstLocation.mapCoord = socket.playerData.mapCoord;
+    let firstLocation = {playerID: playerID, 
+      displayName: socket.playerData.displayName};
+    firstLocation.x = socket.playerData.x;
+    firstLocation.y = socket.playerData.y;
     firstLocation.facing = 'D';
     firstLocation.displayChar = socket.playerData.displayChar;
+    socket.playerData.lastMovingTime = Date.now();
+    //try occupy grid
+    await this.dir.redis.setAsync(
+      [`${firstLocation.x}-${firstLocation.y}`, 'occupied', 'NX']);
     await this._broadcastUserLocation(firstLocation);
     this.broadcaster.sendStateTransfer(socket);
 
@@ -213,6 +218,10 @@ class GatewayService {
       // This should not happen.
       console.error(`Player ${playerID}'s socket mismatch when disconnected.`);
     }
+    
+    // release grid after disconnection
+    await this.dir.redis.delAsync(`${socket.playerData.x}-${socket.playerData.y}`);
+
     // Take socket off first to avoid race condition in the await below.
     delete this.socks[playerID];
 
@@ -243,36 +252,46 @@ class GatewayService {
     // TODO: Check if facing is valid.
     // TODO: Check if movement is legal.
 
+    let mapSize = this.gameMap.getMapSize();
+    let lastMsg = { x:socket.playerData.x , y:socket.playerData.y}
+    if(lastMsg.x === undefined || lastMsg.y === undefined){
+      lastMsg.x = 0;
+      lastMsg.y = 0;
+    }
+    if(!this._movementRequestSpeedCheck(socket.playerData)){
+      return;
+    }
+    // target position is in the map
+    if(!this._borderCheck(msg,mapSize)){
+      // restrict user position
+      msg.x = lastMsg.x;
+      msg.y = lastMsg.y;
+      await this._broadcastUserLocation(msg);
+      return;
+    }
+
+    // near by grid check  
+    if(!this._nearByGridCheck(msg,lastMsg)){
+      return ;
+    }
+    //try occupy grid
+    let ret = await this.dir.redis.setAsync(
+      [`${msg.x}-${msg.y}`, 'occupied', 'NX']);
+    // grid has be occupied
+    if(ret === null){
+      // restrict user position
+      msg.x = lastMsg.x;
+      msg.y = lastMsg.y;
+      await this._broadcastUserLocation(msg);
+      return;
+    }
+    
+    //release old grid 
+    socket.playerData.lastMovingTime = Date.now();
+    await this.dir.redis.delAsync(`${lastMsg.x}-${lastMsg.y}`);
     await this._broadcastUserLocation(msg);
-
     return;
-    /*
-    // todo : checking movement is ligal
-    // 取出uid 上一個位置
-    // 計算距離< 最大可移動距離
-    // 確認目標點是可以走的
-    let speed = 1; // this can be adjust later
-
-    let positionA = this.getLastPosition(uid)
-    let positionB = {x:msg.x,y:msg.y};
-    let distanceSquire = this.getDistanceSquare(positionA,positionB);
-
-    //overspeed , are you fly?
-    if(distanceSquire > speed ^ 2){
-      this.broadcastResetUser(socket,uid,positionA.x,positionA.y,positionA.facing)
-      return
-    }
-
-    //enter none empty grid
-    if(this.checkPositionEmpty(positionB)){
-      this._broadcastResetUser(socket,uid,positionA.x,positionA.y,positionA.facing)
-      return
-    }
-
-    // todo : store user location in server
-
-    //this.broadcastUserLocation(socket,msg);
-    */
+   
   }
 
   /**
@@ -291,25 +310,39 @@ class GatewayService {
     return true;
   }
 
-  async broadcastResetUser(socket, uid, mapCoord, facing) {
-    socket.broadcast.emit('location', {uid, mapCoord, facing});
+  _getDistanceSquare(a,b){
+    return Math.pow(Math.abs(a.x - b.x),2) + Math.pow(Math.abs(a.y - b.y),2);
   }
 
-  getLastPosition(uid){
-    assert.fail('Not implemented');
-    return {x:0,y:0,facing:'up'}
+  _borderCheck(msg,mapSize){
+    if(msg.x > mapSize.width || msg.x < 0){
+      return false;
+    }
+    if(msg.y > mapSize.height || msg.y < 0){
+      return false;
+    }
+    return true;
   }
 
-  updatePosition(uid,x,y,facing){
-    assert.fail('Not implemented');
+  _nearByGridCheck(msg,lastRecord){
+    let lastPosition = {x:lastRecord.x , y:lastRecord.y};
+    let targetPosition = {x:msg.x , y:msg.y};
+    let distanceSquire = this._getDistanceSquare(lastPosition,targetPosition);
+    if(distanceSquire > 1){
+      return false;
+    } 
+    return true;
   }
 
-  getDistanceSquare(a,b){
-    return Math.abs(a.x - b.x)^2 + Math.abs(a.y - b.y)^2
-  }
-
-  checkPositionEmpty(mapCoord) {
-    return this.gameMap.getCell(mapCoord);
+  _movementRequestSpeedCheck(playerData){
+    if(playerData.lastMovingTime === undefined){
+      console.log('player has no last time record')
+      return false;
+    }
+    if( Date.now() - playerData.lastMovingTime < moveingRequestThreshold){
+      return false;
+    }
+    return true;
   }
 }
 
