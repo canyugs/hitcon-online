@@ -8,7 +8,10 @@ const require = createRequire(import.meta.url);
 import assert from 'assert';
 const {Server} = require('socket.io');
 const config = require('config');
-const moveingRequestThreshold = config.get('movingRequestThreshold')
+const movingRequestThreshold = config.get('movingRequestThreshold');
+
+import {MapCoord} from '../../common/maplib/map.mjs';
+
 /**
  * This class handles the connections from the client and does the most
  * processing required to service the client.
@@ -49,6 +52,9 @@ class GatewayService {
     this.extMan.setRpcHandlerFromGateway(this.rpcHandler);
     await this.rpcHandler.registerAsGateway();
     this.rpcHandler.registerRPC('callS2c', this.callS2c.bind(this));
+    this.rpcHandler.registerRPC('teleport', async (serviceName, playerID, mapCoord, facing) => {
+      return await this.teleportPlayer(playerID, mapCoord, facing);
+    });
     this.servers = [];
     await this.extMan.createAllInGateway(this.rpcHandler, this);
     await this.extMan.startAllInGateway();
@@ -181,14 +187,13 @@ class GatewayService {
     // Synchronize the state.
     let firstLocation = {playerID: playerID, 
       displayName: socket.playerData.displayName};
-    firstLocation.x = socket.playerData.x;
-    firstLocation.y = socket.playerData.y;
+    firstLocation.mapCoord = socket.playerData.mapCoord;
     firstLocation.facing = 'D';
     firstLocation.displayChar = socket.playerData.displayChar;
     socket.playerData.lastMovingTime = Date.now();
-    //try occupy grid
-    await this.dir.redis.setAsync(
-      [`${firstLocation.x}-${firstLocation.y}`, 'occupied', 'NX']);
+    // try occupy grid
+    // TODO: Handle cases whereby we can't occupy the location.
+    await this._occupyCoord(firstLocation.mapCoord, playerID);
     await this._broadcastUserLocation(firstLocation);
     this.broadcaster.sendStateTransfer(socket);
 
@@ -218,15 +223,15 @@ class GatewayService {
       // This should not happen.
       console.error(`Player ${playerID}'s socket mismatch when disconnected.`);
     }
-    
-    // release grid after disconnection
-    await this.dir.redis.delAsync(`${socket.playerData.x}-${socket.playerData.y}`);
 
     // Take socket off first to avoid race condition in the await below.
     delete this.socks[playerID];
 
     let lastLocation = {playerID: playerID, removed: true};
     await this._broadcastUserLocation(lastLocation);
+
+    // release grid after disconnection
+    await this._clearOccupy(socket.playerData.mapCoord, playerID);
 
     // Try to unregister the player.
     await this.rpcHandler.unregisterPlayer(playerID);
@@ -245,53 +250,84 @@ class GatewayService {
    * - displayName: The name to show for this player.
    * - displayChar: The character asset to display.
    */
-  async onUserLocation(socket, msg) {
+  async onUserLocation(socket, origMsg) {
+    const msg = {};
     msg.playerID = socket.playerID;
     msg.displayName = socket.playerData.displayName;
     msg.displayChar = socket.playerData.displayChar;
+    msg.facing = origMsg.facing;
+    msg.mapCoord = MapCoord.fromObject(origMsg.mapCoord);
     // TODO: Check if facing is valid.
     // TODO: Check if movement is legal.
 
-    let mapSize = this.gameMap.getMapSize();
-    let lastMsg = { x:socket.playerData.x , y:socket.playerData.y}
-    if(lastMsg.x === undefined || lastMsg.y === undefined){
-      lastMsg.x = 0;
-      lastMsg.y = 0;
+    let lastCoord = socket.playerData.mapCoord;
+    let mapSize = this.gameMap.getMapSize(lastCoord.mapName);
+    if(lastCoord.x === undefined || lastCoord.y === undefined || lastCoord.mapName === undefined){
+      // Shouldn't happen, log an error.
+      console.error(`Invalid lastCoord in onUserLocation ${lastCoord}`);
+      return;
     }
     if(!this._movementRequestSpeedCheck(socket.playerData)){
+      console.warn(`Player ${msg.playerID} is speeding`);
+      return;
+    }
+    if (!(lastCoord.mapName === msg.mapCoord.mapName)) {
+      console.warn(`Player ${msg.playerID} changed map from ` +
+        `${lastCoord.mapName} to ${msg.mapCoord.mapName} without permission.`);
       return;
     }
     // target position is in the map
-    if(!this._borderCheck(msg,mapSize)){
-      // restrict user position
-      msg.x = lastMsg.x;
-      msg.y = lastMsg.y;
-      await this._broadcastUserLocation(msg);
+    if(!this._borderCheck(msg.mapCoord,mapSize)){
+      console.warn(`Player ${msg.playerID} is trying to go outside the map.`);
       return;
     }
-
     // near by grid check  
-    if(!this._nearByGridCheck(msg,lastMsg)){
-      return ;
-    }
-    //try occupy grid
-    let ret = await this.dir.redis.setAsync(
-      [`${msg.x}-${msg.y}`, 'occupied', 'NX']);
-    // grid has be occupied
-    if(ret === null){
-      // restrict user position
-      msg.x = lastMsg.x;
-      msg.y = lastMsg.y;
-      await this._broadcastUserLocation(msg);
+    if(!this._nearByGridCheck(msg.mapCoord,lastCoord)){
+      console.warn(`Player ${msg.playerID} is trynig to teleport.`);
       return;
     }
     
+    // TODO: Maybe log any cell collision.
+    await this._teleportPlayerInternal(socket, msg);
+  }
+
+  /**
+   * Teleport the player to the specified map coordinate.
+   * This is an internal function that requires the socket.
+   */
+  async _teleportPlayerInternal(socket, msg) {
+    // try occupy grid
+    let ret = await this._occupyCoord(msg.mapCoord, msg.playerID);
+    // grid has been occupied
+    if(!ret){
+      // Can't move, target is already occupied.
+      return false;
+    }
+
     //release old grid 
     socket.playerData.lastMovingTime = Date.now();
-    await this.dir.redis.delAsync(`${lastMsg.x}-${lastMsg.y}`);
+    await this._clearOccupy(socket.playerData.mapCoord, msg.playerID);
     await this._broadcastUserLocation(msg);
-    return;
-   
+    return true;
+  }
+
+  /**
+   * Teleport the player to the specified map coordinate.
+   */
+  async teleportPlayer(playerID, mapCoord, facing) {
+    if (!(playerID in this.socks)) {
+      console.error(`Can't teleport ${playerID} who is not on our server.`);
+      return false;
+    }
+    const socket = this.socks[playerID];
+    const msg = {};
+    msg.playerID = socket.playerID;
+    msg.displayName = socket.playerData.displayName;
+    msg.displayChar = socket.playerData.displayChar;
+    msg.facing = facing;
+    msg.mapCoord = mapCoord;
+
+    return this._teleportPlayerInternal(socket, msg);
   }
 
   /**
@@ -301,7 +337,7 @@ class GatewayService {
    * @return {Boolean} success - true if successful.
    */
   async _broadcastUserLocation(msg) {
-    if (msg.playerID in this.socks) {
+    if (msg.playerID in this.socks && !(msg.removed === true)) {
       const playerData = this.socks[msg.playerID].playerData;
       playerData.mapCoord = msg.mapCoord;
       await this.dir.setPlayerData(msg.playerID, playerData);
@@ -310,24 +346,22 @@ class GatewayService {
     return true;
   }
 
-  _getDistanceSquare(a,b){
-    return Math.pow(Math.abs(a.x - b.x),2) + Math.pow(Math.abs(a.y - b.y),2);
+  _getManhattanDistance(a,b){
+    return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
   }
 
-  _borderCheck(msg,mapSize){
-    if(msg.x > mapSize.width || msg.x < 0){
+  _borderCheck(coord,mapSize){
+    if(coord.x > mapSize.width || coord.x < 0){
       return false;
     }
-    if(msg.y > mapSize.height || msg.y < 0){
+    if(coord.y > mapSize.height || coord.y < 0){
       return false;
     }
     return true;
   }
 
-  _nearByGridCheck(msg,lastRecord){
-    let lastPosition = {x:lastRecord.x , y:lastRecord.y};
-    let targetPosition = {x:msg.x , y:msg.y};
-    let distanceSquire = this._getDistanceSquare(lastPosition,targetPosition);
+  _nearByGridCheck(coord,lastCoord){
+    let distanceSquire = this._getManhattanDistance(lastCoord,coord);
     if(distanceSquire > 1){
       return false;
     } 
@@ -339,10 +373,53 @@ class GatewayService {
       console.log('player has no last time record')
       return false;
     }
-    if( Date.now() - playerData.lastMovingTime < moveingRequestThreshold){
+    if( Date.now() - playerData.lastMovingTime < movingRequestThreshold){
       return false;
     }
     return true;
+  }
+
+  /**
+   * Mark the cell specified by mapCoord as occupied by playerID.
+   * Note: This is atomic.
+   * @return {Boolean} success - Return true if the cell is marked
+   * successfully, false if it's occupied.
+   */
+  async _occupyCoord(mapCoord, playerID) {
+    let ret = await this.dir.getRedis().setAsync(
+      [mapCoord.toRedisKey(), playerID, 'NX']);
+    if (ret === null) {
+      // Failed
+      return false;
+    }
+    if (ret === 'OK') {
+      return true;
+    }
+    console.assert(`Invalid reply from redis for _occupyCoord: ${ret}`);
+    return false;
+  }
+
+  /**
+   * Clear the cell specified by mapCoord.
+   * If playerID is not undefined or null, then verify that it was occupied.
+   */
+  async _clearOccupy(mapCoord, playerID) {
+    if (!(playerID === null || playerID === undefined)) {
+      // Do the check
+      let getRet = await this.dir.getRedis().getAsync(
+        [mapCoord.toRedisKey()]);
+      if (!(getRet === playerID)) {
+        console.error(
+          `Cell ${mapCoord} is not occupied by ${playerID}, it's ${getRet}`);
+        return false;
+      }
+    }
+    let ret = await this.dir.getRedis().delAsync([mapCoord.toRedisKey()]);
+    if (ret === 1) {
+      return true;
+    }
+    console.error(`Failed to clear cell ${mapCoord}, redis: ${ret}`);
+    return false;
   }
 }
 
