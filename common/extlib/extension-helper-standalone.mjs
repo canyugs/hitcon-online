@@ -103,9 +103,8 @@ class ExtensionHelperStandalone extends ExtensionHelperBase {
    * write operation in the background.
    * @param {object} data - The data to store.
    */
-  storeData(data) {
-    void data;
-    assert.fail('Not implemented');
+  async storeData(data) {
+    await this.dir.storage.saveData(`ext_${this.name}`, data);
   }
 
   /**
@@ -114,9 +113,9 @@ class ExtensionHelperStandalone extends ExtensionHelperBase {
    * empty object.
    * @return {object} data - The stored data.
    */
-  loadData() {
-    assert.fail('Not implemented');
-    return {};
+  async loadData() {
+    data = await this.dir.storage.loadData(`ext_${this.name}`)
+    return data;
   }
 }
 

@@ -1,0 +1,9 @@
+{
+    "Amy": {
+        "sentence": "Lorem ipsum dolor sit amet consectetur adipisicing elit. Ullam vel saepe, repellendus ipsum vero enim earum sint perspiciatis similique suscipit.",
+        "choice": [
+            "Apple", "Banana", "Watermelon"
+        ], 
+        "location": ""
+    }
+}
