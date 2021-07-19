@@ -20,10 +20,99 @@ body {
   height: 100%;
   padding: 5px;
   box-sizing: border-box;
-  background-color: Azure;
+  background-color: blue;
+  z-index: -10;
 }
 
 #mapcanvas {
   border: 2px solid;
   box-sizing: content-box;
+}
+
+#staging-div {
+  opacity: 20%;
+  background-color: red;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  z-index: 2;
+}
+
+#map-render-overlay {
+  width: 100%;
+  height: 100%;
+}
+
+#notification-bar {
+  background-color: Gainsboro;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  height: 3%;
+  z-index: 10;
+}
+
+#toolbar {
+  background-color: LavenderBlush;
+  position: absolute;
+  bottom: 0px;
+  left: 0px;
+  width: 100%;
+  height: 10%;
+  z-index: 5;
+}
+
+.overlay {
+  background-color: Ivory;
+  position: absolute;
+  opacity: 85%;
+  z-index: 5;
+}
+
+#overlay-topleft {
+  top: 10%;
+  left: 5%;
+  width: 15%;
+  height: 30%;
+}
+
+#overlay-bottomleft {
+  bottom: 15%;
+  left: 5%;
+  width: 15%;
+  height: 20%;
+}
+
+#overlay-right {
+  top: 10%;
+  right: 5%;
+  width: 15%;
+  height: 70%;
+}
+
+#main-view {
+  background-color: MintCream;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.model-background {
+  position: absolute;
+  background-color: Grey;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  z-index: 0;
+}
+
+.model-background.visible {
+  opacity: 80%;
+  z-index: 100;
 }

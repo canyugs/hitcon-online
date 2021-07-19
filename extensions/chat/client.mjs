@@ -1,6 +1,22 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
+import Overlay from '/static/sites/game-client/ui/overlay.mjs';
+import OverlayPosition from '/static/sites/game-client/ui/overlay-position.mjs';
+
+const CHAT_DIV = 'chat-overlay';
+
+class ChatOverlay extends Overlay {
+  constructor(mainUI) {
+    const dom = document.getElementById(CHAT_DIV);
+    super(mainUI, dom);
+  }
+
+  // TODO(zeze-zeze): Expand on this class (jsdoc and implementation) and
+  // implement onPre/PostShow/Hide() as needed.
+};
+
+
 /**
  * This class is the browser/client side of an extension.
  * One instance is created for each connected player.
@@ -15,6 +31,11 @@ class Client {
   constructor(helper) {
     this.helper = helper;
     document.getElementById('chat_message').addEventListener('keypress', this.send_msg(this));
+  }
+
+  async gameStart() {
+    this.overlay = new ChatOverlay(this.helper.mainUI);
+    this.overlay.show(OverlayPosition.RIGHT);
   }
 
   send_msg(client){
