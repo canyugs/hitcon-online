@@ -31,13 +31,15 @@ class ClientExtensionManager {
    * @param {GameClient} gameClient
    * @param {InputManager} inputManager
    * @param {MapRenderer} mapRenderer
+   * @param {MainUI} mainUI
    */
-  async initialize(gameMap, gameState, gameClient, inputManager, mapRenderer) {
+  async initialize(gameMap, gameState, gameClient, inputManager, mapRenderer, mainUI) {
     this.gameMap = gameMap;
     this.gameState = gameState;
     this.gameClient = gameClient;
     this.inputManager = inputManager;
     this.mapRenderer = mapRenderer;
+    this.mainUI = mainUI;
   }
 
   /**
@@ -90,8 +92,7 @@ class ClientExtensionManager {
    * @param {String} extName - The name of the extension.
    */
   async startExtensionClient(extName) {
-    // TODO: Call gameStart() on each of the extensions.
-    if (!typeof extName === 'string') {
+    if (typeof extName !== 'string') {
       console.error('Expected extName to be string');
       return;
     }
@@ -100,7 +101,7 @@ class ClientExtensionManager {
       return;
     }
     await this.extHelpers[extName].gameStart(this.gameMap, this.gameState,
-      this.gameClient, this.inputManager, this.mapRenderer);
+      this.gameClient, this.inputManager, this.mapRenderer, this.mainUI);
     if (typeof this.extObjects[extName].gameStart === 'function') {
       await this.extObjects[extName].gameStart();
     }

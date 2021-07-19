@@ -17,15 +17,37 @@ absolute URL.
     <title>HITCON Online</title>
     <link rel="stylesheet" href="/static/sites/game-client/client.css">
     <script src="/socket.io/socket.io.js"></script>
-    <script src="/static/sites/game-client/misc.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
   </head>
   <body>
     <div id="rootdiv" class="container-center">
-      <% inDiv.forEach((i) => { %>
-        <%- include(i); %>
-      <% }); %>
-      <canvas id="mapcanvas"></canvas>
+      <div id="staging-div">
+        <!--
+        This div is for stuff that's not yet being displayed.
+        It is currently semi-transparent for debugging purpose.
+        -->
+        <div id="map-render-overlay" class="container-center">
+          <canvas id="mapcanvas"></canvas>
+        </div>
+        <% inDiv.forEach((i) => { %>
+          <%- include(i); %>
+        <% }); %>
+      </div>
+      <div id="notification-bar">
+      </div>
+      <div id="toolbar">
+      </div>
+      <div id="overlay-topleft" class="overlay">
+      </div>
+      <div id="overlay-bottomleft" class="overlay">
+      </div>
+      <div id="overlay-right" class="overlay">
+      </div>
+      <div id="main-view">
+      </div>
+      <!-- used to block out the rest of the stuffs when model is visible -->
+      <div id="model-background" class="model-background">
+      </div>
     </div>
 
     <script type="module">
@@ -36,6 +58,9 @@ absolute URL.
       import MapRenderer from '/static/sites/game-client/map-renderer.mjs';
       import InputManager from '/static/sites/game-client/input-manager.mjs';
       import ClientExtensionManager from '/static/common/extlib/client-extension-manager.mjs';
+      import MainUI from '/static/sites/game-client/ui/main-ui.mjs';
+      import MapRendererOverlay from '/static/sites/game-client/ui/map-renderer-overlay.mjs';
+      import OverlayPosition from '/static/sites/game-client/ui/overlay-position.mjs';
 
       // Export internal classes for ease of debugging.
       let gameClass = {};
@@ -44,6 +69,8 @@ absolute URL.
       gameClass.GameState = GameState;
       gameClass.GameClient = GameClient;
       gameClass.ClientExtensionManager = ClientExtensionManager;
+      gameClass.MainUI = MainUI;
+      gameClass.OverlayPosition = OverlayPosition;
       window.gameClass = gameClass;
 
       // Create the various essential game classes.
@@ -73,6 +100,8 @@ absolute URL.
         }
         game.token = testToken;
 
+        game.mainUI = new MainUI();
+
         // TODO: Change map URL to follow the config in server side.
         game.mapData = await $.ajax({url: "/static/run/map/map.json", type: "GET",});
         game.assetData = await $.ajax({url: "/static/run/map/assets.json", type: "GET",});
@@ -95,8 +124,12 @@ absolute URL.
         game.gameClient.initialize(game.token);
         game.mapRenderer.setGameClient(game.gameClient);
 
-        await game.extMan.initialize(game.map, game.gameState, game.gameClient, game.inputManager, game.mapRenderer);
+        await game.extMan.initialize(game.map, game.gameState, game.gameClient, game.inputManager, game.mapRenderer, game.mainUI);
         await game.extMan.loadAllExtensionClient();
+
+        // Initializes the UI.
+        game.mapRendererOverlay = new MapRendererOverlay(game.mainUI);
+        game.mapRendererOverlay.show(OverlayPosition.MAIN_VIEW);
 
         function onGameTick () {
           game.mapRenderer.draw();

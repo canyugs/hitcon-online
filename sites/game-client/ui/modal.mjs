@@ -24,7 +24,8 @@ class Modal {
     /**
      * If true, user can dismiss the modal.
      * 
-     * This property should be implemented by the base class.
+     * This method can be implemented in the derived class if the derived class
+     * wishes to adjust this default behaviour.
      */ 
     canDismiss() {}
     
@@ -59,14 +60,16 @@ class Modal {
     /**
      * execute when the overlay is dismissed.
      * 
-     * This method should be implemented in the derived class.
+     * This method can be implemented in the derived class if the derived class
+     * wishes to handle this event.
      */
     onDismiss()
     
     /**
      * execute when the overlay is shown.
      * 
-     * This method should be implemented in the derived class.
+     * This method can be implemented in the derived class if the derived class
+     * wishes to handle this event.
      */
     onShow()
 }
