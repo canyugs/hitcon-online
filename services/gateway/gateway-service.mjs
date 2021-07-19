@@ -191,8 +191,8 @@ class GatewayService {
     firstLocation.facing = 'D';
     firstLocation.displayChar = socket.playerData.displayChar;
     socket.playerData.lastMovingTime = Date.now();
-    // try occupy grid
-    // TODO: Handle cases whereby we can't occupy the location.
+    // try occupying grid
+    // TODO: Handle cases when we can't occupy the location.
     await this._occupyCoord(firstLocation.mapCoord, playerID);
     await this._broadcastUserLocation(firstLocation);
     this.broadcaster.sendStateTransfer(socket);
@@ -260,33 +260,35 @@ class GatewayService {
     // TODO: Check if facing is valid.
     // TODO: Check if movement is legal.
 
-    let lastCoord = socket.playerData.mapCoord;
-    let mapSize = this.gameMap.getMapSize(lastCoord.mapName);
-    if(lastCoord.x === undefined || lastCoord.y === undefined || lastCoord.mapName === undefined){
+    const lastCoord = socket.playerData.mapCoord;
+    const mapSize = this.gameMap.getMapSize(lastCoord.mapName);
+    if (lastCoord.x === undefined || lastCoord.y === undefined || lastCoord.mapName === undefined) {
       // Shouldn't happen, log an error.
       console.error(`Invalid lastCoord in onUserLocation ${lastCoord}`);
       return;
     }
-    if(!this._movementRequestSpeedCheck(socket.playerData)){
-      console.warn(`Player ${msg.playerID} is speeding`);
+    if (!this._movementRequestSpeedCheck(socket.playerData)) {
+      console.warn(`Player ${msg.playerID} is overspeed.`);
       return;
     }
+    // TODO(whyang9701): Move this into the library as well.
     if (!(lastCoord.mapName === msg.mapCoord.mapName)) {
       console.warn(`Player ${msg.playerID} changed map from ` +
         `${lastCoord.mapName} to ${msg.mapCoord.mapName} without permission.`);
       return;
     }
     // target position is in the map
-    if(!this._borderCheck(msg.mapCoord,mapSize)){
+    if (!this._borderCheck(msg.mapCoord,mapSize)) {
       console.warn(`Player ${msg.playerID} is trying to go outside the map.`);
       return;
     }
-    // near by grid check  
-    if(!this._nearByGridCheck(msg.mapCoord,lastCoord)){
+    // nearby grid check
+    if (!this._nearbyGridCheck(msg.mapCoord,lastCoord)) {
       console.warn(`Player ${msg.playerID} is trynig to teleport.`);
       return;
     }
-    
+    // TODO(whyang9701): Add checks for cells that is marked as blocked
+    // in the map.
     // TODO: Maybe log any cell collision.
     await this._teleportPlayerInternal(socket, msg);
   }
@@ -297,7 +299,7 @@ class GatewayService {
    */
   async _teleportPlayerInternal(socket, msg) {
     // try occupy grid
-    let ret = await this._occupyCoord(msg.mapCoord, msg.playerID);
+    const ret = await this._occupyCoord(msg.mapCoord, msg.playerID);
     // grid has been occupied
     if(!ret){
       // Can't move, target is already occupied.
@@ -346,34 +348,35 @@ class GatewayService {
     return true;
   }
 
+  // TODO(whyang9701): Move this into map.mjs.
   _getManhattanDistance(a,b){
     return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
   }
 
   _borderCheck(coord,mapSize){
-    if(coord.x > mapSize.width || coord.x < 0){
+    if (coord.x >= mapSize.width || coord.x < 0) {
       return false;
     }
-    if(coord.y > mapSize.height || coord.y < 0){
+    if (coord.y >= mapSize.height || coord.y < 0) {
       return false;
     }
     return true;
   }
 
-  _nearByGridCheck(coord,lastCoord){
+  _nearbyGridCheck(coord,lastCoord){
     let distanceSquire = this._getManhattanDistance(lastCoord,coord);
-    if(distanceSquire > 1){
+    if (distanceSquire > 1) {
       return false;
     } 
     return true;
   }
 
   _movementRequestSpeedCheck(playerData){
-    if(playerData.lastMovingTime === undefined){
+    if (playerData.lastMovingTime === undefined) {
       console.log('player has no last time record')
       return false;
     }
-    if( Date.now() - playerData.lastMovingTime < movingRequestThreshold){
+    if (Date.now() - playerData.lastMovingTime < movingRequestThreshold ){
       return false;
     }
     return true;
@@ -388,14 +391,10 @@ class GatewayService {
   async _occupyCoord(mapCoord, playerID) {
     let ret = await this.dir.getRedis().setAsync(
       [mapCoord.toRedisKey(), playerID, 'NX']);
-    if (ret === null) {
-      // Failed
-      return false;
-    }
     if (ret === 'OK') {
       return true;
     }
-    console.assert(`Invalid reply from redis for _occupyCoord: ${ret}`);
+    console.assert(ret === null, `Invalid reply from redis for _occupyCoord: ${ret}`);
     return false;
   }
 
@@ -404,17 +403,17 @@ class GatewayService {
    * If playerID is not undefined or null, then verify that it was occupied.
    */
   async _clearOccupy(mapCoord, playerID) {
-    if (!(playerID === null || playerID === undefined)) {
+    if (playerID) {
       // Do the check
-      let getRet = await this.dir.getRedis().getAsync(
+      const getRet = await this.dir.getRedis().getAsync(
         [mapCoord.toRedisKey()]);
-      if (!(getRet === playerID)) {
+      if (getRet !== playerID) {
         console.error(
           `Cell ${mapCoord} is not occupied by ${playerID}, it's ${getRet}`);
         return false;
       }
     }
-    let ret = await this.dir.getRedis().delAsync([mapCoord.toRedisKey()]);
+    const ret = await this.dir.getRedis().delAsync([mapCoord.toRedisKey()]);
     if (ret === 1) {
       return true;
     }
