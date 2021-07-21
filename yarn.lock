@@ -1480,6 +1480,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"hitcon-online-dialog@workspace:extensions/dialog":
+  version: 0.0.0-use.local
+  resolution: "hitcon-online-dialog@workspace:extensions/dialog"
+  languageName: unknown
+  linkType: soft
+
 "hitcon-online-extlib@workspace:common/extlib":
   version: 0.0.0-use.local
   resolution: "hitcon-online-extlib@workspace:common/extlib"
