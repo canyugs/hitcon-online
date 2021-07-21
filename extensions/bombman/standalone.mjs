@@ -1,6 +1,8 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
+import {LAYER_BOMB} from './client.mjs';
+
 const BOMB_COUNTDOWN = 3000; // millisecond
 
 /**
@@ -33,11 +35,11 @@ class Standalone {
         type: 'set',
         cellSet: {
           mapName: mapName,
-          name: 'bombmanHasBomb',
+          name: LAYER_BOMB.layerName,
           priority: 3,
           cells: Array.from(this.bombCells.values()),
           layers: [
-            {ground: 'B'}, // TODO: draw a bomb, maybe in layer 'item'?
+            {[LAYER_BOMB.layerName]: 'B'}, // TODO: draw a bomb, maybe in layer 'item'?
           ],
         },
       });
@@ -83,7 +85,7 @@ class Standalone {
       type: 'update',
       cellSet: {
         mapName: mapCoord.mapName,
-        name: 'bombmanHasBomb',
+        name: LAYER_BOMB.layerName,
         cells: Array.from(this.bombCells.values()),
       },
     });
@@ -95,7 +97,7 @@ class Standalone {
         type: 'update',
         cellSet: {
           mapName: mapCoord.mapName,
-          name: 'bombmanHasBomb',
+          name: LAYER_BOMB.layerName,
           cells: Array.from(this.bombCells.values()),
         },
       });

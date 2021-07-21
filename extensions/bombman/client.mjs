@@ -1,6 +1,9 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
+const LAYER_BOMB = {zIndex: 5, layerName: 'bombmanHasBomb'};
+const LAYER_OBSTACLE = {zIndex: 1, layerName: 'bombmanObstacle'};
+
 const keyboardMapping = {
   place: ' ',
 };
@@ -26,6 +29,9 @@ class Client {
   async gameStart() {
     this.helper.inputManager.registerKeydown(this.helper.mapRenderer.getCanvas(), this.placeBomb.bind(this));
     // TODO: player cool down
+
+    this.helper.mapRenderer.registerCustomizedLayerToDraw(LAYER_OBSTACLE.zIndex, LAYER_OBSTACLE.layerName);
+    this.helper.mapRenderer.registerCustomizedLayerToDraw(LAYER_BOMB.zIndex, LAYER_BOMB.layerName);
   }
 
   /**
@@ -45,3 +51,8 @@ class Client {
 }
 
 export default Client;
+
+export {
+  LAYER_BOMB,
+  LAYER_OBSTACLE,
+};

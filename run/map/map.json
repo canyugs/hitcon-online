@@ -112,7 +112,7 @@
           { "x": 6, "y": 3, "w": 1, "h": 1 }
         ],
         "layers": [
-          { "ground": "O" },
+          { "bombmanObstacle": "O" },
           { "wall": true }
         ]
       }

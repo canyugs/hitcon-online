@@ -47,6 +47,15 @@ class MapRenderer {
         this.setViewerPosition(loc.mapCoord, 0.5, 0.5);
       }
     });
+
+    /**
+     * @member {Array} customizedLayers - Customized layer that needs to be rendered.
+     * Every element is a pair (`zIndex`, `layerName`).
+     * The definition of `zIndex` is the same as that in CSS except that only
+     * integer is accepted here (CSS allows a keyword 'auto').
+     * `customizedLayers` should always be sorted.
+     */
+    this.customizedLayers = [[10, 'player']]; // 'player' is a layer defined and used by only MapRenderer
   }
 
   /**
@@ -127,27 +136,47 @@ class MapRenderer {
   }
 
   /**
-   * Draw everything onto the canvas.
-   * @return {Boolean} success - Return true if successful.
+   * Register a customized layer for drawing. Commonly used by extension.
+   * @param {Number} zIndex - Should be an integer.
+   * @param {String} layerName - The layer to be drawn.
    */
-  draw() {
-    if (this.viewportFollow === null) {
-      // not initialized
-      return false;
-    }
-
-    let ret = true;
-    ret &&= this._drawGround();
-    ret &&= this._drawPlayers();
-
-    return ret;
+  registerCustomizedLayerToDraw(zIndex, layerName) {
+    // TODO: use binary search and Array.prototype.splice() to improve performance
+    this.customizedLayers.push([zIndex, layerName]);
+    this.customizedLayers.sort((a, b) => a[0] - b[0]);
   }
 
   /**
-   * Draw layer "ground" onto the canvas.
+   * Draw everything onto the canvas.
+   */
+  draw() {
+    // if not initialized
+    if (this.viewportFollow === null) return;
+
+    // draw background
+    this._drawEveryCellWrapper(this._drawLayer.bind(this, 'ground'));
+
+    // draw foreground
+    for (const [, layerName] of this.customizedLayers) {
+      if (layerName === 'player') {
+        this._drawPlayers();
+      } else {
+        this._drawEveryCellWrapper(this._drawLayer.bind(this, layerName));
+      }
+    }
+  }
+
+  /**
+   * This function is the argument of _drawEveryCellWrapper(fn).
+   * @callback drawOneCellFunction
+   * @param {MapCoord} mapCoord - The map coordinate to be drawn.
    * @return {Boolean} success - Return true if successful.
    */
-  _drawGround() {
+  /**
+   * This is a wrapper function that calls fn to draw every cell on screen.
+   * @param {drawOneCellFunction} fn - The function that draws a given cell.
+   */
+  _drawEveryCellWrapper(fn) {
     const firstCellMapCoordFloat = this.canvasToMapCoordinate(0, this.canvas.height);
     const firstCellMapCoordInt = {
       x: Math.floor(firstCellMapCoordFloat.x),
@@ -160,32 +189,40 @@ class MapRenderer {
     };
     const mapSize = this.map.getMapSize(this.viewerPosition.mapName);
 
-    const ret = true;
     for (let mapY = firstCellMapCoordInt.y; mapY <= lastCellMapCoordInt.y; ++mapY) {
       for (let mapX = firstCellMapCoordInt.x; mapX <= lastCellMapCoordInt.x; ++mapX) {
         if (mapX < 0 || mapX >= mapSize.width || mapY < 0 || mapY >= mapSize.height) continue;
         const coord = new MapCoord(this.viewerPosition.mapName, mapX, mapY);
-        const renderInfo = this.map.getCellRenderInfo(coord, 'ground');
-        const canvasCoordinate = this.mapToCanvasCoordinate(coord);
-        this.ctx.drawImage(
-            renderInfo.image,
-            renderInfo.srcX,
-            renderInfo.srcY,
-            renderInfo.srcWidth,
-            renderInfo.srcHeight,
-            canvasCoordinate.x,
-            canvasCoordinate.y - renderInfo.srcHeight,
-            mapCellSize,
-            mapCellSize,
-        );
+        fn(coord);
       }
     }
-    return ret;
+  }
+
+  /**
+   * Draw layer "ground" of mapCoord onto the canvas.
+   * @param {String} layerName - The layer to be drawn.
+   * @param {MapCoord} mapCoord - The map coordinate to be drawn.
+   */
+  _drawLayer(layerName, mapCoord) {
+    const renderInfo = this.map.getCellRenderInfo(mapCoord, layerName);
+    if (renderInfo === null) return;
+
+    const canvasCoordinate = this.mapToCanvasCoordinate(mapCoord);
+    this.ctx.drawImage(
+        renderInfo.image,
+        renderInfo.srcX,
+        renderInfo.srcY,
+        renderInfo.srcWidth,
+        renderInfo.srcHeight,
+        canvasCoordinate.x,
+        canvasCoordinate.y - renderInfo.srcHeight,
+        mapCellSize,
+        mapCellSize,
+    );
   }
 
   /**
    * Draw players onto the canvas.
-   * @return {Boolean} success - Return true if successful.
    */
   _drawPlayers() {
     const players = this.gameState.getPlayers();
@@ -225,7 +262,6 @@ class MapRenderer {
       this.ctx.fillText(displayName, canvasCoordinate.x, canvasCoordinate.y);
     }
     this.ctx.restore();
-    return true;
   }
 }
 

@@ -29,12 +29,16 @@
         "base",
         15,
         1
-      ],
+      ]
+    },
+    "bombmanObstacle": {
       "O": [
         "base",
-        11,
-        14
-      ],
+        6,
+        12
+      ]
+    },
+    "bombmanHasBomb": {
       "B": [
         "base",
         15,
