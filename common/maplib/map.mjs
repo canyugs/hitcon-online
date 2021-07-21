@@ -342,7 +342,7 @@ class _SingleGameMap {
    * Get the raw cell content at the coordinate.
    * @param {MapCoord} coord - The map coordinate.
    * @param {String} layer - The raw layer designation.
-   * @return {String} cell - The raw content of the cell. '' if any error.
+   * @return {String} cell - The raw content of the cell. `null` if not exist.
    */
   getCell(coord, layer) {
     const {x, y} = coord;
@@ -372,8 +372,8 @@ class _SingleGameMap {
    * Return the information required to render the a cell.
    * @param {MapCoord} coord - The map coordinate.
    * @param {String} layer - The raw layer designation.
-   * @return {Object} info - An object denoting the image information. It
-   * should contain:
+   * @return {Object} info - Return `null` if not exist.
+   * An object denoting the image information. It should contain:
    * - image: The HTMLImageElement for the image from which to render the tile.
    *   If we are not running on the browser or GraphicAsset.loadAssets() is not
    *   called. This field may be absent.
@@ -385,6 +385,7 @@ class _SingleGameMap {
    */
   getCellRenderInfo(coord, layer) {
     const tile = this.getCell(coord, layer);
+    if (tile === null) return null;
     return this.graphicAsset.getTile(layer, tile);
   }
 }
