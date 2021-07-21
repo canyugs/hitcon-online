@@ -51,6 +51,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         "reference": "workspace:extensions/chat"
       },
       {
+        "name": "hitcon-online-dialog",
+        "reference": "workspace:extensions/dialog"
+      },
+      {
         "name": "hitcon-online-helloworld",
         "reference": "workspace:extensions/helloworld"
       },
@@ -83,6 +87,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
       ["hitcon-online-bombman", ["workspace:extensions/bombman"]],
       ["hitcon-online-cellsettest", ["workspace:extensions/cellsettest"]],
       ["hitcon-online-chat", ["workspace:extensions/chat"]],
+      ["hitcon-online-dialog", ["workspace:extensions/dialog"]],
       ["hitcon-online-extlib", ["workspace:common/extlib"]],
       ["hitcon-online-game-client", ["workspace:sites/game-client"]],
       ["hitcon-online-gateway", ["workspace:services/gateway"]],
@@ -1949,6 +1954,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./extensions/chat/",
           "packageDependencies": [
             ["hitcon-online-chat", "workspace:extensions/chat"]
+          ],
+          "linkType": "SOFT",
+        }]
+      ]],
+      ["hitcon-online-dialog", [
+        ["workspace:extensions/dialog", {
+          "packageLocation": "./extensions/dialog/",
+          "packageDependencies": [
+            ["hitcon-online-dialog", "workspace:extensions/dialog"]
           ],
           "linkType": "SOFT",
         }]
