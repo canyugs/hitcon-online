@@ -53,7 +53,7 @@ class GatewayService {
     await this.rpcHandler.registerAsGateway();
     this.rpcHandler.registerRPC('callS2c', this.callS2c.bind(this));
     this.rpcHandler.registerRPC('teleport', async (serviceName, playerID, mapCoord, facing) => {
-      return await this.teleportPlayer(playerID, mapCoord, facing);
+      return await this.teleportPlayer(playerID, new MapCoord(mapCoord.mapName, mapCoord.x, mapCoord.y), facing);
     });
     this.servers = [];
     await this.extMan.createAllInGateway(this.rpcHandler, this);
