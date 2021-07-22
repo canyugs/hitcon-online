@@ -4,14 +4,11 @@
 // Boilerplate for getting require() in es module.
 import {createRequire} from 'module';
 const require = createRequire(import.meta.url);
-
-import assert from 'assert';
 const {Server} = require('socket.io');
-const config = require('config');
-const movingRequestThreshold = config.get('movingRequestThreshold');
+
 
 import {MapCoord} from '../../common/maplib/map.mjs';
-
+import MoveRule  from '../../common/maplib/move-rule.mjs';
 /**
  * This class handles the connections from the client and does the most
  * processing required to service the client.
@@ -39,7 +36,7 @@ class GatewayService {
     // A map that tracks the current connected clients.
     // key is the player ID. value is the socket.
     this.socks = {};
-
+    this.moveRule = new MoveRule();
   }
 
   /**
@@ -267,23 +264,23 @@ class GatewayService {
       console.error(`Invalid lastCoord in onUserLocation ${lastCoord}`);
       return;
     }
-    if (!this._movementRequestSpeedCheck(socket.playerData)) {
+    if (!this.moveRule.movementRequestSpeedCheck(socket.playerData)) {
       console.warn(`Player ${msg.playerID} is overspeed.`);
       return;
     }
-    // TODO(whyang9701): Move this into the library as well.
-    if (!(lastCoord.mapName === msg.mapCoord.mapName)) {
+    //target coord is in the same map
+    if(!this.moveRule.sameMapCheck(socket.playerData.mapCoord,msg.mapCoord)){
       console.warn(`Player ${msg.playerID} changed map from ` +
         `${lastCoord.mapName} to ${msg.mapCoord.mapName} without permission.`);
       return;
     }
     // target position is in the map
-    if (!this._borderCheck(msg.mapCoord,mapSize)) {
+    if (!this.moveRule.borderCheck(msg.mapCoord,mapSize)) {
       console.warn(`Player ${msg.playerID} is trying to go outside the map.`);
       return;
     }
     // nearby grid check
-    if (!this._nearbyGridCheck(msg.mapCoord,lastCoord)) {
+    if (!this.moveRule.nearbyGridCheck(msg.mapCoord,lastCoord)) {
       console.warn(`Player ${msg.playerID} is trynig to teleport.`);
       return;
     }
@@ -348,39 +345,7 @@ class GatewayService {
     return true;
   }
 
-  // TODO(whyang9701): Move this into map.mjs.
-  _getManhattanDistance(a,b){
-    return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
-  }
 
-  _borderCheck(coord,mapSize){
-    if (coord.x >= mapSize.width || coord.x < 0) {
-      return false;
-    }
-    if (coord.y >= mapSize.height || coord.y < 0) {
-      return false;
-    }
-    return true;
-  }
-
-  _nearbyGridCheck(coord,lastCoord){
-    let distanceSquire = this._getManhattanDistance(lastCoord,coord);
-    if (distanceSquire > 1) {
-      return false;
-    } 
-    return true;
-  }
-
-  _movementRequestSpeedCheck(playerData){
-    if (playerData.lastMovingTime === undefined) {
-      console.log('player has no last time record')
-      return false;
-    }
-    if (Date.now() - playerData.lastMovingTime < movingRequestThreshold ){
-      return false;
-    }
-    return true;
-  }
 
   /**
    * Mark the cell specified by mapCoord as occupied by playerID.
