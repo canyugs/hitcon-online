@@ -17,13 +17,19 @@ OVERLAY_DIV.set(OverlayPosition.RIGHT, 'overlay-right');
 OVERLAY_DIV.set(OverlayPosition.MAIN_VIEW, 'main-view');
 
 /**
- * TODO(fanlan1210)
+ * MainUI composes components into a window, 
+ * components are classified into Notification, Toolbar, Overlay and Modal.
  */
 class MainUI {
   /**
   * TODO(fanlan1210)
+  * 
+  * Create a MainUI.
+  * @param {String} rootID - id of root DOM element
+  * @param {String} NotifyID - id of NotificationBar DOM element
+  * @param {String} ToolbarID - id of Toolbar DOM element
   */
-  constructor() {
+  constructor(rootID, NotifyID, ToolbarID = 'toolbar') {
     this.state = UIState.NORMAL_UI;
     this.overlays = new Map();
 
@@ -36,6 +42,8 @@ class MainUI {
     for (const [pos, div] of OVERLAY_DIV.entries()) {
       this.overlayDom[pos] = document.getElementById(div);
     }
+
+    this.toolbarDom = document.getElementById(ToolbarID);
   }
 
   /**
@@ -65,7 +73,9 @@ class MainUI {
    * @param target The element which wants add button, should be an Overlay or Modal.
    */
   addToolbarButton(target) {
-    // TODO(fanlan1210)
+    // WIP(fanlan1210)
+    target.initializeToolbarButton();
+    this.toolbarDom.appendChild(target.toolbarButton);
   }
 
   /**
@@ -74,7 +84,8 @@ class MainUI {
    * @param target The element which wants remove button, should be an Overlay or Modal.
    */
   removeToolbarButton(target) {
-    // TODO(fanlan1210)
+    // WIP(fanlan1210)
+    this.toolbarDom.removeChild(target.toolbarButton);
   }
 
   // TODO: Stack visualization? Stack height limit?
