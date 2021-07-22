@@ -39,6 +39,17 @@ class Overlay {
   }
   
   /**
+   * when MainUI wants to add ToolbarButton, this method should be called.
+   * 
+   * create a button element with icon.
+   */
+  initializeToolbarButton(){
+      this.toolbarButton = document.createElement('button');
+      // TODO: load icon asset into button
+      //this.toolbarButton.innerHTML = iconSvg;
+  }
+
+  /**
    * Unset ToolbarButton display=none.
    */
   showToolbarButton() {
