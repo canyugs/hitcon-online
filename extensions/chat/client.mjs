@@ -76,7 +76,7 @@ Usage: !/<Command> <arg1> <arg2> ...
    * @handleCommand
    * @param {string} cmd - the command including arguments
    */
-  handleCommand(cmd){
+  async handleCommand(cmd){
     if(cmd === '!/help'){
       this.listCommand();
     }
@@ -94,8 +94,14 @@ Usage: !/<Command> <arg1> <arg2> ...
       }
     }
     else{
-      document.getElementById('message_history').innerHTML += '<span>Invalid Command</span><br>';
-      this.listCommand();
+      const result = await Promise.resolve(this.helper.callC2sAPI(null, 'adminCommand', 5000));
+      if(result.state){
+        document.getElementById('message_history').innerHTML += '<span>' + this.HTMLEncode(result) + '</span><br>';
+      }
+      else{
+        document.getElementById('message_history').innerHTML += '<span>Invalid Command</span><br>';
+        this.listCommand();
+      }
     }
   }
 

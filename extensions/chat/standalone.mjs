@@ -54,7 +54,19 @@ class Standalone {
    */
   async c2s_teleport(player, mapCoord){
     console.log('Teleport to ' + mapCoord.mapName + ' (' + mapCoord.x + ', '+ mapCoord.y + ')');
-    await this.helper.teleport(player.playerID, mapCoord);
+    console.log(await this.helper.teleport(player.playerID, mapCoord));
+    console.log('haha');
+  }
+
+  /**
+   * Handle commands that only admin can use
+   * @c2s_adminCommand
+   * @param {string} cmd - command input by user
+   * @return {object} result - the result of admin command, state will be false if command not found
+   */
+  async c2s_adminCommand(cmd){
+    result = {'state': false, 'reply': ''}
+    return result;
   }
 
   /**
