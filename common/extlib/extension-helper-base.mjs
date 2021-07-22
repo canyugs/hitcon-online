@@ -106,6 +106,18 @@ class ExtensionHelperBase {
   }
 
   /**
+   * @param {String} playerID - The ID of the player to call.
+   * @param {MapCoord} mapCoord - including map, x, y.
+   * @param {object} args - The arguments.
+   * @return {object} result - The result from the call.
+   */
+  async teleport(playerID, mapCoord, ...args){
+    const playerService = await this.dir.getPlayerGatewayService(playerID);
+    const result = await this.rpcHandler.callRPC(playerService, 'teleport', playerID, mapCoord, 'D');
+    return result;
+  }
+
+  /**
    * Call the API of another extension.
    * @param {String} extName - The name of the extension. Leave empty
    * for current extension.
