@@ -40,10 +40,10 @@ class Client {
 
   send_msg(client){
     return async function(evt){
-      if(evt.keyCode == 13){
-        let message_to_id = document.getElementById('message_to');
-        let chat_message_id = document.getElementById('chat_message');
-        if(chat_message_id.value.substring(0, 2) == "!/"){
+      if(evt.keyCode === 13){
+        const message_to_id = document.getElementById('message_to');
+        const chat_message_id = document.getElementById('chat_message');
+        if(chat_message_id.value.substring(0, 2) === "!/"){
             client.handleCommand(chat_message_id.value.trim());
         }
         else if(message_to_id.value){
@@ -57,6 +57,10 @@ class Client {
     }
   }
     
+  /**
+   * List the user command for player
+   * @listCommand
+   */
   listCommand(){
     document.getElementById('message_history').innerHTML += "<pre>" + 
     this.HTMLEncode(`
@@ -67,11 +71,16 @@ Usage: !/<Command> <arg1> <arg2> ...
     
   }
 
+  /**
+   * Handle the command from client
+   * @handleCommand
+   * @param {string} cmd - the command including arguments
+   */
   handleCommand(cmd){
-    if(cmd == '!/help'){
+    if(cmd === '!/help'){
       this.listCommand();
     }
-    else if(cmd.split(" ")[0] == '!/teleport'){
+    else if(cmd.split(" ")[0] === '!/teleport'){
       var mapCoord = this.helper.gameClient.playerInfo.mapCoord;
       mapCoord.mapName = cmd.split(" ")[1];
       mapCoord.x = cmd.split(" ")[2];
@@ -90,18 +99,38 @@ Usage: !/<Command> <arg1> <arg2> ...
     }
   }
 
+  /**
+   * Encode the html in case of XSS
+   * @HTMLEncode
+   * @param {string} str - the string being encoded
+   */
   HTMLEncode(str){
     return $('<div/>').text(str).html()
   }
 
+  /**
+   * Get a private message from other player
+   * @s2c_getPrivateMessage
+   * @param {object} arg - Information of the private message
+   */
   s2c_getPrivateMessage(arg){
     document.getElementById('message_history').innerHTML += '<span>Private Message From ' + this.HTMLEncode(arg.msg_from) + ': ' + this.HTMLEncode(arg.msg) + '</span><br>';
   }
 
+  /**
+   * Display a private message after sending the private message to other player
+   * @s2c_senderPrivateMessage
+   * @param {object} arg - Information of the private message
+   */
   s2c_sendedPrivateMessage(arg){
     document.getElementById('message_history').innerHTML += '<span>Private Message To ' + this.HTMLEncode(arg.msg_to) + ': ' + this.HTMLEncode(arg.msg) + '</span><br>';
   }
 
+  /**
+   * Get a Broadcast message
+   * @onExtensionBroadcast
+   * @param {object} arg - Information of the broadcast message
+  */
   onExtensionBroadcast(arg){
     arg.msg_from = $('<div/>').text(arg.msg_from).html()
     arg.msg = $('<div/>').text(arg.msg).html()
