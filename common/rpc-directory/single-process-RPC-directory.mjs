@@ -29,6 +29,27 @@ class SingleProcessRPCDirectory extends Directory {
   }
 
   /**
+   * Call an RPC method.
+   * Should be called via Handler, do not called this method directly.
+   * @param {String} callerServiceName - The name of the caller service.
+   * @param {String} serviceName - The name of the service.
+   * @param {String} methodName - The name of the method.
+   * @param {Object} args - The arguments.
+   * @return {Object} result - The result of the call.
+   */
+  async callRPC(callerServiceName, serviceName, methodName, ...args) {
+    void [callerServiceName, serviceName, methodName, args];
+    if(!(serviceName in this.handlers)){
+      throw `Service ${serviceName} not found.`;
+    }
+    if(!(methodName in this.handlers[serviceName].methods)){
+      throw `Method ${methodName} not found.`;
+    }
+
+    return await this.handlers[serviceName].methods[methodName](callerServiceName, ...args);
+  }
+
+  /**
    * Register a service
    * @param {string} name - The name of the service.
    * @return {Handler} handler - The handler object for the registered

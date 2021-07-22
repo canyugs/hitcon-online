@@ -14,14 +14,12 @@
 - Spawn Point
 - Settings Dialog
 - Disconnect/Error Screen/Handler
-- dynamic cellSet support
-  - extension APIs
-  - broadcaster/gateway
 - Bomb man extension
 - Optimize cellSet performance
 
-- Multimap support
-  - GameMap
-  - GameState
-  - All Area Broadcaster
-  - Gateway Service
+- maplib
+  - move game-state.mjs out
+  - create map-utils.mjs
+    - class MapCoord
+    - class CellSet
+    - utility function: tells if a MapCoord is inside a CellSet

@@ -1,6 +1,7 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
+import {MapCoord} from '/static/common/maplib/map.mjs';
 
 /**
  * The game client. This is in charge of interacting with the gateway service
@@ -70,6 +71,9 @@ class GameClient {
         // Note: The method below is async but we ignore its promise.
         this.extMan.onExtensionBroadcast(msg);
       });
+      socket.on('cset', (cset) => {
+        this.gameState.onCellSet(cset);
+      });
       socket.on('callS2cAPI', (msg, callback) => {
         let p = this.extMan.onS2cAPICalled(msg);
         p.then((result) => {
@@ -88,19 +92,20 @@ class GameClient {
       console.assert('Duplicate game start event.');
       return;
     }
-    let pi = this.playerInfo;
+    const pi = this.playerInfo;
     pi.playerID = msg.playerData.playerID;
     pi.displayName = msg.playerData.displayName;
     pi.displayChar = msg.playerData.displayChar;
-    let p = this.gameState.getPlayer(pi.playerID);
-    [pi.x, pi.y, pi.facing] = [p.x, p.y, p.facing];
-    console.log('Game starting');
+    const p = this.gameState.getPlayer(pi.playerID);
+    pi.mapCoord = MapCoord.fromObject(p.mapCoord);
+    pi.facing = p.facing;
+    console.log('Game started.');
 
     this.gameStarted = true;
     this.gameState.registerPlayerLocationChange((loc) => {
       if (loc.playerID == this.playerInfo.playerID) {
-        [this.playerInfo.x, this.playerInfo.y, this.playerInfo.facing] =
-            [loc.x, loc.y, loc.facing];
+        this.playerInfo.mapCoord = MapCoord.fromObject(loc.mapCoord);
+        this.playerInfo.facing = loc.facing;
         // Notify the extensions as well.
         this.extMan.notifySelfLocationUpdate(loc);
       }
@@ -113,7 +118,7 @@ class GameClient {
    * Initialize the inputs for the game.
    */
   _initializeInputs() {
-    this.inputManager.onMove((direction) => {
+    this.inputManager.registerMapMove((direction) => {
       this.onDirection(direction);
     });
   }
@@ -124,14 +129,15 @@ class GameClient {
    */
   async onDirection(direction) {
     console.log(`On direction ${direction}`);
+    const {x, y} = this.playerInfo.mapCoord;
     if (direction == 'U') {
-      await this.moveTo(this.playerInfo.x, this.playerInfo.y-1, 'U');
+      await this.moveTo(x, y+1, 'U');
     } else if (direction == 'D') {
-      await this.moveTo(this.playerInfo.x, this.playerInfo.y+1, 'D');
+      await this.moveTo(x, y-1, 'D');
     } else if (direction == 'L') {
-      await this.moveTo(this.playerInfo.x-1, this.playerInfo.y, 'L');
+      await this.moveTo(x-1, y, 'L');
     } else if (direction == 'R') {
-      await this.moveTo(this.playerInfo.x+1, this.playerInfo.y, 'R');
+      await this.moveTo(x+1, y, 'R');
     }
   }
 
@@ -142,9 +148,10 @@ class GameClient {
    * @param {string} facing
    */
   async moveTo(x, y, facing) {
-    let loc = {};
-    [loc.x, loc.y, loc.facing] = [x, y, facing];
-    this.socket.emit('location', loc);
+    this.socket.emit('location', {
+      mapCoord: new MapCoord(this.playerInfo.mapCoord.mapName, x, y),
+      facing: facing,
+    });
   }
 
   /**

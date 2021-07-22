@@ -38,10 +38,18 @@ class ClientExtensionHelper {
    * This is called when the game starts.
    * @param {GameMap} gameMap - The GameMap object.
    * @param {GameState} gameState - The GameState object.
+   * @param {GameClient} gameClient
+   * @param {InputManager} inputManager
+   * @param {MapRenderer} mapRenderer
+   * @param {MainUI} mainUI
    */
-  async gameStart(gameMap, gameState) {
+  async gameStart(gameMap, gameState, gameClient, inputManager, mapRenderer, mainUI) {
     this.gameMap = gameMap;
     this.gameState = gameState;
+    this.gameClient = gameClient;
+    this.inputManager = inputManager;
+    this.mapRenderer = mapRenderer;
+    this.mainUI = mainUI;
   }
 
   /**

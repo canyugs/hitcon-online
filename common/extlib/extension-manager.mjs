@@ -28,10 +28,14 @@ class ExtensionManager {
    * @param {Directory} directory - An RPC Directory instance.
    * @param {AllAreaBroadcaster} broadcaster - A broadcaster for broadcasting
    * message.
+   * @param {GameMap} gameMap
+   * @param {GameState} gameState
    */
-  constructor(directory, broadcaster) {
+  constructor(directory, broadcaster, gameMap, gameState) {
     this.dir = directory;
     this.broadcaster = broadcaster;
+    this.gameMap = gameMap;
+    this.gameState = gameState;
     // This maps the extension name to an object that have the following:
     // standaloneClass - The standalone class of the extension.
     // inGatewayClass - The inGateway class of the extension.
@@ -102,13 +106,10 @@ class ExtensionManager {
 
     // TODO: Check if already created?
     this.ext[name].standaloneHelper = new ExtensionHelperStandalone(
-        this, this.dir, this.broadcaster, name);
+        this, this.dir, this.broadcaster, name, this.gameMap, this.gameState);
     this.ext[name].standalone = new this.ext[name].standaloneClass(
         this.ext[name].standaloneHelper);
     await this.ext[name].standaloneHelper.asyncConstructor(this.ext[name].standalone);
-    if (typeof this.ext[name].standalone.initialize === 'function') {
-      await this.ext[name].standalone.initialize();
-    }
   }
 
   /**
@@ -142,7 +143,7 @@ class ExtensionManager {
 
     // TODO: Check if already created?
     this.ext[name].inGatewayHelper = new ExtensionHelperInGateway(
-        this, this.dir, rpcHandler, gateway, this.broadcaster, name);
+        this, this.dir, rpcHandler, gateway, this.broadcaster, name, this.gameMap, this.gameState);
     await this.ext[name].inGatewayHelper.asyncConstructor();
     this.ext[name].inGateway = new this.ext[name].inGatewayClass(
         this.ext[name].inGatewayHelper);
@@ -173,7 +174,7 @@ class ExtensionManager {
    */
   async createAllInGateway(rpcHandler, gateway) {
     for (const extName of this.listExtensions()) {
-      await this.createExtensionInGateway(extName, rpcHandler, gateway);
+      await this.createExtensionInGateway(extName, rpcHandler, gateway, this.gameMap, this.gameState);
     }
   }
 

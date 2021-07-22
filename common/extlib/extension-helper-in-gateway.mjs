@@ -17,13 +17,15 @@ class ExtensionHelperInGateway extends ExtensionHelperBase {
    * @param {ExtensionManager} extMan - The extension manager.
    * @param {Directory} dir - An RPC Directory instance.
    * @param {RPCHandler} rpcHandler - The RPC Handler for the gateway service.
-   * @param {GatewayService) gateway - The gateway service object.
+   * @param {GatewayService} gateway - The gateway service object.
    * @param {AllAreaBroadcaster} broadcaster - A broadcaster for broadcasting
    * message.
    * @param {string} name - The name of the extension.
+   * @param {GameMap} gameMap
+   * @param {GameState} gameState
    */
-  constructor(extMan, dir, rpcHandler, gateway, broadcaster, name) {
-    super(extMan, dir, rpcHandler, broadcaster, name);
+  constructor(extMan, dir, rpcHandler, gateway, broadcaster, name, gameMap, gameState) {
+    super(extMan, dir, rpcHandler, broadcaster, name, gameMap, gameState);
     this.gateway = gateway;
   }
 

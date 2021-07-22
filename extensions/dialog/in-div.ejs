@@ -1,0 +1,48 @@
+<style>
+  .dialog {
+    background: rgb(245, 237, 237);
+    display: flex;
+    box-sizing: border-box;
+    flex-direction: column;
+    padding: 5px 10px;
+    border: gray solid 3px;
+  }
+  #npcName {
+    background: white;
+    width: 200px;
+    margin: 5px 0px;
+    border: gray solid 3px;
+    padding: 3px;
+  }
+  #npcSentence {
+    background: white;
+    height: 50px;
+    width: 300px;
+    margin: 10px 0px;
+    border: gray solid 3px;
+    padding: 3px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  #checkButtonDiv {
+    display: flex;
+    flex-direction: row;
+    justify-content: right;
+  }
+  .button {
+    margin-left: 5px;
+  }
+</style>
+
+<div>
+  <button id="c2sButton">get dialog</button>
+</div>
+
+<div class="dialog">
+  <h3 id="npcName"></h3>
+  <p id="npcSentence"></p>
+  <div id="checkButtonDiv">
+    <!-- <button id="button">OK</button> -->
+  </div>
+</div>

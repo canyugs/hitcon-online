@@ -47,15 +47,9 @@ class Handler {
    */
   async callRPC(serviceName, methodName, ...args) {
     void [serviceName, methodName, args];
-    if(!(serviceName in this.RPCDirectory.handlers)){
-      throw `Service ${serviceName} not found.`;
-    }
-    if(!(methodName in this.RPCDirectory.handlers[serviceName].methods)){
-      throw `Method ${methodName} not found.`;
-    }
 
     try {
-      return await this.RPCDirectory.handlers[serviceName].methods[methodName](this.serviceName, ...args); // now it only takes list, WIP...
+      return await this.RPCDirectory.callRPC(this.serviceName, serviceName, methodName, ...args)
     } catch (e) {
       console.error(`Error calling rpc function ${methodName} of ${serviceName}`);
       console.error(e);

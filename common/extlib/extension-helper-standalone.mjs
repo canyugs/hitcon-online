@@ -20,9 +20,11 @@ class ExtensionHelperStandalone extends ExtensionHelperBase {
    * @param {AllAreaBroadcaster} broadcaster - A broadcaster for broadcasting
    * message.
    * @param {string} name - The name of the extension.
+   * @param {GameMap} gameMap
+   * @param {GameState} gameState
    */
-  constructor(extMan, dir, broadcaster, name) {
-    super(extMan, dir, undefined, broadcaster, name);
+  constructor(extMan, dir, broadcaster, name, gameMap, gameState) {
+    super(extMan, dir, undefined, broadcaster, name, gameMap, gameState);
   }
 
   /**
@@ -75,7 +77,7 @@ class ExtensionHelperStandalone extends ExtensionHelperBase {
     try {
       return await this.ext[actualMethodName](player, ...args);
     } catch (e) {
-      console.error(`Exception ${e} calling standalone[${actualMethodName}]`);
+      console.error(`Exception "${e}" when calling standalone[${actualMethodName}]`);
       // Full exception detailed NOT provided for security reason.
       return {'error': 'exception'};
     }
@@ -101,9 +103,8 @@ class ExtensionHelperStandalone extends ExtensionHelperBase {
    * write operation in the background.
    * @param {object} data - The data to store.
    */
-  storeData(data) {
-    void data;
-    assert.fail('Not implemented');
+  async storeData(data) {
+    await this.dir.storage.saveData(`ext_${this.name}`, data);
   }
 
   /**
@@ -112,9 +113,9 @@ class ExtensionHelperStandalone extends ExtensionHelperBase {
    * empty object.
    * @return {object} data - The stored data.
    */
-  loadData() {
-    assert.fail('Not implemented');
-    return {};
+  async loadData() {
+    data = await this.dir.storage.loadData(`ext_${this.name}`)
+    return data;
   }
 }
 

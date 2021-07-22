@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package RPC;
+
+service RPC {
+  rpc callRPC (RPCRequest) returns (RPCResponse) {}
+}
+
+message RPCRequest {
+  string serviceName = 1;
+  string methodName = 2;
+  string callerServiceName = 3;
+  string args = 4;
+}
+
+message RPCResponse{
+  string response = 1;
+}

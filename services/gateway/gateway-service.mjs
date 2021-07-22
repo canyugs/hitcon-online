@@ -8,8 +8,10 @@ const require = createRequire(import.meta.url);
 import assert from 'assert';
 const {Server} = require('socket.io');
 const config = require('config');
+const movingRequestThreshold = config.get('movingRequestThreshold');
 
-import { get } from 'http';
+import {MapCoord} from '../../common/maplib/map.mjs';
+
 /**
  * This class handles the connections from the client and does the most
  * processing required to service the client.
@@ -21,20 +23,23 @@ class GatewayService {
    * At the time when this is called, other services are NOT constructed yet.
    * @constructor
    * @param {Directory} dir - The RPCDirectory for calling other services.
-   * @param {Map} gameMap - The world map for this game.
+   * @param {GameMap} gameMap - The world map for this game.
    * @param {AuthServer} authServer - Auth server for verifying the token.
-   * @param {AllAreaBroadcaster} broadcaster - The broadcaster of game state
+   * @param {io} io - Socket.io object.
+   * @param {ExtensionManager} extMan - Extension Manager object.
    * and player locations.
    */
-  constructor(dir, gameMap, authServer, broadcaster, extMan) {
+  constructor(dir, gameMap, authServer, broadcaster, io, extMan) {
     this.dir = dir;
     this.gameMap = gameMap;
     this.authServer = authServer;
     this.broadcaster = broadcaster;
+    this.io = io;
     this.extMan = extMan;
     // A map that tracks the current connected clients.
     // key is the player ID. value is the socket.
     this.socks = {};
+
   }
 
   /**
@@ -42,14 +47,31 @@ class GatewayService {
    * At the time this is called, other services and extensions have been
    * created, but their initialize() have not been called.
    */
-  async initialize() {
-    this.rpcHandler = await this.dir.registerService("gatewayServer");
+  async initialize(gatewayServiceName) {
+    this.rpcHandler = await this.dir.registerService(gatewayServiceName);
     this.extMan.setRpcHandlerFromGateway(this.rpcHandler);
     await this.rpcHandler.registerAsGateway();
     this.rpcHandler.registerRPC('callS2c', this.callS2c.bind(this));
+    this.rpcHandler.registerRPC('teleport', async (serviceName, playerID, mapCoord, facing) => {
+      return await this.teleportPlayer(playerID, mapCoord, facing);
+    });
     this.servers = [];
     await this.extMan.createAllInGateway(this.rpcHandler, this);
     await this.extMan.startAllInGateway();
+
+    // register callbacks for All Area Boardcaster
+    this.broadcaster.registerOnLocation((loc) => {
+      // Broadcast the location message.
+      this.io.emit('location', loc);
+    });
+    this.broadcaster.registerOnExtensionBroadcast((bc) => {
+      // Broadcast the extension broadcast.
+      this.io.emit('extBC', bc);
+    });
+    this.broadcaster.registerOnCellSetBroadcast((cset) => {
+      // Broadcast the cell set modification.
+      this.io.emit('cset', cset);
+    });
   }
 
   async callS2c(serviceName, playerID, extName, methodName, timeout, args) {
@@ -163,12 +185,15 @@ class GatewayService {
     }
 
     // Synchronize the state.
-    let firstLocation = {playerID: playerID, displayName:
-      socket.playerData.displayName};
-    firstLocation.x = socket.playerData.x;
-    firstLocation.y = socket.playerData.y;
+    let firstLocation = {playerID: playerID, 
+      displayName: socket.playerData.displayName};
+    firstLocation.mapCoord = socket.playerData.mapCoord;
     firstLocation.facing = 'D';
     firstLocation.displayChar = socket.playerData.displayChar;
+    socket.playerData.lastMovingTime = Date.now();
+    // try occupying grid
+    // TODO: Handle cases when we can't occupy the location.
+    await this._occupyCoord(firstLocation.mapCoord, playerID);
     await this._broadcastUserLocation(firstLocation);
     this.broadcaster.sendStateTransfer(socket);
 
@@ -189,7 +214,7 @@ class GatewayService {
   async onDisconnect(socket, reason) {
     const playerID = socket.decoded_token.sub;
     if (!(playerID in this.socks)) {
-      // This could happen in possible race condition between setting up 
+      // This could happen in possible race condition between setting up
       // on('disconnect') and when we check connection state again.
       console.error(`Player ${playerID} is non-existent when disconnected.`);
       return;
@@ -198,11 +223,15 @@ class GatewayService {
       // This should not happen.
       console.error(`Player ${playerID}'s socket mismatch when disconnected.`);
     }
+
     // Take socket off first to avoid race condition in the await below.
     delete this.socks[playerID];
 
     let lastLocation = {playerID: playerID, removed: true};
     await this._broadcastUserLocation(lastLocation);
+
+    // release grid after disconnection
+    await this._clearOccupy(socket.playerData.mapCoord, playerID);
 
     // Try to unregister the player.
     await this.rpcHandler.unregisterPlayer(playerID);
@@ -214,51 +243,93 @@ class GatewayService {
    * socket.on('location')
    * @param {Socket} socket - The socket from which this is sent.
    * @param {Object} msg - The location message. It includes the following:
-   * - x: The x coordinate
-   * - y: The y coordinate
+   * - mapCoord: The map coordinate, whose type is MapCoord.
    * - facing: One of 'U', 'D', 'L', 'R'. The direction the user is facing.
    * It'll also contain other fields that's added elsewhere.
    * - playerID: The player's ID.
    * - displayName: The name to show for this player.
    * - displayChar: The character asset to display.
    */
-  async onUserLocation(socket, msg) {
+  async onUserLocation(socket, origMsg) {
+    const msg = {};
     msg.playerID = socket.playerID;
     msg.displayName = socket.playerData.displayName;
     msg.displayChar = socket.playerData.displayChar;
+    msg.facing = origMsg.facing;
+    msg.mapCoord = MapCoord.fromObject(origMsg.mapCoord);
     // TODO: Check if facing is valid.
     // TODO: Check if movement is legal.
-    
+
+    const lastCoord = socket.playerData.mapCoord;
+    const mapSize = this.gameMap.getMapSize(lastCoord.mapName);
+    if (lastCoord.x === undefined || lastCoord.y === undefined || lastCoord.mapName === undefined) {
+      // Shouldn't happen, log an error.
+      console.error(`Invalid lastCoord in onUserLocation ${lastCoord}`);
+      return;
+    }
+    if (!this._movementRequestSpeedCheck(socket.playerData)) {
+      console.warn(`Player ${msg.playerID} is overspeed.`);
+      return;
+    }
+    // TODO(whyang9701): Move this into the library as well.
+    if (!(lastCoord.mapName === msg.mapCoord.mapName)) {
+      console.warn(`Player ${msg.playerID} changed map from ` +
+        `${lastCoord.mapName} to ${msg.mapCoord.mapName} without permission.`);
+      return;
+    }
+    // target position is in the map
+    if (!this._borderCheck(msg.mapCoord,mapSize)) {
+      console.warn(`Player ${msg.playerID} is trying to go outside the map.`);
+      return;
+    }
+    // nearby grid check
+    if (!this._nearbyGridCheck(msg.mapCoord,lastCoord)) {
+      console.warn(`Player ${msg.playerID} is trynig to teleport.`);
+      return;
+    }
+    // TODO(whyang9701): Add checks for cells that is marked as blocked
+    // in the map.
+    // TODO: Maybe log any cell collision.
+    await this._teleportPlayerInternal(socket, msg);
+  }
+
+  /**
+   * Teleport the player to the specified map coordinate.
+   * This is an internal function that requires the socket.
+   */
+  async _teleportPlayerInternal(socket, msg) {
+    // try occupy grid
+    const ret = await this._occupyCoord(msg.mapCoord, msg.playerID);
+    // grid has been occupied
+    if(!ret){
+      // Can't move, target is already occupied.
+      return false;
+    }
+
+    //release old grid 
+    socket.playerData.lastMovingTime = Date.now();
+    await this._clearOccupy(socket.playerData.mapCoord, msg.playerID);
     await this._broadcastUserLocation(msg);
-    
-    return;
-    /*
-    // todo : checking movement is ligal
-    // 取出uid 上一個位置
-    // 計算距離< 最大可移動距離
-    // 確認目標點是可以走的
-    let speed = 1; // this can be adjust later
+    return true;
+  }
 
-    let positionA = this.getLastPosition(uid)
-    let positionB = {x:msg.x,y:msg.y};
-    let distanceSquire = this.getDistanceSquare(positionA,positionB);
-
-    //overspeed , are you fly?
-    if(distanceSquire > speed ^ 2){
-      this.broadcastResetUser(socket,uid,positionA.x,positionA.y,positionA.facing)
-      return
+  /**
+   * Teleport the player to the specified map coordinate.
+   */
+  async teleportPlayer(playerID, mapCoord, facing) {
+    if (!(playerID in this.socks)) {
+      console.error(`Can't teleport ${playerID} who is not on our server.`);
+      return false;
     }
+    const socket = this.socks[playerID];
+    const msg = {};
+    msg.playerID = socket.playerID;
+    msg.displayName = socket.playerData.displayName;
+    msg.displayChar = socket.playerData.displayChar;
+    msg.facing = facing;
+    msg.mapCoord = mapCoord;
 
-    //enter none empty grid
-    if(this.checkPositionEmpty(positionB)){
-      this._broadcastResetUser(socket,uid,positionA.x,positionA.y,positionA.facing)
-      return
-    }
-
-    // todo : store user location in server
-
-    //this.broadcastUserLocation(socket,msg);
-    */
+    return this._teleportPlayerInternal(socket, msg);
   }
 
   /**
@@ -268,35 +339,86 @@ class GatewayService {
    * @return {Boolean} success - true if successful.
    */
   async _broadcastUserLocation(msg) {
-    if (msg.playerID in this.socks) {
+    if (msg.playerID in this.socks && !(msg.removed === true)) {
       const playerData = this.socks[msg.playerID].playerData;
-      playerData.x = msg.x;
-      playerData.y = msg.y;
+      playerData.mapCoord = msg.mapCoord;
       await this.dir.setPlayerData(msg.playerID, playerData);
     }
     await this.broadcaster.notifyPlayerLocationChange(msg);
     return true;
   }
 
-  async broadcastResetUser(socket , uid, x, y, facing){
-    socket.broadcast.emit("location",{uid:uid,x:x,y:y,facing:facing});
+  // TODO(whyang9701): Move this into map.mjs.
+  _getManhattanDistance(a,b){
+    return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
   }
 
-  getLastPosition(uid){
-    assert.fail('Not implemented');
-    return {x:0,y:0,facing:'up'}
+  _borderCheck(coord,mapSize){
+    if (coord.x >= mapSize.width || coord.x < 0) {
+      return false;
+    }
+    if (coord.y >= mapSize.height || coord.y < 0) {
+      return false;
+    }
+    return true;
   }
 
-  updatePosition(uid,x,y,facing){
-    assert.fail('Not implemented');
+  _nearbyGridCheck(coord,lastCoord){
+    let distanceSquire = this._getManhattanDistance(lastCoord,coord);
+    if (distanceSquire > 1) {
+      return false;
+    } 
+    return true;
   }
 
-  getDistanceSquare(a,b){
-    return Math.abs(a.x - b.x)^2 + Math.abs(a.y - b.y)^2
+  _movementRequestSpeedCheck(playerData){
+    if (playerData.lastMovingTime === undefined) {
+      console.log('player has no last time record')
+      return false;
+    }
+    if (Date.now() - playerData.lastMovingTime < movingRequestThreshold ){
+      return false;
+    }
+    return true;
   }
 
-  checkPositionEmpty(x,y){
-    return gameMap.getCell(x,y);
+  /**
+   * Mark the cell specified by mapCoord as occupied by playerID.
+   * Note: This is atomic.
+   * @return {Boolean} success - Return true if the cell is marked
+   * successfully, false if it's occupied.
+   */
+  async _occupyCoord(mapCoord, playerID) {
+    let ret = await this.dir.getRedis().setAsync(
+      [mapCoord.toRedisKey(), playerID, 'NX']);
+    if (ret === 'OK') {
+      return true;
+    }
+    console.assert(ret === null, `Invalid reply from redis for _occupyCoord: ${ret}`);
+    return false;
+  }
+
+  /**
+   * Clear the cell specified by mapCoord.
+   * If playerID is not undefined or null, then verify that it was occupied.
+   */
+  async _clearOccupy(mapCoord, playerID) {
+    if (playerID) {
+      // Do the check
+      const getRet = await this.dir.getRedis().getAsync(
+        [mapCoord.toRedisKey()]);
+      if (getRet !== playerID) {
+        console.error(
+          `Cell ${mapCoord} is not occupied by ${playerID}, it's ${getRet}`);
+        return false;
+      }
+    }
+    const ret = await this.dir.getRedis().delAsync([mapCoord.toRedisKey()]);
+    if (ret === 1) {
+      return true;
+    }
+    console.error(`Failed to clear cell ${mapCoord}, redis: ${ret}`);
+    return false;
   }
 }
 

@@ -19,13 +19,17 @@ class ExtensionHelperBase {
    * @param {AllAreaBroadcaster} broadcaster - A broadcaster for broadcasting
    * message.
    * @param {string} name - The name of the extension.
+   * @param {GameMap} gameMap
+   * @param {GameState} gameState
    */
-  constructor(extMan, dir, rpcHandler, broadcaster, name) {
+  constructor(extMan, dir, rpcHandler, broadcaster, name, gameMap, gameState) {
     this.extMan = extMan;
     this.dir = dir;
     this.rpcHandler = rpcHandler;
     this.name = name;
     this.broadcaster = broadcaster;
+    this.gameMap = gameMap;
+    this.gameState = gameState;
   }
 
   /**
@@ -129,7 +133,15 @@ class ExtensionHelperBase {
    */
   async broadcastToAllUser(msg) {
     msg.extName = this.name;
-    this.broadcaster.broadcastExtensionMessage(msg);
+    await this.broadcaster.broadcastExtensionMessage(msg);
+  }
+
+  /**
+   * Broadcast a cell set update to all clients.
+   * @param {object} cset - The cell set. See GameState.onCellSet for doc.
+   */
+  async broadcastCellSetUpdateToAllUser(cset) {
+    await this.broadcaster.notifyPlayerCellSetChange(cset);
   }
 }
 
