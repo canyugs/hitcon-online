@@ -28,7 +28,7 @@ class MainUI {
     this.overlays = new Map();
 
     window.addEventListener('resize', (evt) => { this._onResize(evt); });
-    window.addEventListener('load', (evt) => { this._onResize(evt); });
+    window.addEventListener('gameStart', (evt) => { this._onResize(evt); });
 
     // Cache the common used DOM elements.
     this.stagingDom = document.getElementById(STAGING_ID);
@@ -40,7 +40,6 @@ class MainUI {
 
   /**
    * Return Modal class. It can called by extension.
-   * 
    * When having multiple modals want to show, it should stacked by priority.
    * @param modal one of Modal.
    */
@@ -48,7 +47,7 @@ class MainUI {
 
   /**
    *  Return one of UIState.
-   */ 
+   */
   getState() {}
 
   /**
@@ -59,9 +58,8 @@ class MainUI {
 
   // Toolbar buttons including overlay hide/show.
   /**
-   * Add an button in the Toolbar. Default visibility determined by the target, 
+   * Add an button in the Toolbar. Default visibility determined by the target,
    * and the button icon should get from the target.
-   * 
    * @param target The element which wants add button, should be an Overlay or Modal.
    */
   addToolbarButton(target) {
@@ -70,7 +68,6 @@ class MainUI {
 
   /**
    * Remove an button from the Toolbar.
-   * 
    * @param target The element which wants remove button, should be an Overlay or Modal.
    */
   removeToolbarButton(target) {

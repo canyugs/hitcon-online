@@ -21,6 +21,8 @@ class InputManager {
     // TODO: Better way of maintaining focused element.
     this.focusedElement = document.activeElement;
 
+    // TODO: Maintain a list of pressed key for better user experience (player moving)
+
     document.addEventListener('keydown', (event) => {
       for (const {DOMElement, callback} of this.keydownCallbacks) {
         // TODO: Send event to the focused element only.
@@ -41,6 +43,14 @@ class InputManager {
           // TODO: preventDefault stopPropagation correctly
         }
       }
+    });
+
+    this.gameClient = null;
+    window.addEventListener('gameStart', (event) => {
+      this.gameClient = event.detail.gameClient;
+      this.registerMapMove((direction) => {
+        this.gameClient.onDirection(direction);
+      });
     });
   }
 
