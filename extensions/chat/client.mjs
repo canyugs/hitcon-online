@@ -43,15 +43,50 @@ class Client {
       if(evt.keyCode == 13){
         let message_to_id = document.getElementById('message_to');
         let chat_message_id = document.getElementById('chat_message');
-        if(message_to_id.value){
+        if(chat_message_id.value.substring(0, 2) == "!/"){
+            client.handleCommand(chat_message_id.value.trim());
+        }
+        else if(message_to_id.value){
           client.helper.callC2sAPI(null, 'privateMessage', 5000, {'msg_to': message_to_id.value, 'msg': chat_message_id.value});
-          chat_message_id.value = '';
         }
         else{
           client.helper.callC2sAPI(null, 'broadcastMessage', 5000, {'msg': chat_message_id.value});
-          chat_message_id.value = '';
         }
+        chat_message_id.value = '';
       }
+    }
+  }
+    
+  listCommand(){
+    document.getElementById('message_history').innerHTML += "<pre>" + 
+    this.HTMLEncode(`
+Usage: !/<Command> <arg1> <arg2> ...
+  !/teleport <Map> <x> <y>    Teleport to the map Map at coordinate (x, y)
+  !/help                List command usages
+    `) + "</pre>";
+    
+  }
+
+  handleCommand(cmd){
+    if(cmd == '!/help'){
+      this.listCommand();
+    }
+    else if(cmd.split(" ")[0] == '!/teleport'){
+      var mapCoord = this.helper.gameClient.playerInfo.mapCoord;
+      mapCoord.mapName = cmd.split(" ")[1];
+      mapCoord.x = cmd.split(" ")[2];
+      mapCoord.y = cmd.split(" ")[3];
+      if(isNaN(parseInt(mapCoord.x, 10)) || isNaN(parseInt(mapCoord.y, 10))){
+        document.getElementById('message_history').innerHTML += '<span>Invalid Coordinate</span><br>';
+        this.listCommand();
+      }
+      else{
+        this.helper.callC2sAPI(null, 'teleport', 5000, mapCoord);
+      }
+    }
+    else{
+      document.getElementById('message_history').innerHTML += '<span>Invalid Command</span><br>';
+      this.listCommand();
     }
   }
 
