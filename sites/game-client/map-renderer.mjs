@@ -48,6 +48,8 @@ class MapRenderer {
       }
     });
 
+    window.addEventListener('gameStart', this.initializeViewerPosition.bind(this));
+
     /**
      * @member {Array} customizedLayers - Customized layer that needs to be rendered.
      * Every element is a pair (`zIndex`, `layerName`).
@@ -67,7 +69,7 @@ class MapRenderer {
   }
 
   /**
-   * This function should be called after GameClient.onStartup()
+   * This function is a listener of "gameStart" event.
    */
   initializeViewerPosition() {
     this.viewportFollow = this.gameClient.playerInfo.playerID;

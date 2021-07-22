@@ -110,17 +110,12 @@ class GameClient {
         this.extMan.notifySelfLocationUpdate(loc);
       }
     });
-    this.mapRenderer.initializeViewerPosition();
-    this._initializeInputs();
-  }
 
-  /**
-   * Initialize the inputs for the game.
-   */
-  _initializeInputs() {
-    this.inputManager.registerMapMove((direction) => {
-      this.onDirection(direction);
-    });
+    window.dispatchEvent(new CustomEvent(
+        'gameStart', {
+          detail: {gameClient: this},
+        },
+    ));
   }
 
   /**
