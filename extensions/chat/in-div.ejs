@@ -1,15 +1,58 @@
 <style type="text/css">
-  #message_to{
-    width: 100px;
+  #overlay-right{
+    width:30%;
+    padding:20px;
   }
+
+  .input-container{
+    position:relative;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-bot-direction: reverse;
+    -ms-flex-flow: column-reverse;
+    flex-flow: column-reverse;
+    -webkit-box-align: start;
+    -ms-flex-align: start;
+    align-items: flex-start;
+    margin:20px;
+  }
+
+  .input-container input{
+    -webkit-box-ordinal-group: 11;
+    order:10;
+    outline: none;
+    border: none;
+    width: 100%;
+    padding: 10px 0;
+    font-size: 20px;
+    border-bottom: 1px solid #d5d5d5;
+    text-indent: 10px;
+  }
+
+  #message_history{
+    overflow:auto;
+    height:50vh;
+    line-height:20px;
+  }
+
+  pre{
+    overflow: auto;
+  }
+
 </style>
 
 <div id="chat-overlay">
-<div>
-  To: <input type="text" id="message_to" placeholder="Broadcast">
-  Msg: <input type="text" id="chat_message">
-</div>
-<div id="message_history">
-  <h3>Message History:</h3>
-</div>
+  <div id="message_history">
+    <h2>Message History:</h2>
+  </div>
+  <div>
+    <div class="input-container">
+      <input type="text" id="message_to" placeholder="Channel (Default: Broadcast)">
+    </div>
+    <div class="input-container">
+      <input type="text" id="chat_message" placeholder="Message">
+    </div>
+  </div>
 </div>
