@@ -94,7 +94,7 @@ Usage: !/<Command> <arg1> <arg2> ...
       }
     }
     else{
-      const result = await Promise.resolve(this.helper.callC2sAPI(null, 'adminCommand', 5000));
+      const result = await Promise.resolve(this.helper.callC2sAPI(null, 'otherCommands', 5000));
       if(result.state){
         document.getElementById('message_history').innerHTML += '<span>' + this.HTMLEncode(result) + '</span><br>';
       }
