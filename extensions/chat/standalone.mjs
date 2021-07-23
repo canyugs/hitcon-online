@@ -60,11 +60,11 @@ class Standalone {
 
   /**
    * Handle commands that only admin can use
-   * @c2s_adminCommand
+   * @c2s_otherCommands
    * @param {string} cmd - command input by user
    * @return {object} result - the result of admin command, state will be false if command not found
    */
-  async c2s_adminCommand(cmd){
+  async c2s_otherCommands(cmd){
     result = {'state': false, 'reply': ''}
     return result;
   }
