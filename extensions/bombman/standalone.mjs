@@ -1,6 +1,7 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
+import CellSet from '../../common/maplib/cellset.mjs';
 import {LAYER_BOMB} from './client.mjs';
 
 const BOMB_COUNTDOWN = 3000; // millisecond
@@ -31,18 +32,17 @@ class Standalone {
     this.bombCells = new Map(); // key: a unique bomb ID; value: the cell
     this.bombID = 0;
     for (const mapName of this.arenaOfMaps.keys()) {
-      await this.helper.broadcastCellSetUpdateToAllUser({
-        type: 'set',
-        cellSet: {
-          mapName: mapName,
-          name: LAYER_BOMB.layerName,
-          priority: 3,
-          cells: Array.from(this.bombCells.values()),
-          layers: [
-            {[LAYER_BOMB.layerName]: 'B'}, // TODO: draw a bomb, maybe in layer 'item'?
-          ],
-        },
-      });
+      await this.helper.broadcastCellSetUpdateToAllUser(
+          'set', // operation type
+          mapName,
+          CellSet.fromObject({
+            name: LAYER_BOMB.layerName,
+            priority: 3,
+            cells: Array.from(this.bombCells.values()),
+            layers: {[LAYER_BOMB.layerName]: 'B'},
+            dynamic: true,
+          }),
+      );
     }
   }
 
@@ -81,26 +81,26 @@ class Standalone {
 
     const bombID = this.bombID++;
     this.bombCells.set(bombID, {x: mapCoord.x, y: mapCoord.y});
-    await this.helper.broadcastCellSetUpdateToAllUser({
-      type: 'update',
-      cellSet: {
-        mapName: mapCoord.mapName,
-        name: LAYER_BOMB.layerName,
-        cells: Array.from(this.bombCells.values()),
-      },
-    });
+    await this.helper.broadcastCellSetUpdateToAllUser(
+        'update', // operation type
+        mapCoord.mapName,
+        CellSet.fromObject({
+          name: LAYER_BOMB.layerName,
+          cells: Array.from(this.bombCells.values()),
+        }),
+    );
 
     // setTimeout to remove bomb
     setTimeout(async (bombID) => {
       this.bombCells.delete(bombID);
-      await this.helper.broadcastCellSetUpdateToAllUser({
-        type: 'update',
-        cellSet: {
-          mapName: mapCoord.mapName,
-          name: LAYER_BOMB.layerName,
-          cells: Array.from(this.bombCells.values()),
-        },
-      });
+      await this.helper.broadcastCellSetUpdateToAllUser(
+          'update', // operation type
+          mapCoord.mapName,
+          CellSet.fromObject({
+            name: LAYER_BOMB.layerName,
+            cells: Array.from(this.bombCells.values()),
+          }),
+      );
     }, BOMB_COUNTDOWN, bombID);
 
     // TODO: check if the player can set a bomb or not
