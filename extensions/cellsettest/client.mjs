@@ -16,33 +16,14 @@ class Client {
     this.helper = helper;
     document.getElementById('ccs').addEventListener('click', () => {this.requestChangeCellset(this);});
     console.log("cellset extension loaded");
-    this.socket = io();
+
+    window.testCellSet = this.requestChangeCellset.bind(this);
   }
 
-  /**
-   * Returns true if this extension have a browser side part.
-   * If this returns false, the constructor for Client will not be called.
-   * @return {Boolean} haveClient - See above.
-   */
-  static haveClient() {
-    return false;
+  requestChangeCellset() {
+    console.log('requestChangeCellset');
+    this.helper.callC2sAPI('cellsettest', 'changeCellSet', null, 5000);
   }
-
-  onExtensionBroadcast(msg) {
-    console.log(msg);
-  }
-
-  requestChangeCellset(client) {
-    console.log("requestChangeCellset", client)
-    client.helper.callStandaloneAPI('changeCellSet', null, 5000);
-  }
-
-  /**
-   * The below static variable is used to configure the api functions that you want to expose to the client
-   */
-  static apis = {
-    "SayHello": "clientHello",
-  };
 }
 
 export default Client;

@@ -19,7 +19,3 @@
 
 - maplib
   - move game-state.mjs out
-  - create map-utils.mjs
-    - class MapCoord
-    - class CellSet
-    - utility function: tells if a MapCoord is inside a CellSet

@@ -68,9 +68,9 @@ class GatewayService {
       // Broadcast the extension broadcast.
       this.io.emit('extBC', bc);
     });
-    this.broadcaster.registerOnCellSetBroadcast((cset) => {
+    this.broadcaster.registerOnCellSetBroadcast((msg) => {
       // Broadcast the cell set modification.
-      this.io.emit('cset', cset);
+      this.io.emit('cellSet', msg);
     });
   }
 

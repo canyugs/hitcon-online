@@ -1,8 +1,7 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
-import assert from 'assert';
-
+import CellSet from '../../common/maplib/cellset.mjs';
 
 /**
  * This represents the standalone extension service for this extension.
@@ -16,7 +15,7 @@ class Standalone {
    */
   constructor(helper) {
     this.helper = helper;
-    this.set = false;
+    this.state = 0;
   }
 
   /**
@@ -35,28 +34,52 @@ class Standalone {
     return false;
   }
 
-  changeCellSet() {
-    if (!this.set) {
-      this.helper.broadcastCellSetUpdateToAllUser({
-        type: 'set',
-        cellSet: {
-          'name': 'testDynamic',
-          'priority': 4,
-          'cells': [
-            {'x': 1, 'y': 1, 'h': 18, 'w': 18},
-          ],
-          'layers': [
-            {'ground': 'P'},
-          ],
-        },
-      });
-    } else {
-      this.helper.broadcastCellSetUpdateToAllUser({
-        type: 'unset',
-        name: 'testDynamic',
-      });
+  c2s_changeCellSet() {
+    switch (this.state) {
+      case 0:
+        this.helper.broadcastCellSetUpdateToAllUser(
+            'set', // operation type
+            'world1',
+            CellSet.fromObject({
+              name: 'testDynamic',
+              priority: 4,
+              cells: [{'x': 10, 'y': 10, 'h': 8, 'w': 8}],
+              layers: {ground: 'P'},
+              dynamic: true,
+            }),
+        );
+        this.state = 1;
+        break;
+
+      case 1:
+        this.helper.broadcastCellSetUpdateToAllUser(
+            'update', // operation type
+            'world1',
+            CellSet.fromObject({
+              name: 'testDynamic',
+              cells: [
+                {'x': 10, 'y': 10, 'h': 8, 'w': 8},
+                {'x': 12, 'y': 5, 'h': 4, 'w': 4},
+              ],
+            }),
+        );
+        this.state = 2;
+        break;
+
+      case 2:
+        this.helper.broadcastCellSetUpdateToAllUser(
+            'unset', // operation type
+            'world1',
+            CellSet.fromObject({
+              name: 'testDynamic',
+            }),
+        );
+        this.state = 0;
+        break;
+
+      default:
+        console.error(`invalid \`this.state\`, value = ${this.state}`);
     }
-    this.set = !this.set;
   }
 
   /**

@@ -8,6 +8,7 @@
  * The documentation for format of the map is found at the end of this file.
  */
 
+import CellSet from './cellset.mjs';
 
 /*
  * The map coordinate:
@@ -49,6 +50,36 @@ class MapCoord {
     return this.mapName === coord.mapName &&
           this.x === coord.x &&
           this.y === coord.y;
+  }
+
+  /**
+   * Get the distance between two map coordinate.
+   * @param {MapCoord} coord
+   * @return {Number}
+   */
+  distanceTo(coord) {
+    // TODO
+    console.log('MapCoord.distanceTo not implemented');
+    return -1;
+  }
+
+  /**
+   * Check if mapCoord lies inside this cell set.
+   * Does not care the mapName of mapCoord.
+   * @param {CellSet} cellSet - The cell set.
+   * @return {Boolean}
+   */
+  insideCellSet(cellSet) {
+    const {x, y} = this;
+    for (const cells of cellSet.cells) {
+      if (x >= cells.x &&
+          x < cells.x + (cells.w ?? 1) &&
+          y >= cells.y &&
+          y < cells.y + (cells.h ?? 1)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**
@@ -109,7 +140,7 @@ class GameMap {
   /**
    * Set a dynamic cell set of an underlying map.
    * @param {String} mapName
-   * @param {Object} cellSet - A cell set object.
+   * @param {CellSet} cellSet - A cell set object.
    */
   setDynamicCellSet(mapName, cellSet) {
     this._maps.get(mapName).setDynamicCellSet(cellSet);
@@ -224,49 +255,41 @@ class _SingleGameMap {
       throw 'No map json supplied with new _SingleGameMap()';
     }
 
-    this.dynamicCellSet = {};
-    this.layerToCellSet = new Map();
     // If cellSet is not in the map data, add it back.
-    if (typeof this.gameMap.cellSet === 'undefined') {
-      this.gameMap.cellSet = [];
+    this.gameMap.cellSets = (this.gameMap.cellSets ?? []);
+
+    // ensure this.gameMap.cellSets are `CellSet` instance
+    for (const [i, cellSet] of this.gameMap.cellSets.entries()) {
+      cellSet.dynamic = false;
+      this.gameMap.cellSets[i] = CellSet.fromObject(cellSet);
     }
-    for(let cellSet of this.gameMap.cellSet){
-      for(let layer of cellSet.layers){
-        if(!this.layerToCellSet.has(Object.keys(layer)[0])){
-          this.layerToCellSet.set(Object.keys(layer)[0], []);
-        }
-        this.layerToCellSet.get(Object.keys(layer)[0]).push({
-          name: cellSet.name,
-          cells: cellSet.cells,
-          priority: cellSet.priority,
-          cellContent: Object.values(layer)[0],
-          dynamic: false
-        });
-      }
-    }
-    for(let k of this.layerToCellSet.keys()){
-      this.layerToCellSet.get(k).sort((first, second) => (second.priority ?? -1) - (first.priority ?? -1));
+
+    // initialize dynamic cell set
+    this.dynamicCellSet = {};
+
+    // construct layerToCellSet for efficient lookup
+    this.layerToCellSet = new Map();
+    for (const cs of this.gameMap.cellSets) {
+      this._setCellSet(cs);
     }
   }
 
   /**
    * Return a cell set in the original map.
    * @param {string} csName - The name of the cell set.
-   * @return {Object} cellset - The cell set.
-   * Return undefined if not found.
+   * @return {CellSet} The cell set. Return undefined if not found.
    */
   getOriginalCellSet(csName) {
-    return this.gameMap.cellSet.find((cs) => cs.name === csName);
+    return this.gameMap.cellSets.find((cs) => cs.name === csName);
   }
 
   /**
    * Similar to getOriginalCellSet(), but matches cell set name's as prefix.
    * @param {String} csName - The prefix of cell set name.
-   * @return {Map} ret - Key: mapName; Value: cell set.
-   * Return undefined if not found.
+   * @return {Array} The cell sets. Return empty array if not found.
    */
   getOriginalCellSetStartWith(csName) {
-    return this.gameMap.cellSet.filter((cs) => cs.name.startsWith(csName));
+    return this.gameMap.cellSets.filter((cs) => cs.name.startsWith(csName));
   }
 
   /**
@@ -274,31 +297,58 @@ class _SingleGameMap {
    */
   removeAllDynamicCellSet() {
     this.dynamicCellSet = {};
-    for(let k of this.layerToCellSet.keys()){
-      this.layerToCellSet.set(k, this.layerToCellSet.get(k).filter(cs => !cs.dynamic));
+    const l2cs = this.layerToCellSet; // alias
+    for (const layerName of l2cs.keys()) {
+      l2cs.set(layerName, l2cs.get(layerName).filter((cs) => (!cs.dynamic)));
+    }
+  }
+
+  /**
+   * Set a cell set. `cellSet` can be static or dynamic cell set.
+   * Should be called internally. Only setDynamicCellSet is publicly available.
+   * @param {CellSet} cellSet - The cell set to be added.
+   */
+  _setCellSet(cellSet) {
+    // just in case if cellSet is not a `CellSet` instance
+    // TODO: a more correct check
+    if (typeof cellSet.dynamic === 'undefined') {
+      throw 'parameter `cellSet` is not an instance of class CellSet';
+    }
+
+    if (cellSet.dynamic) {
+      this.dynamicCellSet[cellSet.name] = cellSet;
+    }
+
+    for (const layerName of Object.keys(cellSet.layers)) {
+      const l2cs = this.layerToCellSet; // alias
+
+      if (!l2cs.has(layerName)) l2cs.set(layerName, []);
+
+      l2cs.get(layerName).push(cellSet);
+      l2cs.get(layerName).sort(
+          (a, b) => (a.priority !== b.priority) ?
+                    ((b.priority) - (a.priority)) :
+                    (b.dynamic ? 1 : -1),
+      );
     }
   }
 
   /**
    * Set a dynamic cell set.
-   * @param {Object} cellSet - A cell set object.
+   * @param {CellSet} cellSet - The cell set to be added.
    */
   setDynamicCellSet(cellSet) {
-    this.dynamicCellSet[cellSet.name] = cellSet;
-
-    for(let layer of cellSet.layers){
-      if(!this.layerToCellSet.has(Object.keys(layer)[0])){
-        this.layerToCellSet.set(Object.keys(layer)[0], []);
-      }
-      this.layerToCellSet.get(Object.keys(layer)[0]).push({
-        name: cellSet.name,
-        cells: cellSet.cells,
-        priority: cellSet.priority,
-        cellContent: Object.values(layer)[0],
-        dynamic: true
-      });
-      this.layerToCellSet.get(Object.keys(layer)[0]).sort((first, second) => (second.priority ?? -1) - (first.priority ?? -1));
+    // just in case if cellSet is not a `CellSet` instance
+    // TODO: a more correct check
+    if (typeof cellSet.dynamic === 'undefined') {
+      throw 'parameter `cellSet` is not an instance of class CellSet';
     }
+
+    if (cellSet.dynamic === false) {
+      throw 'parameter `cellSet` is not a dynamic cell set';
+    }
+
+    this._setCellSet(cellSet);
   }
 
   /**
@@ -309,9 +359,8 @@ class _SingleGameMap {
    */
   updateDynamicCellSet(name, cells) {
     if (name in this.dynamicCellSet) {
-      for (const layer of this.dynamicCellSet[name].layers) {
-        this.layerToCellSet.get(Object.keys(layer)[0]).find((cellset) => cellset.name === name).cells = cells;
-      }
+      // Note that no need to update layerToCellSet since the referenced object
+      // is the same. Modify this.dynamicCellSet is sufficient.
       this.dynamicCellSet[name].cells = cells;
       return true;
     }
@@ -323,8 +372,9 @@ class _SingleGameMap {
    * @param {string} name - Name of the cell set.
    */
   unsetDynamicCellSet(name) {
-    for(let layer of this.dynamicCellSet[name].layers){
-      this.layerToCellSet.set(Object.keys(layer)[0], this.layerToCellSet.get(Object.keys(layer)[0]).filter(cs => cs.name != name));
+    const l2cs = this.layerToCellSet; // alias
+    for (const layerName of Object.keys(this.dynamicCellSet[name].layers)) {
+      l2cs.set(layerName, l2cs.get(layerName).filter((cs) => (cs.name !== name)));
     }
 
     delete this.dynamicCellSet[name];
@@ -351,20 +401,20 @@ class _SingleGameMap {
       throw 'map index out of bound';
     }
 
-    if(this.layerToCellSet.has(layer)){
-      for(let cellSet of this.layerToCellSet.get(layer)){
-        for(let cells of cellSet.cells){
-          if(x >= cells.x && x < cells.x + (cells.w ?? 1) && y >= cells.y && y < cells.y + (cells.h ?? 1)){
-            return cellSet.cellContent;
-          }
+    // check if this layer is overwritten by cell sets
+    if (this.layerToCellSet.has(layer)) {
+      for (const cs of this.layerToCellSet.get(layer)) {
+        if (cs.containsMapCoord(coord)) {
+          return cs.layers[layer];
         }
       }
     }
 
-    if(layer in this.gameMap){
-      const cell = this.gameMap[layer][y*this.gameMap.width + x];
-      return cell;
+    // If no cell sets overwrite this mapCoord, check the original layer.
+    if (layer in this.gameMap) {
+      return this.gameMap[layer][y*this.gameMap.width + x];
     }
+
     return null;
   }
 
@@ -405,7 +455,7 @@ Sample format for the map:
     "startY": 0,
     "width": 3,
     "height": 2
-    "cellSet": [
+    "cellSets": [
       {
         name: "meeting01",
         priority: 1,
@@ -413,9 +463,9 @@ Sample format for the map:
           { x: 5, y: 6, w: 3, h: 3 },
           { x: 1, y: 2 }
         ],
-        layers: [
-          {"meeting": "example01"},
-        ],
+        layers: {
+          "meeting": "example01"
+        },
       }
     ]
   },
@@ -429,5 +479,4 @@ Sample format for the map:
     "height": 1
   }
 }
-TODO: Add more elaborate documentation on what cellSet is.
 */

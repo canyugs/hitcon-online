@@ -1,6 +1,7 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
+import CellSet from './cellset.mjs';
 import {MapCoord} from './map.mjs';
 
 /**
@@ -19,7 +20,6 @@ class GameState {
    */
   constructor(gameMap) {
     this.gameMap = gameMap;
-    this.players = {};
     /*
      * Format of player in players:
      * {string} playerID - ID of the player. Key in players.
@@ -28,7 +28,16 @@ class GameState {
      * {Number} y - The y coordinate.
      * {string} facing - 'U', 'D', 'L', 'R', the direction user's facing.
      */
-    this.cellSet = {};
+    this.players = {};
+
+    /**
+     * An example of this.cellSets:
+     *  {
+     *    "map1": {"cellSetName1": cellSet1, cellSetName2: cellSet2},
+     *    "map2": {"cellSetName1": cellSet3},
+     *  }
+     */
+    this.cellSetsOfMaps = {};
 
     this.locationCallbacks = [];
   }
@@ -69,22 +78,31 @@ class GameState {
    * This is called when a cell set event (set or clear) is received from the
    * game server or upper layer.
    * Usually this is called by the game client or redis client.
-   * @param {object} cset - The cell set update object.
-   * - attribute "type": Either "set" or "unset" or "update".
-   * - attribute "cellSet": The cell set object. Must contain a "mapName" attribute.
+   * @param {String} op - The operation type: "set", "unset", or "update"
+   * @param {String} mapName - The map which this cell set applies to.
+   * @param {CellSet} cellSet - The cell set object.
    */
-  onCellSet(cset) {
-    if (cset.type == 'unset') {
-      delete this.cellSet[cset.cellSet.name];
-      this.gameMap.unsetDynamicCellSet(cset.cellSet.mapName, cset.cellSet.name);
-    } else if (cset.type == 'set') {
-      this.cellSet[cset.cellSet.name] = cset.cellSet;
-      this.gameMap.setDynamicCellSet(cset.cellSet.mapName, cset.cellSet);
-    } else if (cset.type === 'update') {
-      this.cellSet[cset.cellSet.name].cells = cset.cellSet.cells;
-      this.gameMap.updateDynamicCellSet(cset.cellSet.mapName, cset.cellSet.name, cset.cellSet.cells);
-    } else {
-      throw `Unknown cellSet update object with type ${cset.type}`;
+  onCellSet(op, mapName, cellSet) {
+    const csom = this.cellSetsOfMaps; // alias
+    switch (op) {
+      case 'unset':
+        delete csom[mapName][cellSet.name];
+        this.gameMap.unsetDynamicCellSet(mapName, cellSet.name);
+        break;
+
+      case 'set':
+        if (typeof csom[mapName] === 'undefined') csom[mapName] = {};
+        csom[mapName][cellSet.name] = cellSet;
+        this.gameMap.setDynamicCellSet(mapName, CellSet.fromObject(cellSet));
+        break;
+
+      case 'update':
+        csom[mapName][cellSet.name].cells = cellSet.cells;
+        this.gameMap.updateDynamicCellSet(mapName, cellSet.name, cellSet.cells);
+        break;
+
+      default:
+        throw `Unknown cellSet update object with type ${op}`;
     }
   }
 
@@ -114,7 +132,7 @@ class GameState {
    * Get a map of all cell set that's active.
    */
   getCellSets() {
-    return this.cellSet;
+    return this.cellSetsOfMaps;
   }
 
   /**
@@ -134,7 +152,7 @@ class GameState {
    * @return {object} state - The game state.
    */
   getStateTransfer() {
-    return {players: this.players, cellSet: this.cellSet};
+    return {players: this.players, cellSetsOfMaps: this.cellSetsOfMaps};
   }
 
   /**
@@ -144,10 +162,15 @@ class GameState {
    */
   acceptStateTransfer(state) {
     this.players = state.players;
-    this.cellSet = state.cellSet;
+    this.cellSetsOfMaps = state.cellSetsOfMaps;
     this.gameMap.removeAllDynamicCellSet();
-    for (const cs of Object.values(this.cellSet)) {
-      this.gameMap.setDynamicCellSet(cs.mapName, cs);
+    for (const mapName of Object.keys(this.cellSetsOfMaps)) {
+      for (const cs of Object.values(this.cellSetsOfMaps[mapName])) {
+        // ensure that cs is an instance of CellSet
+        const cs_ = CellSet.fromObject(cs);
+        this.cellSetsOfMaps[mapName][cs.name] = cs_;
+        this.gameMap.setDynamicCellSet(mapName, cs_);
+      }
     }
   }
 }

@@ -71,8 +71,8 @@ class GameClient {
         // Note: The method below is async but we ignore its promise.
         this.extMan.onExtensionBroadcast(msg);
       });
-      socket.on('cset', (cset) => {
-        this.gameState.onCellSet(cset);
+      socket.on('cellSet', (msg) => {
+        this.gameState.onCellSet(msg.op, msg.mapName, msg.cellSet);
       });
       socket.on('callS2cAPI', (msg, callback) => {
         let p = this.extMan.onS2cAPICalled(msg);

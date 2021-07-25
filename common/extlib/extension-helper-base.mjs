@@ -150,10 +150,12 @@ class ExtensionHelperBase {
 
   /**
    * Broadcast a cell set update to all clients.
-   * @param {object} cset - The cell set. See GameState.onCellSet for doc.
+   * @param {String} op - The operation type: "set", "unset", or "update"
+   * @param {String} mapName - The map which this cell set applies to.
+   * @param {CellSet} cellSet - The cell set object.
    */
-  async broadcastCellSetUpdateToAllUser(cset) {
-    await this.broadcaster.notifyPlayerCellSetChange(cset);
+  async broadcastCellSetUpdateToAllUser(op, mapName, cellSet) {
+    await this.broadcaster.notifyPlayerCellSetChange(op, mapName, cellSet);
   }
 }
 
