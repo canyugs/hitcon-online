@@ -20,6 +20,7 @@ class Client {
 
   /*
    * On game start, the below function will retrieve all of the client's items from the server.
+   * This function should be called by the client whenever the game starts.
    */
   async gameStart() {
     this.itemInfo = await this.helper.callC2sAPI('items', 'getItemInfo', 5000);
@@ -28,6 +29,7 @@ class Client {
 
   /*
    * The below function is used to give an item to another player
+   * This function should be called by the client whenever he/she wants to give an item to another player.
    * itemName: string;
    * amount: number;
    * toPlayerID: string;
@@ -52,6 +54,10 @@ class Client {
 
   /*
    * The below function is used to receive an item from another player
+   * This function should be listened by the client extension manager.
+   * Whenever the giver calls `giveItem`, the server should delete a specific number of items and inform the recipient of this fact.
+   * Thus, this function is called whenever a client receives an item.
+   *
    * itemName: string;
    * amount: number;
    * fromPlayerID: string;
@@ -84,6 +90,8 @@ class Client {
 
   /*
    * The below function is the callback function when an item is used.
+   * This function should be listened by the client extension manager.
+   * It serves as a call back function whenever an item is used.
    */
   async onUseItem(itemName, amount) {
     /* animation */
