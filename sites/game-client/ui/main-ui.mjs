@@ -16,6 +16,8 @@ OVERLAY_DIV.set(OverlayPosition.LEFT_BOTTOM, 'overlay-bottomleft');
 OVERLAY_DIV.set(OverlayPosition.RIGHT, 'overlay-right');
 OVERLAY_DIV.set(OverlayPosition.MAIN_VIEW, 'main-view');
 
+const TOOLBAR_ID = 'toolbar';
+
 /**
  * MainUI composes components into a window, 
  * components are classified into Notification, Toolbar, Overlay and Modal.
@@ -29,7 +31,7 @@ class MainUI {
   * @param {String} NotifyID - id of NotificationBar DOM element
   * @param {String} ToolbarID - id of Toolbar DOM element
   */
-  constructor(rootID, NotifyID, ToolbarID = 'toolbar') {
+  constructor() {
     this.state = UIState.NORMAL_UI;
     this.overlays = new Map();
 
@@ -43,7 +45,7 @@ class MainUI {
       this.overlayDom[pos] = document.getElementById(div);
     }
 
-    this.toolbarDom = document.getElementById(ToolbarID);
+    this.toolbarDom = document.getElementById(TOOLBAR_ID);
   }
 
   /**

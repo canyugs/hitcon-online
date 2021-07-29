@@ -43,24 +43,26 @@ class Overlay {
    * 
    * create a button element with icon.
    */
-  initializeToolbarButton(){
+  initializeToolbarButton() {
       this.toolbarButton = document.createElement('button');
       // TODO: load icon asset into button
-      //this.toolbarButton.innerHTML = iconSvg;
+      this.toolbarButton.innerHTML = 'Placeholder';
   }
 
   /**
    * Unset ToolbarButton display=none.
    */
   showToolbarButton() {
-    // TODO(fanlan1210)
+    // WIP(fanlan1210)
+    this.toolbarButton.style.display = null;
   }
 
   /**
    * Set ToolbarButton display=none.
    */
   hideToolbarButton() {
-    // TODO(fanlan1210)
+    // WIP(fanlan1210)
+    this.toolbarButton.style.display = 'none';
   }
 
   /**
@@ -68,7 +70,9 @@ class Overlay {
    * when the button is clicked.
   */
   onClickToolbarButton() {
-    // TODO(fanlan1210)
+    // WIP(fanlan1210)
+    if (this.canHide() && this.position !== undefined) this.hide();
+    else this.show();
   }
 
   /*
