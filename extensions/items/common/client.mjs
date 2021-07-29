@@ -89,6 +89,16 @@ class Client {
   }
 
   /*
+   * The below function is the callback function when a player picks up a dropped item from the floor.
+   * This function is called whenever a player is closed to a dropped item.
+   * It serves as a call back function whenever an item is used.
+   */
+  async pickupItem(itemName, amount) {
+    /* Check if the player is closed to a dropped item */
+    const result = await this.helper.callC2sAPI('items', 'setItem', 5000, itemName, amount);
+  }
+
+  /*
    * The below function is the callback function when an item is used.
    * This function should be listened by the client extension manager.
    * It serves as a call back function whenever an item is used.
@@ -96,6 +106,11 @@ class Client {
   async onUseItem(itemName, amount) {
     /* animation */
   }
+
+  async disconnect() {
+    const result = await this.helper.callC2sAPI('items', 'disconnect', 5000);
+  }
+
 };
 
 export default Client;

@@ -34,6 +34,7 @@ class Standalone {
     this.itemInfo = {};
     this.itemInstances = {};
     this.items = new Map();
+    this.playerOnline = new Set();
   }
 
   /**
@@ -44,7 +45,6 @@ class Standalone {
    * 3. Create an item instance (which contains all possible functions that can be performed on the item)
    */
   async initialize() {
-    //console.log(process.cwd()); # /home/user/hitcon-online/run
     const allItemsName = await fs.promises.readdir('../extensions/items/common/itemClasses');
     for (let itemTypeName of allItemsName) {
       const itemClasses = await import(`../items/common/itemClasses/${itemTypeName}/${itemTypeName}.mjs`);
@@ -64,13 +64,13 @@ class Standalone {
 
   /**
    * Client initialization. This function will set the basic information of a player's item to an empty object
+   * The below function should be called whenever a player starts a game session.
    */
   async c2s_playerInit(player) {
-    if (this.items.has(playerID)) {
-      console.log('Player already initialized');
-      return;
+    this.playerOnline.add(playerID);
+    if (!this.items.has(playerID)) {
+      this.items.set(playerID, {});
     }
-    this.items.set(playerID, {});
   }
 
   /**
@@ -92,13 +92,19 @@ class Standalone {
 
   /**
    * Initialize the amount of a specific item to zero.
+   * This function is called by a client to notify the server whenever he/she pick up a dropped item from the map.
+   * Once the client calls , the server will consequently update its database.
    * itemName: string;
    * amount: number;
    */
   async c2s_setItem(playerID, itemName, amount) {
     /* player has not registered yet */
     if (!this.items.has(playerID)) {
-      console.log('Player already initialized');
+      console.log('Player not initialized');
+      return;
+    }
+    if (!this.playerOnline.has(playerID)) {
+      console.log('Player not online');
       return;
     }
     let itemObj = this.items.get(playerID);
@@ -121,6 +127,10 @@ class Standalone {
       console.log('Player already initialized');
       return;
     }
+    if (!this.playerOnline.has(playerID)) {
+      console.log('Player not online');
+      return;
+    }
     const itemObj = this.items.get(playerID);
     return itemObj;
   }
@@ -136,6 +146,10 @@ class Standalone {
     /* player has not registered yet */
     if (!this.items.has(playerID)) {
       console.log('Player already initialized');
+      return;
+    }
+    if (!this.playerOnline.has(playerID)) {
+      console.log('Player not online');
       return;
     }
     const itemObj = this.items.get(playerID);
@@ -164,6 +178,14 @@ class Standalone {
     }
     if (!this.itemInfo[itemName].exchangeable) {
       console.log("Item is not exchangeable");
+      return;
+    }
+    if (!this.playerOnline.has(playerID)) {
+      console.log('Player not online');
+      return;
+    }
+    if (!this.playerOnline.has(toPlayerID)) {
+      console.log('Receiver not online');
       return;
     }
 
@@ -205,6 +227,10 @@ class Standalone {
       console.log("Item is not usable");
       return;
     }
+    if (!this.playerOnline.has(playerID)) {
+      console.log('Player not online');
+      return;
+    }
 
     const item = this.items.get(playerID);
     if (!itemName in item || item[itemName].amount < amount) {
@@ -217,6 +243,25 @@ class Standalone {
     itemInstances[itemName].useItem(amount);
 
     await this.helper.callS2cAPI('items', 'onUseItem', 5000, playerID, itemName, amount);
+  }
+
+  /**
+   * This function should be called whenever a client is disconnected.
+   * This way, the server can set the player's status to disconnected.
+   * (a.k.a. remove playerID from the set `playerOnline`) 
+   * @return {object} partials - An object, it could have the following:
+   * inDiv - A string to the path of ejs partial for the location inDiv.
+   */
+  async c2s_disconnect(playerID) {
+    if (!this.items.has(playerID)) {
+      console.log('Player not initialized');
+      return;
+    }
+    if (!this.playerOnline.has(playerID)) {
+      console.log('Player not online');
+      return;
+    }
+    this.playerOnline.delete(playerID);
   }
 
   /**
