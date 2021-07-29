@@ -3,6 +3,7 @@
 
 import assert from 'assert';
 import fs from 'fs';
+import path from 'path';
 
 /**
  * This represents the standalone extension service for this extension.
@@ -42,17 +43,22 @@ class Standalone {
    * 2. Retrieve `info.json` (which contains the basic information of an item).
    * 3. Create an item instance (which contains all possible functions that can be performed on the item)
    */
-  async initializeItemInfo() {
-    const allItemsName = await fs.promises.readdir('items');
-    for (let itemName of allItemsName) {
-      const itemInfoPath = path.join('items', itemName, 'info.json');
-      const infoJsonString = await fs.promises.readFile(itemInfoPath, 'utf8');
-      const infoObj = JSON.parse(infoJsonString);
-      this.itemInfo[itemName] = infoObj;
-
-      const itemInstancePath = path.join('items', itemName, itemName + '.js')
-      const itemClass = await import(itemInstancePath).default;
-      this.itemInstances[itemName] = new itemClass(this.helper);
+  async initialize() {
+    //console.log(process.cwd()); # /home/user/hitcon-online/run
+    const allItemsName = await fs.promises.readdir('../extensions/items/common/itemClasses');
+    for (let itemTypeName of allItemsName) {
+      const itemClasses = await import(`../items/common/itemClasses/${itemTypeName}/${itemTypeName}.mjs`);
+      for (let itemClassName in itemClasses) {
+        const itemClass = itemClasses[itemClassName];
+        const item = new itemClass(this.helper);
+        const itemName = itemClassName.toLowerCase();
+        this.itemInfo[itemName] = {
+          show: item.show,
+          exchangeable: item.exchangeable,
+          usable: item.usable,
+        }
+        this.itemInstances[itemName] = item;
+      }
     }
   }
 

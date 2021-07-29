@@ -15,7 +15,7 @@
   "multiprocess": false,
   "secret": "secret",
   "ext": {
-    "enabled": ["chat", "bombman"]
+    "enabled": ["chat", "bombman", "items"]
   },
   "movingRequestThreshold": 100
 }

@@ -3,6 +3,7 @@
 
 // Boilerplate for getting the __dirname.
 import url from 'url';
+import fs from 'fs';
 import path from 'path';
 
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
@@ -40,12 +41,16 @@ class AssetServer {
   /**
    * Prepare the static routes.
    */
-  staticRoutes() {
+  async staticRoutes() {
     // TODO: Restrict the visible pages.
     // Not sure if all static files are in sites
     this.app.use('/static/sites', express.static(__dirname + '/../../sites/'));
     this.app.use('/static/common', express.static(__dirname + '/../../common/'));
     this.app.use('/static/run/map', express.static(__dirname + '/../../run/map'));
+    const allExtensionNames = await fs.promises.readdir(__dirname + '/../../extensions');
+    for (let extensionName of allExtensionNames) {
+      this.app.use(`/static/extensions/${extensionName}`, express.static(__dirname + `/../../extensions/${extensionName}/common`));
+    }
   }
 
   /**
@@ -69,15 +74,6 @@ class AssetServer {
     }
     this.app.get('/client.html', (req, res) => {
       res.render(path.resolve(__dirname + '/../../sites/game-client/client.ejs'), this.clientParams);
-    });
-    this.app.get('/extension/:extName', (req, res) => {
-      /* waf */
-      const extName = req.params.extName;
-      if (/^[a-zA-Z0-9_]+$/.test(extName) === false) {
-        res.status(404).send('Extension Not Found');
-        return;
-      }
-      res.sendFile(path.resolve(__dirname + `/../../extensions/${extName}/client.mjs`));
     });
   }
 

@@ -18,6 +18,10 @@ class InGateway {
   constructor(helper) {
     void helper;
   }
+
+  initialize() {
+
+  }
 }
 
 export default InGateway;
