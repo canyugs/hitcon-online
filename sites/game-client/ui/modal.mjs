@@ -32,19 +32,25 @@ class Modal {
     /**
      * Unset ToolbarButton display=none.
      */
-    showToolbarButton() {}
+    showToolbarButton() {
+      this.toolbarButton.style.display = null;
+    }
 
     /**
      * Set ToolbarButton display=none.
      */
-    hideToolbarButton() { }
+    hideToolbarButton() {
+      this.toolbarButton.style.display = 'none';
+    }
 
 
     /**
      * If the modal has ToolbarButton, it should show the modal
      * when the button is clicked.
     */
-    onClickToolbarButton()
+    onClickToolbarButton() {
+      this.show();
+    }
   
     // Return root dom element.
     getDOM() {}
