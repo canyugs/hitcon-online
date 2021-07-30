@@ -76,7 +76,11 @@ class MainUI {
    */
   addToolbarButton(target) {
     // WIP(fanlan1210)
-    target.initializeToolbarButton();
+    target.toolbarButton = document.createElement('button');
+    // TODO: load icon asset into button
+    target.toolbarButton.innerHTML = 'Placeholder';
+    target.toolbarButton.addEventListener('click', target.onClickToolbarButton());
+
     this.toolbarDom.appendChild(target.toolbarButton);
   }
 
