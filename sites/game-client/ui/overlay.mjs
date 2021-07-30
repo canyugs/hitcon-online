@@ -14,6 +14,7 @@ class Overlay {
     this.mainUI = mainUI;
     this.dom = dom;
     this.position = undefined;
+    this.toolbarButton = undefined;
   }
   
   /**
@@ -36,17 +37,6 @@ class Overlay {
   canDismiss() {
     // Fail safe default.
     return true;
-  }
-  
-  /**
-   * when MainUI wants to add ToolbarButton, this method should be called.
-   * 
-   * create a button element with icon.
-   */
-  initializeToolbarButton() {
-      this.toolbarButton = document.createElement('button');
-      // TODO: load icon asset into button
-      this.toolbarButton.innerHTML = 'Placeholder';
   }
 
   /**
