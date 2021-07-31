@@ -238,7 +238,7 @@ class GameMap {
 
   /**
    * Get the SpawnPointList
-   * @return {Array} : {mapName, x, y}
+   * @return {mapCoord Array} : All the spawn points
   **/
   getSpawnPoint() {
     if (this.spawnPointList.length === 0) {
@@ -467,7 +467,7 @@ class _SingleGameMap {
         const h = (cell.h ?? 1);
         for (let i = 0; i < w; ++i) {
           for (let j = 0; j < h; ++j) {
-            expandList.push({mapName: this.gameMap, x: cell.x + i, y: cell.y + j});
+            expandList.push(new MapCoord(this.gameMap, cell.x + i , cell.y + j));
           }
         }
       }
