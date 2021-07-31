@@ -258,13 +258,12 @@ class GatewayService {
     // TODO: Check if movement is legal.
 
     const lastCoord = socket.playerData.mapCoord;
-    const mapSize = this.gameMap.getMapSize(lastCoord.mapName);
     if (lastCoord.x === undefined || lastCoord.y === undefined || lastCoord.mapName === undefined) {
       // Shouldn't happen, log an error.
       console.error(`Invalid lastCoord in onUserLocation ${lastCoord}`);
       return;
     }
-    if (!this.moveRule.movementRequestSpeedCheck(socket.playerData)) {
+    if (!this.moveRule.movementRequestSpeedCheck(socket.playerData.lastMovingTime)) {
       console.warn(`Player ${msg.playerID} is overspeed.`);
       return;
     }
@@ -274,8 +273,8 @@ class GatewayService {
         `${lastCoord.mapName} to ${msg.mapCoord.mapName} without permission.`);
       return;
     }
-    // target position is in the map
-    if (!this.moveRule.borderCheck(msg.mapCoord,mapSize)) {
+    // target coord is in the map
+    if (!this.moveRule.borderCheck(msg.mapCoord,lastCoord.mapName)) {
       console.warn(`Player ${msg.playerID} is trying to go outside the map.`);
       return;
     }
@@ -285,7 +284,7 @@ class GatewayService {
       return;
     }
     // blocked Cell Check
-    if (this.moveRule.blockedCellCheck(this.gameMap, msg.mapCoord)) {
+    if (this.moveRule.blockedCellCheck(msg.mapCoord,this.gameMap)) {
       console.warn(`Player ${msg.playerID} is trynig to enter blocked cell`);
       return;
     }
