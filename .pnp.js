@@ -2038,7 +2038,8 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         ["workspace:common/maplib", {
           "packageLocation": "./common/maplib/",
           "packageDependencies": [
-            ["hitcon-online-maplib", "workspace:common/maplib"]
+            ["hitcon-online-maplib", "workspace:common/maplib"],
+            ["config", "npm:3.3.6"]
           ],
           "linkType": "SOFT",
         }]
