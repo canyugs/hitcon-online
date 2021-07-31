@@ -1541,6 +1541,8 @@ __metadata:
 "hitcon-online-maplib@workspace:common/maplib":
   version: 0.0.0-use.local
   resolution: "hitcon-online-maplib@workspace:common/maplib"
+  dependencies:
+    config: ^3.3.6
   languageName: unknown
   linkType: soft
 
