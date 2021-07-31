@@ -190,13 +190,10 @@ class GatewayService {
     firstLocation.mapCoord = socket.playerData.mapCoord;
     if (firstLocation.mapCoord === undefined) {
       let setLocation = -1, index = 0;
-      firstLocation.mapCoord = new MapCoord();
       const spawnPoint = this.gameMap.getSpawnPoint();
       spawnPoint.sort(() => Math.random() - 0.5);
       while (setLocation === -1 && index < spawnPoint.length) {
-        firstLocation.mapCoord.mapName = spawnPoint[index].mapName;
-        firstLocation.mapCoord.x = spawnPoint[index].x;
-        firstLocation.mapCoord.y = spawnPoint[index].y;
+        firstLocation.mapCoord = new MapCoord(spawnPoint[index].mapName, spawnPoint[index].x, spawnPoint[index].y);
         setLocation = await this._occupyCoord(firstLocation.mapCoord, playerID);
         index = index + 1;
       }
@@ -205,10 +202,6 @@ class GatewayService {
         socket.disconnect();
         return;
       }
-    }
-    else {
-      firstLocation.x = firstLocation.mapCoord.x;
-      firstLocation.y = firstLocation.mapCoord.y;
     }
     firstLocation.facing = 'D';
     firstLocation.displayChar = socket.playerData.displayChar;
