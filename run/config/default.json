@@ -12,10 +12,15 @@
     "type": "real",
     "option": {}
   },
-  "multiprocess": false,
+  "multiprocess": true,
   "secret": "secret",
   "ext": {
-    "enabled": ["chat", "bombman", "items"]
+    "enabled": ["chat", "bombman"],
+    "standalone": {
+      "chat": "127.0.0.1:5005",
+      "helloworld": "127.0.0.1:5006",
+      "bombman": "127.0.0.1:5007"
+    }
   },
   "movingRequestThreshold": 100
 }

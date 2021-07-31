@@ -57,9 +57,17 @@ class MultiProcessRPCDirectory extends Directory {
   createGrpcServer(name, port) {
     let server = new grpc.Server();
     server.addService(this.rpcProto.RPC.service, { callRPC: async (call, callback) => await this.responseGrpcCall.bind(this)(call, callback, this.callLocalRPC) });
+    console.log('creating ' + name + ' at 0.0.0.0:' + port);
+
     server.bindAsync('0.0.0.0:' + port, grpc.ServerCredentials.createInsecure(), () => {
-      server.start();
-      console.log("The gRPC server for " + name + " is running on port " + port + ".");
+      try {
+        server.start();
+        console.log("The gRPC server for " + name + " is running on port " + port + ".");
+      } catch(err) {
+        console.error('Failed to create gRPC server.');
+        console.error(err);
+        process.exit();
+      }
     });
   }
 
@@ -157,7 +165,7 @@ class MultiProcessRPCDirectory extends Directory {
       let port = (await this.redis.hgetAsync("ServiceIndex", name)).split(':')[1];
       this.createGrpcServer(name, port);
     } catch {
-      throw 'Failed to create gRPC server.';
+      throw 'Failed to create gRPC server:' + name;
     }
 
     return this.handlers[name];
