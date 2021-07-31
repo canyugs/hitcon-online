@@ -1,8 +1,22 @@
 {
   "debug": true,
-  "server": {
-    "address": "localhost",
-    "port": 5000
+  "servers": {
+    "server5000": {
+      "address": "localhost",
+      "port": 5000,
+      "gatewayService": {
+        "name": "gatewayService5010",
+        "address": "127.0.0.1:5010"
+      }
+    },
+    "server5001": {
+      "address": "localhost",
+      "port": 5001,
+      "gatewayService": {
+        "name": "gatewayService5011",
+        "address": "127.0.0.1:5011"
+      }
+    }
   },
   "map": [
     "map/map.json"
@@ -15,11 +29,11 @@
   "multiprocess": true,
   "secret": "secret",
   "ext": {
-    "enabled": ["chat", "bombman"],
+    "enabled": [],
     "standalone": {
-      "chat": "127.0.0.1:5005",
-      "helloworld": "127.0.0.1:5006",
-      "bombman": "127.0.0.1:5007"
+      "chat": "127.0.0.1:5020",
+      "helloworld": "127.0.0.1:5021",
+      "bombman": "127.0.0.1:5022"
     }
   },
   "movingRequestThreshold": 100
