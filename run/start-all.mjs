@@ -24,12 +24,17 @@ async function main() {
     const hmset = promisify(redisClient.hmset).bind(redisClient);
     const flushall = promisify(redisClient.flushall).bind(redisClient);
     await flushall();
+
     const ext_addresses = config.get('ext.standalone');
     for(const ext in ext_addresses){
-      console.log('set', ext, ext_addresses[ext]);
       await hmset("ServiceIndex", "ext_" + ext, ext_addresses[ext]);
     }
-    await hmset("ServiceIndex", "gatewayServer", "127.0.0.1:5001");
+
+    const servers = config.get('servers');
+    for(const serverName in servers){
+      await hmset("ServiceIndex", servers[serverName].gatewayService.name, servers[serverName].gatewayService.address);
+    }
+
   } catch {
     console.error("Failed to initialize Redis.");
     process.exit();
@@ -39,14 +44,17 @@ async function main() {
   // The child processes would create their own connections.
   redisClient.quit();
 
-  /* Start gateway service */
-  const gatewayService = fork('../services/main/main-server.mjs', ['--gateway-service', 'gatewayServer'], { cwd: '.' });
+  /* Start main server & gateway service */
+  const mainServers = {};
+  const servers = config.get('servers');
+  console.log(servers);
+  for(const serverName in servers){
+    mainServers[serverName] = fork('../services/main/main-server.mjs', ['--gateway-service', servers[serverName].gatewayService.name, '--port', servers[serverName].port], { cwd: '.' });
+  }
 
   /* Start standalone extension services */
   const extServices = {};
   const enabledExtStandalone = config.get('ext.standalone');
-  console.log(enabledExtStandalone);
-  console.log(config.get('ext.enabled'));
   for(const ext in enabledExtStandalone){
     if(config.get('ext.enabled').includes(ext)) continue;
     extServices[ext] = fork('../services/standalone/standalone-extension.mjs', ['--ext', ext], { cwd: '.' });
@@ -57,9 +65,11 @@ async function main() {
     console.error(message);
     console.error(err);
 
-    try {
-      gatewayService.kill();
-    } catch {};
+    for(const serverName in servers){
+      try {
+        mainServers[serverName].kill();
+      } catch {};
+    }
 
     for(const ext in enabledExtStandalone){
       if(config.get('ext.enabled').includes(ext)) continue;
@@ -71,8 +81,10 @@ async function main() {
     process.exit();
   }
 
-  gatewayService.on('error', (err) => { handler('Gateway service error.', err) });
-  gatewayService.on('close', (err) => { handler('Gateway service closed.', err) });
+  for(const serverName in servers){
+    mainServers[serverName].on('error', (err) => { handler(serverName + ' service error.', err) });
+    mainServers[serverName].on('close', (err) => { handler(serverName + ' service closed.', err) });
+  }
   for(const ext in enabledExtStandalone){
     if(config.get('ext.enabled').includes(ext)) continue;
     extServices[ext].on('error', (err) => { handler(ext + ' service error.', err) });

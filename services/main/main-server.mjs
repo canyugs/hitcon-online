@@ -85,8 +85,9 @@ async function mainServer() {
   gatewayService.addServer(io);
 
   // TODO: Set the port once configuration is done.
-  console.log(`Server is listening on port ${config.get('server.port')} ...`);
-  server.listen(config.get('server.port'));
+  const port = ('port' in argv) ? argv['port'] : config.get('servers')[Object.keys(config.get('servers'))[0]].port;
+  console.log(`Server is listening on port ${port} ...`);
+  server.listen(port);
 }
 
 mainServer();
