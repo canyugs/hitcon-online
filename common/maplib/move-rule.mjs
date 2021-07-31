@@ -6,7 +6,6 @@ const movingRequestThreshold = config.get('movingRequestThreshold');
 
 class MoveRule{
 
-      // TODO(whyang9701): Move this into map.mjs.
   _getManhattanDistance(a,b){
     return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
   }
@@ -42,6 +41,10 @@ class MoveRule{
       return false;
     }
     return true;
+  }
+
+  blockedCellCheck(gameMap, mapCoord){
+    return gameMap.getCell(mapCoord,'wall');
   }
 }
 

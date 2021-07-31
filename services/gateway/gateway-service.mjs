@@ -284,8 +284,11 @@ class GatewayService {
       console.warn(`Player ${msg.playerID} is trynig to teleport.`);
       return;
     }
-    // TODO(whyang9701): Add checks for cells that is marked as blocked
-    // in the map.
+    // blocked Cell Check
+    if (this.moveRule.blockedCellCheck(this.gameMap, msg.mapCoord)) {
+      console.warn(`Player ${msg.playerID} is trynig to enter blocked cell`);
+      return;
+    }
     // TODO: Maybe log any cell collision.
     await this._teleportPlayerInternal(socket, msg);
   }
