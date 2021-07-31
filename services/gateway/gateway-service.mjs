@@ -190,8 +190,13 @@ class GatewayService {
     firstLocation.mapCoord = socket.playerData.mapCoord;
     if (firstLocation.mapCoord === undefined) {
       let setLocation = false, index = 0;
-      const spawnPoint = this.gameMap.getSpawnPoint();
-      spawnPoint.sort(() => Math.random() - 0.5);
+      let spawnPoint = this.gameMap.getSpawnPoint();
+      for (let i = spawnPoint.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = spawnPoint[i];
+        spawnPoint[i] = spawnPoint[j];
+        spawnPoint[j] = temp;
+      }
       while (setLocation === false && index < spawnPoint.length) {
         firstLocation.mapCoord = spawnPoint[index];
         setLocation = await this._occupyCoord(firstLocation.mapCoord, playerID);
