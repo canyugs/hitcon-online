@@ -27,9 +27,6 @@ class MainUI {
   * TODO(fanlan1210)
   * 
   * Create a MainUI.
-  * @param {String} rootID - id of root DOM element
-  * @param {String} NotifyID - id of NotificationBar DOM element
-  * @param {String} ToolbarID - id of Toolbar DOM element
   */
   constructor() {
     this.state = UIState.NORMAL_UI;
