@@ -192,8 +192,11 @@ class GatewayService {
       let setLocation = false, index = 0;
       const spawnPoint = this.gameMap.getSpawnPoint();
       spawnPoint.sort(() => Math.random() - 0.5);
+      firstLocation.mapCoord = new MapCoord(spawnPoint[0].mapName, spawnPoint[0].x, spawnPoint[0].y);
       while (setLocation === false && index < spawnPoint.length) {
-        firstLocation.mapCoord = new MapCoord(spawnPoint[index].mapName, spawnPoint[index].x, spawnPoint[index].y);
+        firstLocation.mapCoord.mapName = spawnPoint[index].mapName;
+        firstLocation.mapCoord.x = spawnPoint[index].x;
+        firstLocation.mapCoord.y = spawnPoint[index].y;
         setLocation = await this._occupyCoord(firstLocation.mapCoord, playerID);
         index = index + 1;
       }
