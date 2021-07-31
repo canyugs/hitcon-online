@@ -185,28 +185,28 @@ class GatewayService {
     }
 
     // Synchronize the state.
-    let firstLocation = {playerID: playerID,
+    const firstLocation = {playerID: playerID,
       displayName: socket.playerData.displayName};
     firstLocation.mapCoord = socket.playerData.mapCoord;
     if (firstLocation.mapCoord === undefined) {
       let setLocation = -1, index = 0;
-      firstLocation.mapCoord = new mapCoord();
-      let spawnPoint = this.gameMap.getSpawnPoint();
+      firstLocation.mapCoord = new MapCoord();
+      const spawnPoint = this.gameMap.getSpawnPoint();
       spawnPoint.sort(() => Math.random() - 0.5);
       while (setLocation === -1 && index < spawnPoint.length) {
         firstLocation.mapCoord.mapName = spawnPoint[index].mapName;
         firstLocation.mapCoord.x = spawnPoint[index].x;
         firstLocation.mapCoord.y = spawnPoint[index].y;
-        setLocation = await this._occupyCoord(firstLocation.mapCoord, playerID); /*set spawn point */
+        setLocation = await this._occupyCoord(firstLocation.mapCoord, playerID);
         index = index + 1;
       }
-      if(setLocation === -1) {
+      if (setLocation === -1) {
         console.warn(`No free spawn point.`);
         socket.disconnect();
         return;
       }
     }
-    else{
+    else {
       firstLocation.x = firstLocation.mapCoord.x;
       firstLocation.y = firstLocation.mapCoord.y;
     }
