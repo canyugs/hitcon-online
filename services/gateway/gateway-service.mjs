@@ -185,35 +185,36 @@ class GatewayService {
     }
 
     // Synchronize the state.
-    let firstLocation = {playerID: playerID, 
+    let firstLocation = {playerID: playerID,
       displayName: socket.playerData.displayName};
     firstLocation.mapCoord = socket.playerData.mapCoord;
-    firstLocation.x = firstLocation.mapCoord.x;
-    firstLocation.y = firstLocation.mapCoord.y;
-    if (firstLocation.x === undefined && firstLocation.y === undefined) {
+    if (firstLocation.mapCoord === undefined) {
       let setLocation = -1, index = 0;
-      let spawnPoint = this.gameMap.getSpawnPoint(firstLocation.mapCoord.mapName);
+      firstLocation.mapCoord = new mapCoord();
+      let spawnPoint = this.gameMap.getSpawnPoint();
       spawnPoint.sort(() => Math.random() - 0.5);
       while (setLocation === -1 && index < spawnPoint.length) {
-        setLocation = 1; /*set spawn point */
-        if (setLocation != -1) {
-          firstLocation.x = spawnPoint[index].x;
-          firstLocation.y = spawnPoint[index].y;
-        }
+        firstLocation.mapCoord.mapName = spawnPoint[index].mapName;
+        firstLocation.mapCoord.x = spawnPoint[index].x;
+        firstLocation.mapCoord.y = spawnPoint[index].y;
+        setLocation = await this._occupyCoord(firstLocation.mapCoord, playerID); /*set spawn point */
         index = index + 1;
       }
-      if(setLocation === -1){
+      if(setLocation === -1) {
         console.warn(`No free spawn point.`);
         socket.disconnect();
         return;
       }
+    }
+    else{
+      firstLocation.x = firstLocation.mapCoord.x;
+      firstLocation.y = firstLocation.mapCoord.y;
     }
     firstLocation.facing = 'D';
     firstLocation.displayChar = socket.playerData.displayChar;
     socket.playerData.lastMovingTime = Date.now();
     // try occupying grid
     // TODO: Handle cases when we can't occupy the location.
-    await this._occupyCoord(firstLocation.mapCoord, playerID);
     await this._broadcastUserLocation(firstLocation);
     this.broadcaster.sendStateTransfer(socket);
 
@@ -326,7 +327,7 @@ class GatewayService {
       return false;
     }
 
-    //release old grid 
+    //release old grid
     socket.playerData.lastMovingTime = Date.now();
     await this._clearOccupy(socket.playerData.mapCoord, msg.playerID);
     await this._broadcastUserLocation(msg);
@@ -387,7 +388,7 @@ class GatewayService {
     let distanceSquire = this._getManhattanDistance(lastCoord,coord);
     if (distanceSquire > 1) {
       return false;
-    } 
+    }
     return true;
   }
 

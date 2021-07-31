@@ -92,6 +92,7 @@ class GameMap {
   constructor(asset, maps) {
     this.graphicAsset = asset;
     this._maps = new Map();
+    this.spawnPointList = [];
     for (const [mapName, map] of Object.entries(maps)) {
       this._maps.set(mapName, new _SingleGameMap(asset, map));
     }
@@ -204,10 +205,15 @@ class GameMap {
     return ret;
   }
 
-  getSpawnPoint(mapName){
-    return this._maps.get(mapName).getSpawnPoint();
+  getSpawnPoint(){
+    if( this.spawnPointList.length === 0){
+      this._maps.forEach((map) => {
+        this.spawnPointList.concat(map.getSpawnPoint());
+      })
+    }
+    return this.spawnPointList;
   }
-
+}
 
 /**
  * The class that represents a single map.
@@ -228,8 +234,6 @@ class _SingleGameMap {
     }
 
     this.dynamicCellSet = {};
-    //this.spawnpointCellSet = [];
-    this.spawnPointList = [];
     this.staticCellSet = new Map();
     this.layerToCellSet = new Map();
     // If cellSet is not in the map data, add it back.
@@ -406,7 +410,7 @@ class _SingleGameMap {
       const w = (cell.w ?? 1), h = (cell.h ?? 1);
       for (let i = 0; i < w; ++i) {
         for (let j = 0; j < h; ++j) {
-          expandList.push({x: cell.x + i, y: cell.y + j});
+          expandList.push({mapName: this.gameMap, x: cell.x + i, y: cell.y + j});
         }
       }
     }
@@ -418,10 +422,7 @@ class _SingleGameMap {
    * @return {list} spawn point - A list of the spawn point.
    */
   getSpawnPoint(){
-    if (this.spawnPointList == 0) {
-      this.spawnPointList = this.expandCellSet("SpawnPoint");
-    }
-    return this.spawnPointList;
+    return this.expandCellSet("SpawnPoint");
   }
 }
 
