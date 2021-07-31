@@ -189,15 +189,15 @@ class GatewayService {
       displayName: socket.playerData.displayName};
     firstLocation.mapCoord = socket.playerData.mapCoord;
     if (firstLocation.mapCoord === undefined) {
-      let setLocation = -1, index = 0;
+      let setLocation = false, index = 0;
       const spawnPoint = this.gameMap.getSpawnPoint();
       spawnPoint.sort(() => Math.random() - 0.5);
-      while (setLocation === -1 && index < spawnPoint.length) {
+      while (setLocation === false && index < spawnPoint.length) {
         firstLocation.mapCoord = new MapCoord(spawnPoint[index].mapName, spawnPoint[index].x, spawnPoint[index].y);
         setLocation = await this._occupyCoord(firstLocation.mapCoord, playerID);
         index = index + 1;
       }
-      if (setLocation === -1) {
+      if (setLocation === false) {
         console.warn(`No free spawn point.`);
         socket.disconnect();
         return;
