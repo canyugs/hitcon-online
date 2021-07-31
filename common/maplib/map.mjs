@@ -221,12 +221,12 @@ class GameMap {
     }
     return ret;
   }
+
   /**
    * Similar to getOriginalCellSet(), but matches cell set name's as prefix.
    * @param {String} csName - The prefix of cell set name.
    * @return {Map} ret - Key: mapName; Value: list of cell set.
   **/
-
   getOriginalCellSetStartWith(csName) {
     const ret = new Map();
     for (const [mapName, map] of this._maps) {
@@ -236,11 +236,15 @@ class GameMap {
     return ret;
   }
 
-  getSpawnPoint(){
-    if( this.spawnPointList.length === 0){
+  /**
+   * Get the SpawnPointList
+   * @return {Array} : {mapName, x, y}
+  **/
+  getSpawnPoint() {
+    if (this.spawnPointList.length === 0) {
       this._maps.forEach((map) => {
         this.spawnPointList.concat(map.getSpawnPoint());
-      })
+      });
     }
     return this.spawnPointList;
   }
@@ -456,13 +460,15 @@ class _SingleGameMap {
    * @return {list} Cell Set points - A list of cell set points.
    */
   expandCellSet(cellSetName) {
-    let expandList = [];
-    if(this.staticCellSet.has(cellSetName))
-    for (const cell in this.staticCellSet.get(cellSetName)) {
-      const w = (cell.w ?? 1), h = (cell.h ?? 1);
-      for (let i = 0; i < w; ++i) {
-        for (let j = 0; j < h; ++j) {
-          expandList.push({mapName: this.gameMap, x: cell.x + i, y: cell.y + j});
+    const expandList = [];
+    if (this.staticCellSet.has(cellSetName)) {
+      for (const cell in this.staticCellSet.get(cellSetName)) {
+        const w = (cell.w ?? 1);
+        const h = (cell.h ?? 1);
+        for (let i = 0; i < w; ++i) {
+          for (let j = 0; j < h; ++j) {
+            expandList.push({mapName: this.gameMap, x: cell.x + i, y: cell.y + j});
+          }
         }
       }
     }
@@ -473,8 +479,8 @@ class _SingleGameMap {
    * Get Spawn Point List.
    * @return {list} spawn point - A list of the spawn point.
    */
-  getSpawnPoint(){
-    return this.expandCellSet("SpawnPoint");
+  getSpawnPoint() {
+    return this.expandCellSet('SpawnPoint');
   }
 }
 
