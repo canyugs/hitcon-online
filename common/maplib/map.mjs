@@ -226,7 +226,7 @@ class GameMap {
    * Similar to getOriginalCellSet(), but matches cell set name's as prefix.
    * @param {String} csName - The prefix of cell set name.
    * @return {Map} ret - Key: mapName; Value: list of cell set.
-  **/
+   */
   getOriginalCellSetStartWith(csName) {
     const ret = new Map();
     for (const [mapName, map] of this._maps) {
@@ -237,14 +237,22 @@ class GameMap {
   }
 
   /**
-   * Get the SpawnPointList
-   * @return {mapCoord Array} : All the spawn points
+   * Get the Spawn Points from all maps.
+   * @return {mapCoord Array} : Random spawn points with mapCoord type
   **/
-  getSpawnPoint() {
+  getRandomSpawnPoint() {
     if (this.spawnPointList.length === 0) {
       this._maps.forEach((map) => {
         this.spawnPointList.concat(map.getSpawnPoint());
       });
+    }
+
+    // Suffle the spawn points array
+    for (let i = this.spawnPointList.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const temp = this.spawnPointList[i];
+      this.spawnPointList[i] = this.spawnPointList[j];
+      this.spawnPointList[j] = temp;
     }
     return this.spawnPointList;
   }
@@ -276,8 +284,6 @@ class _SingleGameMap {
       cellSet.dynamic = false;
       this.gameMap.cellSets[i] = CellSet.fromObject(cellSet);
     }
-    this.spawnpointCellSet = [];
-    this.spawn_point_list = [];
 
     // initialize dynamic cell set
     this.dynamicCellSet = {};
@@ -455,32 +461,25 @@ class _SingleGameMap {
   }
 
   /**
-   * Expand Cell Set List.
-   * @param {string} cellSetName
-   * @return {list} Cell Set points - A list of cell set points.
+   * Get spawn points of single map.
+   * If We have a spawn point area from (1,1) (1,5) (5,1) (5,5),
+   * we split it here to become 16 spawn points.
+   * @return {MapCoord Array} Spawn points - A list of spawn points with mapcoord type.
    */
-  expandCellSet(cellSetName) {
+  getSpawnPoint() {
     const expandList = [];
-    if (this.staticCellSet.has(cellSetName)) {
-      for (const cell in this.staticCellSet.get(cellSetName)) {
+    if (this.staticCellSet.has('spawnPoint')) {
+      for (const cell in this.staticCellSet.get('spawnPoint')) {
         const w = (cell.w ?? 1);
         const h = (cell.h ?? 1);
         for (let i = 0; i < w; ++i) {
           for (let j = 0; j < h; ++j) {
-            expandList.push(new MapCoord(this.gameMap, cell.x + i , cell.y + j));
+            expandList.push(new MapCoord(this.gameMap, cell.x + i, cell.y + j));
           }
         }
       }
     }
     return expandList;
-  }
-
-  /**
-   * Get Spawn Point List.
-   * @return {list} spawn point - A list of the spawn point.
-   */
-  getSpawnPoint() {
-    return this.expandCellSet('SpawnPoint');
   }
 }
 

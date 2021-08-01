@@ -189,19 +189,17 @@ class GatewayService {
       displayName: socket.playerData.displayName};
     firstLocation.mapCoord = socket.playerData.mapCoord;
     if (firstLocation.mapCoord === undefined) {
+      const spawnPoint = this.gameMap.getRandomSpawnPoint();
       let setLocation = false, index = 0;
-      let spawnPoint = this.gameMap.getSpawnPoint();
-      for (let i = spawnPoint.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        const temp = spawnPoint[i];
-        spawnPoint[i] = spawnPoint[j];
-        spawnPoint[j] = temp;
-      }
+
+      // Try to find the empty spawn points.
       while (setLocation === false && index < spawnPoint.length) {
         firstLocation.mapCoord = spawnPoint[index];
-        setLocation = await this._occupyCoord(firstLocation.mapCoord, playerID);
+        setLocation = await this._occupyCoord(firstLocation.mapCoord, playerID); // try occupying grid
         index = index + 1;
       }
+
+      // Handle cases when we can't occupy the location.
       if (setLocation === false) {
         console.warn(`No free spawn point.`);
         socket.disconnect();
@@ -211,8 +209,7 @@ class GatewayService {
     firstLocation.facing = 'D';
     firstLocation.displayChar = socket.playerData.displayChar;
     socket.playerData.lastMovingTime = Date.now();
-    // try occupying grid
-    // TODO: Handle cases when we can't occupy the location.
+
     await this._broadcastUserLocation(firstLocation);
     this.broadcaster.sendStateTransfer(socket);
 
