@@ -188,6 +188,7 @@ class GatewayService {
     const firstLocation = {playerID: playerID,
       displayName: socket.playerData.displayName};
     firstLocation.mapCoord = socket.playerData.mapCoord;
+    let setLocation = false;
     if (firstLocation.mapCoord === undefined) {
       // Try to find the empty spawn points.
       while (setLocation === false) {

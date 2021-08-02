@@ -479,8 +479,12 @@ class _SingleGameMap {
    */
   getSpawnPoints() {
     if (typeof this._spawnPointList === 'undefined') {
-      if (this.staticCellSet.has('spawnPoint')) {
-        for (const cell in this.staticCellSet.get('spawnPoint')) {
+      const spawnPointsCellSet = getOriginalCellSet('spawnPoint');
+      if (typeof spawnPointsCellSet === 'undefined') {
+        this._spawnPointList = [];
+      }
+      else{
+        for (const cell in spawnPointsCellSet.cells) {
           const w = (cell.w ?? 1);
           const h = (cell.h ?? 1);
           for (let i = 0; i < w; ++i) {
