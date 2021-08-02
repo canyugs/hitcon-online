@@ -239,7 +239,7 @@ class GameMap {
   /**
    * Get the Spawn Points from all maps without starvation.
    * @return {mapCoord} : A random spawn point with mapCoord type
-  **/
+   */
   getRandomSpawnPointNoStarvation() {
     function randomSuffle(arr) {
       // Suffle the spawn points array
@@ -251,10 +251,12 @@ class GameMap {
       }
     }
 
-    if ( typeof this._spawnPointCache === 'undefined') {
+    if (typeof this._spawnPointCache === 'undefined') {
       // Get all spawn points from all maps
-      this._maps.forEach((map) => {
-        this._spawnPointCache.concat(map.getSpawnPoints());
+      this._spawnPointCache = [];
+      this._maps.forEach( (map) => {
+        const newSpawnPoints = map.getSpawnPoints();
+        this._spawnPointCache = this._spawnPointCache.concat(newSpawnPoints);
       });
       randomSuffle(this._spawnPointCache);
       this._spawnPointCurrentIndex = 0; // prevent starvation
@@ -262,7 +264,6 @@ class GameMap {
 
     this._spawnPointCurrentIndex += 1;
     if (this._spawnPointCurrentIndex === this._spawnPointCache.length) {
-      randomSuffle(this._spawnPointCache);
       this._spawnPointCurrentIndex = 0;
     }
     return this._spawnPointCache[this._spawnPointCurrentIndex];
@@ -479,12 +480,10 @@ class _SingleGameMap {
    */
   getSpawnPoints() {
     if (typeof this._spawnPointList === 'undefined') {
-      const spawnPointsCellSet = getOriginalCellSet('spawnPoint');
-      if (typeof spawnPointsCellSet === 'undefined') {
-        this._spawnPointList = [];
-      }
-      else{
-        for (const cell in spawnPointsCellSet.cells) {
+      const spawnPointsCellSet = this.getOriginalCellSet('spawnPoint');
+      this._spawnPointList = [];
+      if (typeof spawnPointsCellSet != 'undefined') {
+        for (const cell of spawnPointsCellSet.cells) {
           const w = (cell.w ?? 1);
           const h = (cell.h ?? 1);
           for (let i = 0; i < w; ++i) {
