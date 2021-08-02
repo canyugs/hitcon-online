@@ -238,7 +238,7 @@ class GameMap {
 
   /**
    * Get the Spawn Points from all maps without starvation.
-   * @return {mapCoord} : Random spawn points with mapCoord type
+   * @return {mapCoord} : A random spawn point with mapCoord type
   **/
   getRandomSpawnPointNoStarvation() {
     function randomSuffle(arr) {
@@ -475,7 +475,7 @@ class _SingleGameMap {
    * Get spawn points of single map.
    * If We have a spawn point area from (1,1) (1,5) (5,1) (5,5),
    * we split it here to become 16 spawn points.
-   * @return {MapCoord Array} Spawn points - A list of spawn points with mapcoord type.
+   * @return {Array} The map coordinates inside 'spawnPoint' cell set.
    */
   getSpawnPoints() {
     if (typeof this._spawnPointList === 'undefined') {
