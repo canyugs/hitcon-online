@@ -188,14 +188,10 @@ class GatewayService {
     const firstLocation = {playerID: playerID,
       displayName: socket.playerData.displayName};
     firstLocation.mapCoord = socket.playerData.mapCoord;
-    let setLocation = false;
-    if (firstLocation.mapCoord === undefined) {
-      // Try to find the empty spawn points.
-      while (setLocation === false) {
-        firstLocation.mapCoord = this.gameMap.getRandomSpawnPointNoStarvation();
-        setLocation = await this._occupyCoord(firstLocation.mapCoord, playerID); // try occupying grid
-        if (setLocation) break;
-      }
+    // TODO: if the user existed before, remember their locations.
+    while (true){
+      firstLocation.mapCoord = this.gameMap.getRandomSpawnPointNoStarvation();
+      if (await this._occupyCoord(firstLocation.mapCoord, playerID)) break;
     }
     firstLocation.facing = 'D';
     firstLocation.displayChar = socket.playerData.displayChar;
