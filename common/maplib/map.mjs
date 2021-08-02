@@ -237,24 +237,35 @@ class GameMap {
   }
 
   /**
-   * Get the Spawn Points from all maps.
-   * @return {mapCoord Array} : Random spawn points with mapCoord type
+   * Get the Spawn Points from all maps without starvation.
+   * @return {mapCoord} : Random spawn points with mapCoord type
   **/
-  getRandomSpawnPoint() {
-    if (this.spawnPointList.length === 0) {
-      this._maps.forEach((map) => {
-        this.spawnPointList.concat(map.getSpawnPoint());
-      });
+  getRandomSpawnPointNoStarvation() {
+    function randomSuffle(arr) {
+      // Suffle the spawn points array
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = temp;
+      }
     }
 
-    // Suffle the spawn points array
-    for (let i = this.spawnPointList.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      const temp = this.spawnPointList[i];
-      this.spawnPointList[i] = this.spawnPointList[j];
-      this.spawnPointList[j] = temp;
+    if ( typeof this._spawnPointCache === 'undefined') {
+      // Get all spawn points from all maps
+      this._maps.forEach((map) => {
+        this._spawnPointCache.concat(map.getSpawnPoints());
+      });
+      randomSuffle(this._spawnPointCache);
+      this._spawnPointCurrentIndex = 0; // prevent starvation
     }
-    return this.spawnPointList;
+
+    this._spawnPointCurrentIndex += 1;
+    if (this._spawnPointCurrentIndex === this._spawnPointCache.length) {
+      randomSuffle(this._spawnPointCache);
+      this._spawnPointCurrentIndex = 0;
+    }
+    return this._spawnPointCache[this._spawnPointCurrentIndex];
   }
 }
 
@@ -466,20 +477,21 @@ class _SingleGameMap {
    * we split it here to become 16 spawn points.
    * @return {MapCoord Array} Spawn points - A list of spawn points with mapcoord type.
    */
-  getSpawnPoint() {
-    const expandList = [];
-    if (this.staticCellSet.has('spawnPoint')) {
-      for (const cell in this.staticCellSet.get('spawnPoint')) {
-        const w = (cell.w ?? 1);
-        const h = (cell.h ?? 1);
-        for (let i = 0; i < w; ++i) {
-          for (let j = 0; j < h; ++j) {
-            expandList.push(new MapCoord(this.gameMap, cell.x + i, cell.y + j));
+  getSpawnPoints() {
+    if (typeof this._spawnPointList === 'undefined') {
+      if (this.staticCellSet.has('spawnPoint')) {
+        for (const cell in this.staticCellSet.get('spawnPoint')) {
+          const w = (cell.w ?? 1);
+          const h = (cell.h ?? 1);
+          for (let i = 0; i < w; ++i) {
+            for (let j = 0; j < h; ++j) {
+              this._spawnPointList.push(new MapCoord(this.gameMap, cell.x + i, cell.y + j));
+            }
           }
         }
       }
     }
-    return expandList;
+    return this._spawnPointList;
   }
 }
 

@@ -115,6 +115,13 @@
           "bombmanObstacle": "O",
           "wall": true
         }
+      },
+      {
+        "name": "spawnPoint",
+        "cells": [
+          { "x": 1, "y": 1, "w": 2, "h": 2 },
+          { "x": 5, "y": 6, "w": 1, "h": 1 }
+        ]
       }
     ]
   }
