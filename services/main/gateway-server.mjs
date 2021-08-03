@@ -22,7 +22,6 @@ import SingleProcessRPCDirectory from
   '../../common/rpc-directory/single-process-RPC-directory.mjs';
 import MultiProcessRPCDirectory from
   '../../common/rpc-directory/multi-process-RPC-directory.mjs';
-import AssetServer from '../assets/asset-server.mjs';
 import AuthServer from '../auth/AuthServer.mjs';
 
 /* Import all utility classes */
@@ -40,8 +39,14 @@ async function mainServer() {
 
   /* Create the http service */
   const app = express();
+  app.use(require('cors')({
+    origin: '*'
+  }));
   const server = http.createServer(app);
-  const io = new Server(server);
+  const io = new Server(server, {
+    cors: true,
+    origins: ["*"],
+  });
 
   /* Create all utility classes */
   const rpcDirectory = config.get('multiprocess')
@@ -62,20 +67,15 @@ async function mainServer() {
   const extensionManager = new ExtensionManager(rpcDirectory, broadcaster, gameMap, gameState);
   const gatewayService = new GatewayService(rpcDirectory, gameMap, authServer,
     broadcaster, io, extensionManager);
-  const assetServer = new AssetServer(app, extensionManager);
   await extensionManager.ensureClass('blank');
   for (const extName of extensionManager.listExtensions()) {
     await extensionManager.createExtensionService(extName);
   }
 
-  /* Initialize static asset server */
-  await assetServer.initialize();
-  /* Start static asset server */
-  assetServer.run();
-
   /* Initialize broadcaster and gateway service */
+  const serviceName = ('service-name' in argv) ? argv['service-name'] : Object.keys(config.get('gatewayServers'))[0];
   await broadcaster.initialize();
-  await gatewayService.initialize(('gateway-service' in argv) ? argv['gateway-service'] : "gatewayServer");
+  await gatewayService.initialize(serviceName);
   authServer.run();
   for (const extName of extensionManager.listExtensions()) {
     await extensionManager.startExtensionService(extName);
@@ -84,7 +84,7 @@ async function mainServer() {
   gatewayService.addServer(io);
 
   // TODO: Set the port once configuration is done.
-  const port = ('port' in argv) ? argv['port'] : config.get('servers')[Object.keys(config.get('servers'))[0]].port;
+  const port = config.get('gatewayServers')[serviceName].httpAddress.split(':')[1];
   console.log(`Server is listening on port ${port} ...`);
   server.listen(port);
 }

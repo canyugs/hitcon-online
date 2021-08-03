@@ -19,7 +19,8 @@ redisClient.on('error', (err) => {
         await flushall();
         await hmset("ServiceIndex", "ext_chat", "127.0.0.1:5005");
         await hmset("ServiceIndex", "ext_helloworld", "127.0.0.1:5006");
-        await hmset("ServiceIndex", "gatewayServer", "127.0.0.1:5001");
+        await hmset("ServiceIndex", "gatewayService5010", "127.0.0.1:5030");
+        await hmset("ServiceIndex", "gatewayService5011", "127.0.0.1:5031");
         redisClient.quit();
     } catch {};
 })();

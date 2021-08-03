@@ -2025,6 +2025,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageDependencies": [
             ["hitcon-online-main-server", "workspace:services/main"],
             ["config", "npm:3.3.6"],
+            ["cors", "npm:2.8.5"],
             ["ejs", "npm:3.1.6"],
             ["express", "npm:4.16.4"],
             ["minimist", "npm:1.2.5"],

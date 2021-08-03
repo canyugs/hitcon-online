@@ -16,7 +16,7 @@ absolute URL.
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>HITCON Online</title>
     <link rel="stylesheet" href="/static/sites/game-client/client.css">
-    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.2/socket.io.min.js" integrity="sha512-2ho+gY0H62N4Z9oxD422L2ZYXiOMq9l+Aub1QNz4Z4UDOtDVxz4vk6O6R3Hqqc9Y7qSvZFl7cy3+eZ/ITnUrLA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
   </head>
   <body>
@@ -95,7 +95,7 @@ absolute URL.
         // Try to get a test token.
         let testToken = getTokenFromDocument();
         if (testToken == '') {
-          testToken = await $.ajax({url: "/get_test_token", type: "GET",});
+          testToken = await $.ajax({url: "//localhost:5010/get_test_token", type: "GET",});
           testToken = testToken.token;
         }
         game.token = testToken;
@@ -114,7 +114,7 @@ absolute URL.
         }
         game.map = new GameMap(game.graphicAsset, game.mapData);
         game.gameState = new GameState(game.map);
-        game.socket = game.io({reconnection: false});
+        game.socket = game.io("ws://localhost:5010", {reconnection: false});
 
         game.extMan = new ClientExtensionManager(game.socket, game.extensionList);
         game.mapRenderer = new MapRenderer(document.querySelector('#mapcanvas'), game.map, game.gameState);

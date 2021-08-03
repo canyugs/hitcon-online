@@ -30,9 +30,9 @@ async function main() {
       await hmset("ServiceIndex", "ext_" + ext, ext_addresses[ext]);
     }
 
-    const servers = config.get('servers');
+    const servers = config.get('gatewayServers');
     for(const serverName in servers){
-      await hmset("ServiceIndex", servers[serverName].gatewayService.name, servers[serverName].gatewayService.address);
+      await hmset("ServiceIndex", serverName, servers[serverName].grpcAddress);
     }
 
   } catch {
@@ -44,12 +44,20 @@ async function main() {
   // The child processes would create their own connections.
   redisClient.quit();
 
-  /* Start main server & gateway service */
-  const mainServers = {};
-  const servers = config.get('servers');
-  console.log(servers);
-  for(const serverName in servers){
-    mainServers[serverName] = fork('../services/main/main-server.mjs', ['--gateway-service', servers[serverName].gatewayService.name, '--port', servers[serverName].port], { cwd: '.' });
+  /* Start asset server */
+  const assetServers = {};
+  const enabledAssetServers = config.get('assetServers');
+  console.log(enabledAssetServers);
+  for(const serverName in enabledAssetServers){
+    assetServers[serverName] = fork('../services/main/asset-server.mjs', ['--service-name', serverName], { cwd: '.' });
+  }
+
+  /* Start gateway service */
+  const gatewayServers = {};
+  const enabledGatewayServers = config.get('gatewayServers');
+  console.log(enabledGatewayServers);
+  for(const serverName in enabledGatewayServers){
+    gatewayServers[serverName] = fork('../services/main/gateway-server.mjs', ['--service-name', serverName], { cwd: '.' });
   }
 
   /* Start standalone extension services */
@@ -65,9 +73,15 @@ async function main() {
     console.error(message);
     console.error(err);
 
-    for(const serverName in servers){
+    for(const serverName in enabledAssetServers){
       try {
-        mainServers[serverName].kill();
+        assetServers[serverName].kill();
+      } catch {};
+    }
+
+    for(const serverName in enabledGatewayServers){
+      try {
+        gatewayServers[serverName].kill();
       } catch {};
     }
 
@@ -81,9 +95,13 @@ async function main() {
     process.exit();
   }
 
-  for(const serverName in servers){
-    mainServers[serverName].on('error', (err) => { handler(serverName + ' service error.', err) });
-    mainServers[serverName].on('close', (err) => { handler(serverName + ' service closed.', err) });
+  for(const serverName in enabledAssetServers){
+    assetServers[serverName].on('error', (err) => { handler(serverName + ' service error.', err) });
+    assetServers[serverName].on('close', (err) => { handler(serverName + ' service closed.', err) });
+  }
+  for(const serverName in enabledGatewayServers){
+    gatewayServers[serverName].on('error', (err) => { handler(serverName + ' service error.', err) });
+    gatewayServers[serverName].on('close', (err) => { handler(serverName + ' service closed.', err) });
   }
   for(const ext in enabledExtStandalone){
     if(config.get('ext.enabled').includes(ext)) continue;

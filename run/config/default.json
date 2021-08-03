@@ -1,21 +1,23 @@
 {
   "debug": true,
-  "servers": {
-    "server5000": {
-      "address": "localhost",
-      "port": 5000,
-      "gatewayService": {
-        "name": "gatewayService5010",
-        "address": "127.0.0.1:5010"
-      }
+  "assetServers": {
+    "assetServer5000": {
+      "address": "127.0.0.1",
+      "port": 5000
     },
-    "server5001": {
-      "address": "localhost",
-      "port": 5001,
-      "gatewayService": {
-        "name": "gatewayService5011",
-        "address": "127.0.0.1:5011"
-      }
+    "assetServer5001": {
+      "address": "127.0.0.1",
+      "port": 5001
+    }
+  },
+  "gatewayServers": {
+    "gatewayService5010": {
+      "httpAddress": "127.0.0.1:5010",
+      "grpcAddress": "127.0.0.1:5030"
+    },
+    "gatewayService5011": {
+      "httpAddress": "127.0.0.1:5011",
+      "grpcAddress": "127.0.0.1:5031"
     }
   },
   "map": [
