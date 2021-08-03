@@ -1,0 +1,11 @@
+name: ESLint
+on: [push, pull_request]
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install modules
+        run: yarn
+      - name: Run ESLint
+        run: yarn run eslint . --no-eslintrc --config .github/eslintrc.yml --ext .js,.mjs
