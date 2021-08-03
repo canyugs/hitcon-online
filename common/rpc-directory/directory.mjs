@@ -9,10 +9,10 @@ const config = require('config');
 const redis = require('redis');
 
 import assert from 'assert';
-import { promisify } from 'util';
+import {promisify} from 'util';
 
-import DataStore from './data-store.mjs'
-import MockRedis from './mock-redis.mjs'
+import DataStore from './data-store.mjs';
+import MockRedis from './mock-redis.mjs';
 import {MapCoord} from '../maplib/map.mjs';
 
 const mockRedis = new MockRedis();
@@ -37,7 +37,7 @@ class Directory {
     this.redisSub = undefined;
     if (config.get('redis.type') == 'real') {
       this._createRealRedis();
-    } else if(config.get('redis.type') == 'mock') {
+    } else if (config.get('redis.type') == 'mock') {
       this._createMockRedis();
     } else {
       throw 'invalid redis type ' + config.get('type');

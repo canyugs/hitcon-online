@@ -10,10 +10,10 @@ const protoLoader = require('@grpc/proto-loader');
 const path = require('path');
 
 import assert from 'assert';
-import Directory from './directory.mjs'
-import Handler from './handler.mjs'
-import { promisify } from 'util';
-import { fileURLToPath } from 'url';
+import Directory from './directory.mjs';
+import Handler from './handler.mjs';
+import {promisify} from 'util';
+import {fileURLToPath} from 'url';
 
 /**
  * This class is handling all RPC calls in Multi Process version, which does IPC by gRPC.
@@ -56,13 +56,12 @@ class MultiProcessRPCDirectory extends Directory {
    */
   createGrpcServer(name, port) {
     let server = new grpc.Server();
-    server.addService(this.rpcProto.RPC.service, { callRPC: async (call, callback) => await this.responseGrpcCall.bind(this)(call, callback, this.callLocalRPC) });
-
+    server.addService(this.rpcProto.RPC.service, {callRPC: async (call, callback) => await this.responseGrpcCall.bind(this)(call, callback, this.callLocalRPC)});
     server.bindAsync('0.0.0.0:' + port, grpc.ServerCredentials.createInsecure(), () => {
       try {
         server.start();
         console.log("The gRPC server for " + name + " is running on port " + port + ".");
-      } catch(err) {
+      } catch (err) {
         console.error('Failed to create gRPC server.');
         console.error(err);
         process.exit();
@@ -94,23 +93,23 @@ class MultiProcessRPCDirectory extends Directory {
    async callRPC(callerServiceName, serviceName, methodName, ...args) {
     void [callerServiceName, serviceName, methodName, args];
     // local service
-    if((serviceName in this.handlers)){
-      if(!(methodName in this.handlers[serviceName].methods)){
+    if ((serviceName in this.handlers)) {
+      if (!(methodName in this.handlers[serviceName].methods)) {
         throw `Method ${methodName} not found.`;
       }
       return await this.handlers[serviceName].methods[methodName](callerServiceName, ...args);
     }
 
     // remote service
-    if(!(serviceName in this.remoteCallRPC)){
+    if (!(serviceName in this.remoteCallRPC)) {
       let remoteAddress = await this.redis.hgetAsync("ServiceIndex", serviceName);
-      if(remoteAddress){
+      if (remoteAddress) {
         let gRPCService = new this.rpcProto.RPC(remoteAddress, grpc.credentials.createInsecure());
         this.remoteCallRPC[serviceName] = gRPCService;
       }
     }
 
-    if(this.remoteCallRPC[serviceName]){
+    if (this.remoteCallRPC[serviceName]) {
       let ret = await promisify(this.remoteCallRPC[serviceName].callRPC.bind(this.remoteCallRPC[serviceName]))({
         callerServiceName: callerServiceName,
         serviceName: serviceName,
@@ -136,8 +135,8 @@ class MultiProcessRPCDirectory extends Directory {
    async callLocalRPC(callerServiceName, serviceName, methodName, ...args) {
     void [callerServiceName, serviceName, methodName, args];
     // local service
-    if((serviceName in this.handlers)){
-      if(!(methodName in this.handlers[serviceName].methods)){
+    if ((serviceName in this.handlers)) {
+      if (!(methodName in this.handlers[serviceName].methods)) {
         throw `Method ${methodName} not found.`;
       }
       return await this.handlers[serviceName].methods[methodName](callerServiceName, ...args);
@@ -154,7 +153,7 @@ class MultiProcessRPCDirectory extends Directory {
    * service. Service should register all API handlers with it.
    */
   async registerService(name) {
-    if(name in this.handlers){
+    if (name in this.handlers) {
         throw 'A service with the same name has been registered';
     }
     this.handlers[name] = new Handler(name, this);

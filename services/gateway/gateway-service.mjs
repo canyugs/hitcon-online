@@ -189,7 +189,7 @@ class GatewayService {
       displayName: socket.playerData.displayName};
     firstLocation.mapCoord = socket.playerData.mapCoord;
     // TODO: if the user existed before, remember their locations.
-    while (true){
+    while (true) {
       firstLocation.mapCoord = this.gameMap.getRandomSpawnPointNoStarvation();
       if (await this._occupyCoord(firstLocation.mapCoord, playerID)) break;
     }
@@ -281,12 +281,12 @@ class GatewayService {
       return;
     }
     // target position is in the map
-    if (!this._borderCheck(msg.mapCoord,mapSize)) {
+    if (!this._borderCheck(msg.mapCoord, mapSize)) {
       console.warn(`Player ${msg.playerID} is trying to go outside the map.`);
       return;
     }
     // nearby grid check
-    if (!this._nearbyGridCheck(msg.mapCoord,lastCoord)) {
+    if (!this._nearbyGridCheck(msg.mapCoord, lastCoord)) {
       console.warn(`Player ${msg.playerID} is trynig to teleport.`);
       return;
     }
@@ -304,7 +304,7 @@ class GatewayService {
     // try occupy grid
     const ret = await this._occupyCoord(msg.mapCoord, msg.playerID);
     // grid has been occupied
-    if(!ret){
+    if (!ret) {
       // Can't move, target is already occupied.
       return false;
     }
@@ -352,11 +352,11 @@ class GatewayService {
   }
 
   // TODO(whyang9701): Move this into map.mjs.
-  _getManhattanDistance(a,b){
+  _getManhattanDistance(a, b) {
     return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
   }
 
-  _borderCheck(coord,mapSize){
+  _borderCheck(coord, mapSize) {
     if (coord.x >= mapSize.width || coord.x < 0) {
       return false;
     }
@@ -366,20 +366,20 @@ class GatewayService {
     return true;
   }
 
-  _nearbyGridCheck(coord,lastCoord){
-    let distanceSquire = this._getManhattanDistance(lastCoord,coord);
+  _nearbyGridCheck(coord, lastCoord) {
+    let distanceSquire = this._getManhattanDistance(lastCoord, coord);
     if (distanceSquire > 1) {
       return false;
     }
     return true;
   }
 
-  _movementRequestSpeedCheck(playerData){
+  _movementRequestSpeedCheck(playerData) {
     if (playerData.lastMovingTime === undefined) {
-      console.log('player has no last time record')
+      console.log('player has no last time record');
       return false;
     }
-    if (Date.now() - playerData.lastMovingTime < movingRequestThreshold ){
+    if (Date.now() - playerData.lastMovingTime < movingRequestThreshold ) {
       return false;
     }
     return true;

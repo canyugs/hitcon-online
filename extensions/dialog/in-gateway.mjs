@@ -16,7 +16,7 @@ class InGateway {
    * various functionalities of the extension.
    */
   constructor(helper) {
-    this.helper = helper
+    this.helper = helper;
   }
 
   /**

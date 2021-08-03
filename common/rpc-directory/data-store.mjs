@@ -4,7 +4,7 @@
 import assert from 'assert';
 import fs from 'fs';
 import path from 'path';
-import { promises as fsPromises } from 'fs';
+import {promises as fsPromises} from 'fs';
 
 /**
  * DataStore is a class that handles storing small amount of JSON data.
