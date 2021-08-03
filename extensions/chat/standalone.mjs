@@ -29,7 +29,7 @@ class Standalone {
    * @param {Player} player - player information
    * @param {object} args - chat information including message
    */
-  async c2s_broadcastMessage(player, args){
+  async c2s_broadcastMessage(player, args) {
     args['msg_from'] = player.playerID;
     await this.helper.broadcastToAllUser(args);
   }
@@ -40,7 +40,7 @@ class Standalone {
    * @param {Player} player - player information
    * @param {object} args - chat information including message, target player id
    */
-  async c2s_privateMessage(player, args){
+  async c2s_privateMessage(player, args) {
     args['msg_from'] = player.playerID;
     await this.helper.callS2cAPI(arg.msg_to, 'chat', 'getPrivateMessage', 5000, args);
     await this.helper.callS2cAPI(player.playerID, 'chat', 'sendedPrivateMessage', 5000, args);
@@ -52,7 +52,7 @@ class Standalone {
    * @param {Player} player - player information
    * @param {MapCoord} mapCoord - teleport information including map, x, y
    */
-  async c2s_teleport(player, mapCoord){
+  async c2s_teleport(player, mapCoord) {
     console.log('Teleport to ' + mapCoord.mapName + ' (' + mapCoord.x + ', '+ mapCoord.y + ')');
     console.log(await this.helper.teleport(player.playerID, mapCoord));
     console.log('haha');
@@ -64,8 +64,8 @@ class Standalone {
    * @param {string} cmd - command input by user
    * @return {object} result - the result of admin command, state will be false if command not found
    */
-  async c2s_otherCommands(cmd){
-    result = {'state': false, 'reply': ''}
+  async c2s_otherCommands(cmd) {
+    result = {'state': false, 'reply': ''};
     return result;
   }
 

@@ -73,10 +73,10 @@ class ClientExtensionHelper {
         resolve({error: 'timeout'});
       }, timeout);
 
-      let callArgs = {
+      const callArgs = {
         extName: extName,
         methodName: methodName,
-        args: args
+        args: args,
       };
       // TODO: Handle timeout.
       this.socket.emit('callC2sAPI', callArgs, (result) => {
@@ -97,7 +97,7 @@ class ClientExtensionHelper {
    */
   async onS2cAPICalled(methodName, args) {
     // TODO: Forward to corresponding method in client.mjs.
-    if (typeof methodName !== 'string' || !methodName in this.clientAPIs) {
+    if (typeof methodName !== 'string' || !(methodName in this.clientAPIs)) {
       return {'error': 'Api name not found'};
     }
     const fn = this.clientAPIs[methodName];
@@ -134,6 +134,6 @@ class ClientExtensionHelper {
   getMap() {
     return this.extMan.gameMap;
   }
-};
+}
 
 export default ClientExtensionHelper;

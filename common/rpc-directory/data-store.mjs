@@ -4,7 +4,7 @@
 import assert from 'assert';
 import fs from 'fs';
 import path from 'path';
-import { promises as fsPromises } from 'fs';
+import {promises as fsPromises} from 'fs';
 
 /**
  * DataStore is a class that handles storing small amount of JSON data.
@@ -55,7 +55,7 @@ class DataStore {
     }
 
     // Check that the directory exists.
-    let stat = fs.statSync(this.dataDir);
+    const stat = fs.statSync(this.dataDir);
     assert.equal(stat.isDirectory(), true);
   }
 
@@ -85,7 +85,7 @@ class DataStore {
       return this.opened[dataName].data;
     }
 
-    let newData = await this._loadDataFromDisk(dataName);
+    const newData = await this._loadDataFromDisk(dataName);
     if (dataName in this.opened) {
       console.warn(`Concurrent loadData() on dataName, overwriting.`);
     }
@@ -100,7 +100,7 @@ class DataStore {
    * @return {object} data - The data that is loaded.
    */
   async _loadDataFromDisk(dataName) {
-    let result = {};
+    const result = {};
     result.data = {};
     result.dirty = false;
     result.writeInProgress = false;
@@ -108,7 +108,7 @@ class DataStore {
     result.flushActive = false;
     result.onFlushDone = undefined;
 
-    let filePath = this._getPath(dataName, true);
+    const filePath = this._getPath(dataName, true);
     let readFd = undefined;
     try {
       readFd = await fsPromises.open(filePath, 'r');
@@ -132,7 +132,7 @@ class DataStore {
       console.error('Failed to read \'' + filePath + '\'. Reason: '+e);
       throw e;
     }
-    let dataObject = JSON.parse(fileContent);
+    const dataObject = JSON.parse(fileContent);
     result.data = dataObject;
     return result;
   }
@@ -172,7 +172,7 @@ class DataStore {
     if (!(dataName in this.opened)) {
       throw 'Attempting to flush non-existent data.';
     }
-    let obj = this.opened[dataName];
+    const obj = this.opened[dataName];
     if (obj.flushActive) {
       console.warn('Concurrent _flushDirtyData()');
       return;
@@ -181,7 +181,7 @@ class DataStore {
     obj.flushActive = true;
 
     // Wait a tick so we don't delay anything.
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     while (true) {
       if (!obj.dirty) {
@@ -197,10 +197,10 @@ class DataStore {
       obj.writeInProgress = true;
       obj.pending = false;
       obj.dirty = false;
-      let fileContent = JSON.stringify(obj.data);
+      const fileContent = JSON.stringify(obj.data);
 
       // Write to temp file first.
-      let filePath = this._getPath(dataName, false);
+      const filePath = this._getPath(dataName, false);
       let writeFd = undefined;
       try {
         writeFd = await fsPromises.open(filePath, 'w');
@@ -235,7 +235,7 @@ class DataStore {
     }
 
     return true;
-  };
+  }
 
   /**
    * This method runs continuously since the creation of this class.
@@ -244,13 +244,13 @@ class DataStore {
    */
   async _routineFlusher() {
     // Wait a tick before starting.
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     while (true) {
       // TODO: Make this configurable.
-      await new Promise(resolve => setTimeout(resolve, 5000));
+      await new Promise((resolve) => setTimeout(resolve, 5000));
 
-      for (let dataName in this.opened) {
+      for (const dataName in this.opened) {
         // no await, we let it run in the background.
         this._flushDirtyData(dataName);
       }
@@ -267,16 +267,16 @@ class DataStore {
       console.error(`Attempting to unload data ${dataName} that is not loaded.`);
       return false;
     }
-    let obj = this.opened[dataName];
+    const obj = this.opened[dataName];
     delete this.opened[dataName];
     if (obj.flushActive) {
-      let p = new Promise(function (resolve, reject) {
+      const p = new Promise(function(resolve, reject) {
         obj.onFlushDone = resolve;
       });
       await p;
     }
     return true;
   }
-};
+}
 
 export default DataStore;

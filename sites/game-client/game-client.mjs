@@ -46,7 +46,7 @@ class GameClient {
    */
   async initialize(token) {
     this.token = token;
-    let socket = this.socket;
+    const socket = this.socket;
     socket.on('connect', () => {
       socket.emit('authenticate', {token: token});
       socket.on('authenticated', () => {
@@ -75,7 +75,7 @@ class GameClient {
         this.gameState.onCellSet(msg.op, msg.mapName, msg.cellSet);
       });
       socket.on('callS2cAPI', (msg, callback) => {
-        let p = this.extMan.onS2cAPICalled(msg);
+        const p = this.extMan.onS2cAPICalled(msg);
         p.then((result) => {
           callback(result);
         });

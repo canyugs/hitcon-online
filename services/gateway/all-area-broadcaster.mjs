@@ -61,7 +61,7 @@ class AllAreaBroadcaster {
    */
   async notifyPlayerLocationChange(loc) {
     this.gameState.onLocation(loc);
-    let msg = {type: 'loc', msg: loc};
+    const msg = {type: 'loc', msg: loc};
     await this.dir.getRedis().publishAsync(this.gameStateChannel,
         JSON.stringify(msg));
   }
@@ -127,7 +127,7 @@ class AllAreaBroadcaster {
     // We transfer the state at this moment, but some previous 'location' might
     // still be in the pipeline, resulting in duplicated messages delivered.
     // NOTE: We might need to filter the player data.
-    let state = this.gameState.getStateTransfer();
+    const state = this.gameState.getStateTransfer();
     socket.emit('stateTransfer', state);
   }
 

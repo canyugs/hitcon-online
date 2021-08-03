@@ -37,59 +37,59 @@ async function mainServer() {
   //   console.error(err);
   // });
 
-  const corsValidation = function (origin, callback) {
+  const corsValidation = function(origin, callback) {
     // https://github.com/expressjs/cors/issues/71
-    if(origin === undefined) {
+    if (origin === undefined) {
       callback(null, true);
       return;
     }
 
     let originHostname;
     try {
-      originHostname = (new URL(origin)).hostname
+      originHostname = (new URL(origin)).hostname;
     } catch {
-      console.error("Can't parse URL: ", origin);
+      console.error('Can\'t parse URL: ', origin);
       callback(new Error('Not allowed by CORS'));
       return;
     }
 
-    if(!config.get('publicAddress')) {
-      callback(null, true)
+    if (!config.get('publicAddress')) {
+      callback(null, true);
       return;
     }
 
     // for development only, might need to removed in the future.
-    if(originHostname === 'localhost' || originHostname === '127.0.0.1') {
-      callback(null, true)
+    if (originHostname === 'localhost' || originHostname === '127.0.0.1') {
+      callback(null, true);
       return;
     }
 
-    if(config.get('publicAddress') === originHostname) {
+    if (config.get('publicAddress') === originHostname) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
     }
-  }
+  };
 
   /* Create the http service */
   const app = express();
 
   app.use(require('cors')({
-    origin: corsValidation
+    origin: corsValidation,
   }));
   const server = http.createServer(app);
   const io = new Server(server, {
     cors: true,
-    origin: corsValidation
+    origin: corsValidation,
   });
 
   /* Create all utility classes */
-  const rpcDirectory = config.get('multiprocess')
-                        ? (new MultiProcessRPCDirectory())
-                        : (new SingleProcessRPCDirectory());
+  const rpcDirectory = config.get('multiprocess') ?
+                        (new MultiProcessRPCDirectory()) :
+                        (new SingleProcessRPCDirectory());
   await rpcDirectory.asyncConstruct();
   // Load the map.
-  const mapList = config.get("map");
+  const mapList = config.get('map');
   const rawMapJSON = fs.readFileSync(mapList[0]);
   const mapJSON = JSON.parse(rawMapJSON);
   // We do not have GraphicAsset on the server side.
@@ -101,7 +101,7 @@ async function mainServer() {
   const broadcaster = new AllAreaBroadcaster(rpcDirectory, gameMap, gameState);
   const extensionManager = new ExtensionManager(rpcDirectory, broadcaster, gameMap, gameState);
   const gatewayService = new GatewayService(rpcDirectory, gameMap, authServer,
-    broadcaster, io, extensionManager);
+      broadcaster, io, extensionManager);
 
   /* Initialize broadcaster and gateway service */
   const serviceName = ('service-name' in argv) ? argv['service-name'] : Object.keys(config.get('gatewayServers'))[0];

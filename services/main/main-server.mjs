@@ -42,19 +42,19 @@ async function mainServer() {
   const io = new Server(server);
 
   /* Check if main-server should be used & warn the developer of the special (and possibly unexpected) behavior. */
-  if(config.get('multiprocess')) {
-    console.error("The main-server.mjs should only be used in single-process mode.");
+  if (config.get('multiprocess')) {
+    console.error('The main-server.mjs should only be used in single-process mode.');
     return;
   }
-  if(Object.keys(config.get('gatewayServers')).length > 1) {
-    console.warn("The main-server.mjs would use the first gateway service in the config file. Use multiprocessing mode to create all gateway servers.");
+  if (Object.keys(config.get('gatewayServers')).length > 1) {
+    console.warn('The main-server.mjs would use the first gateway service in the config file. Use multiprocessing mode to create all gateway servers.');
   }
 
   /* Create all utility classes */
   const rpcDirectory = new SingleProcessRPCDirectory();
   await rpcDirectory.asyncConstruct();
   // Load the map.
-  const mapList = config.get("map");
+  const mapList = config.get('map');
   const rawMapJSON = fs.readFileSync(mapList[0]);
   const mapJSON = JSON.parse(rawMapJSON);
   // We do not have GraphicAsset on the server side.
@@ -66,7 +66,7 @@ async function mainServer() {
   const broadcaster = new AllAreaBroadcaster(rpcDirectory, gameMap, gameState);
   const extensionManager = new ExtensionManager(rpcDirectory, broadcaster, gameMap, gameState);
   const gatewayService = new GatewayService(rpcDirectory, gameMap, authServer,
-    broadcaster, io, extensionManager);
+      broadcaster, io, extensionManager);
   const assetServer = new AssetServer(app, extensionManager, null);
   await extensionManager.ensureClass('blank');
   for (const extName of extensionManager.listExtensions()) {

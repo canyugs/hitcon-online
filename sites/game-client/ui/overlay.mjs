@@ -1,9 +1,9 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
-/** 
+/**
  * Represents an overlay
- * 
+ *
  * Those who wants to use the Overlay element should extend this class and implement the methods.
 */
 class Overlay {
@@ -16,10 +16,10 @@ class Overlay {
     this.position = undefined;
     this.toolbarButton = undefined;
   }
-  
+
   /**
    * If true, user can hide the overlay.
-   * 
+   *
    * This method can be implemented in the derived class if the derived class
    * wishes to adjust this default behaviour.
    */
@@ -72,12 +72,12 @@ class Overlay {
      V
   DISMISSED
   */
-  
+
   /**
    * Set visibility=hidden.
-   * 
+   *
    * state: HIDDEN -> SHOW
-   */ 
+   */
   show(position) {
     const proceed = this.onPreShow();
     // If onPreShow() says don't do it, then don't.
@@ -94,7 +94,7 @@ class Overlay {
 
   /**
    * Unset visibility=hidden.
-   * 
+   *
    * state: SHOW -> HIDE
    */
   hide() {
@@ -113,14 +113,14 @@ class Overlay {
 
   /**
    * Destroy the overlay.
-   * 
+   *
    * state: SHOW/HIDDEN -> DISMISS
    */
   dismiss() {}
 
   /**
    * Executes when the overlay is dismissed.
-   * 
+   *
    * This method can be implemented in the derived class if the derived class
    * wishes to handle this event.
    */
@@ -132,7 +132,9 @@ class Overlay {
    * This method can be implemented in the derived class if the derived class
    * wishes to handle this event.
    */
-  onPreShow() { return true; }
+  onPreShow() {
+    return true;
+  }
 
   /**
    * Executes after the overlay is shown.
@@ -140,7 +142,9 @@ class Overlay {
    * This method can be implemented in the derived class if the derived class
    * wishes to handle this event.
    */
-  onPostShow() { return true; }
+  onPostShow() {
+    return true;
+  }
 
   /**
    * Executes before the overlay is hidden.
@@ -148,7 +152,9 @@ class Overlay {
    * This method can be implemented in the derived class if the derived class
    * wishes to handle this event.
    */
-  onPreHide() { return true; }
+  onPreHide() {
+    return true;
+  }
 
   /**
    * Executes after the overlay is hidden.
@@ -156,16 +162,17 @@ class Overlay {
    * This method can be implemented in the derived class if the derived class
    * wishes to handle this event.
    */
-  onPostHide() { return true; }
+  onPostHide() {
+    return true;
+  }
 
   /**
    * Executes when the window is resized.
-   * 
+   *
    * This method can be implemented in the derived class if the derived class
    * wishes to handle this event.
    */
   onResize(evt) {}
-
-};
+}
 
 export default Overlay;

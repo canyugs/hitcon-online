@@ -25,6 +25,6 @@ class Client {
   static haveClient() {
     return false;
   }
-};
+}
 
 export default Client;

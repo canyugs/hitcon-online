@@ -9,10 +9,10 @@ const config = require('config');
 const redis = require('redis');
 
 import assert from 'assert';
-import { promisify } from 'util';
+import {promisify} from 'util';
 
-import DataStore from './data-store.mjs'
-import MockRedis from './mock-redis.mjs'
+import DataStore from './data-store.mjs';
+import MockRedis from './mock-redis.mjs';
 import {MapCoord} from '../maplib/map.mjs';
 
 const mockRedis = new MockRedis();
@@ -37,7 +37,7 @@ class Directory {
     this.redisSub = undefined;
     if (config.get('redis.type') == 'real') {
       this._createRealRedis();
-    } else if(config.get('redis.type') == 'mock') {
+    } else if (config.get('redis.type') == 'mock') {
       this._createMockRedis();
     } else {
       throw 'invalid redis type ' + config.get('type');
@@ -116,7 +116,7 @@ class Directory {
    * @param {string} name - Name of the gateway service.
    */
   async addGatewayServiceName(name) {
-    let ret = await this.getRedis().hsetAsync(['gatewayServers', name, name]);
+    const ret = await this.getRedis().hsetAsync(['gatewayServers', name, name]);
     if (!(ret === 1)) {
       throw `Failed to add gateway service name to redis: ${ret}`;
     }
@@ -127,7 +127,7 @@ class Directory {
    * This is called so that we know how to reach each extension service.
    */
   async addExtensionServiceName(extName, serviceName) {
-    let ret = await this.getRedis().hsetAsync(['extServers', extName, serviceName]);
+    const ret = await this.getRedis().hsetAsync(['extServers', extName, serviceName]);
     if (!(ret === 1)) {
       throw `Failed to add extension service name to redis: ${ret}`;
     }
@@ -138,8 +138,8 @@ class Directory {
    * @param {object} arr - An array of gateway service name.
    */
   async getGatewayServices() {
-    let ret = await this.getRedis().hgetallAsync('gatewayServers');
-    let result = [];
+    const ret = await this.getRedis().hgetallAsync('gatewayServers');
+    const result = [];
     for (const p in ret) {
       result.push(p);
     }
@@ -154,7 +154,7 @@ class Directory {
   async getExtensionServiceName(extName) {
     // TODO: Cache this because service name doesn't change throughout the
     // current instance of server. i.e. Only restart results in name change.
-    let ret = await this.getRedis().hgetAsync(['extServers', extName]);
+    const ret = await this.getRedis().hgetAsync(['extServers', extName]);
     // Will get null if failed.
     if (typeof ret != 'string' || ret === '') {
       return null;
@@ -180,7 +180,7 @@ class Directory {
    */
   async registerPlayer(playerID, serviceName) {
     // NX: Only set if it doesn't exist.
-    let ret = await this.getRedis().setAsync(
+    const ret = await this.getRedis().setAsync(
         [this._getPlayerKey(playerID), serviceName, 'NX']);
     if (ret === null) {
       // Player already connected with another connection.
@@ -224,7 +224,7 @@ class Directory {
    * on which the player is on. undefined if failed.
    */
   async getPlayerGatewayService(playerID) {
-    let ret = await this.getRedis().getAsync([this._getPlayerKey(playerID)]);
+    const ret = await this.getRedis().getAsync([this._getPlayerKey(playerID)]);
     if (typeof ret === 'string') {
       return ret;
     }
@@ -260,7 +260,7 @@ class Directory {
    */
   async setPlayerData(playerID, playerData) {
     const dataName = this._getPlayerDataName(playerID);
-    let data = await this.storage.saveData(dataName, playerData);
+    const data = await this.storage.saveData(dataName, playerData);
   }
 
   /**

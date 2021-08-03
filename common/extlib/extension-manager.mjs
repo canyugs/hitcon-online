@@ -204,11 +204,11 @@ class ExtensionManager {
    * for each location.
    */
   async collectPartials(names) {
-    let result = {};
+    const result = {};
     for (const name of names) {
       // Load the classes if they are not loaded.
       await this.ensureClass(name);
-      let p = this.ext[name].standaloneClass.getPartials();
+      const p = this.ext[name].standaloneClass.getPartials();
       for (const loc in p) {
         if (!(loc in result)) {
           result[loc] = [];
@@ -238,7 +238,7 @@ class ExtensionManager {
    * @return {Object} result - The result of the call.
    */
   async onC2sCalled(msg, playerID) {
-    const { extName, methodName, args } = msg;
+    const {extName, methodName, args} = msg;
     if (!(typeof extName === 'string')) {
       return {'error': 'extName not string'};
     }

@@ -25,6 +25,6 @@ class MapRendererOverlay extends Overlay {
     this.canvas.height = 32 * 15; // 15 tiles
     this.canvas.width = 32 * 20; // 20 tiles
   }
-};
+}
 
 export default MapRendererOverlay;

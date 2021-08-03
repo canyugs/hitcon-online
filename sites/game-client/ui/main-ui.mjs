@@ -19,21 +19,25 @@ OVERLAY_DIV.set(OverlayPosition.MAIN_VIEW, 'main-view');
 const TOOLBAR_ID = 'toolbar';
 
 /**
- * MainUI composes components into a window, 
+ * MainUI composes components into a window,
  * components are classified into Notification, Toolbar, Overlay and Modal.
  */
 class MainUI {
   /**
   * TODO(fanlan1210)
-  * 
+  *
   * Create a MainUI.
   */
   constructor() {
     this.state = UIState.NORMAL_UI;
     this.overlays = new Map();
 
-    window.addEventListener('resize', (evt) => { this._onResize(evt); });
-    window.addEventListener('gameStart', (evt) => { this._onResize(evt); });
+    window.addEventListener('resize', (evt) => {
+      this._onResize(evt);
+    });
+    window.addEventListener('gameStart', (evt) => {
+      this._onResize(evt);
+    });
 
     // Cache the common used DOM elements.
     this.stagingDom = document.getElementById(STAGING_ID);

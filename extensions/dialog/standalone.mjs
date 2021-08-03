@@ -4,8 +4,8 @@
 import assert from 'assert';
 import fs from 'fs';
 
-import { dirname } from 'path';
-import { fileURLToPath } from 'url';
+import {dirname} from 'path';
+import {fileURLToPath} from 'url';
 import path from 'path';
 
 /**
@@ -19,7 +19,7 @@ class Standalone {
    * various functionalities of the extension.
    */
   constructor(helper) {
-    this.helper = helper
+    this.helper = helper;
     this.npcInfo = {};
     this.npcObj = {};
   }
@@ -34,27 +34,27 @@ class Standalone {
   }
 
   /**
-   * Get the specific NPC data from Server (npc.json), 
+   * Get the specific NPC data from Server (npc.json),
    * than send NPC data back to user to render the dialog.
    * @param {object} player - Player ID
    * @@param {object} arg - NPC name
    */
-  async c2s_getSpecificNpcData(player, arg){
-    const npcName = arg['npc'] ;
+  async c2s_getSpecificNpcData(player, arg) {
+    const npcName = arg['npc'];
     const npcObject = this.npcObj[npcName];
-    
-    if(npcObject == undefined){
+
+    if (npcObject == undefined) {
       assert.fail(`[Error] Does not have NPC ${npcName}'s data`);
-    }else {
+    } else {
       arg = {
         'name': npcName,
         'sentence': npcObject.sentence,
-        'choice': npcObject.choice
-      }
+        'choice': npcObject.choice,
+      };
 
-      if(npcObject.choice.length === 1){
+      if (npcObject.choice.length === 1) {
         await this.helper.callS2cAPI(player.playerID, 'dialog', 'singleChoiceDialog', 5000, arg);
-      }else {
+      } else {
         await this.helper.callS2cAPI(player.playerID, 'dialog', 'multiChoiceDialog', 5000, arg);
       }
     }
@@ -65,7 +65,7 @@ class Standalone {
    * @param {object} player - Player ID
    * @param {object} arg - user choice
    */
-  async c2s_getResultFromClient(player, arg){
+  async c2s_getResultFromClient(player, arg) {
     console.log(arg);
   }
 

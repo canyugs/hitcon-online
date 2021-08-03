@@ -18,7 +18,7 @@ class Handler {
   constructor(serviceName, RPCDirectory) {
     this.serviceName = serviceName;
     this.RPCDirectory = RPCDirectory;
-    this.methods = {}
+    this.methods = {};
     this.methods.serviceName = {};
   }
 
@@ -32,7 +32,7 @@ class Handler {
    * Caller should bind the callback to this before calling registerRPC.
    */
   registerRPC(methodName, callback) {
-    if(methodName in this.methods){
+    if (methodName in this.methods) {
       throw 'A method with the same name has been registered';
     }
     this.methods[methodName] = callback;
@@ -49,7 +49,7 @@ class Handler {
     void [serviceName, methodName, args];
 
     try {
-      return await this.RPCDirectory.callRPC(this.serviceName, serviceName, methodName, ...args)
+      return await this.RPCDirectory.callRPC(this.serviceName, serviceName, methodName, ...args);
     } catch (e) {
       console.error(`Error calling rpc function '${methodName}' of '${serviceName}'`);
       console.error(e);

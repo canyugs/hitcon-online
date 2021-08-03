@@ -66,7 +66,7 @@ class AssetServer {
 
     // Prepare the client params beforehand.
     this.clientParams = {};
-    let partials = await this.extMan.collectPartials(this.extMan.listExtensions());
+    const partials = await this.extMan.collectPartials(this.extMan.listExtensions());
     this.clientParams.inDiv = [];
     if (typeof partials.inDiv == 'object') {
       this.clientParams.inDiv = partials.inDiv;

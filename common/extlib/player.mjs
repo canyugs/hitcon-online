@@ -75,6 +75,6 @@ class Player {
   async callAPI(extensionName, methodName, args, timeoutMs) {
     assert.fail('Not impemented');
   }
-};
+}
 
 export default Player;

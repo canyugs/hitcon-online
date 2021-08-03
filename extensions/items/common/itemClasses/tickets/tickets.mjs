@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 class Tickets {
-
   constructor(helper, imagePath) {
     this.helper = helper;
     this.imagePath = imagePath;

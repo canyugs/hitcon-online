@@ -31,7 +31,7 @@ async function standaloneExtensionServer() {
   const rpcDirectory = new MultiProcessRPCDirectory();
   await rpcDirectory.asyncConstruct();
   // Load the map.
-  const mapList = config.get("map");
+  const mapList = config.get('map');
   const rawMapJSON = fs.readFileSync(mapList[0]);
   const mapJSON = JSON.parse(rawMapJSON);
   // We do not have GraphicAsset on the server side.
@@ -40,7 +40,7 @@ async function standaloneExtensionServer() {
   const broadcaster = new AllAreaBroadcaster(rpcDirectory, gameMap, gameState);
   const extensionManager = new ExtensionManager(rpcDirectory, broadcaster, gameMap, null);
 
-  if(!('ext' in argv)){
+  if (!('ext' in argv)) {
     console.error('Please specify extension name via --ext argument.');
     process.exit();
   }

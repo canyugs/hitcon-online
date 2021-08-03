@@ -14,15 +14,17 @@ class Client {
    */
   constructor(helper) {
     this.helper = helper;
-    document.getElementById('ccs').addEventListener('click', () => {this.requestChangeCellset(this);});
-    console.log("cellset extension loaded");
+    document.getElementById('ccs').addEventListener('click', () => {
+      this.requestChangeCellset(this);
+    });
+    console.log('cellset extension loaded');
 
     window.testCellSet = this.requestChangeCellset.bind(this);
   }
 
-  requestChangeCellset() {
-    console.log('requestChangeCellset');
-    this.helper.callC2sAPI('cellsettest', 'changeCellSet', null, 5000);
+  requestChangeCellset(client) {
+    console.log("requestChangeCellset", client);
+    client.helper.callStandaloneAPI('changeCellSet', null, 5000);
   }
 }
 

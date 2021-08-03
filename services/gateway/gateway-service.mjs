@@ -39,7 +39,6 @@ class GatewayService {
     // A map that tracks the current connected clients.
     // key is the player ID. value is the socket.
     this.socks = {};
-
   }
 
   /**
@@ -80,10 +79,10 @@ class GatewayService {
         const timeoutTimer = setTimeout(() => {
           resolve({error: 'timeout'});
         }, timeout);
-        let callArgs = {
+        const callArgs = {
           extName: extName,
           methodName: methodName,
-          args: args
+          args: args,
         };
         this.socks[playerID].emit('callS2cAPI', callArgs, (result) => {
           clearTimeout(timeoutTimer);
@@ -113,7 +112,7 @@ class GatewayService {
           socket.emit('unauthorized', {data: 'Token is not string'});
           return;
         }
-        let verified = this.authServer.verifyToken(msg.token);
+        const verified = this.authServer.verifyToken(msg.token);
         if (verified === null) {
           socket.emit('unauthorized', {data: 'Token verification failed'});
           return;
@@ -137,7 +136,7 @@ class GatewayService {
     const playerID = socket.decoded_token.sub;
 
     // Let everyone know we've accepted this player.
-    let ret = await this.rpcHandler.registerPlayer(playerID);
+    const ret = await this.rpcHandler.registerPlayer(playerID);
     if (!ret) {
       // Player already connected.
       console.warn(`Player ${playerID} already connected`);
@@ -189,7 +188,7 @@ class GatewayService {
       displayName: socket.playerData.displayName};
     firstLocation.mapCoord = socket.playerData.mapCoord;
     // TODO: if the user existed before, remember their locations.
-    while (true){
+    while (true) {
       firstLocation.mapCoord = this.gameMap.getRandomSpawnPointNoStarvation();
       if (await this._occupyCoord(firstLocation.mapCoord, playerID)) break;
     }
@@ -201,7 +200,7 @@ class GatewayService {
     this.broadcaster.sendStateTransfer(socket);
 
     // Emit the gameStart event.
-    let startPack = {};
+    const startPack = {};
     startPack.playerData = {};
     for (const k of ['playerID', 'displayName', 'displayChar']) {
       startPack.playerData[k] = socket.playerData[k];
@@ -230,7 +229,7 @@ class GatewayService {
     // Take socket off first to avoid race condition in the await below.
     delete this.socks[playerID];
 
-    let lastLocation = {playerID: playerID, removed: true};
+    const lastLocation = {playerID: playerID, removed: true};
     await this._broadcastUserLocation(lastLocation);
 
     // release grid after disconnection
@@ -281,12 +280,12 @@ class GatewayService {
       return;
     }
     // target position is in the map
-    if (!this._borderCheck(msg.mapCoord,mapSize)) {
+    if (!this._borderCheck(msg.mapCoord, mapSize)) {
       console.warn(`Player ${msg.playerID} is trying to go outside the map.`);
       return;
     }
     // nearby grid check
-    if (!this._nearbyGridCheck(msg.mapCoord,lastCoord)) {
+    if (!this._nearbyGridCheck(msg.mapCoord, lastCoord)) {
       console.warn(`Player ${msg.playerID} is trynig to teleport.`);
       return;
     }
@@ -304,12 +303,12 @@ class GatewayService {
     // try occupy grid
     const ret = await this._occupyCoord(msg.mapCoord, msg.playerID);
     // grid has been occupied
-    if(!ret){
+    if (!ret) {
       // Can't move, target is already occupied.
       return false;
     }
 
-    //release old grid
+    // release old grid
     socket.playerData.lastMovingTime = Date.now();
     await this._clearOccupy(socket.playerData.mapCoord, msg.playerID);
     await this._broadcastUserLocation(msg);
@@ -352,11 +351,11 @@ class GatewayService {
   }
 
   // TODO(whyang9701): Move this into map.mjs.
-  _getManhattanDistance(a,b){
+  _getManhattanDistance(a, b) {
     return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
   }
 
-  _borderCheck(coord,mapSize){
+  _borderCheck(coord, mapSize) {
     if (coord.x >= mapSize.width || coord.x < 0) {
       return false;
     }
@@ -366,20 +365,20 @@ class GatewayService {
     return true;
   }
 
-  _nearbyGridCheck(coord,lastCoord){
-    let distanceSquire = this._getManhattanDistance(lastCoord,coord);
+  _nearbyGridCheck(coord, lastCoord) {
+    const distanceSquire = this._getManhattanDistance(lastCoord, coord);
     if (distanceSquire > 1) {
       return false;
     }
     return true;
   }
 
-  _movementRequestSpeedCheck(playerData){
+  _movementRequestSpeedCheck(playerData) {
     if (playerData.lastMovingTime === undefined) {
-      console.log('player has no last time record')
+      console.log('player has no last time record');
       return false;
     }
-    if (Date.now() - playerData.lastMovingTime < movingRequestThreshold ){
+    if (Date.now() - playerData.lastMovingTime < movingRequestThreshold ) {
       return false;
     }
     return true;
@@ -392,8 +391,8 @@ class GatewayService {
    * successfully, false if it's occupied.
    */
   async _occupyCoord(mapCoord, playerID) {
-    let ret = await this.dir.getRedis().setAsync(
-      [mapCoord.toRedisKey(), playerID, 'NX']);
+    const ret = await this.dir.getRedis().setAsync(
+        [mapCoord.toRedisKey(), playerID, 'NX']);
     if (ret === 'OK') {
       return true;
     }
@@ -409,10 +408,10 @@ class GatewayService {
     if (playerID) {
       // Do the check
       const getRet = await this.dir.getRedis().getAsync(
-        [mapCoord.toRedisKey()]);
+          [mapCoord.toRedisKey()]);
       if (getRet !== playerID) {
         console.error(
-          `Cell ${mapCoord} is not occupied by ${playerID}, it's ${getRet}`);
+            `Cell ${mapCoord} is not occupied by ${playerID}, it's ${getRet}`);
         return false;
       }
     }

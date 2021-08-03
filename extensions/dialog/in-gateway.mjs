@@ -16,14 +16,14 @@ class InGateway {
    * various functionalities of the extension.
    */
   constructor(helper) {
-    this.helper = helper
+    this.helper = helper;
   }
 
   /**
    * This is called by gateway service to initialie the in gateway part of
    * the extension.
    */
-   async initialize() {
+  async initialize() {
   }
 }
 

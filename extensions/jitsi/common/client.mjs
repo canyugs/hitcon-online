@@ -27,16 +27,16 @@ class Client {
   startMeeting(meetingName) {
     const domain = 'meet.jit.si';
     const options = {
-        roomName: meetingName,
-        // TODO: Update the size to fit the UI framework.
-        width: 290,
-        height: 290,
-        parentNode: document.querySelector('#meet-iframe'),
-        configOverwrite: {
-          prejoinPageEnabled: false,
-          startWithAudioMuted: true,
-          startVideoMuted: true
-        }
+      roomName: meetingName,
+      // TODO: Update the size to fit the UI framework.
+      width: 290,
+      height: 290,
+      parentNode: document.querySelector('#meet-iframe'),
+      configOverwrite: {
+        prejoinPageEnabled: false,
+        startWithAudioMuted: true,
+        startVideoMuted: true,
+      },
     };
     const api = new JitsiMeetExternalAPI(domain, options);
     this.jitsiObj = api;
@@ -81,10 +81,10 @@ class Client {
   onSelfLocationUpdated(loc) {
     const map = this.helper.getMap();
     if (typeof map === 'object') {
-      let m = map.getCell(loc.mapCoord, 'jitsi');
+      const m = map.getCell(loc.mapCoord, 'jitsi');
       this.updateMeeting(m);
     }
   }
-};
+}
 
 export default Client;

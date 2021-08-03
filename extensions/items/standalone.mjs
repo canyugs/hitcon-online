@@ -52,13 +52,13 @@ class Standalone {
     const itemSettingJson = await fs.promises.readFile(`../extensions/items/common/config.json`);
     const itemConfig = JSON.parse(itemSettingJson).items;
     const itemBaseClasses = {};
-    for (let itemTypeName of allItemsName) {
+    for (const itemTypeName of allItemsName) {
       const itemBaseModule = await import(`../items/common/itemClasses/${itemTypeName}/${itemTypeName}.mjs`);
       const itemBaseClass = itemBaseModule.default;
       itemBaseClasses[itemTypeName] = itemBaseClass;
     }
     let index = 0;
-    for (let itemName in itemConfig) {
+    for (const itemName in itemConfig) {
       const itemBaseClassName = itemConfig[itemName].baseClass;
       const item = new itemBaseClasses[itemBaseClassName](this.helper, itemConfig[itemName].imagePath);
       this.itemInfo[itemName] = {
@@ -66,19 +66,19 @@ class Standalone {
         layer: itemConfig[itemName].layer,
         show: item.show,
         exchangeable: item.exchangeable,
-        usable: item.usable
-      }
+        usable: item.usable,
+      };
       this.itemInstances[itemName] = item;
       index++;
 
       /* Initialize cell set for each items */
       for (const mapName of this.helper.gameMap.getOriginalCellSetStartWith('').keys()) { // Get all available maps.
         const cellSet = new CellSet(
-          'droppedItem' + itemName.toUpperCase(),
-          4,
-          Array.from(this.droppedItemCell.values()),
-          { "item": this.itemInfo[itemName].layer },
-          true);
+            'droppedItem' + itemName.toUpperCase(),
+            4,
+            Array.from(this.droppedItemCell.values()),
+            {'item': this.itemInfo[itemName].layer},
+            true);
         this.helper.gameMap.setDynamicCellSet(mapName, cellSet);
       }
     }
@@ -163,8 +163,8 @@ class Standalone {
       return;
     }
     const itemObj = this.items.get(playerID);
-    if (!itemName in itemObj) {
-      console.error('No such item');
+    if (!(itemName in itemObj)) {
+      console.log('No such item');
       return;
     }
     return itemObj[itemName];
@@ -182,8 +182,8 @@ class Standalone {
       console.error('Player not initialized');
       return;
     }
-    if (!itemName in this.itemInfo) {
-      console.error('Item does not exist');
+    if (!(itemName in this.itemInfo)) {
+      console.log("Item does not exist");
       return;
     }
     if (!this.itemInfo[itemName].exchangeable) {
@@ -192,8 +192,8 @@ class Standalone {
     }
 
     const fromPlayerItem = this.items.get(playerID);
-    if (!itemName in fromPlayerItem || fromPlayerItem[itemName].amount < amount) {
-      console.error('Insufficient quantity');
+    if (!(itemName in fromPlayerItem) || fromPlayerItem[itemName].amount < amount) {
+      console.log("Insufficient quantity");
       return;
     }
     fromPlayerItem[itemName].amount -= amount;
@@ -201,7 +201,7 @@ class Standalone {
 
     const toPlayerItem = this.items.get(toPlayerID);
     if (!itemName in toPlayerItem) {
-      toPlayerItem[itemName] = { amount: 0 };
+      toPlayerItem[itemName] = {amount: 0};
     }
     toPlayerItem[itemName] += amount;
     this.items.set(toPlayerID, toPlayerItem);
@@ -209,8 +209,7 @@ class Standalone {
     /* Notify the client that a certain amount of items have been given */
     try {
       await this.helper.callS2cAPI('items', 'onReceiveItem', 5000, toPlayerID, playerID, itemName, amount);
-    }
-    catch (e) {
+    } catch (e) {
       // ignore if recipient is offline
     }
   }
@@ -226,8 +225,8 @@ class Standalone {
       console.error('Player not initialized');
       return;
     }
-    if (!itemName in this.itemInfo || !itemName in this.itemInstances) {
-      console.error('Item does not exist');
+    if (!(itemName in this.itemInfo) || !(itemName in this.itemInstances)) {
+      console.log("Item does not exist");
       return;
     }
     if (!this.itemInfo[itemName].usable) {
@@ -236,8 +235,8 @@ class Standalone {
     }
 
     const item = this.items.get(playerID);
-    if (!itemName in item || item[itemName].amount < amount) {
-      console.error('Insufficient quantity');
+    if (!(itemName in item) || item[itemName].amount < amount) {
+      console.log("Insufficient quantity");
       return;
     }
     item[itemName].amount -= amount;
@@ -247,8 +246,7 @@ class Standalone {
 
     try {
       await this.helper.callS2cAPI('items', 'onUseItem', 5000, playerID, itemName, amount);
-    }
-    catch (e) {
+    } catch (e) {
       // ignore if player becomes offline for some reason
     }
   }
@@ -267,7 +265,7 @@ class Standalone {
     }
 
     /* update database */
-    let itemObj = this.items.get(playerID);
+    const itemObj = this.items.get(playerID);
     if (!itemName in itemObj) {
       console.error('No such item');
       return;
@@ -277,7 +275,7 @@ class Standalone {
 
     /* update cell set */
     /* TODO: calculate dropped coordinate. Currently, the dropped coordinate is the same as the player's map coordinate */
-    this.droppedItemCell.set(this.droppedItemIndex, { "x": mapCoord.x, "y": mapCoord.y, "w": 1, "h": 1 });
+    this.droppedItemCell.set(this.droppedItemIndex, {'x': mapCoord.x, 'y': mapCoord.y, 'w': 1, 'h': 1});
     this.droppedItemInfo.set(this.droppedItemIndex, itemName);
     this.droppedItemIndex++;
     for (const mapName of this.helper.gameMap.getOriginalCellSetStartWith('').keys()) { // Get all available maps.
@@ -303,7 +301,7 @@ class Standalone {
       return;
     }
     /* update amount */
-    let itemObj = this.items.get(playerID);
+    const itemObj = this.items.get(playerID);
     const itemName = this.droppedItemInfo.get(droppedItemIndex);
     itemObj[itemName].amount += 1;
     this.items.set(playerID, itemObj);

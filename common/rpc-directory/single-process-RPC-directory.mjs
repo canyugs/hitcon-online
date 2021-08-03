@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 import assert from 'assert';
-import Directory from './directory.mjs'
-import Handler from './handler.mjs'
+import Directory from './directory.mjs';
+import Handler from './handler.mjs';
 
 /**
  * This class is handling all RPC calls in Single Process version.
@@ -39,10 +39,10 @@ class SingleProcessRPCDirectory extends Directory {
    */
   async callRPC(callerServiceName, serviceName, methodName, ...args) {
     void [callerServiceName, serviceName, methodName, args];
-    if(!(serviceName in this.handlers)){
+    if (!(serviceName in this.handlers)) {
       throw `Service ${serviceName} not found.`;
     }
-    if(!(methodName in this.handlers[serviceName].methods)){
+    if (!(methodName in this.handlers[serviceName].methods)) {
       throw `Method ${methodName} not found.`;
     }
 
@@ -56,8 +56,8 @@ class SingleProcessRPCDirectory extends Directory {
    * service. Service should register all API handlers with it.
    */
   async registerService(name) {
-    if(name in this.handlers){
-        throw 'A service with the same name has been registered';
+    if (name in this.handlers) {
+      throw 'A service with the same name has been registered';
     }
     this.handlers[name] = new Handler(name, this);
     return this.handlers[name];
