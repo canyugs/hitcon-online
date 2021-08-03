@@ -238,7 +238,7 @@ class ExtensionManager {
    * @return {Object} result - The result of the call.
    */
   async onC2sCalled(msg, playerID) {
-    const { extName, methodName, args } = msg;
+    const {extName, methodName, args} = msg;
     if (!(typeof extName === 'string')) {
       return {'error': 'extName not string'};
     }

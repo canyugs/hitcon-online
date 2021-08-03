@@ -111,7 +111,7 @@ class ExtensionHelperBase {
    * @param {object} args - The arguments.
    * @return {object} result - The result from the call.
    */
-  async teleport(playerID, mapCoord, ...args){
+  async teleport(playerID, mapCoord, ...args) {
     const playerService = await this.dir.getPlayerGatewayService(playerID);
     const result = await this.rpcHandler.callRPC(playerService, 'teleport', playerID, mapCoord, 'D');
     return result;

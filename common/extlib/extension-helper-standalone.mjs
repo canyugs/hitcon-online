@@ -114,7 +114,7 @@ class ExtensionHelperStandalone extends ExtensionHelperBase {
    * @return {object} data - The stored data.
    */
   async loadData() {
-    data = await this.dir.storage.loadData(`ext_${this.name}`)
+    data = await this.dir.storage.loadData(`ext_${this.name}`);
     return data;
   }
 }

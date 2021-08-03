@@ -14,15 +14,15 @@ class Client {
    */
   constructor(helper) {
     this.helper = helper;
-    document.getElementById('c2sButton').addEventListener('click', () => {this.getNpcData()});
+    document.getElementById('c2sButton').addEventListener('click', () => {this.getNpcData();});
   }
 
   /**
    * Get the NPC data from Server (npc.json)
    */
-  getNpcData(){
+  getNpcData() {
     console.log('[c2s Button] getNpcData');
-    let arg = {'npc': 'Amy'} //for test
+    let arg = {'npc': 'Amy'}; //for test
 
     this.helper.callC2sAPI(null, 'getSpecificNpcData', 5000, arg);
   }
@@ -31,7 +31,7 @@ class Client {
    * Show the single choice dialog to user.
    * @param {object} arg - npc data.
    */
-  s2c_singleChoiceDialog(arg){
+  s2c_singleChoiceDialog(arg) {
     console.log(`[Dialog] Single Choice Dialog`);
 
     document.getElementById('npcName').innerHTML = arg.name;
@@ -45,11 +45,11 @@ class Client {
    * Show the multi choice dialog to user.
    * @param {object} arg - npc data.
    */
-  s2c_multiChoiceDialog(arg){
+  s2c_multiChoiceDialog(arg) {
     console.log(`[Dialog] Multi Choice Dialog`);
     let buttonString = '';
-    for(let choice of arg.choice){
-      buttonString += `<button id="button">${choice}</button>`
+    for (let choice of arg.choice) {
+      buttonString += `<button id="button">${choice}</button>`;
     }
 
     //todo: show the pop-up dialog for user
@@ -57,14 +57,14 @@ class Client {
     document.getElementById('npcName').innerHTML = arg.name;
     document.getElementById('npcSentence').innerHTML = arg.sentence;
     document.getElementById('checkButtonDiv').innerHTML = buttonString;
-    document.getElementById('checkButtonDiv').addEventListener('click', e => {this.sendResultToServer(e.target.innerHTML)});
+    document.getElementById('checkButtonDiv').addEventListener('click', e => {this.sendResultToServer(e.target.innerHTML);});
   }
 
   /**
    * Send the user choice to Server.
    * @param result - user choice.
    */
-  sendResultToServer(result){
+  sendResultToServer(result) {
     this.helper.callC2sAPI(null, 'getResultFromClient', 5000, {'result': result});
   }
 

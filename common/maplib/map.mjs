@@ -297,21 +297,25 @@ class _SingleGameMap {
     this.mapName = mapName;
 
     // If cellSet is not in the map data, add it back.
-    this.gameMap.cellSets = (this.gameMap.cellSets ?? []);
-
-    // ensure this.gameMap.cellSets are `CellSet` instance
-    for (const [i, cellSet] of this.gameMap.cellSets.entries()) {
-      cellSet.dynamic = false;
-      this.gameMap.cellSets[i] = CellSet.fromObject(cellSet);
+    if (typeof this.gameMap.cellSet === 'undefined') {
+      this.gameMap.cellSet = [];
     }
-
-    // initialize dynamic cell set
-    this.dynamicCellSet = {};
-
-    // construct layerToCellSet for efficient lookup
-    this.layerToCellSet = new Map();
-    for (const cs of this.gameMap.cellSets) {
-      this._setCellSet(cs);
+    for (let cellSet of this.gameMap.cellSet) {
+      for (let layer of cellSet.layers) {
+        if (!this.layerToCellSet.has(Object.keys(layer)[0])) {
+          this.layerToCellSet.set(Object.keys(layer)[0], []);
+        }
+        this.layerToCellSet.get(Object.keys(layer)[0]).push({
+          name: cellSet.name,
+          cells: cellSet.cells,
+          priority: cellSet.priority,
+          cellContent: Object.values(layer)[0],
+          dynamic: false
+        });
+      }
+    }
+    for (let k of this.layerToCellSet.keys()) {
+      this.layerToCellSet.get(k).sort((first, second) => (second.priority ?? -1) - (first.priority ?? -1));
     }
   }
 
@@ -338,39 +342,8 @@ class _SingleGameMap {
    */
   removeAllDynamicCellSet() {
     this.dynamicCellSet = {};
-    const l2cs = this.layerToCellSet; // alias
-    for (const layerName of l2cs.keys()) {
-      l2cs.set(layerName, l2cs.get(layerName).filter((cs) => (!cs.dynamic)));
-    }
-  }
-
-  /**
-   * Set a cell set. `cellSet` can be static or dynamic cell set.
-   * Should be called internally. Only setDynamicCellSet is publicly available.
-   * @param {CellSet} cellSet - The cell set to be added.
-   */
-  _setCellSet(cellSet) {
-    // just in case if cellSet is not a `CellSet` instance
-    // TODO: a more correct check
-    if (typeof cellSet.dynamic === 'undefined') {
-      throw 'parameter `cellSet` is not an instance of class CellSet';
-    }
-
-    if (cellSet.dynamic) {
-      this.dynamicCellSet[cellSet.name] = cellSet;
-    }
-
-    for (const layerName of Object.keys(cellSet.layers)) {
-      const l2cs = this.layerToCellSet; // alias
-
-      if (!l2cs.has(layerName)) l2cs.set(layerName, []);
-
-      l2cs.get(layerName).push(cellSet);
-      l2cs.get(layerName).sort(
-          (a, b) => (a.priority !== b.priority) ?
-                    ((b.priority) - (a.priority)) :
-                    (b.dynamic ? 1 : -1),
-      );
+    for (let k of this.layerToCellSet.keys()) {
+      this.layerToCellSet.set(k, this.layerToCellSet.get(k).filter(cs => !cs.dynamic));
     }
   }
 
@@ -385,8 +358,18 @@ class _SingleGameMap {
       throw 'parameter `cellSet` is not an instance of class CellSet';
     }
 
-    if (cellSet.dynamic === false) {
-      throw 'parameter `cellSet` is not a dynamic cell set';
+    for (let layer of cellSet.layers) {
+      if (!this.layerToCellSet.has(Object.keys(layer)[0])) {
+        this.layerToCellSet.set(Object.keys(layer)[0], []);
+      }
+      this.layerToCellSet.get(Object.keys(layer)[0]).push({
+        name: cellSet.name,
+        cells: cellSet.cells,
+        priority: cellSet.priority,
+        cellContent: Object.values(layer)[0],
+        dynamic: true
+      });
+      this.layerToCellSet.get(Object.keys(layer)[0]).sort((first, second) => (second.priority ?? -1) - (first.priority ?? -1));
     }
 
     this._setCellSet(cellSet);
@@ -413,9 +396,8 @@ class _SingleGameMap {
    * @param {string} name - Name of the cell set.
    */
   unsetDynamicCellSet(name) {
-    const l2cs = this.layerToCellSet; // alias
-    for (const layerName of Object.keys(this.dynamicCellSet[name].layers)) {
-      l2cs.set(layerName, l2cs.get(layerName).filter((cs) => (cs.name !== name)));
+    for (let layer of this.dynamicCellSet[name].layers) {
+      this.layerToCellSet.set(Object.keys(layer)[0], this.layerToCellSet.get(Object.keys(layer)[0]).filter(cs => cs.name != name));
     }
 
     delete this.dynamicCellSet[name];
@@ -442,18 +424,19 @@ class _SingleGameMap {
       throw 'map index out of bound';
     }
 
-    // check if this layer is overwritten by cell sets
     if (this.layerToCellSet.has(layer)) {
-      for (const cs of this.layerToCellSet.get(layer)) {
-        if (cs.containsMapCoord(coord)) {
-          return cs.layers[layer];
+      for (let cellSet of this.layerToCellSet.get(layer)) {
+        for (let cells of cellSet.cells) {
+          if (x >= cells.x && x < cells.x + (cells.w ?? 1) && y >= cells.y && y < cells.y + (cells.h ?? 1)) {
+            return cellSet.cellContent;
+          }
         }
       }
     }
 
-    // If no cell sets overwrite this mapCoord, check the original layer.
     if (layer in this.gameMap) {
-      return this.gameMap[layer][y*this.gameMap.width + x];
+      const cell = this.gameMap[layer][y*this.gameMap.width + x];
+      return cell;
     }
 
     return null;

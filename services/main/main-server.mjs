@@ -42,11 +42,11 @@ async function mainServer() {
   const io = new Server(server);
 
   /* Check if main-server should be used & warn the developer of the special (and possibly unexpected) behavior. */
-  if(config.get('multiprocess')) {
+  if (config.get('multiprocess')) {
     console.error("The main-server.mjs should only be used in single-process mode.");
     return;
   }
-  if(Object.keys(config.get('gatewayServers')).length > 1) {
+  if (Object.keys(config.get('gatewayServers')).length > 1) {
     console.warn("The main-server.mjs would use the first gateway service in the config file. Use multiprocessing mode to create all gateway servers.");
   }
 

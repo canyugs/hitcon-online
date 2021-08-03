@@ -33,16 +33,16 @@ class Client {
    * toPlayerID: string;
    */
   async giveItem(toPlayerID, itemName, amount) {
-    if (!itemName in this.itemInfo) {
-      console.error('Item does not exist');
+    if (!(itemName in this.itemInfo)) {
+      console.log("Item does not exist");
       return;
     }
     if (!this.itemInfo[itemName].exchangeable) {
       console.error('Item is not exchangeable');
       return;
     }
-    if (!itemName in this.items || this.items[itemName].amount < amount) {
-      console.error('Insufficient quantity');
+    if (!(itemName in this.items) || this.items[itemName].amount < amount) {
+      console.log("Insufficient quantity");
       return;
     }
     this.items[itemName].amount -= amount;
@@ -61,16 +61,16 @@ class Client {
    * fromPlayerID: string;
    */
   async onReceiveItem(fromPlayerID, itemName, amount) {
-    if (!name in this.itemInfo) {
-      console.error('Item does not exist');
+    if (!(name in this.itemInfo)) {
+      console.log("Item does not exist");
       return;
     }
     if (!itemInfo[name].exchangeable) {
       console.error('Item is not exchangeable');
       return;
     }
-    if (!itemName in this.items) {
-      this.items[itemName] = { amount: 0 };
+    if (!(itemName in this.items)) {
+      this.items[itemName] = {amount: 0};
     }
     this.items[itemName] += amount;
   }
@@ -79,8 +79,8 @@ class Client {
    * The below function is used to use an item.
    */
   async useItem(itemName, amount) {
-    if (!itemName in this.itemInfo) {
-      console.error('Item does not exist');
+    if (!(itemName in this.itemInfo)) {
+      console.log("Item does not exist");
       return;
     }
     const result = await this.helper.callC2sAPI('items', 'useItem', 5000, itemName, amount);

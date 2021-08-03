@@ -69,8 +69,7 @@ class ClientExtensionManager {
       // TODO: check the type of extModule.default is a function.
       if (typeof extModule.default !== 'function') {
         throw `Default export of client extension ${name} is not a function.`;
-      }
-      else {
+      } else {
         this.extModules[extName] = extModule;
       }
 
@@ -96,8 +95,8 @@ class ClientExtensionManager {
       console.error('Expected extName to be string');
       return;
     }
-    if (!extName in this.extObjects) {
-      console.error(`Extension '${extName}' not loaded`);
+    if (!(extName in this.extObjects)) {
+      console.error(`Extension ${extName} not loaded`);
       return;
     }
     await this.extHelpers[extName].gameStart(this.gameMap, this.gameState,
@@ -121,7 +120,7 @@ class ClientExtensionManager {
     if (!typeof methodName === 'string') {
       return {'error': 'Expected methodName to be string'};
     }
-    if (!extName in this.extNameList) {
+    if (!(extName in this.extNameList)) {
       return {'error': 'Extension name not found'};
     }
     if (!typeof args === 'object' || !Array.isArray(args)) {
@@ -146,13 +145,13 @@ class ClientExtensionManager {
       return {
         "status": "failed",
         "message": "Expected extName to be string"
-      }
+      };
     }
-    if (!extName in this.extNameList) {
+    if (!(extName in this.extNameList)) {
       return {
         "status": "failed",
         "message": "Extension name not found"
-      }
+      };
     }
 
     const onExtBc = this.extObjects[extName].onExtensionBroadcast;
@@ -160,7 +159,7 @@ class ClientExtensionManager {
       return {
         "status": "failed",
         "message": "Expected onExtensionBroadcast to be function"
-      }
+      };
     }
     await onExtBc(msg);
   }

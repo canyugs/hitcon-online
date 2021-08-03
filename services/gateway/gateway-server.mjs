@@ -39,37 +39,37 @@ async function mainServer() {
 
   const corsValidation = function (origin, callback) {
     // https://github.com/expressjs/cors/issues/71
-    if(origin === undefined) {
+    if (origin === undefined) {
       callback(null, true);
       return;
     }
 
     let originHostname;
     try {
-      originHostname = (new URL(origin)).hostname
+      originHostname = (new URL(origin)).hostname;
     } catch {
       console.error("Can't parse URL: ", origin);
       callback(new Error('Not allowed by CORS'));
       return;
     }
 
-    if(!config.get('publicAddress')) {
-      callback(null, true)
+    if (!config.get('publicAddress')) {
+      callback(null, true);
       return;
     }
 
     // for development only, might need to removed in the future.
-    if(originHostname === 'localhost' || originHostname === '127.0.0.1') {
-      callback(null, true)
+    if (originHostname === 'localhost' || originHostname === '127.0.0.1') {
+      callback(null, true);
       return;
     }
 
-    if(config.get('publicAddress') === originHostname) {
+    if (config.get('publicAddress') === originHostname) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
     }
-  }
+  };
 
   /* Create the http service */
   const app = express();

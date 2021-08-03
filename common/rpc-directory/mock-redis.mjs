@@ -21,41 +21,41 @@ class MockRedis {
     }
 }
 
-class MockRedisClient{
+class MockRedisClient {
     constructor(mockRedis) {
         this._mockRedis = mockRedis;
         this._data = mockRedis._data;
     }
 
     get(key, cb) {
-        if (this._data.has(key[0])){
-            if(typeof cb === 'function') cb(null, this._data.get(key[0]));
+        if (this._data.has(key[0])) {
+            if (typeof cb === 'function') cb(null, this._data.get(key[0]));
         } else {
-            if(typeof cb === 'function') cb(null, null); // If the key does not exist the special value nil is returned.
+            if (typeof cb === 'function') cb(null, null); // If the key does not exist the special value nil is returned.
         }
     }
 
     set(kv, cb) {
-        if(kv.length < 2) throw 'Missing key and value';
-        if(kv.length == 3 && kv[2] == "NX" && this._data.has(kv[0])){
-            if(typeof cb === 'function') cb(null, null);
+        if (kv.length < 2) throw 'Missing key and value';
+        if (kv.length == 3 && kv[2] == "NX" && this._data.has(kv[0])) {
+            if (typeof cb === 'function') cb(null, null);
             return;
         }
 
         this._data.set(kv[0], kv[1]);
-        if(typeof cb === 'function') cb(null, 'OK');
+        if (typeof cb === 'function') cb(null, 'OK');
     }
 
     del(keys, cb) {
-        for(let key of keys) {
+        for (let key of keys) {
             this._data.delete(key);
         }
-        if(typeof cb === 'function') cb(null, 1);
+        if (typeof cb === 'function') cb(null, 1);
     }
 
     subscribe(channel, cb) {
         this._mockRedis.subscribed[channel] = 1;
-        if(typeof cb === 'function') cb(null, true);
+        if (typeof cb === 'function') cb(null, true);
     }
 
     publish(channel, message, cb) {
@@ -64,7 +64,7 @@ class MockRedisClient{
                 f(channel, message);
             }
         }
-        if(typeof cb === 'function') cb(null, true);
+        if (typeof cb === 'function') cb(null, true);
     }
 
     on(event, callback) {
@@ -76,39 +76,39 @@ class MockRedisClient{
     hget(kf, cb) {
         if (kf.length < 2) throw 'Missing key and value';
         let key = kf[0], field = kf[1];
-        if (this._data.has(key) && (this._data.get(key) instanceof Map) && this._data.get(key).has(field)){
-            if(typeof cb === 'function') cb(null, this._data.get(key).get(field))
+        if (this._data.has(key) && (this._data.get(key) instanceof Map) && this._data.get(key).has(field)) {
+            if (typeof cb === 'function') cb(null, this._data.get(key).get(field));
         } else {
-            if(typeof cb === 'function') cb(null, null);
+            if (typeof cb === 'function') cb(null, null);
         }
     }
 
     hset(kfv, cb) {
-        if(kfv.length < 3) throw 'Missing key, field, and value';
+        if (kfv.length < 3) throw 'Missing key, field, and value';
         let key = kfv[0], field = kfv[1], value = kfv[2];
-        if(!this._data.has(key) || !(this._data.get(key) instanceof Map)) {
+        if (!this._data.has(key) || !(this._data.get(key) instanceof Map)) {
             this._data.set(key, new Map());
         }
         this._data.get(key).set(field, value);
 
-        if(typeof cb === 'function') cb(null, 1);
+        if (typeof cb === 'function') cb(null, 1);
     }
 
     hgetall(key, cb) {
         let obj = {};
         if (this._data.has(key) && (this._data.get(key) instanceof Map)) {
-            this._data.get(key).forEach((v, k) => { obj[k] = v });
+            this._data.get(key).forEach((v, k) => { obj[k] = v; });
         }
-        if(typeof cb === 'function') cb(null, obj);
+        if (typeof cb === 'function') cb(null, obj);
     }
 
     flushall(cb) {
         this._data.clear();
-        if(typeof cb === 'function') cb(null, null);
+        if (typeof cb === 'function') cb(null, null);
     } 
 
     scan(cb) {
-        cb(null, [0, Array.from(this._data.keys())])
+        cb(null, [0, Array.from(this._data.keys())]);
     } 
 }
 
