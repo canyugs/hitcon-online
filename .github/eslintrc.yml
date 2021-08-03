@@ -1,0 +1,30 @@
+env:
+  browser: true
+  es2021: true
+  node: true
+parser: '@typescript-eslint/parser'
+parserOptions:
+  ecmaVersion: 12
+  sourceType: module
+plugins:
+  - '@typescript-eslint'
+rules:
+  object-curly-spacing: error
+  space-before-blocks: error
+  no-unsafe-negation: error
+  keyword-spacing: error
+  comma-spacing: error
+  brace-style:
+    - error
+    - 1tbs
+    - allowSingleLine: true
+  no-unused-vars: warn
+  camelcase: warn
+  max-len:
+    - warn
+    - code: 120
+  semi: warn
+  no-extra-semi: off
+  comma-dangle: off
+  indent: off
+  quotes: off
