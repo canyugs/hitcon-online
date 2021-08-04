@@ -32,7 +32,8 @@ async function mainServer() {
 
   /* Create services */
   const extensionManager = new ExtensionManager(null, null, null, null);
-  const assetServer = new AssetServer(app, extensionManager);
+  console.log(Object.values(config.get('gatewayServers')).map(v => v.httpAddress));
+  const assetServer = new AssetServer(app, extensionManager, Object.values(config.get('gatewayServers')).map(v => v.httpAddress));
 
   /* Initialize static asset server */
   await assetServer.initialize();
