@@ -26,7 +26,7 @@ class AssetServer {
   constructor(app, extMan, gatewayAddresses) {
     this.app = app;
     this.extMan = extMan;
-    this.gatewayAddresses = gatewayAddresses ?? ["window.location"];
+    this.gatewayAddresses = gatewayAddresses;
   }
 
   /**
@@ -70,7 +70,7 @@ class AssetServer {
     }
     this.app.get('/client.html', (req, res) => {
       // TODO: workaround for development, in production we should fetch the unique endpoint from the config.
-      this.clientParams.gatewayAddress = this.gatewayAddresses[Math.floor(Math.random() * this.gatewayAddresses.length)];
+      this.clientParams.gatewayAddress = this.gatewayAddresses ? this.gatewayAddresses[Math.floor(Math.random() * this.gatewayAddresses.length)] : null;
       res.render(path.resolve(__dirname + '/../../sites/game-client/client.ejs'), this.clientParams);
     });
     this.app.get('/extension/:extName', (req, res) => {

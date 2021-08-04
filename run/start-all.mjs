@@ -12,6 +12,12 @@ const config = require('config');
 const fork = require('child_process').fork;
 
 async function main() {
+  /* start-all.mjs should only be used in multi-process mode */
+  if(!config.get('multiprocess')) {
+    console.error("The start-all.mjs should only be used in multi-process mode.");
+    return;
+  }
+
   /* Initialize Redis */
   const redisClient = redis.createClient();
   redisClient.on('error', (err) => {
