@@ -20,8 +20,6 @@ import GatewayService from '../gateway/gateway-service.mjs';
 import AllAreaBroadcaster from '../gateway/all-area-broadcaster.mjs';
 import SingleProcessRPCDirectory from
   '../../common/rpc-directory/single-process-RPC-directory.mjs';
-import MultiProcessRPCDirectory from
-  '../../common/rpc-directory/multi-process-RPC-directory.mjs';
 import AssetServer from '../assets/asset-server.mjs';
 import AuthServer from '../auth/AuthServer.mjs';
 
@@ -43,10 +41,20 @@ async function mainServer() {
   const server = http.createServer(app);
   const io = new Server(server);
 
+  /* Check if main-server should be used & warn the developer of the special (and possibly unexpected) behavior. */
+  if(config.get('multiprocess')) {
+    console.error("The main-server.mjs should only be used in single-process mode.");
+    return;
+  }
+  if(Object.keys(config.get('assetServers')).length > 1) {
+    console.warn("The main-server.mjs would use the first asset server in the config file. Use multiprocessing mode to create all asset servers.");
+  }
+  if(Object.keys(config.get('gatewayServers')).length > 1) {
+    console.warn("The main-server.mjs would use the first gateway service in the config file. Use multiprocessing mode to create all gateway servers.");
+  }
+
   /* Create all utility classes */
-  const rpcDirectory = config.get('multiprocess')
-                        ? (new MultiProcessRPCDirectory())
-                        : (new SingleProcessRPCDirectory());
+  const rpcDirectory = new SingleProcessRPCDirectory();
   await rpcDirectory.asyncConstruct();
   // Load the map.
   const mapList = config.get("map");
@@ -75,7 +83,7 @@ async function mainServer() {
 
   /* Initialize broadcaster and gateway service */
   await broadcaster.initialize();
-  await gatewayService.initialize(('gateway-service' in argv) ? argv['gateway-service'] : "gatewayServer");
+  await gatewayService.initialize(Object.keys(config.get('gatewayServers'))[0]);
   authServer.run();
   for (const extName of extensionManager.listExtensions()) {
     await extensionManager.startExtensionService(extName);
@@ -84,7 +92,7 @@ async function mainServer() {
   gatewayService.addServer(io);
 
   // TODO: Set the port once configuration is done.
-  const port = ('port' in argv) ? argv['port'] : config.get('servers')[Object.keys(config.get('servers'))[0]].port;
+  const port = config.get('assetServers')[Object.keys(config.get('assetServers'))[0]].port;
   console.log(`Server is listening on port ${port} ...`);
   server.listen(port);
 }

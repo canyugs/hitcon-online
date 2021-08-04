@@ -28,7 +28,7 @@
     "type": "real",
     "option": {}
   },
-  "multiprocess": true,
+  "multiprocess": false,
   "secret": "secret",
   "ext": {
     "enabled": [],
