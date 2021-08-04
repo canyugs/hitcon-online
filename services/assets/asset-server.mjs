@@ -23,9 +23,10 @@ class AssetServer {
    * @param {App} app - An express app or router compatible with express.js.
    * @param {ExtensionManager} extMan - An extension manager.
    */
-  constructor(app, extMan) {
+  constructor(app, extMan, gatewayAddresses) {
     this.app = app;
     this.extMan = extMan;
+    this.gatewayAddresses = gatewayAddresses ?? ["window.location"];
   }
 
   /**
@@ -68,6 +69,8 @@ class AssetServer {
       this.clientParams.inDiv = partials.inDiv;
     }
     this.app.get('/client.html', (req, res) => {
+      // TODO: workaround for development, in production we should fetch the unique endpoint from the config.
+      this.clientParams.gatewayAddress = this.gatewayAddresses[Math.floor(Math.random() * this.gatewayAddresses.length)];
       res.render(path.resolve(__dirname + '/../../sites/game-client/client.ejs'), this.clientParams);
     });
     this.app.get('/extension/:extName', (req, res) => {

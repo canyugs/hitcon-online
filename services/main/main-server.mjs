@@ -62,7 +62,7 @@ async function mainServer() {
   const extensionManager = new ExtensionManager(rpcDirectory, broadcaster, gameMap, gameState);
   const gatewayService = new GatewayService(rpcDirectory, gameMap, authServer,
     broadcaster, io, extensionManager);
-  const assetServer = new AssetServer(app, extensionManager);
+  const assetServer = new AssetServer(app, extensionManager, null);
   await extensionManager.ensureClass('blank');
   for (const extName of extensionManager.listExtensions()) {
     await extensionManager.createExtensionService(extName);

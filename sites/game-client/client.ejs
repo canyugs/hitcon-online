@@ -95,7 +95,7 @@ absolute URL.
         // Try to get a test token.
         let testToken = getTokenFromDocument();
         if (testToken == '') {
-          testToken = await $.ajax({url: "//localhost:5010/get_test_token", type: "GET",});
+          testToken = await $.ajax({url: "//<%= gatewayAddress %>/get_test_token", type: "GET",});
           testToken = testToken.token;
         }
         game.token = testToken;
@@ -114,7 +114,7 @@ absolute URL.
         }
         game.map = new GameMap(game.graphicAsset, game.mapData);
         game.gameState = new GameState(game.map);
-        game.socket = game.io("ws://localhost:5010", {reconnection: false});
+        game.socket = game.io("ws://<%= gatewayAddress %>", {reconnection: false});
 
         game.extMan = new ClientExtensionManager(game.socket, game.extensionList);
         game.mapRenderer = new MapRenderer(document.querySelector('#mapcanvas'), game.map, game.gameState);
