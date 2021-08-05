@@ -15,6 +15,7 @@ class Overlay {
     this.dom = dom;
     this.position = undefined;
     this.toolbarButton = undefined;
+    this.toolbarButtonIconSrc = undefined;
   }
   
   /**
@@ -61,8 +62,9 @@ class Overlay {
   */
   onClickToolbarButton() {
     // WIP(fanlan1210)
+    this.positionCache = this.position; // store current position state
     if (this.canHide() && this.position !== undefined) this.hide();
-    else this.show();
+    else this.show(this.positionCache); // resore position state
   }
 
   /*

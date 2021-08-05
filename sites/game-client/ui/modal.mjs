@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 /**
- * The modal is a center aligned window above the MainView.  
+ * The modal is a center aligned window above the MainView.
  * Before closing the modal, user cannot interactive with other components.
  * 
  * Those who wants to use the Modal element should extend this class and implement the methods.
@@ -21,6 +21,9 @@ class Modal {
     this.height = '50%';
     this.top = '25%';
     this.left = '20%';
+
+    this.toolbarButton = undefined;
+    this.toolbarButtonIconSrc = undefined;
   }
 
   /**
