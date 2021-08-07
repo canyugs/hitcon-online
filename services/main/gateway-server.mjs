@@ -67,19 +67,12 @@ async function mainServer() {
   const extensionManager = new ExtensionManager(rpcDirectory, broadcaster, gameMap, gameState);
   const gatewayService = new GatewayService(rpcDirectory, gameMap, authServer,
     broadcaster, io, extensionManager);
-  await extensionManager.ensureClass('blank');
-  for (const extName of extensionManager.listExtensions()) {
-    await extensionManager.createExtensionService(extName);
-  }
 
   /* Initialize broadcaster and gateway service */
   const serviceName = ('service-name' in argv) ? argv['service-name'] : Object.keys(config.get('gatewayServers'))[0];
   await broadcaster.initialize();
   await gatewayService.initialize(serviceName);
   authServer.run();
-  for (const extName of extensionManager.listExtensions()) {
-    await extensionManager.startExtensionService(extName);
-  }
 
   gatewayService.addServer(io);
 
