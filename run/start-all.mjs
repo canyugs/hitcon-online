@@ -53,7 +53,6 @@ async function main() {
   /* Start asset server */
   const assetServers = {};
   const enabledAssetServers = config.get('assetServers');
-  console.log(enabledAssetServers);
   for(const serverName in enabledAssetServers){
     assetServers[serverName] = fork('../services/main/asset-server.mjs', ['--service-name', serverName], { cwd: '.' });
   }
@@ -61,7 +60,6 @@ async function main() {
   /* Start gateway service */
   const gatewayServers = {};
   const enabledGatewayServers = config.get('gatewayServers');
-  console.log(enabledGatewayServers);
   for(const serverName in enabledGatewayServers){
     gatewayServers[serverName] = fork('../services/main/gateway-server.mjs', ['--service-name', serverName], { cwd: '.' });
   }
