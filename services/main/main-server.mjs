@@ -46,9 +46,6 @@ async function mainServer() {
     console.error("The main-server.mjs should only be used in single-process mode.");
     return;
   }
-  if(Object.keys(config.get('assetServers')).length > 1) {
-    console.warn("The main-server.mjs would use the first asset server in the config file. Use multiprocessing mode to create all asset servers.");
-  }
   if(Object.keys(config.get('gatewayServers')).length > 1) {
     console.warn("The main-server.mjs would use the first gateway service in the config file. Use multiprocessing mode to create all gateway servers.");
   }
@@ -92,7 +89,7 @@ async function mainServer() {
   gatewayService.addServer(io);
 
   // TODO: Set the port once configuration is done.
-  const port = config.get('assetServers')[Object.keys(config.get('assetServers'))[0]].port;
+  const port = config.get('assetServer.port');
   console.log(`Server is listening on port ${port} ...`);
   server.listen(port);
 }

@@ -1,14 +1,8 @@
 {
   "debug": true,
-  "assetServers": {
-    "assetServer5000": {
-      "address": "127.0.0.1",
-      "port": 5000
-    },
-    "assetServer5001": {
-      "address": "127.0.0.1",
-      "port": 5001
-    }
+  "assetServer": {
+    "address": "127.0.0.1",
+    "port": 5000
   },
   "gatewayServers": {
     "gatewayService5010": {
