@@ -51,11 +51,7 @@ async function main() {
   redisClient.quit();
 
   /* Start asset server */
-  const assetServers = {};
-  const enabledAssetServers = config.get('assetServers');
-  for(const serverName in enabledAssetServers){
-    assetServers[serverName] = fork('../services/main/asset-server.mjs', ['--service-name', serverName], { cwd: '.' });
-  }
+  const assetServer = fork('../services/main/asset-server.mjs', { cwd: '.' });
 
   /* Start gateway service */
   const gatewayServers = {};
@@ -77,11 +73,9 @@ async function main() {
     console.error(message);
     console.error(err);
 
-    for(const serverName in enabledAssetServers){
-      try {
-        assetServers[serverName].kill();
-      } catch {};
-    }
+    try {
+      assetServer.kill();
+    } catch {};
 
     for(const serverName in enabledGatewayServers){
       try {
@@ -99,10 +93,9 @@ async function main() {
     process.exit();
   }
 
-  for(const serverName in enabledAssetServers){
-    assetServers[serverName].on('error', (err) => { handler(serverName + ' service error.', err) });
-    assetServers[serverName].on('close', (err) => { handler(serverName + ' service closed.', err) });
-  }
+  assetServer.on('error', (err) => { handler('Asset service error.', err) });
+  assetServer.on('close', (err) => { handler('Asset service closed.', err) });
+
   for(const serverName in enabledGatewayServers){
     gatewayServers[serverName].on('error', (err) => { handler(serverName + ' service error.', err) });
     gatewayServers[serverName].on('close', (err) => { handler(serverName + ' service closed.', err) });

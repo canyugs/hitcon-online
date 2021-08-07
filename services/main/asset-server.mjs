@@ -40,8 +40,7 @@ async function mainServer() {
   assetServer.run();
 
   // TODO: Set the port once configuration is done.
-  const serviceName = ('service-name' in argv) ? argv['service-name'] : Object.keys(config.get('assetServers'))[0];
-  const port = config.get('assetServers')[serviceName].port;
+  const port = config.get('assetServer.port');
   console.log(`Server is listening on port ${port} ...`);
   server.listen(port);
 }

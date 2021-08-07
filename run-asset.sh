@@ -2,5 +2,5 @@
 
 pushd $(dirname "${0}") > /dev/null
 cd run
-yarn node ../services/main/asset-server.mjs --service-name=$1
+yarn node ../services/main/asset-server.mjs
 popd > /dev/null
