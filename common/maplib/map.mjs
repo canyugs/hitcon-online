@@ -36,6 +36,12 @@ class MapCoord {
     if (mapName === undefined || x === undefined || y === undefined) {
       throw 'MapCoord should be initialized with three arguments';
     }
+    if (typeof mapName !== 'string') {
+      throw 'MapCoord.mapName is not a string';
+    }
+    if (typeof x !== 'number' || typeof y !== 'number') {
+      throw 'MapCoord.x or y is not a Number';
+    }
     this.mapName = mapName;
     this.x = x;
     this.y = y;
@@ -125,7 +131,7 @@ class GameMap {
     this._maps = new Map();
     this.spawnPointList = [];
     for (const [mapName, map] of Object.entries(maps)) {
-      this._maps.set(mapName, new _SingleGameMap(asset, map));
+      this._maps.set(mapName, new _SingleGameMap(asset, map, mapName));
     }
   }
 
@@ -133,7 +139,7 @@ class GameMap {
    * Remove all the dynamic cell set.
    */
   removeAllDynamicCellSet() {
-    for (const map of this._maps) {
+    for (const map of this._maps.values()) {
       map.removeAllDynamicCellSet();
     }
   }
@@ -280,13 +286,15 @@ class _SingleGameMap {
    * @constructor
    * @param {GraphicAsset} asset - The asset that is used with this set of map.
    * @param {Object} map - The JSON object representing the map.
+   * @param {String} mapName - The name of this single map.
    */
-  constructor(asset, map) {
+  constructor(asset, map, mapName) {
     this.graphicAsset = asset;
     this.gameMap = map;
     if (!this.gameMap) {
       throw 'No map json supplied with new _SingleGameMap()';
     }
+    this.mapName = mapName;
 
     // If cellSet is not in the map data, add it back.
     this.gameMap.cellSets = (this.gameMap.cellSets ?? []);
@@ -488,7 +496,7 @@ class _SingleGameMap {
           const h = (cell.h ?? 1);
           for (let i = 0; i < w; ++i) {
             for (let j = 0; j < h; ++j) {
-              this._spawnPointList.push(new MapCoord(this.gameMap, cell.x + i, cell.y + j));
+              this._spawnPointList.push(new MapCoord(this.mapName, cell.x + i, cell.y + j));
             }
           }
         }
