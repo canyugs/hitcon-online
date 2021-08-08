@@ -6,26 +6,27 @@
     flex-direction: column;
     padding: 5px 10px;
     border: gray solid 3px;
+    height: 100%;
+    width: 100%;
   }
-  #npcName {
+  #dialog-subject {
     background: white;
-    width: 200px;
-    margin: 5px 0px;
+    width: 50%;
+    margin: 1vh 1vw 1vh 1vw;
     border: gray solid 3px;
     padding: 3px;
   }
-  #npcSentence {
+  #dialog-msg {
     background: white;
-    height: 50px;
-    width: 300px;
-    margin: 10px 0px;
+    margin: 1vh 1vw 1vh 1vw;
     border: gray solid 3px;
     padding: 3px;
     overflow:hidden;
     text-overflow:ellipsis;
     white-space:nowrap;
+    flex-grow: 10;
   }
-  #checkButtonDiv {
+  #dialog-btn-container {
     display: flex;
     flex-direction: row;
     justify-content: right;
@@ -39,10 +40,10 @@
   <button id="c2sButton">get dialog</button>
 </div>
 
-<div class="dialog">
-  <h3 id="npcName"></h3>
-  <p id="npcSentence"></p>
-  <div id="checkButtonDiv">
+<div id="dialog-div" class="dialog">
+  <h3 id="dialog-subject"></h3>
+  <p id="dialog-msg"></p>
+  <div id="dialog-btn-container">
     <!-- <button id="button">OK</button> -->
   </div>
 </div>

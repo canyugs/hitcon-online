@@ -74,9 +74,7 @@ class Overlay {
   */
 
   /**
-   * Set visibility=hidden.
-   *
-   * state: HIDDEN -> SHOW
+   * Transfer the state: HIDDEN -> SHOW
    */
   show(position) {
     const proceed = this.onPreShow();
