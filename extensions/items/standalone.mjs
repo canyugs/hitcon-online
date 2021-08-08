@@ -4,6 +4,7 @@
 import assert from 'assert';
 import fs from 'fs';
 import path from 'path';
+import CellSet from '../../common/maplib/cellset.mjs';
 
 /**
  * This represents the standalone extension service for this extension.
@@ -72,15 +73,12 @@ class Standalone {
 
       /* Initialize cell set for each items */
       for (const mapName of this.helper.gameMap.getOriginalCellSetStartWith('').keys()) { // Get all available maps.
-        const cellSet = {
-          mapName: mapName,
-          name: 'droppedItem' + itemName.toUpperCase(),
-          priority: 4,
-          cells: Array.from(this.droppedItemCell.values()),
-          layers: [
-            { "item": this.itemInfo[itemName].layer }
-          ],
-        };
+        const cellSet = new CellSet(
+          'droppedItem' + itemName.toUpperCase(),
+          4,
+          Array.from(this.droppedItemCell.values()),
+          { "item": this.itemInfo[itemName].layer },
+          true);
         this.helper.gameMap.setDynamicCellSet(mapName, cellSet);
       }
     }
