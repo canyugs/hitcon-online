@@ -1,0 +1,29 @@
+{
+    "items":
+    {
+        "facemask":
+        {
+            "baseClass": "clothing",
+            "imagePath":  "./items/clothing/facemask.jpg",
+            "layer": 0
+        },
+        "sunglasses":
+        {
+            "baseClass": "clothing",
+            "imagePath": "./items/clothing/sunglasses.jpg",
+            "layer": 0
+        },
+        "room1Ticket":
+        {
+            "baseClass": "tickets",
+            "imagePath":  "./items/ticket/ticket.jpg",
+            "layer": 0
+        },
+        "room2Ticket":
+        {
+            "baseClass": "tickets",
+            "imagePath": "./items/ticket/ticket.jpg",
+            "layer": 0
+        }
+    }
+}

@@ -34,7 +34,9 @@ class Standalone {
     this.itemInfo = {};
     this.itemInstances = {};
     this.items = new Map();
-    this.playerOnline = new Set();
+    this.droppedItemCell = new Map();
+    this.droppedItemInfo = new Map();
+    this.droppedItemIndex = 0;
   }
 
   /**
@@ -46,18 +48,40 @@ class Standalone {
    */
   async initialize() {
     const allItemsName = await fs.promises.readdir('../extensions/items/common/itemClasses');
+    const itemSettingJson = await fs.promises.readFile(`../extensions/items/common/config.json`);
+    const itemConfig = JSON.parse(itemSettingJson).items;
+    const itemBaseClasses = {};
     for (let itemTypeName of allItemsName) {
-      const itemClasses = await import(`../items/common/itemClasses/${itemTypeName}/${itemTypeName}.mjs`);
-      for (let itemClassName in itemClasses) {
-        const itemClass = itemClasses[itemClassName];
-        const item = new itemClass(this.helper);
-        const itemName = itemClassName.toLowerCase();
-        this.itemInfo[itemName] = {
-          show: item.show,
-          exchangeable: item.exchangeable,
-          usable: item.usable,
-        }
-        this.itemInstances[itemName] = item;
+      const itemBaseModule = await import(`../items/common/itemClasses/${itemTypeName}/${itemTypeName}.mjs`);
+      const itemBaseClass = itemBaseModule.default;
+      itemBaseClasses[itemTypeName] = itemBaseClass;
+    }
+    let index = 0;
+    for (let itemName in itemConfig) {
+      const itemBaseClassName = itemConfig[itemName].baseClass;
+      const item = new itemBaseClasses[itemBaseClassName](this.helper, itemConfig[itemName].imagePath);
+      this.itemInfo[itemName] = {
+        index: index,
+        layer: itemConfig[itemName].layer,
+        show: item.show,
+        exchangeable: item.exchangeable,
+        usable: item.usable
+      }
+      this.itemInstances[itemName] = item;
+      index++;
+
+      /* Initialize cell set for each items */
+      for (const mapName of this.helper.gameMap.getOriginalCellSetStartWith('').keys()) { // Get all available maps.
+        const cellSet = {
+          mapName: mapName,
+          name: 'droppedItem' + itemName.toUpperCase(),
+          priority: 4,
+          cells: Array.from(this.droppedItemCell.values()),
+          layers: [
+            { "item": this.itemInfo[itemName].layer }
+          ],
+        };
+        this.helper.gameMap.setDynamicCellSet(mapName, cellSet);
       }
     }
   }
@@ -67,7 +91,6 @@ class Standalone {
    * The below function should be called whenever a player starts a game session.
    */
   async c2s_playerInit(player) {
-    this.playerOnline.add(playerID);
     if (!this.items.has(playerID)) {
       this.items.set(playerID, {});
     }
@@ -91,28 +114,6 @@ class Standalone {
   }
 
   /**
-   * Initialize the amount of a specific item to zero.
-   * This function is called by a client to notify the server whenever he/she pick up a dropped item from the map.
-   * Once the client calls , the server will consequently update its database.
-   * itemName: string;
-   * amount: number;
-   */
-  async c2s_setItem(playerID, itemName, amount) {
-    /* player has not registered yet */
-    if (!this.items.has(playerID)) {
-      console.log('Player not initialized');
-      return;
-    }
-    if (!this.playerOnline.has(playerID)) {
-      console.log('Player not online');
-      return;
-    }
-    let itemObj = this.items.get(playerID);
-    itemObj[itemName].amount = 0;
-    this.items.set(playerID, itemObj);
-  }
-
-  /**
    * Returning all items owned by the user
    * @return {object} partials - An object with the following type:
    * type ItemObj = {
@@ -124,11 +125,26 @@ class Standalone {
   async c2s_getAllItems(playerID) {
     /* player has not registered yet */
     if (!this.items.has(playerID)) {
-      console.log('Player already initialized');
+      console.log('Player not initialized');
       return;
     }
-    if (!this.playerOnline.has(playerID)) {
-      console.log('Player not online');
+    const itemObj = this.items.get(playerID);
+    return itemObj;
+  }
+
+  /**
+   * Returning all currently dropped Items
+   * @return {object} partials - An object with the following type:
+   * type ItemObj = {
+   *   [itemName: string]: {
+   *     amount: number;
+   *   }
+   * }
+   */
+  async c2s_getAllItems(playerID) {
+    /* player has not registered yet */
+    if (!this.items.has(playerID)) {
+      console.log('Player not initialized');
       return;
     }
     const itemObj = this.items.get(playerID);
@@ -145,11 +161,7 @@ class Standalone {
   async c2s_getItem(playerID, itemName) {
     /* player has not registered yet */
     if (!this.items.has(playerID)) {
-      console.log('Player already initialized');
-      return;
-    }
-    if (!this.playerOnline.has(playerID)) {
-      console.log('Player not online');
+      console.log('Player not initialized');
       return;
     }
     const itemObj = this.items.get(playerID);
@@ -180,14 +192,6 @@ class Standalone {
       console.log("Item is not exchangeable");
       return;
     }
-    if (!this.playerOnline.has(playerID)) {
-      console.log('Player not online');
-      return;
-    }
-    if (!this.playerOnline.has(toPlayerID)) {
-      console.log('Receiver not online');
-      return;
-    }
 
     const fromPlayerItem = this.items.get(playerID);
     if (!itemName in fromPlayerItem || fromPlayerItem[itemName].amount < amount) {
@@ -205,7 +209,12 @@ class Standalone {
     this.items.set(toPlayerID, toPlayerItem);
 
     /* Notify the client that a certain amount of items have been given */
-    await this.helper.callS2cAPI('items', 'onReceiveItem', 5000, toPlayerID, playerID, itemName, amount);
+    try {
+      await this.helper.callS2cAPI('items', 'onReceiveItem', 5000, toPlayerID, playerID, itemName, amount);
+    }
+    catch (e) {
+      // ignore if recipient is offline
+    }
   }
 
   /**
@@ -227,10 +236,6 @@ class Standalone {
       console.log("Item is not usable");
       return;
     }
-    if (!this.playerOnline.has(playerID)) {
-      console.log('Player not online');
-      return;
-    }
 
     const item = this.items.get(playerID);
     if (!itemName in item || item[itemName].amount < amount) {
@@ -242,26 +247,77 @@ class Standalone {
 
     itemInstances[itemName].useItem(amount);
 
-    await this.helper.callS2cAPI('items', 'onUseItem', 5000, playerID, itemName, amount);
+    try {
+      await this.helper.callS2cAPI('items', 'onUseItem', 5000, playerID, itemName, amount);
+    }
+    catch (e) {
+      // ignore if player becomes offline for some reason
+    }
   }
 
   /**
-   * This function should be called whenever a client is disconnected.
-   * This way, the server can set the player's status to disconnected.
-   * (a.k.a. remove playerID from the set `playerOnline`) 
-   * @return {object} partials - An object, it could have the following:
-   * inDiv - A string to the path of ejs partial for the location inDiv.
+   * This function is called by a client to notify the server whenever he/she drops an item on the ground.
+   * Once the client calls, the server will consequently update its database.
+   * itemName: string;
+   * amount: number;
    */
-  async c2s_disconnect(playerID) {
+  async c2s_dropItem(playerID, mapCoord, facing, itemName) {
+    /* player has not registered yet */
     if (!this.items.has(playerID)) {
       console.log('Player not initialized');
       return;
     }
-    if (!this.playerOnline.has(playerID)) {
-      console.log('Player not online');
+
+    /* update database */
+    let itemObj = this.items.get(playerID);
+    if (!itemName in itemObj) {
+      console.log('No such item');
       return;
     }
-    this.playerOnline.delete(playerID);
+    itemObj[itemName].amount -= 1;
+    this.items.set(playerID, itemObj);
+
+    /* update cell set */
+    /* TODO: calculate dropped coordinate. Currently, the dropped coordinate is the same as the player's map coordinate */
+    this.droppedItemCell.set(this.droppedItemIndex, { "x": mapCoord.x, "y": mapCoord.y, "w": 1, "h": 1 });
+    this.droppedItemInfo.set(this.droppedItemIndex, itemName);
+    this.droppedItemIndex++;
+    for (const mapName of this.helper.gameMap.getOriginalCellSetStartWith('').keys()) { // Get all available maps.
+      this.gameMap.updateDynamicCellSet(mapName, 'droppedItem' + itemName.toUpperCase(), Array.from(this.droppedItemCell.values()));
+    }
+  }
+
+  /**
+   * This function is called by a client to notify the server whenever he/she pick up a dropped item from the map.
+   * Once the client calls , the server will consequently update its database.
+   * itemName: string;
+   * amount: number;
+   */
+  async c2s_pickupItem(playerID, mapCoord, droppedItemIndex) {
+    /* player has not registered yet */
+    if (!this.items.has(playerID)) {
+      console.log('Player not initialized');
+      return;
+    }
+    const cell = this.droppedItemCell.get(droppedItemIndex);
+    if (Math.abs(mapCoord.x - cell.x) > 1 || Math.abs(mapCoord.y - cell.y) > 1) {
+      console.log('Player too far away from dropped item');
+      return;
+    }
+    /* update amount */
+    let itemObj = this.items.get(playerID);
+    const itemName = this.droppedItemInfo.get(droppedItemIndex);
+    itemObj[itemName].amount += 1;
+    this.items.set(playerID, itemObj);
+
+    /* remove picked up item from cell */
+    this.droppedItemCell.delete(droppedItemIndex);
+    this.droppedItemInfo.delete(droppedItemIndex);
+
+    /* update cell set */
+    for (const mapName of this.helper.gameMap.getOriginalCellSetStartWith('').keys()) { // Get all available maps.
+      this.gameMap.updateDynamicCellSet(mapName, 'droppedItem' + itemName.toUpperCase(), Array.from(this.droppedItemCell.values()));
+    }
   }
 
   /**

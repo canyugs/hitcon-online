@@ -89,13 +89,22 @@ class Client {
   }
 
   /*
+   * The below function is used by the client to drop an unwanted item.
+   * Dropped items will be displayed on the map.
+  */
+  async dropItem(itemName, amount) {
+    /* Check if the player is closed to a dropped item */
+    const result = await this.helper.callC2sAPI('items', 'dropItem', 5000, this.helper.gameClient.playerInfo.mapCoord, this.helper.gameClient.playerInfo.facing, itemName, amount);
+  }
+
+  /*
    * The below function is the callback function when a player picks up a dropped item from the floor.
    * This function is called whenever a player is closed to a dropped item.
    * It serves as a call back function whenever an item is used.
    */
   async pickupItem(itemName, amount) {
     /* Check if the player is closed to a dropped item */
-    const result = await this.helper.callC2sAPI('items', 'setItem', 5000, itemName, amount);
+    const result = await this.helper.callC2sAPI('items', 'pickupItem', 5000, itemName, amount);
   }
 
   /*
@@ -110,7 +119,6 @@ class Client {
   async disconnect() {
     const result = await this.helper.callC2sAPI('items', 'disconnect', 5000);
   }
-
 };
 
 export default Client;
