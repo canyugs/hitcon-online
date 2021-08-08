@@ -1,8 +1,6 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
-import fs from 'fs';
-
 /**
  * This class is the browser/client side of an extension.
  * One instance is created for each connected player.
