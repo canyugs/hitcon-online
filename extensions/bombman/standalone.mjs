@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 import CellSet from '../../common/maplib/cellset.mjs';
-import {LAYER_BOMB} from './client.mjs';
+import {LAYER_BOMB} from './common/client.mjs';
 
 const BOMB_COUNTDOWN = 3000; // millisecond
 
