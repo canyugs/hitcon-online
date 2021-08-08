@@ -103,7 +103,7 @@ body {
   z-index: 1;
 }
 
-.model-background {
+.modal-background {
   position: absolute;
   background-color: Grey;
   top: 0px;
@@ -114,7 +114,21 @@ body {
   z-index: 0;
 }
 
-.model-background.visible {
+.modal-background.visible {
   opacity: 80%;
   z-index: 100;
+}
+
+.modal-container {
+  background-color: HoneyDew;
+  position: absolute;
+  z-index: 0;
+  top: 25%;
+  left: 20%;
+  width: 60%;
+  height: 50%;
+}
+
+.modal-container.visible {
+  z-index: 110;
 }
