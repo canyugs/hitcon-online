@@ -16,17 +16,19 @@ class AllAreaBroadcaster {
    * @constructor
    * @param {Directory} dir - RPC Directory.
    * @param {GameMap} gameMap - The game map.
+   * @param {GameState} gameState
    */
-  constructor(dir, gameMap) {
+  constructor(dir, gameMap, gameState) {
     this.dir = dir;
     this.gameMap = gameMap;
     this.gameStateChannel = AllAreaBroadcaster.gameStateChannel;
+    this.gameState = gameState;
     this.onLocation = () => {};
     this.onExtensionBroadcast = () => {};
     this.onCellSetBroadcast = () => {};
 
     // GameState object for storing the game state/player location.
-    this.gameState = new GameState(gameMap);
+    //this.gameState = new GameState(gameMap);
   }
 
   /**
@@ -40,10 +42,12 @@ class AllAreaBroadcaster {
           obj = JSON.parse(message);
         }
         if (obj.type == 'loc') {
+          this.gameState.onLocation(obj.msg);
           this.onLocation(obj.msg);
         } else if (obj.type == 'extBC') {
           this.onExtensionBroadcast(obj.msg);
         } else if (obj.type == 'cellSet') {
+          this.gameState.onCellSet(obj.msg.op, obj.msg.mapName, obj.msg.cellSet);
           this.onCellSetBroadcast(obj.msg);
         }
       }
