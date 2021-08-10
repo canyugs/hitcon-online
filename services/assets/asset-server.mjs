@@ -41,12 +41,15 @@ class AssetServer {
   /**
    * Prepare the static routes.
    */
-  staticRoutes() {
+  async staticRoutes() {
     // TODO: Restrict the visible pages.
     // Not sure if all static files are in sites
     this.app.use('/static/sites', express.static(__dirname + '/../../sites/'));
     this.app.use('/static/common', express.static(__dirname + '/../../common/'));
     this.app.use('/static/run/map', express.static(__dirname + '/../../run/map'));
+    for (const extName of this.extMan.listExtensions()) {
+      this.app.use(`/static/extensions/${extName}`, express.static(__dirname + `/../../extensions/${extName}/common`));
+    }
   }
 
   /**
@@ -72,15 +75,6 @@ class AssetServer {
       // TODO: workaround for development, in production we should fetch the unique endpoint from the config.
       this.clientParams.gatewayAddress = this.gatewayAddresses ? this.gatewayAddresses[Math.floor(Math.random() * this.gatewayAddresses.length)] : null;
       res.render(path.resolve(__dirname + '/../../sites/game-client/client.ejs'), this.clientParams);
-    });
-    this.app.get('/extension/:extName', (req, res) => {
-      /* waf */
-      const extName = req.params.extName;
-      if (/^[a-zA-Z0-9_]+$/.test(extName) === false) {
-        res.status(404).send('Extension Not Found');
-        return;
-      }
-      res.sendFile(path.resolve(__dirname + `/../../extensions/${extName}/client.mjs`));
     });
   }
 

@@ -25,7 +25,7 @@
   "multiprocess": false,
   "secret": "secret",
   "ext": {
-    "enabled": [],
+    "enabled": ["chat", "bombman"],
     "standalone": {
       "chat": "127.0.0.1:5020",
       "helloworld": "127.0.0.1:5021",
