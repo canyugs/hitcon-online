@@ -60,11 +60,12 @@ async function main() {
     gatewayServers[serverName] = fork('../services/main/gateway-server.mjs', ['--service-name', serverName], { cwd: '.' });
   }
 
+  await new Promise(r => setTimeout(r, 4000)); // TODO: better way to prevent race condition.
+
   /* Start standalone extension services */
   const extServices = {};
   const enabledExtStandalone = config.get('ext.standalone');
   for(const ext in enabledExtStandalone){
-    if(config.get('ext.enabled').includes(ext)) continue;
     extServices[ext] = fork('../services/standalone/standalone-extension.mjs', ['--ext', ext], { cwd: '.' });
   }
 
@@ -84,7 +85,6 @@ async function main() {
     }
 
     for(const ext in enabledExtStandalone){
-      if(config.get('ext.enabled').includes(ext)) continue;
       try {
         extServices[ext].kill();
       } catch {};
@@ -101,7 +101,6 @@ async function main() {
     gatewayServers[serverName].on('close', (err) => { handler(serverName + ' service closed.', err) });
   }
   for(const ext in enabledExtStandalone){
-    if(config.get('ext.enabled').includes(ext)) continue;
     extServices[ext].on('error', (err) => { handler(ext + ' service error.', err) });
     extServices[ext].on('close', (err) => { handler(ext + ' service closed.', err) });
   }
