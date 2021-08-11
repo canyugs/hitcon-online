@@ -132,7 +132,7 @@ class ExtensionHelperBase {
     }
     const extService = await this.dir.getExtensionServiceName(extName);
     if (typeof extService != 'string') {
-      console.error(`Service ${extName} unavailable, got ${extService}`);
+      console.error(`Service '${extName}' unavailable, got '${extService}'`);
       return {'error': 'Service unavailable'};
     }
     const result = await this.rpcHandler.callRPC(extService, 'callS2s', this.name, methodName, args);

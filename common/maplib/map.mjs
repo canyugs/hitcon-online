@@ -65,7 +65,7 @@ class MapCoord {
    */
   distanceTo(coord) {
     // TODO
-    console.log('MapCoord.distanceTo not implemented');
+    console.error('MapCoord.distanceTo not implemented');
     return -1;
   }
 

@@ -59,7 +59,7 @@ class ExtensionHelperStandalone extends ExtensionHelperBase {
       return this.ext[actualMethodName](srcExtName, ...args);
     } catch (e) {
       console.error(e);
-      console.error(`Error calling ${methodName} in ${this.name}`);
+      console.error(`Error calling '${methodName}' in '${this.name}'`);
       return {'error': 'exception'};
     }
   }

@@ -62,7 +62,7 @@ class GameClient {
       });
       socket.on('stateTransfer', (msg) => {
         this.gameState.acceptStateTransfer(msg);
-        console.log('State transfer done!');
+        console.debug('State transfer done!');
       });
       socket.on('location', (msg) => {
         this.gameState.onLocation(msg);
@@ -89,7 +89,7 @@ class GameClient {
    */
   async onStartup(msg) {
     if (this.gameStarted) {
-      console.assert('Duplicate game start event.');
+      console.error('Duplicate game start event.');
       return;
     }
     const pi = this.playerInfo;
@@ -123,7 +123,7 @@ class GameClient {
    * @param {string} direction - 'U', 'D', 'L', R'
    */
   async onDirection(direction) {
-    console.log(`On direction ${direction}`);
+    console.debug(`On direction ${direction}`);
     const {x, y} = this.playerInfo.mapCoord;
     if (direction == 'U') {
       await this.moveTo(x, y+1, 'U');

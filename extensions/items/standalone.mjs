@@ -19,7 +19,7 @@ class Standalone {
    * type Item = {
    *   amount: number;
    * }
-   * 
+   *
    * @param {ItemInfo} itemInfo - An object that contains the basic information of all items
    * type ItemInfo = {
    *   [itemName: string]: {
@@ -123,7 +123,7 @@ class Standalone {
   async c2s_getAllItems(playerID) {
     /* player has not registered yet */
     if (!this.items.has(playerID)) {
-      console.log('Player not initialized');
+      console.error('Player not initialized');
       return;
     }
     const itemObj = this.items.get(playerID);
@@ -142,7 +142,7 @@ class Standalone {
   async c2s_getAllItems(playerID) {
     /* player has not registered yet */
     if (!this.items.has(playerID)) {
-      console.log('Player not initialized');
+      console.error('Player not initialized');
       return;
     }
     const itemObj = this.items.get(playerID);
@@ -159,12 +159,12 @@ class Standalone {
   async c2s_getItem(playerID, itemName) {
     /* player has not registered yet */
     if (!this.items.has(playerID)) {
-      console.log('Player not initialized');
+      console.error('Player not initialized');
       return;
     }
     const itemObj = this.items.get(playerID);
     if (!itemName in itemObj) {
-      console.log('No such item');
+      console.error('No such item');
       return;
     }
     return itemObj[itemName];
@@ -179,21 +179,21 @@ class Standalone {
    */
   async c2s_giveReceiveItem(playerID, toPlayerID, itemName, amount) {
     if (!this.items.has(playerID) || !this.items.has(toPlayerID)) {
-      console.log('Player not initialized');
+      console.error('Player not initialized');
       return;
     }
     if (!itemName in this.itemInfo) {
-      console.log("Item does not exist");
+      console.error('Item does not exist');
       return;
     }
     if (!this.itemInfo[itemName].exchangeable) {
-      console.log("Item is not exchangeable");
+      console.error('Item is not exchangeable');
       return;
     }
 
     const fromPlayerItem = this.items.get(playerID);
     if (!itemName in fromPlayerItem || fromPlayerItem[itemName].amount < amount) {
-      console.log("Insufficient quantity");
+      console.error('Insufficient quantity');
       return;
     }
     fromPlayerItem[itemName].amount -= amount;
@@ -223,21 +223,21 @@ class Standalone {
    */
   async c2s_useItem(playerID, itemName, amount) {
     if (!this.items.has(playerID)) {
-      console.log('Player not initialized');
+      console.error('Player not initialized');
       return;
     }
     if (!itemName in this.itemInfo || !itemName in this.itemInstances) {
-      console.log("Item does not exist");
+      console.error('Item does not exist');
       return;
     }
     if (!this.itemInfo[itemName].usable) {
-      console.log("Item is not usable");
+      console.error('Item is not usable');
       return;
     }
 
     const item = this.items.get(playerID);
     if (!itemName in item || item[itemName].amount < amount) {
-      console.log("Insufficient quantity");
+      console.error('Insufficient quantity');
       return;
     }
     item[itemName].amount -= amount;
@@ -262,14 +262,14 @@ class Standalone {
   async c2s_dropItem(playerID, mapCoord, facing, itemName) {
     /* player has not registered yet */
     if (!this.items.has(playerID)) {
-      console.log('Player not initialized');
+      console.error('Player not initialized');
       return;
     }
 
     /* update database */
     let itemObj = this.items.get(playerID);
     if (!itemName in itemObj) {
-      console.log('No such item');
+      console.error('No such item');
       return;
     }
     itemObj[itemName].amount -= 1;
@@ -294,12 +294,12 @@ class Standalone {
   async c2s_pickupItem(playerID, mapCoord, droppedItemIndex) {
     /* player has not registered yet */
     if (!this.items.has(playerID)) {
-      console.log('Player not initialized');
+      console.error('Player not initialized');
       return;
     }
     const cell = this.droppedItemCell.get(droppedItemIndex);
     if (Math.abs(mapCoord.x - cell.x) > 1 || Math.abs(mapCoord.y - cell.y) > 1) {
-      console.log('Player too far away from dropped item');
+      console.error('Player too far away from dropped item');
       return;
     }
     /* update amount */

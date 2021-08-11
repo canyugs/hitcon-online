@@ -259,7 +259,7 @@ class ExtensionManager {
   async callC2sInStandalone(extName, methodName, args, playerID) {
     const extService = await this.dir.getExtensionServiceName(extName);
     if (typeof extService != 'string') {
-      console.error(`Service ${extName} unavailable in tryC2sInStandalone, got ${extService}`);
+      console.error(`Service '${extName}' unavailable in tryC2sInStandalone, got '${extService}'`);
       return {'error': 'Service unavailable'};
     }
     const result = await this.rpcHandler.callRPC(extService, 'callC2s', playerID, methodName, args);
