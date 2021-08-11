@@ -41,6 +41,20 @@ class Overlay {
   }
 
   /**
+   * If true, it should set the basic property for toolbarButton,
+   * and mainUI will add a button in toolbar for the overlay.
+   *
+   * *This method can be implemented in the derived class if the derived class
+   * wishes to adjust this default behaviour.*
+   *
+   * @return {Boolean}
+   */
+  hasToolbarbutton() {
+    // Fail safe default.
+    return false;
+  }
+
+  /**
    * Unset ToolbarButton display=none.
    */
   showToolbarButton() {
@@ -62,8 +76,10 @@ class Overlay {
   */
   onClickToolbarButton() {
     // WIP(fanlan1210)
-    this.positionCache = this.position; // store current position state
-    if (this.canHide() && this.position !== undefined) this.hide();
+    if (this.canHide() && this.position !== undefined) {
+      this.positionCache = this.position; // store current position state
+      this.hide();
+    }
     else this.show(this.positionCache); // resore position state
   }
 

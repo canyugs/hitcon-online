@@ -69,6 +69,8 @@ class MainUI {
    */
   addToolbarButton(target) {
     // WIP(fanlan1210)
+    if (!target.hasToolbarButton()) return false;
+
     target.toolbarButton = document.createElement('button');
     // load icon asset into button
     const icon = new Image();
