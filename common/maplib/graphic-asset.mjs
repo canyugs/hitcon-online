@@ -60,11 +60,7 @@ class GraphicAsset {
   getImage(getname) {
     for (let i = 0; i < this.asset_manager.images.length; i++) {
       if (this.asset_manager.images[i].name === getname) {
-        if (this.images_arr[i].assetName !== getname) {
-          // Shouldn't happen.
-          console.log(this.images_arr[i]);
-          console.assert('Image name mismatch in image and asset');
-        }
+        console.assert(this.images_arr[i].assetName === getname);
         return this.images_arr[i];
       }
     }

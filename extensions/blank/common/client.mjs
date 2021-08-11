@@ -14,7 +14,7 @@ class Client {
    */
   constructor(helper) {
     void helper;
-    console.assert('Not implemented');
+    console.assert(false, 'Not implemented');
   }
 
   /**

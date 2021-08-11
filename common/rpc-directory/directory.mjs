@@ -192,7 +192,8 @@ class Directory {
       return true;
     }
     // Shouldn't happen.
-    console.assert('Invalid reply from redis in registerPlayer: '+ret);
+    console.error('Invalid reply from redis in registerPlayer: '+ret);
+    console.trace();
     return false;
   }
 

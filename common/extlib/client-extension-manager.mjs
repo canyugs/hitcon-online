@@ -97,7 +97,7 @@ class ClientExtensionManager {
       return;
     }
     if (!extName in this.extObjects) {
-      console.error(`Extension ${extName} not loaded`);
+      console.error(`Extension '${extName}' not loaded`);
       return;
     }
     await this.extHelpers[extName].gameStart(this.gameMap, this.gameState,
@@ -130,7 +130,7 @@ class ClientExtensionManager {
     try {
       return await this.extHelpers[extName].onS2cAPICalled(methodName, args);
     } catch (e) {
-      console.error(`Exception ${e} calling S2cAPI ${methodName} in ${extName}`);
+      console.error(`Exception '${e}' calling S2cAPI '${methodName}' in '${extName}'`);
       return {'error': 'exception'};
     }
   }

@@ -84,7 +84,7 @@ class DataStore {
     if (dataName in this.opened) {
       return this.opened[dataName].data;
     }
-    
+
     let newData = await this._loadDataFromDisk(dataName);
     if (dataName in this.opened) {
       console.warn(`Concurrent loadData() on dataName, overwriting.`);
@@ -92,7 +92,7 @@ class DataStore {
     this.opened[dataName] = newData;
     return this.opened[dataName].data;
   }
-  
+
   /**
    * Load a data file from disk.
    * @private
@@ -116,7 +116,7 @@ class DataStore {
       if (e.code === 'ENOENT') {
         // Nothing to do. This is expected.
       } else {
-        console.warn(`Unable to open ${filePath} for reading. Reason: ${e}`);
+        console.warn(`Unable to open '${filePath}' for reading. Reason: ${e}`);
       }
       readFd = undefined;
     }
@@ -136,14 +136,14 @@ class DataStore {
     result.data = dataObject;
     return result;
   }
-  
+
   /**
    * Save the dataObj into the data file.
    * This method returns immediately, while the save operation carries on in
    * the background atomically.
    * @param {string} dataName - Name of the data to save.
    * @param {object} dataObj - The data object to save.
-   * @return 
+   * @return
    */
   async saveData(dataName, dataObj) {
     if (!(dataName in this.opened)) {
@@ -163,7 +163,7 @@ class DataStore {
       this._flushDirtyData(dataName);
     }
   }
-  
+
   /**
    * Actually try to save the data back to disk.
    * @param {string} dataName - The name of the data to save.
@@ -177,12 +177,12 @@ class DataStore {
       console.warn('Concurrent _flushDirtyData()');
       return;
     }
-    
+
     obj.flushActive = true;
 
     // Wait a tick so we don't delay anything.
     await new Promise(resolve => setTimeout(resolve, 0));
-    
+
     while (true) {
       if (!obj.dirty) {
         // Not dirty? Not our problem.
@@ -198,7 +198,7 @@ class DataStore {
       obj.pending = false;
       obj.dirty = false;
       let fileContent = JSON.stringify(obj.data);
-      
+
       // Write to temp file first.
       let filePath = this._getPath(dataName, false);
       let writeFd = undefined;
@@ -206,17 +206,17 @@ class DataStore {
         writeFd = await fsPromises.open(filePath, 'w');
         await writeFd.write(fileContent, 'utf-8');
         await writeFd.close();
-        
+
         // Overwrite the actual file.
         fsPromises.rename(filePath, this._getPath(dataName, true));
       } catch (e) {
-        console.warn('Unable to open \'' + filePath + '\' for writing. Reason: '+e);
+        console.error('Unable to open \'' + filePath + '\' for writing. Reason: '+e);
         throw e;
       }
-      
+
       // We're done.
       obj.writeInProgress = false;
-      
+
       if (obj.pending) {
         // We've pending flush, so flush it again.
         continue;
@@ -227,7 +227,7 @@ class DataStore {
       }
       break;
     }
-    
+
     obj.flushActive = false;
     if (obj.onFlushDone) {
       obj.onFlushDone();
@@ -236,7 +236,7 @@ class DataStore {
 
     return true;
   };
-  
+
   /**
    * This method runs continuously since the creation of this class.
    * It attempts to flush all outstanding dirty cache.
@@ -249,14 +249,14 @@ class DataStore {
     while (true) {
       // TODO: Make this configurable.
       await new Promise(resolve => setTimeout(resolve, 5000));
-      
+
       for (let dataName in this.opened) {
         // no await, we let it run in the background.
         this._flushDirtyData(dataName);
       }
     }
   }
-  
+
   /**
    * Unloads a data from our cache.
    * @param {string} dataName - The name of the data to save.
