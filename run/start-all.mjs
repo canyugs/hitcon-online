@@ -61,15 +61,16 @@ async function main() {
   }
 
   // Wait for all gateway services to start.
-  const promises = Object.keys(gatewayServers).map((serverName) => {
+  const promises = Object.entries(gatewayServers).map((entry) => {
+    const [name, server] = entry;
     return new Promise((resolve, reject) => {
-      gatewayServers[serverName].on('message', msg => {
+      server.on('message', msg => {
         if(msg !== 'started') return;
-        console.log(`${serverName} has started successfully.`)
+        console.log(`${name} has started successfully.`)
         resolve(msg)
       });
-      const timer = setTimeout(() => {
-        reject(new Error(`Promise timed out after 10 sec.`));
+      setTimeout(() => {
+        reject(new Error(`Failed to start "${name}" server successfully in 10 seconds.`));
       }, 10 * 1000);
     });
   });
