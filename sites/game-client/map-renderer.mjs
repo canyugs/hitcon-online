@@ -6,6 +6,8 @@ import {MapCoord} from '/static/common/maplib/map.mjs';
 const mapCellSize = 32; // pixel
 const fontStyle = '12px serif';
 
+const LAYER_PLAYER = {zIndex: 10, layerName: 'player'};
+
 /**
  * MapRender renders the map onto the a canvas element.
  * The coordinate of canvas is shown below.
@@ -52,12 +54,12 @@ class MapRenderer {
 
     /**
      * @member {Array} customizedLayers - Customized layer that needs to be rendered.
-     * Every element is a pair (`zIndex`, `layerName`).
-     * The definition of `zIndex` is the same as that in CSS except that only
-     * integer is accepted here (CSS allows a keyword 'auto').
-     * `customizedLayers` should always be sorted.
+     * Refer to `this.registerCustomizedLayerToDraw()` for more details.
      */
-    this.customizedLayers = [[10, 'player']]; // 'player' is a layer defined and used by only MapRenderer
+    this.customizedLayers = [];
+
+    // 'player' is a layer defined and used only by MapRenderer
+    this.registerCustomizedLayerToDraw(LAYER_PLAYER.zIndex, LAYER_PLAYER.layerName, '_drawCharacters', this.gameState.players);
   }
 
   /**
@@ -139,12 +141,34 @@ class MapRenderer {
 
   /**
    * Register a customized layer for drawing. Commonly used by extension.
-   * @param {Number} zIndex - Should be an integer.
+   * Be careful with `renderArgs`. Due to the pass-by-reference of JavaScript, you may want to
+   * pass a container of your render arguments as follows:
+   * ```javascript
+   * class MyExtension {
+   *   constructor() {
+   *     Object.defineProperty(this, 'renderArgs', {value: {}});
+   *     registerCustomizedLayerToDraw(0, 'layer', 'renderFunc', this.renderArgs);
+   *   }
+   *   someMethod() {
+   *     // this.renderArgs = {a:1, b:2}; // Reassigning is disabled. This will cause error.
+   *     this.renderArgs.a = 1; // do this instead
+   *     this.renderArgs.b = 2; // do this instead
+   *   }
+   * }
+   * ```
+   * Reassigning causes a dangling object, which means the registered `renderArgs` does not point
+   * to the reassigned `renderArgs`.
+   * Using the above code snippet, you can ensure that `'renderFunc'` always access the identical
+   * object in your extension, and no need to worry about accidentally reassign the `renderArgs`.
+   * Consider using `Object.freeze()` if you never need any modification on `renderArgs`.
+   * @param {Number} zIndex - Should be an integer. Refer to the definition of 'z-index' in CSS.
    * @param {String} layerName - The layer to be drawn.
+   * @param {String} renderFunction - Optional. The rendering function used to render this layer.
+   * @param {any} renderArgs - Optional. The optional argument if renderFunction requires one.
    */
-  registerCustomizedLayerToDraw(zIndex, layerName) {
+  registerCustomizedLayerToDraw(zIndex, layerName, renderFunction, renderArgs) {
     // TODO: use binary search and Array.prototype.splice() to improve performance
-    this.customizedLayers.push([zIndex, layerName]);
+    this.customizedLayers.push([zIndex, layerName, renderFunction, renderArgs]);
     this.customizedLayers.sort((a, b) => a[0] - b[0]);
   }
 
@@ -159,9 +183,9 @@ class MapRenderer {
     this._drawEveryCellWrapper(this._drawLayer.bind(this, 'ground'));
 
     // draw foreground
-    for (const [, layerName] of this.customizedLayers) {
-      if (layerName === 'player') {
-        this._drawPlayers();
+    for (const [, layerName, renderFunction, renderArgs] of this.customizedLayers) {
+      if (renderFunction === '_drawCharacters') {
+        this._drawCharacters(renderArgs);
       } else {
         this._drawEveryCellWrapper(this._drawLayer.bind(this, layerName));
       }
@@ -224,17 +248,18 @@ class MapRenderer {
   }
 
   /**
-   * Draw players onto the canvas.
+   * Draw players or NPCs onto the canvas.
+   * @param {Map} players - The players to be drawn. Refer to `GameState.players` for format.
    */
-  _drawPlayers() {
-    const players = this.gameState.getPlayers();
-    for (const {mapCoord, displayChar, facing} of Object.values(players)) {
+  _drawCharacters(players) {
+    for (const {mapCoord, displayChar, facing} of players.values()) {
       const canvasCoordinate = this.mapToCanvasCoordinate(mapCoord);
+      const topLeftCanvasCoord = {x: canvasCoordinate.x, y: canvasCoordinate.y - mapCellSize};
       // check if this player is out of viewport
-      if (canvasCoordinate.x < -mapCellSize ||
-          canvasCoordinate.x >= this.canvas.width ||
-          canvasCoordinate.y < -mapCellSize ||
-          canvasCoordinate.y >= this.canvas.height) {
+      if (topLeftCanvasCoord.x < -mapCellSize ||
+          topLeftCanvasCoord.x >= this.canvas.width ||
+          topLeftCanvasCoord.y < -mapCellSize ||
+          topLeftCanvasCoord.y >= this.canvas.height) {
         continue;
       }
       const renderInfo = this.map.graphicAsset.getCharacter(displayChar,
@@ -245,8 +270,8 @@ class MapRenderer {
           renderInfo.srcY,
           renderInfo.srcWidth,
           renderInfo.srcHeight,
-          canvasCoordinate.x,
-          canvasCoordinate.y - renderInfo.srcHeight,
+          topLeftCanvasCoord.x,
+          topLeftCanvasCoord.y,
           mapCellSize,
           mapCellSize,
       );
