@@ -78,7 +78,8 @@ async function mainServer() {
 
   // TODO: Set the port once configuration is done.
   const port = config.get('gatewayServers')[serviceName].httpAddress.split(':')[1];
-  console.log(`Server is listening on port ${port} ...`);
+  console.log(`Gateway server is listening on port ${port} ...`);
+  process.send('started'); // notify start-all that the gateway service has started.
   server.listen(port);
 }
 
