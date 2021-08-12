@@ -60,7 +60,20 @@ async function main() {
     gatewayServers[serverName] = fork('../services/main/gateway-server.mjs', ['--service-name', serverName], { cwd: '.' });
   }
 
-  await new Promise(r => setTimeout(r, 4000)); // TODO: better way to prevent race condition.
+  // Wait for all gateway services to start.
+  const promises = Object.keys(gatewayServers).map((serverName) => {
+    return new Promise((resolve, reject) => {
+      gatewayServers[serverName].on('message', msg => {
+        if(msg !== 'started') return;
+        console.log(`${serverName} has started successfully.`)
+        resolve(msg)
+      });
+      const timer = setTimeout(() => {
+        reject(new Error(`Promise timed out after 10 sec.`));
+      }, 10 * 1000);
+    });
+  });
+  await Promise.all(promises);
 
   /* Start standalone extension services */
   const extServices = {};
