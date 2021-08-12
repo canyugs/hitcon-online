@@ -20,7 +20,11 @@ class GameState {
    */
   constructor(gameMap) {
     this.gameMap = gameMap;
-    /*
+
+    /**
+     * @member {Map} players - The players
+     * Since mapRenderer uses `this.players` to render players, we use `Object.defineProperty`
+     * to prevent reassignment.
      * Format of player in players:
      * {string} playerID - ID of the player. Key in players.
      * {string} displayName - The name to display for the player.
@@ -28,7 +32,8 @@ class GameState {
      * {Number} y - The y coordinate.
      * {string} facing - 'U', 'D', 'L', 'R', the direction user's facing.
      */
-    this.players = {};
+    this.players = undefined;
+    Object.defineProperty(this, 'players', {value: new Map(), enumerable: true});
 
     /**
      * An example of this.cellSets:
@@ -54,16 +59,17 @@ class GameState {
     const playerID = loc.playerID;
     if ('removed' in loc && loc['removed']) {
       // Player is removed. Disconnected.
-      if (playerID in this.players) {
-        delete this.players[playerID];
+      if (this.players.has(playerID)) {
+        delete this.players.delete(playerID);
       }
     } else {
-      if (!(playerID in this.players)) {
-        this.players[playerID] = {playerID: playerID};
-        // The default, wait for it to be updated later.
-        this.players[playerID].displayName = playerID;
+      if (!this.players.has(playerID)) {
+        this.players.set(playerID, {
+          playerID,
+          displayName: playerID, // The default, wait for it to be updated later.
+        });
       }
-      const obj = this.players[playerID];
+      const obj = this.players.get(playerID);
       if ('displayName' in loc) obj.displayName = loc.displayName;
       if ('displayChar' in loc) obj.displayChar = loc.displayChar;
       obj.mapCoord = MapCoord.fromObject(loc.mapCoord);
@@ -141,8 +147,8 @@ class GameState {
    * @return {object} state - An object representing player's state.
    */
   getPlayer(playerID) {
-    if (playerID in this.players) {
-      return this.players[playerID];
+    if (this.players.has(playerID)) {
+      return this.players.get(playerID);
     }
     return null;
   }
@@ -152,7 +158,7 @@ class GameState {
    * @return {object} state - The game state.
    */
   getStateTransfer() {
-    return {players: this.players, cellSetsOfMaps: this.cellSetsOfMaps};
+    return {players: JSON.stringify(Object.fromEntries(this.players)), cellSetsOfMaps: this.cellSetsOfMaps};
   }
 
   /**
@@ -161,7 +167,13 @@ class GameState {
    * @param {object} state - State returned by getStateTransfer().
    */
   acceptStateTransfer(state) {
-    this.players = state.players;
+    // update players
+    const newPlayers = new Map(Object.entries(JSON.parse(state.players)));
+    this.players.clear();
+    for (const [k, v] of newPlayers.entries()) {
+      this.players.set(k, v);
+    }
+
     this.cellSetsOfMaps = state.cellSetsOfMaps;
     this.gameMap.removeAllDynamicCellSet();
     for (const mapName of Object.keys(this.cellSetsOfMaps)) {
