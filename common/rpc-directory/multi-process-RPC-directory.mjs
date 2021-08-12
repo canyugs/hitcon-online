@@ -57,7 +57,6 @@ class MultiProcessRPCDirectory extends Directory {
   createGrpcServer(name, port) {
     let server = new grpc.Server();
     server.addService(this.rpcProto.RPC.service, { callRPC: async (call, callback) => await this.responseGrpcCall.bind(this)(call, callback, this.callLocalRPC) });
-    console.log('creating ' + name + ' at 0.0.0.0:' + port);
 
     server.bindAsync('0.0.0.0:' + port, grpc.ServerCredentials.createInsecure(), () => {
       try {

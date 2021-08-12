@@ -41,7 +41,7 @@ async function mainServer() {
 
   // TODO: Set the port once configuration is done.
   const port = config.get('assetServer.port');
-  console.log(`Server is listening on port ${port} ...`);
+  console.log(`Asset server is listening on port ${port} ...`);
   server.listen(port);
 }
 
