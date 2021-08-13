@@ -3,6 +3,7 @@
 
 import OverlayPosition from './overlay-position.mjs';
 import ContextMenu from './context-menu.mjs';
+import LinkedList from '../../../common/utility/linked-list.mjs';
 
 // enum
 const UIState = Object.freeze({
@@ -19,6 +20,9 @@ OVERLAY_DIV.set(OverlayPosition.LEFT_BOTTOM, 'overlay-bottomleft');
 OVERLAY_DIV.set(OverlayPosition.RIGHT, 'overlay-right');
 OVERLAY_DIV.set(OverlayPosition.CENTER_TOP, 'overlay-centertop');
 OVERLAY_DIV.set(OverlayPosition.MAIN_VIEW, 'main-view');
+
+const TOOLBAR_ID = 'toolbar';
+const NOTIFICATION_NUM_LIMIT = 4;
 
 /**
  * MainUI composes components into a window,
@@ -68,6 +72,31 @@ class MainUI {
    */
   showNotification(msg, timeout) {
     // TODO(lisasasasa)
+    // Every element of the list is {ele, next}, where `ele` is DOMElement
+    this._msgList ??= new LinkedList();
+
+    // An arrow function to remove the notification
+    const removeNotification = (listNode, clear) => {
+      const {ele, timer} = listNode.content;
+      if (clear) clearTimeout(timer);
+      if (this._msgList.delete(listNode)) ele.removeFromHTML();
+      // TODO (Delete the DOMElement)
+    };
+
+    // Before inserting the new notification, check if list exceed the limit
+    if (this._msgList.length === NOTIFICATION_NUM_LIMIT) {
+      removeNotification(this._msgList.head.next, true);
+    }
+
+    // TODO (create the DOMElement)
+    const content = {ele};
+    const listNode = this._msgList.insert(content);
+
+    const timer = setTimeout(() => {
+      removeNotification.bind(this, listNode, false)();
+    }, timeout);
+    listNode.content.timer = timer;
+
   }
 
   /**
