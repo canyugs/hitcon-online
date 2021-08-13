@@ -1,0 +1,33 @@
+version: "3.9"
+services:
+  online:
+    image: "node:latest"
+    working_dir: /home/node/app
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - ../:/home/node/app
+    command:  bash -c "yarn && ./run-all.sh"
+    depends_on:
+      - redis
+
+  redis:
+    image: redis
+
+  setup:
+    image: python:3.9.6-alpine
+    volumes:
+      - ../:/usr/src/myapp
+    working_dir: /usr/src/myapp/docker
+    command:  sh -c "python generate-nginx-conf.py"
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - setup
+      - online
+      - redis

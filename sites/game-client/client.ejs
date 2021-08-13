@@ -95,7 +95,7 @@ absolute URL.
         // Try to get a test token.
         let testToken = getTokenFromDocument();
         if (testToken == '') {
-          testToken = await $.ajax({url: "<%= gatewayAddress %>" ? "//<%= gatewayAddress %>" : "/get_test_token", type: "GET",});
+          testToken = await $.ajax({url: ("<%= gatewayAddress %>" ? "//<%= gatewayAddress %>" : "") + "/get_test_token", type: "GET",});
           testToken = testToken.token;
         }
         game.token = testToken;

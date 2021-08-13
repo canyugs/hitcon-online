@@ -1,0 +1,43 @@
+{
+  "debug": true,
+  "assetServer": {
+    "address": "127.0.0.1",
+    "port": 5000
+  },
+  "gatewayServers": {
+    "gatewayService5010": {
+      "httpAddress": "127.0.0.1:5010",
+      "grpcAddress": "127.0.0.1:5030"
+    },
+    "gatewayService5011": {
+      "httpAddress": "127.0.0.1:5011",
+      "grpcAddress": "127.0.0.1:5031"
+    }
+  },
+  "map": [
+    "map/map.json"
+  ],
+  "assets": "map/assets.json",
+  "redis": {
+    "type": "real",
+    "option": {
+      "host": "redis",
+      "port": 6379
+    }
+  },
+  "multiprocess": true,
+  "secret": "secret",
+  "ext": {
+    "enabled": ["chat", "bombman"],
+    "standalone": {
+      "chat": "127.0.0.1:5020",
+      "helloworld": "127.0.0.1:5021",
+      "bombman": "127.0.0.1:5022"
+    }
+  },
+  "publicAddresses": {
+    "assetService": "online.hitcon.org",
+    "gatewayService": "gateway.online.hitcon.org"
+  },
+  "movingRequestThreshold": 100
+}
