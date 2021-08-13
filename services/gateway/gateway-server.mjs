@@ -37,15 +37,37 @@ async function mainServer() {
   //   console.error(err);
   // });
 
+  const corsValidation = function (origin, callback) {
+    const originHostname = (new URL(origin)).hostname;
+
+    if(!config?.publicAddresses?.assetService) {
+      callback(null, true)
+      return;
+    }
+
+    // for development only, might need to removed in the future.
+    if(originHostname === 'localhost' || originHostname === '127.0.0.1') {
+      callback(null, true)
+      return;
+    }
+
+    if(config.publicAddresses.assetService === originHostname) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  }
+
   /* Create the http service */
   const app = express();
+
   app.use(require('cors')({
-    origin: '*'
+    origin: corsValidation
   }));
   const server = http.createServer(app);
   const io = new Server(server, {
     cors: true,
-    origins: ["*"],
+    origin: corsValidation
   });
 
   /* Create all utility classes */
