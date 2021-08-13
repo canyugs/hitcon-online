@@ -16,8 +16,8 @@ const argv = require('minimist')(process.argv.slice(2));
 import fs from 'fs';
 
 /* Import all servers */
-import GatewayService from '../gateway/gateway-service.mjs';
-import AllAreaBroadcaster from '../gateway/all-area-broadcaster.mjs';
+import GatewayService from './gateway-service.mjs';
+import AllAreaBroadcaster from './all-area-broadcaster.mjs';
 import SingleProcessRPCDirectory from
   '../../common/rpc-directory/single-process-RPC-directory.mjs';
 import MultiProcessRPCDirectory from

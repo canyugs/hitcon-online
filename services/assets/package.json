@@ -1,13 +1,16 @@
 {
-  "name": "hitcon-online-gateway",
+  "name": "hitcon-online-asset-server",
   "version": "0.0.1",
+  "scripts": {
+    "start": "node asset-server-launcher.js"
+  },
   "dependencies": {
     "config": "^3.3.6",
     "cors": "^2.8.5",
+    "ejs": "^3.1.6",
     "express": "~4.16.1",
     "minimist": "^1.2.5",
     "redis": "^3.1.2",
-    "socket.io": "^4.1.2",
-    "socketio-jwt": "^4.6.2"
+    "socket.io": "^4.1.2"
   }
 }

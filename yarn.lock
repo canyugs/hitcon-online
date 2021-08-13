@@ -1456,6 +1456,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"hitcon-online-asset-server@workspace:services/assets":
+  version: 0.0.0-use.local
+  resolution: "hitcon-online-asset-server@workspace:services/assets"
+  dependencies:
+    config: ^3.3.6
+    cors: ^2.8.5
+    ejs: ^3.1.6
+    express: ~4.16.1
+    minimist: ^1.2.5
+    redis: ^3.1.2
+    socket.io: ^4.1.2
+  languageName: unknown
+  linkType: soft
+
 "hitcon-online-blank@workspace:extensions/blank":
   version: 0.0.0-use.local
   resolution: "hitcon-online-blank@workspace:extensions/blank"
@@ -1508,6 +1522,10 @@ __metadata:
   resolution: "hitcon-online-gateway@workspace:services/gateway"
   dependencies:
     config: ^3.3.6
+    cors: ^2.8.5
+    express: ~4.16.1
+    minimist: ^1.2.5
+    redis: ^3.1.2
     socket.io: ^4.1.2
     socketio-jwt: ^4.6.2
   languageName: unknown
@@ -1516,6 +1534,12 @@ __metadata:
 "hitcon-online-helloworld@workspace:extensions/helloworld":
   version: 0.0.0-use.local
   resolution: "hitcon-online-helloworld@workspace:extensions/helloworld"
+  languageName: unknown
+  linkType: soft
+
+"hitcon-online-items@workspace:extensions/items":
+  version: 0.0.0-use.local
+  resolution: "hitcon-online-items@workspace:extensions/items"
   languageName: unknown
   linkType: soft
 

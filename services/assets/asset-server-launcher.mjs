@@ -15,7 +15,7 @@ const argv = require('minimist')(process.argv.slice(2));
 
 import fs from 'fs';
 
-import AssetServer from '../assets/asset-server.mjs';
+import AssetServer from './asset-server.mjs';
 import ExtensionManager from '../../common/extlib/extension-manager.mjs';
 
 async function mainServer() {

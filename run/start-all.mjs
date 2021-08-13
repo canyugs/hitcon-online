@@ -51,13 +51,13 @@ async function main() {
   redisClient.quit();
 
   /* Start asset server */
-  const assetServer = fork('../services/main/asset-server.mjs', { cwd: '.' });
+  const assetServer = fork('../services/assets/asset-server-launcher.mjs', { cwd: '.' });
 
   /* Start gateway service */
   const gatewayServers = {};
   const enabledGatewayServers = config.get('gatewayServers');
   for(const serverName in enabledGatewayServers){
-    gatewayServers[serverName] = fork('../services/main/gateway-server.mjs', ['--service-name', serverName], { cwd: '.' });
+    gatewayServers[serverName] = fork('../services/gateway/gateway-server.mjs', ['--service-name', serverName], { cwd: '.' });
   }
 
   // Wait for all gateway services to start.
