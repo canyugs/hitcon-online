@@ -19,8 +19,9 @@ async function main() {
   }
 
   /* Initialize Redis */
-  const redisClient = redis.createClient();
+  const redisClient = redis.createClient(config.get('redis.option'));
   redisClient.on('error', (err) => {
+    console.error(err);
     console.error("Can't connect to Redis, make sure that the connection info is correct.");
     process.exit();
   });
