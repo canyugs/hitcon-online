@@ -59,8 +59,16 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         "reference": "workspace:extensions/helloworld"
       },
       {
+        "name": "hitcon-online-items",
+        "reference": "workspace:extensions/items"
+      },
+      {
         "name": "hitcon-online-jitsi",
         "reference": "workspace:extensions/jitsi"
+      },
+      {
+        "name": "hitcon-online-asset-server",
+        "reference": "workspace:services/assets"
       },
       {
         "name": "hitcon-online-gateway",
@@ -83,6 +91,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
     "ignorePatternData": "(^(?:\\.yarn\\/sdks(?:\\/(?!\\.)(?:(?:(?!(?:^|\\/)\\.).)*?)|$))$)",
     "fallbackExclusionList": [
       ["hitcon-online", ["workspace:."]],
+      ["hitcon-online-asset-server", ["workspace:services/assets"]],
       ["hitcon-online-blank", ["workspace:extensions/blank"]],
       ["hitcon-online-bombman", ["workspace:extensions/bombman"]],
       ["hitcon-online-cellsettest", ["workspace:extensions/cellsettest"]],
@@ -92,6 +101,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
       ["hitcon-online-game-client", ["workspace:sites/game-client"]],
       ["hitcon-online-gateway", ["workspace:services/gateway"]],
       ["hitcon-online-helloworld", ["workspace:extensions/helloworld"]],
+      ["hitcon-online-items", ["workspace:extensions/items"]],
       ["hitcon-online-jitsi", ["workspace:extensions/jitsi"]],
       ["hitcon-online-main-server", ["workspace:services/main"]],
       ["hitcon-online-maplib", ["workspace:common/maplib"]],
@@ -1922,6 +1932,22 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "SOFT",
         }]
       ]],
+      ["hitcon-online-asset-server", [
+        ["workspace:services/assets", {
+          "packageLocation": "./services/assets/",
+          "packageDependencies": [
+            ["hitcon-online-asset-server", "workspace:services/assets"],
+            ["config", "npm:3.3.6"],
+            ["cors", "npm:2.8.5"],
+            ["ejs", "npm:3.1.6"],
+            ["express", "npm:4.16.4"],
+            ["minimist", "npm:1.2.5"],
+            ["redis", "npm:3.1.2"],
+            ["socket.io", "npm:4.1.2"]
+          ],
+          "linkType": "SOFT",
+        }]
+      ]],
       ["hitcon-online-blank", [
         ["workspace:extensions/blank", {
           "packageLocation": "./extensions/blank/",
@@ -1995,6 +2021,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageDependencies": [
             ["hitcon-online-gateway", "workspace:services/gateway"],
             ["config", "npm:3.3.6"],
+            ["cors", "npm:2.8.5"],
+            ["express", "npm:4.16.4"],
+            ["minimist", "npm:1.2.5"],
+            ["redis", "npm:3.1.2"],
             ["socket.io", "npm:4.1.2"],
             ["socketio-jwt", "npm:4.6.2"]
           ],
@@ -2006,6 +2036,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./extensions/helloworld/",
           "packageDependencies": [
             ["hitcon-online-helloworld", "workspace:extensions/helloworld"]
+          ],
+          "linkType": "SOFT",
+        }]
+      ]],
+      ["hitcon-online-items", [
+        ["workspace:extensions/items", {
+          "packageLocation": "./extensions/items/",
+          "packageDependencies": [
+            ["hitcon-online-items", "workspace:extensions/items"]
           ],
           "linkType": "SOFT",
         }]
