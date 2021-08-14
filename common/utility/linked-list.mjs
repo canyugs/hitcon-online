@@ -11,7 +11,7 @@ class Node {
    */
   constructor(content, next) {
     this.content = content;
-    this.next = next ?? null;
+    this.next = next;
   }
 
   /**
@@ -43,13 +43,23 @@ class LinkedList {
   }
 
   /**
+   * Find the node by index
+   * @param {int} index
+   * @return {Node} the certain node
+   */
+  findNode(index) {
+    let iter = this.head;
+    for (let i = 0; i < index; i++) iter = iter.next;
+    return iter;
+  }
+  /**
    * Insert a node in the begin of the list
    * @param {any} content
    * @return {Node} newNode - A newNode be inserted
    */
   insert(content) {
     this.length += 1;
-    const newNode = new(content, this.head.next);
+    const newNode = new Node(content, this.head.next);
     this.head.next = newNode;
     return newNode;
   }
@@ -79,6 +89,16 @@ class LinkedList {
     this.length -= 1;
     iter.next = node.next;
     return true;
+  }
+
+  findAllElement() {
+    let _list = [];
+    let iter = this.head;
+    for (let i = 0; i < this.length; i++) {
+      iter = iter.next;
+      _list.push(iter.content.msg);
+    }
+    return _list;
   }
 }
 

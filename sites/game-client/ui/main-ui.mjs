@@ -22,7 +22,11 @@ OVERLAY_DIV.set(OverlayPosition.CENTER_TOP, 'overlay-centertop');
 OVERLAY_DIV.set(OverlayPosition.MAIN_VIEW, 'main-view');
 
 const TOOLBAR_ID = 'toolbar';
+const NOTIFICATIONBAR_ID = 'notification-bar';
 const NOTIFICATION_NUM_LIMIT = 4;
+const ANNOUNCEMENT_ID = 'announcement-bar';
+const ANNOUNCEMENT_STRING = 'announcement-bar-span';
+const ANNOUNCEMENT_NUM_LIMIT = 4;
 
 /**
  * MainUI composes components into a window,
@@ -51,6 +55,11 @@ class MainUI {
     for (const [pos, div] of OVERLAY_DIV.entries()) {
       this.overlayDom[pos] = document.getElementById(div);
     }
+
+    this.toolbarDom = document.getElementById(TOOLBAR_ID);
+    this.notificationDom = document.getElementById(NOTIFICATIONBAR_ID);
+    this.announcementDom = document.getElementById(ANNOUNCEMENT_ID);
+    this.announcementWord = document.getElementById(ANNOUNCEMENT_STRING);
   }
 
   /**
@@ -64,10 +73,9 @@ class MainUI {
    */
   setMainView(overlay) {}
 
-  // TODO: Stack visualization? Stack height limit?
   /**
    * Show notification in notification area.
-   * @param msg The message want to be shown.
+   * @param {String} msg The message want to be shown.
    * @param {Number} timeout The duraion of showing notification, the unit is millisecond.
    */
   showNotification(msg, timeout) {
@@ -79,24 +87,58 @@ class MainUI {
     const removeNotification = (listNode, clear) => {
       const {ele, timer} = listNode.content;
       if (clear) clearTimeout(timer);
-      if (this._msgList.delete(listNode)) ele.removeFromHTML();
-      // TODO (Delete the DOMElement)
+      if (this._msgList.delete(listNode)) this.notificationDom.removeChild(ele);
     };
 
     // Before inserting the new notification, check if list exceed the limit
     if (this._msgList.length === NOTIFICATION_NUM_LIMIT) {
-      removeNotification(this._msgList.head.next, true);
+      removeNotification(this._msgList.findNode(NOTIFICATION_NUM_LIMIT), true);
     }
 
-    // TODO (create the DOMElement)
+    const ele = document.createElement('div');
+    const msgEle = document.createTextNode(msg);
+    ele.appendChild(msgEle);
+
+    this.notificationDom.appendChild(ele);
     const content = {ele};
     const listNode = this._msgList.insert(content);
 
-    const timer = setTimeout(() => {
+    const timer = setTimeout(() =>{
       removeNotification.bind(this, listNode, false)();
     }, timeout);
     listNode.content.timer = timer;
+    console.log(this._msgList)
+  }
 
+  /**
+   * Show announcement in marquee.
+   * @param {String} msg The message want to be shown.
+   * @param {Number} timeout The duraion of showing notification, the unit is millisecond.
+   */
+  showAnnouncement(msg, timeout) {
+    // Every element of the list is {sting, next}
+    this._announceList ??= new LinkedList();
+    // TODO(marquee)
+    // An arrow function to remove the notification
+    const removeNotification = (listNode, clear) => {
+      const {msg, timer} = listNode.content;
+      if (clear) clearTimeout(timer);
+      if (this._announceList.delete(listNode)) {
+        this.announcementWord.textContent = this._announceList.findAllElement().join('  ');
+      }
+    };
+
+    if (this._announceList.length === NOTIFICATION_NUM_LIMIT) {
+      removeNotification(this._announceList.findNode(NOTIFICATION_NUM_LIMIT), true);
+    }
+
+    const content = {msg};
+    const listNode = this._announceList.insert(content);
+    this.announcementWord.textContent = this._announceList.findAllElement().join('  ');
+    const timer = setTimeout(() =>{
+      removeNotification.bind(this, listNode, false)();
+    }, timeout);
+    listNode.content.timer = timer;
   }
 
   /**
