@@ -159,7 +159,18 @@ class MapRenderer {
       canvasCoord2.x >= 0 &&
       canvasCoord2.y >= 0 &&
       canvasCoord2.x <= this.canvas.width &&
-      canvasCoord2.y <= this.canvas.height)
+      canvasCoord2.y <= this.canvas.height
+      ) || (
+      canvasCoord1.x >= 0 &&
+      canvasCoord2.y >= 0 &&
+      canvasCoord1.x <= this.canvas.width &&
+      canvasCoord2.y <= this.canvas.height
+      ) || (
+      canvasCoord2.x >= 0 &&
+      canvasCoord1.y >= 0 &&
+      canvasCoord2.x <= this.canvas.width &&
+      canvasCoord1.y <= this.canvas.height
+      )
     ){
       return true;
     }
