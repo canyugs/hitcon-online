@@ -35,9 +35,6 @@
       "bombman": "127.0.0.1:5022"
     }
   },
-  "publicAddresses": {
-    "assetService": "online.hitcon.org",
-    "gatewayService": "gateway.online.hitcon.org"
-  },
+  "publicAddress": "online.hitcon.org",
   "movingRequestThreshold": 100
 }

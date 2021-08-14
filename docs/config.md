@@ -15,5 +15,5 @@ Run multi-process mode or not. The multi-process mode requires real Redis, prelo
 The `enabled` field controls which extension should be loaded in this main process.
 The `standalone` object controls the address and port used by the gRPC server of each standalone extension.
 
-## `publicAddresses`
-Includes `assetService` and `gatewayService`, standing for the addresses for the gateway server and the asset server. These addresses are used by the Nginx reverse proxy and CORS. If these are not assigned, CORS would be set to `*`, the reverse proxy wouldn't work, and the asset server would serve the raw address of a randomly chosen gateway server.
+## `publicAddress`
+Define the public address. These addresses are used by the Nginx reverse proxy and CORS. If these are not assigned, CORS would be set to `*`, the reverse proxy wouldn't work, and the asset server would serve the raw address of a randomly chosen gateway server.

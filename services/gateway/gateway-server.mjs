@@ -38,9 +38,22 @@ async function mainServer() {
   // });
 
   const corsValidation = function (origin, callback) {
-    const originHostname = (new URL(origin)).hostname;
+    // https://github.com/expressjs/cors/issues/71
+    if(origin === undefined) {
+      callback(null, true);
+      return;
+    }
 
-    if(!config?.publicAddresses?.assetService) {
+    let originHostname;
+    try {
+      originHostname = (new URL(origin)).hostname
+    } catch {
+      console.error("Can't parse URL: ", origin);
+      callback(new Error('Not allowed by CORS'));
+      return;
+    }
+
+    if(!config.get('publicAddress')) {
       callback(null, true)
       return;
     }
@@ -51,7 +64,7 @@ async function mainServer() {
       return;
     }
 
-    if(config.publicAddresses.assetService === originHostname) {
+    if(config.get('publicAddress') === originHostname) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
