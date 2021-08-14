@@ -1,21 +1,34 @@
-- extension
-  - standalone
-  - in gateway
-  - rpc passthrough in gateway
-- chat (text)
-- inventory
+
+Not started
+===========
+
+- Settings Dialog
+- NPC
+  - Portal NPC
+  - Door NPC
+- Extension
+  - Allow extensions to get player state/location
+  - Allow extensions to listen to broadcast of player move/cellset changes
 - UI
   - character displayName / displayChar setting
   - online list
-  - dialogs
-- jitsi integration
-- Productionization
-
-- Spawn Point
-- Settings Dialog
+- Better Jitsi integration
 - Disconnect/Error Screen/Handler
-- Bomb man extension
-- Optimize cellSet performance
+- Right click menu on character
+  - Follow functionality
+- Ghost mode/jump
+- Fix race condition in Gateway connect/disconnect handler.
+- Optimize loading when multiple users are looking for spawn point or have a timer/queue when spawn points are full.
+- Renderer
+  - Smoother movement animation with transition
+  - Text layer for directions
 
-- maplib
-  - move game-state.mjs out
+
+In Progress
+===========
+
+- Chat (text) extension
+- Item/Inventory extension
+- Dialogs extension
+- Productionization
+- Bomb man extension
