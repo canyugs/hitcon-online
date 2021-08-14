@@ -32,9 +32,7 @@ async function mainServer() {
 
   /* Create services */
   const extensionManager = new ExtensionManager(null, null, null, null);
-  const gatewayAddresses = config?.publicAddresses?.gatewayService
-                            ? [config?.publicAddresses?.gatewayService]
-                            : Object.values(config.get('gatewayServers')).map(v => v.httpAddress)
+  const gatewayAddresses = [config.get('publicAddress')] ?? Object.values(config.get('gatewayServers')).map(v => v.httpAddress)
   const assetServer = new AssetServer(app, extensionManager, gatewayAddresses);
 
   /* Initialize static asset server */
