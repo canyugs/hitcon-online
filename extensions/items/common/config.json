@@ -4,26 +4,22 @@
         "facemask":
         {
             "baseClass": "clothing",
-            "imagePath":  "./items/clothing/facemask.jpg",
-            "layer": 0
+            "imagePath":  "./items/clothing/facemask.jpg"
         },
         "sunglasses":
         {
             "baseClass": "clothing",
-            "imagePath": "./items/clothing/sunglasses.jpg",
-            "layer": 0
+            "imagePath": "./items/clothing/sunglasses.jpg"
         },
         "room1Ticket":
         {
             "baseClass": "tickets",
-            "imagePath":  "./items/ticket/ticket.jpg",
-            "layer": 0
+            "imagePath":  "./items/ticket/ticket.jpg"
         },
         "room2Ticket":
         {
             "baseClass": "tickets",
-            "imagePath": "./items/ticket/ticket.jpg",
-            "layer": 0
+            "imagePath": "./items/ticket/ticket.jpg"
         }
     }
 }

@@ -9,6 +9,7 @@ class Tickets {
     this.show = false;
     this.exchangeable = true;
     this.usable = true;
+    this.droppable = true;
   }
 
   async getImage() {

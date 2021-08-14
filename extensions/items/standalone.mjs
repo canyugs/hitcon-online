@@ -6,6 +6,8 @@ import fs from 'fs';
 import path from 'path';
 import CellSet from '../../common/maplib/cellset.mjs';
 
+import CellSet from '../../common/maplib/cellset.mjs';
+
 /**
  * This represents the standalone extension service for this extension.
  */
@@ -26,6 +28,7 @@ class Standalone {
    *     url: string;
    *     show: boolean;
    *     exchangeable: boolean;
+   *     droppable: boolean;
    *     properties: {};
    *   }
    * }
@@ -34,9 +37,9 @@ class Standalone {
     this.helper = helper;
     this.itemInfo = {};
     this.itemInstances = {};
-    this.items = new Map();
-    this.droppedItemCell = new Map();
-    this.droppedItemInfo = new Map();
+    this.items = {};
+    this.droppedItemCell = {};
+    this.droppedItemInfo = {};
     this.droppedItemIndex = 0;
   }
 
@@ -66,31 +69,43 @@ class Standalone {
         layer: itemConfig[itemName].layer,
         show: item.show,
         exchangeable: item.exchangeable,
+        droppable: item.droppable,
         usable: item.usable
       };
       this.itemInstances[itemName] = item;
       index++;
+    }
 
-      /* Initialize cell set for each items */
-      for (const mapName of this.helper.gameMap.getOriginalCellSetStartWith('').keys()) { // Get all available maps.
-        const cellSet = new CellSet(
-          'droppedItem' + itemName.toUpperCase(),
-          4,
-          Array.from(this.droppedItemCell.values()),
-          {"item": this.itemInfo[itemName].layer},
-          true);
-        this.helper.gameMap.setDynamicCellSet(mapName, cellSet);
-      }
+    /* Load all stored data */
+    const storedData = this.helper.loadData();
+    this.items = storedData.items ?? {};
+    this.droppedItemInfo = storedData.droppedItemInfo ?? {};
+    this.droppedItemCell = storedData.droppedItemCell ?? {};
+    this.droppedItemIndex = storedData.droppedItemIndex ?? 0;
+
+    /* Changed to one cellset per world instead of one cellset per item per world */
+    /* The type of item dropped is stored in `this.droppedItemInfo` */
+    for (const mapName of this.helper.gameMap.getOriginalCellSetStartWith('').keys()) { // Get all available maps/worlds. Since there's no reason that one item may not exist in another world.
+      const cellSet = new CellSet(
+        'droppedItem' + mapName,
+        4,
+        Array.from(Object.values(this.droppedItemCell)),
+        { "item": 0 },
+        true);
+      this.helper.gameMap.setDynamicCellSet(mapName, cellSet);
     }
   }
 
   /**
-   * Client initialization. This function will set the basic information of a player's item to an empty object
-   * The below function should be called whenever a player starts a game session.
+   * This function packages all the data that need to be stored into a big object
+   * This function is usually called before `this.helper.storeData`
    */
-  async c2s_playerInit(player) {
-    if (!this.items.has(playerID)) {
-      this.items.set(playerID, {});
+  async _pack_stored_data() {
+    return {
+      items: this.items,
+      droppedItemCell: this.droppedItemCell,
+      droppedItemInfo: this.droppedItemInfo,
+      droppedItemIndex: this.droppedItemIndex
     }
   }
 
@@ -103,6 +118,7 @@ class Standalone {
    *     show: boolean;
    *     exchangeable: boolean;
    *     usable: boolean;
+   *     droppable: boolean;
    *     properties: {};
    *   }
    * }
@@ -122,11 +138,10 @@ class Standalone {
    */
   async c2s_getAllItems(playerID) {
     /* player has not registered yet */
-    if (!this.items.has(playerID)) {
-      console.error('Player not initialized');
-      return;
+    if (!(playerID in this.items)) {
+      this.items[playerID] = {};
     }
-    const itemObj = this.items.get(playerID);
+    const itemObj = this.items[playerID];
     return itemObj;
   }
 
@@ -141,11 +156,10 @@ class Standalone {
    */
   async c2s_getAllItems(playerID) {
     /* player has not registered yet */
-    if (!this.items.has(playerID)) {
-      console.error('Player not initialized');
-      return;
+    if (!(playerID in this.items)) {
+      this.items[playerID] = {};
     }
-    const itemObj = this.items.get(playerID);
+    const itemObj = this.items[playerID];
     return itemObj;
   }
 
@@ -158,13 +172,12 @@ class Standalone {
    */
   async c2s_getItem(playerID, itemName) {
     /* player has not registered yet */
-    if (!this.items.has(playerID)) {
-      console.error('Player not initialized');
-      return;
+    if (!(playerID in this.items)) {
+      this.items[playerID] = {};
     }
-    const itemObj = this.items.get(playerID);
+    const itemObj = this.items[playerID];
     if (!(itemName in itemObj)) {
-      console.log('No such item');
+      console.error('No such item');
       return;
     }
     return itemObj[itemName];
@@ -178,9 +191,11 @@ class Standalone {
    * amount: number;
    */
   async c2s_giveReceiveItem(playerID, toPlayerID, itemName, amount) {
-    if (!this.items.has(playerID) || !this.items.has(toPlayerID)) {
-      console.error('Player not initialized');
-      return;
+    if (!(playerID in this.items)) {
+      this.items[playerID] = {};
+    }
+    if (!(toPlayerID in this.items)) {
+      this.items[toPlayerID] = {};
     }
     if (!(itemName in this.itemInfo)) {
       console.log("Item does not exist");
@@ -191,20 +206,23 @@ class Standalone {
       return;
     }
 
-    const fromPlayerItem = this.items.get(playerID);
-    if (!(itemName in fromPlayerItem) || fromPlayerItem[itemName].amount < amount) {
-      console.log("Insufficient quantity");
+    const fromPlayerItem = this.items[playerID];
+    if (!itemName in fromPlayerItem || fromPlayerItem[itemName].amount < amount) {
+      console.error('Insufficient quantity');
       return;
     }
     fromPlayerItem[itemName].amount -= amount;
-    this.items.set(playerID, fromPlayerItem);
+    this.items[playerID] = fromPlayerItem;
 
     const toPlayerItem = this.items.get(toPlayerID);
     if (!(itemName in toPlayerItem)) {
       toPlayerItem[itemName] = {amount: 0};
     }
     toPlayerItem[itemName] += amount;
-    this.items.set(toPlayerID, toPlayerItem);
+    this.items[toPlayerID] = toPlayerItem;
+
+    /* Store data into file */
+    this.helper.storeData(this._pack_stored_data());
 
     /* Notify the client that a certain amount of items have been given */
     try {
@@ -221,9 +239,8 @@ class Standalone {
    * amount: number;
    */
   async c2s_useItem(playerID, itemName, amount) {
-    if (!this.items.has(playerID)) {
-      console.error('Player not initialized');
-      return;
+    if (!(playerID in this.items)) {
+      this.items[playerID] = {};
     }
     if (!(itemName in this.itemInfo) || !(itemName in this.itemInstances)) {
       console.log("Item does not exist");
@@ -234,15 +251,18 @@ class Standalone {
       return;
     }
 
-    const item = this.items.get(playerID);
+    const item = this.items[playerID];
     if (!(itemName in item) || item[itemName].amount < amount) {
-      console.log("Insufficient quantity");
+      console.error('Insufficient quantity');
       return;
     }
     item[itemName].amount -= amount;
-    this.items.set(playerID, fromPlayerItem);
+    this.items[playerID, fromPlayerItem];
 
     itemInstances[itemName].useItem(amount);
+
+    /* Store data into file */
+    this.helper.storeData(this._pack_stored_data());
 
     try {
       await this.helper.callS2cAPI('items', 'onUseItem', 5000, playerID, itemName, amount);
@@ -259,28 +279,72 @@ class Standalone {
    */
   async c2s_dropItem(playerID, mapCoord, facing, itemName) {
     /* player has not registered yet */
-    if (!this.items.has(playerID)) {
-      console.error('Player not initialized');
-      return;
+    if (!(playerID in this.items)) {
+      this.items[playerID] = {};
     }
 
-    /* update database */
-    let itemObj = this.items.get(playerID);
+    let itemObj = this.items[playerID];
     if (!(itemName in itemObj)) {
-      console.log('No such item');
+      console.error('No such item');
+      return;
+    }
+    if (!this.itemInfo[itemName].droppable) {
+      console.log("Item is not droppable");
       return;
     }
     itemObj[itemName].amount -= 1;
-    this.items.set(playerID, itemObj);
+    this.items[playerID, itemObj];
 
     /* update cell set */
-    /* TODO: calculate dropped coordinate. Currently, the dropped coordinate is the same as the player's map coordinate */
-    this.droppedItemCell.set(this.droppedItemIndex, {"x": mapCoord.x, "y": mapCoord.y, "w": 1, "h": 1});
-    this.droppedItemInfo.set(this.droppedItemIndex, itemName);
-    this.droppedItemIndex++;
-    for (const mapName of this.helper.gameMap.getOriginalCellSetStartWith('').keys()) { // Get all available maps.
-      this.gameMap.updateDynamicCellSet(mapName, 'droppedItem' + itemName.toUpperCase(), Array.from(this.droppedItemCell.values()));
+    const mapSize = this.gameMap.getMapSize(mapCoord.mapName);
+    let droopedItemCoord = {}
+    switch (facing) {
+      case 'U':
+        if (mapCoord.y === 0) {
+          droppedItemCoord.y = mapCoord.y + 1; // dropped back instead of front
+        }
+        else {
+          droppedItemCoord.y = mapCoord.y - 1;
+        }
+        droppedItemCoord.x = mapCoord.x;
+        break;
+      case 'D':
+        if (mapCoord.y === mapSize.y - 1) {
+          droppedItemCoord.y = mapCoord.y - 1; // dropped back instead of front
+        }
+        else {
+          droppedItemCoord.y = mapCoord.y + 1;
+        }
+        droppedItemCoord.x = mapCoord.x;
+        break;
+      case 'L':
+        if (mapCoord.x === 0) {
+          droppedItemCoord.x = mapCoord.x + 1; // dropped right instead of left
+        }
+        else {
+          droppedItemCoord.x = mapCoord.x - 1;
+        }
+        droppedItemCoord.y = mapCoord.y;
+        break;
+      case 'R':
+        if (mapCoord.x === mapSize - 1) {
+          droppedItemCoord.x = mapCoord.x - 1; // dropped left instead of right
+        }
+        else {
+          droppedItemCoord.x = mapCoord.x + 1;
+        }
+        droppedItemCoord.y = mapCoord.y;
+        break;
     }
+    this.droppedItemCell[this.droppedItemIndex] = { "x": droppedItemCoord.x, "y": droppedItemCoord.y, "w": 1, "h": 1 };
+    this.droppedItemInfo[this.droppedItemIndex] = itemName;
+    this.droppedItemIndex++;
+
+    /* Store data into file */
+    this.helper.storeData(this._pack_stored_data());
+
+    /* Update cell set */
+    this.gameMap.updateDynamicCellSet(mapCoord.mapName, 'droppedItem' + mapCoord.mapName, Array.from(Object.values(this.droppedItemCell)));
   }
 
   /**
@@ -291,29 +355,33 @@ class Standalone {
    */
   async c2s_pickupItem(playerID, mapCoord, droppedItemIndex) {
     /* player has not registered yet */
-    if (!this.items.has(playerID)) {
-      console.error('Player not initialized');
-      return;
+    if (!(playerID in this.items)) {
+      this.items[playerID] = {};
     }
-    const cell = this.droppedItemCell.get(droppedItemIndex);
+    const cell = this.droppedItemCell[droppedItemIndex];
     if (Math.abs(mapCoord.x - cell.x) > 1 || Math.abs(mapCoord.y - cell.y) > 1) {
       console.error('Player too far away from dropped item');
       return;
     }
     /* update amount */
-    let itemObj = this.items.get(playerID);
-    const itemName = this.droppedItemInfo.get(droppedItemIndex);
+    let itemObj = this.items[playerID];
+    const itemName = this.droppedItemInfo[droppedItemIndex];
+    if (!this.itemInfo[itemName].droppable) {
+      console.log("Item is not droppable");
+      return;
+    }
     itemObj[itemName].amount += 1;
-    this.items.set(playerID, itemObj);
+    this.items[playerID, itemObj];
 
     /* remove picked up item from cell */
-    this.droppedItemCell.delete(droppedItemIndex);
-    this.droppedItemInfo.delete(droppedItemIndex);
+    delete this.droppedItemCell[droppedItemIndex];
+    delete this.droppedItemInfo[droppedItemIndex];
 
-    /* update cell set */
-    for (const mapName of this.helper.gameMap.getOriginalCellSetStartWith('').keys()) { // Get all available maps.
-      this.gameMap.updateDynamicCellSet(mapName, 'droppedItem' + itemName.toUpperCase(), Array.from(this.droppedItemCell.values()));
-    }
+    /* Store data into file */
+    this.helper.storeData(this._pack_stored_data());
+
+    /* Update cell set */
+    this.gameMap.updateDynamicCellSet(mapCoord.mapName, 'droppedItem' + itemName.toUpperCase(), Array.from(Object.values(this.droppedItemCell)));
   }
 
   /**

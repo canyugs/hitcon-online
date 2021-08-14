@@ -11,6 +11,7 @@ class Clothing {
     this.show = true;
     this.exchangeable = false;
     this.usable = true;
+    this.droppable = true;
   }
 
   async getImage() {
