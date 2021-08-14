@@ -140,6 +140,33 @@ class MapRenderer {
   }
 
   /**
+   * Determine whether the target is inside the viewport.
+   * @param {string} mapName - The map the client using.
+   * @param {object} canvasCoord1 - The target's left-top coordinate (x, y) relative to canvas.
+   * @param {object} canvasCoord2 - The target's right-bottom coordinate (x, y) relative to canvas.
+   * @return {bool} isInside - return true if the target is inside the viewport.
+   */
+  insideViewport(mapName, canvasCoord1, canvasCoord2) {
+    if (this.gameClient.playerInfo.mapCoord.mapName != mapName) {
+      return false;
+    }
+    else if ((
+      canvasCoord1.x >= 0 &&
+      canvasCoord1.y >= 0 &&
+      canvasCoord1.x <= this.canvas.width && 
+      canvasCoord1.y <= this.canvas.height
+      ) || (
+      canvasCoord2.x >= 0 &&
+      canvasCoord2.y >= 0 &&
+      canvasCoord2.x <= this.canvas.width &&
+      canvasCoord2.y <= this.canvas.height)
+    ){
+      return true;
+    }
+    return false;
+  }
+
+  /**
    * Register a customized layer for drawing. Commonly used by extension.
    * Be careful with `renderArgs`. Due to the pass-by-reference of JavaScript, you may want to
    * pass a container of your render arguments as follows:
@@ -186,7 +213,11 @@ class MapRenderer {
     for (const [, layerName, renderFunction, renderArgs] of this.customizedLayers) {
       if (renderFunction === '_drawCharacters') {
         this._drawCharacters(renderArgs);
-      } else {
+      } 
+      else if (renderFunction === '_drawWatermark') {
+        this._drawWatermark(renderArgs);
+      }
+      else {
         this._drawEveryCellWrapper(this._drawLayer.bind(this, layerName));
       }
     }
@@ -289,6 +320,69 @@ class MapRenderer {
       this.ctx.fillText(displayName, canvasCoordinate.x, canvasCoordinate.y);
     }
     this.ctx.restore();
+  }
+
+  /**
+   * Draw objects as watermarks onto the canvas
+   * @param {watermarks} players - The watermarks to be drawn. Refer to extensions/guidepost for format.
+   */
+  _drawWatermark(watermarks){
+    watermarks.forEach(watermark => {
+      const canvasCoordinate = this.mapToCanvasCoordinate(watermark.mapCoord);
+      const topLeftCanvasCoord = {};
+      if (watermark.position === 1){
+        topLeftCanvasCoord.x = canvasCoordinate.x;
+        topLeftCanvasCoord.y = canvasCoordinate.y;
+      }
+      else if(watermark.position === 2){
+        topLeftCanvasCoord.x = canvasCoordinate.x - watermark.dWidth / 2;
+        topLeftCanvasCoord.y = canvasCoordinate.y;
+      }
+      else if(watermark.position === 3){
+        topLeftCanvasCoord.x = canvasCoordinate.x - watermark.dWidth;
+        topLeftCanvasCoord.y = canvasCoordinate.y;
+      }
+      else if(watermark.position === 4){
+        topLeftCanvasCoord.x = canvasCoordinate.x;
+        topLeftCanvasCoord.y = canvasCoordinate.y - watermark.dHeight / 2;
+      }
+      else if(watermark.position === 5){
+        topLeftCanvasCoord.x = canvasCoordinate.x - watermark.dWidth / 2;
+        topLeftCanvasCoord.y = canvasCoordinate.y - watermark.dHeight / 2;
+      }
+      else if(watermark.position === 6){
+        topLeftCanvasCoord.x = canvasCoordinate.x - watermark.dWidth;
+        topLeftCanvasCoord.y = canvasCoordinate.y - watermark.dHeight / 2;
+      }
+      else if(watermark.position === 7){
+        topLeftCanvasCoord.x = canvasCoordinate.x;
+        topLeftCanvasCoord.y = canvasCoordinate.y - watermark.dHeight;
+      }
+      else if(watermark.position === 8){
+        topLeftCanvasCoord.x = canvasCoordinate.x - watermark.dWidth / 2;
+        topLeftCanvasCoord.y = canvasCoordinate.y - watermark.dHeight;
+      }
+      else if(watermark.position === 9){
+        topLeftCanvasCoord.x = canvasCoordinate.x - watermark.dWidth;
+        topLeftCanvasCoord.y = canvasCoordinate.y - watermark.dHeight;
+      }
+
+      if (!this.insideViewport(watermark.mapCoord.mapName, topLeftCanvasCoord, {x: topLeftCanvasCoord.x + watermark.dWidth, y: topLeftCanvasCoord.y + watermark.dHeight})){
+        return;
+      }
+
+      this.ctx.drawImage(
+          watermark.image,
+          watermark.srcX,
+          watermark.srcY,
+          watermark.srcWidth,
+          watermark.srcHeight,
+          topLeftCanvasCoord.x,
+          topLeftCanvasCoord.y,
+          watermark.dWidth,
+          watermark.dHeight,
+      );
+    });
   }
 }
 
