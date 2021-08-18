@@ -16,7 +16,7 @@ class ChatOverlay extends Overlay {
   // implement onPre/PostShow/Hide() as needed.
 
   hasToolbarButton(){
-    //this.toolbarButtonSrc = './chat.svg';
+    this.toolbarButtonSrc = '/static/extensions/chat/chat.svg';
     return true;
   }
 };
@@ -41,7 +41,6 @@ class Client {
   async gameStart() {
     this.overlay = new ChatOverlay(this.helper.mainUI);
     this.overlay.show(OverlayPosition.RIGHT);
-    this.helper.mainUI.addToolbarButton(this.overlay);
   }
 
   send_msg(client) {
