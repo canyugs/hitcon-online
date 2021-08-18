@@ -6,14 +6,8 @@ import {createRequire} from 'module';
 const require = createRequire(import.meta.url);
 
 const express = require('express');
-const path = require('path');
 const config = require('config');
-const redis = require('redis');
-const {Server} = require('socket.io');
 const http = require('http');
-const argv = require('minimist')(process.argv.slice(2));
-
-import fs from 'fs';
 
 import AssetServer from './asset-server.mjs';
 import ExtensionManager from '../../common/extlib/extension-manager.mjs';
@@ -32,7 +26,9 @@ async function mainServer() {
 
   /* Create services */
   const extensionManager = new ExtensionManager(null, null, null, null);
-  const gatewayAddresses = [config.get('publicAddress')] ?? Object.values(config.get('gatewayServers')).map(v => v.httpAddress);
+  const gatewayAddresses = config.get('publicAddress') ?
+                          [config.get('publicAddress')] :
+                          Object.values(config.get('gatewayServers')).map((v) => v.httpAddress);
   const assetServer = new AssetServer(app, extensionManager, gatewayAddresses);
 
   /* Initialize static asset server */

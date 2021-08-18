@@ -1,8 +1,6 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
-import assert from 'assert';
-
 /**
  * This represents the in-gateway/in-area part of the extension.
  * One instance of InGateway will be created for each gateway service
@@ -16,7 +14,7 @@ class InGateway {
    * various functionalities of the extension.
    */
   constructor(helper) {
-    void helper;
+    this.helper = helper;
   }
 
   /**
@@ -24,6 +22,12 @@ class InGateway {
    * the extension.
    */
   async initialize() {
+    this.helper.registerOnLocation((loc) => {
+      console.log('in-gateway extension received: ', loc);
+    });
+    this.helper.registerOnCellSetBroadcast((cset) => {
+      console.log('in-gateway extension received: ', cset);
+    });
   }
 
   /**

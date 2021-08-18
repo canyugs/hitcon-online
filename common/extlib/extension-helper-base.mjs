@@ -16,6 +16,7 @@ class ExtensionHelperBase {
    * @constructor
    * @param {ExtensionManager} extMan - The extension manager.
    * @param {Directory} dir - An RPC Directory instance.
+   * @param {Handler} rpcHandler - An RPC Handler instance.
    * @param {AllAreaBroadcaster} broadcaster - A broadcaster for broadcasting
    * message.
    * @param {string} name - The name of the extension.
@@ -54,6 +55,25 @@ class ExtensionHelperBase {
     void [x, y, callback];
     assert.fail('Not supported, registerInteraction is only supported ' +
         'in derived class.');
+  }
+
+  /**
+   * Register an onLocation. If any player move, the callback will be called.
+   * @param {function} callback - The callback when any player moved,
+   * take a location object, see Gateway Service for doc.
+   */
+  registerOnLocation(callback) {
+    this.broadcaster.registerOnLocation(callback);
+  }
+
+  /**
+   * Register an onCellSetBroadcast. If any cellset is added/modified/removed,
+   * the callback will be called.
+   * @param {function} callback - The callback when cellset is changed, take a
+   * cell set object, see .
+   */
+  registerOnCellSetBroadcast(callback) {
+    this.broadcaster.registerOnCellSetBroadcast(callback);
   }
 
   /**
@@ -101,7 +121,8 @@ class ExtensionHelperBase {
    */
   async callS2cAPI(playerID, extensionName, methodName, timeout, ...args) {
     const playerService = await this.dir.getPlayerGatewayService(playerID);
-    const result = await this.rpcHandler.callRPC(playerService, 'callS2c', playerID, extensionName, methodName, timeout, args);
+    const result = await this.rpcHandler.callRPC(playerService, 'callS2c',
+        playerID, extensionName, methodName, timeout, args);
     return result;
   }
 
@@ -113,7 +134,8 @@ class ExtensionHelperBase {
    */
   async teleport(playerID, mapCoord, ...args) {
     const playerService = await this.dir.getPlayerGatewayService(playerID);
-    const result = await this.rpcHandler.callRPC(playerService, 'teleport', playerID, mapCoord, 'D');
+    const result = await this.rpcHandler.callRPC(playerService, 'teleport',
+        playerID, mapCoord, 'D');
     return result;
   }
 
@@ -135,7 +157,8 @@ class ExtensionHelperBase {
       console.error(`Service '${extName}' unavailable, got '${extService}'`);
       return {'error': 'Service unavailable'};
     }
-    const result = await this.rpcHandler.callRPC(extService, 'callS2s', this.name, methodName, args);
+    const result = await this.rpcHandler.callRPC(extService, 'callS2s',
+        this.name, methodName, args);
     return result;
   }
 
