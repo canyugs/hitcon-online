@@ -16,6 +16,9 @@ class Overlay {
     this.position = undefined;
     this.toolbarButton = undefined;
     this.toolbarButtonIconSrc = undefined;
+    this.positionCache = undefined;
+
+    mainUI.addToolbarButton(this);
   }
   
   /**
@@ -76,6 +79,7 @@ class Overlay {
   */
   onClickToolbarButton() {
     // WIP(fanlan1210)
+    console.assert(this.positionCache, 'positionCache does not have default value.');
     if (this.canHide() && this.position !== undefined) {
       this.positionCache = this.position; // store current position state
       this.hide();
