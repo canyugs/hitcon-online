@@ -7,7 +7,7 @@ cd docker
 docker-compose up -d
 ```
 
-Currently there are four containers, for `redis`, `nginx` (for reverse proxy and load balancing), `online` (main container for hitcon-online), and `setup` (for the generation of the nginx.conf file). The default config file for hitcon-online is `production.json`. Make sure that multiprocess mode is enabled and `publicAddress` is assigned.
+Currently there are three containers, for `redis`, `nginx` (for reverse proxy and load balancing), and `online` (main container for hitcon-online). The default config file for hitcon-online is `production.json`. Make sure that multiprocess mode is enabled and `publicAddress` is assigned.
 
 By default, only port 80 (from Nginx) is exposed to the host. One can access hitcon-online through `online.hitcon.org`. This is a temporary location, we might not use it in production.
 
