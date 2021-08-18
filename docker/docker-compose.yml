@@ -14,20 +14,13 @@ services:
   redis:
     image: redis
 
-  setup:
-    image: python:3.9.6-alpine
-    volumes:
-      - ../:/usr/src/myapp
-    working_dir: /usr/src/myapp/docker
-    command:  sh -c "python generate-nginx-conf.py"
-
   nginx:
     image: nginx:latest
     ports:
       - "80:80"
     volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ../:/myapp
+      - ./generate-nginx-conf.sh:/docker-entrypoint.d/10-generate-nginx-conf.sh
     depends_on:
-      - setup
       - online
       - redis
