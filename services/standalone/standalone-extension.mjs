@@ -40,6 +40,8 @@ async function standaloneExtensionServer() {
   const broadcaster = new AllAreaBroadcaster(rpcDirectory, gameMap, gameState);
   const extensionManager = new ExtensionManager(rpcDirectory, broadcaster, gameMap, null);
 
+  await broadcaster.initialize();
+
   if (!('ext' in argv)) {
     console.error('Please specify extension name via --ext argument.');
     process.exit();

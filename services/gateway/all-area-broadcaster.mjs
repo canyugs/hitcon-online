@@ -23,9 +23,10 @@ class AllAreaBroadcaster {
     this.gameMap = gameMap;
     this.gameStateChannel = AllAreaBroadcaster.gameStateChannel;
     this.gameState = gameState;
-    this.onLocation = () => {};
-    this.onExtensionBroadcast = () => {};
-    this.onCellSetBroadcast = () => {};
+
+    this.onLocationCallbacks = [];
+    this.onExtensionBroadcastCallbacks = [];
+    this.onCellSetBroadcastCallbacks = [];
 
     // GameState object for storing the game state/player location.
     // this.gameState = new GameState(gameMap);
@@ -94,7 +95,7 @@ class AllAreaBroadcaster {
    * message from redis.
    */
   registerOnLocation(callback) {
-    this.onLocation = callback;
+    this.onLocationCallbacks.push(callback);
   }
 
   /**
@@ -103,7 +104,7 @@ class AllAreaBroadcaster {
    * broadcast from redis.
    */
   registerOnExtensionBroadcast(callback) {
-    this.onExtensionBroadcast = callback;
+    this.onExtensionBroadcastCallbacks.push(callback);
   }
 
   /**
@@ -112,7 +113,37 @@ class AllAreaBroadcaster {
    * set modification broadcast from redis.
    */
   registerOnCellSetBroadcast(callback) {
-    this.onCellSetBroadcast = callback;
+    this.onCellSetBroadcastCallbacks.push(callback);
+  }
+
+  /**
+   * This is called when we've a location message from redis.
+   * @param {object} loc - The location object, see Gateway Service for doc.
+   */
+  onLocation(loc) {
+    for (const cb of this.onLocationCallbacks) {
+      cb(loc);
+    }
+  }
+
+  /**
+   * This is called when we've an extension broadcast from redis.
+   * @param {object} bc - The broadcast message.
+   */
+  onExtensionBroadcast(bc) {
+    for (const cb of this.onExtensionBroadcastCallbacks) {
+      cb(bc);
+    }
+  }
+
+  /**
+   * This is called when we've a cell set modification broadcast from redis.
+   * @param {object} cset - The cell set.
+   */
+  onCellSetBroadcast(cset) {
+    for (const cb of this.onCellSetBroadcastCallbacks) {
+      cb(cset);
+    }
   }
 
   /**
