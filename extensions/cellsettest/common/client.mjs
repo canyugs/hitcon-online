@@ -20,9 +20,9 @@ class Client {
     window.testCellSet = this.requestChangeCellset.bind(this);
   }
 
-  requestChangeCellset(client) {
-    console.log("requestChangeCellset", client);
-    client.helper.callStandaloneAPI('changeCellSet', null, 5000);
+  requestChangeCellset() {
+    console.log('requestChangeCellset');
+    this.helper.callC2sAPI('cellsettest', 'changeCellSet', null, 5000);
   }
 }
 
