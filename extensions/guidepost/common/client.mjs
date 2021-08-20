@@ -22,14 +22,32 @@ class Client {
    * Initialize the layer and send the guidepost data as a parameter from json file
    */
   async gameStart(){
-    const guideposts = game.assetData = await $.ajax({url: "/static/run/map/watermark/guideposts.json", type: "GET",});
+    const guideposts = await $.ajax({url: "/static/run/map/watermark/guideposts.json", type: "GET",});
+    const arr_promise = [];
+
     guideposts.forEach((guidepost, index, guideposts) => {
-      const image = new Image();
-      image.assetName = guidepost.assetName;
-      image.src = guidepost.src;
-      guideposts[index].image = image;  
+      arr_promise.push(new Promise((resolve, reject) => {
+        const image = new Image();
+        image.assetName = guidepost.assetName;
+        image.src = guidepost.src;
+        image.onload = resolve;
+        image.onerror = () => {
+          reject(`error on loading ${image.src}`);
+        }
+        guideposts[index].image = image;  
+      }));
     });
-    this.helper.mapRenderer.registerCustomizedLayerToDraw(LAYER_GUIDEPOST.zIndex, LAYER_GUIDEPOST.layerName, '_drawWatermark', guideposts);
+
+    await Promise.all(arr_promise).then(() => {
+      this.helper.mapRenderer.registerCustomizedLayerToDraw(
+        LAYER_GUIDEPOST.zIndex, 
+        LAYER_GUIDEPOST.layerName, 
+        '_drawWatermark', 
+        guideposts
+      );
+    }).catch((err_msg) => {
+      console.error(err_msg);
+    });
   }
 
   /**

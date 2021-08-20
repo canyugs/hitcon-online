@@ -12,8 +12,8 @@
     "mapCoord":{
       "mapName":"world1",
       "x":10,
-      "y":1
+      "y":4
     },
-    "position":1
+    "position":"topleft"
   }
 ]
