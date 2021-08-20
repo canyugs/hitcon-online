@@ -21,8 +21,8 @@ class Client {
   /**
    * Initialize the layer and send the guidepost data as a parameter from json file
    */
-  async gameStart(){
-    const guideposts = await $.ajax({url: "/static/run/map/watermark/guideposts.json", type: "GET",});
+  async gameStart() {
+    const guideposts = await $.ajax({url: "/static/run/map/watermark/guideposts.json", type: "GET"});
     const arr_promise = [];
 
     guideposts.forEach((guidepost, index, guideposts) => {
