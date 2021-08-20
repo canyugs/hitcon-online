@@ -142,36 +142,23 @@ class MapRenderer {
   /**
    * Determine whether the target is inside the viewport.
    * @param {string} mapName - The map the client using.
-   * @param {object} canvasCoord1 - The target's left-top coordinate (x, y) relative to canvas.
-   * @param {object} canvasCoord2 - The target's right-bottom coordinate (x, y) relative to canvas.
+   * @param {object} topleftCoord - The target's left-top coordinate (x, y) relative to canvas.
+   * @param {object} bottomrightCoord - The target's right-bottom coordinate (x, y) relative to canvas.
    * @return {bool} isInside - return true if the target is inside the viewport.
    */
-  insideViewport(mapName, canvasCoord1, canvasCoord2) {
-    if (this.gameClient.playerInfo.mapCoord.mapName != mapName) {
+  insideViewport(mapName, topleftCoord, bottomrightCoord) {
+    const [x1, y1] = [topleftCoord.x, topleftCoord.y];
+    const [x2, y2] = [bottomrightCoord.x, bottomrightCoord.y];
+    const {width: w, height: h} = this.canvas;
+
+    if (this.gameClient.playerInfo.mapCoord.mapName !== mapName) {
+      // check if the player is in the map
       return false;
-    }
-    else if ((
-      canvasCoord1.x >= 0 &&
-      canvasCoord1.y >= 0 &&
-      canvasCoord1.x <= this.canvas.width && 
-      canvasCoord1.y <= this.canvas.height
-      ) || (
-      canvasCoord2.x >= 0 &&
-      canvasCoord2.y >= 0 &&
-      canvasCoord2.x <= this.canvas.width &&
-      canvasCoord2.y <= this.canvas.height
-      ) || (
-      canvasCoord1.x >= 0 &&
-      canvasCoord2.y >= 0 &&
-      canvasCoord1.x <= this.canvas.width &&
-      canvasCoord2.y <= this.canvas.height
-      ) || (
-      canvasCoord2.x >= 0 &&
-      canvasCoord1.y >= 0 &&
-      canvasCoord2.x <= this.canvas.width &&
-      canvasCoord1.y <= this.canvas.height
-      )
-    ){
+    } else if ((x1 >= 0 && y1 >= 0 && x1 <= w && y1 <= h) || 
+               (x2 >= 0 && y2 >= 0 && x2 <= w && y2 <= h) || 
+               (x1 >= 0 && y2 >= 0 && x1 <= w && y2 <= h) || 
+               (x2 >= 0 && y1 >= 0 && x2 <= w && y1 <= h)){
+      // check if the target's position is in the player's viewport
       return true;
     }
     return false;
@@ -224,11 +211,9 @@ class MapRenderer {
     for (const [, layerName, renderFunction, renderArgs] of this.customizedLayers) {
       if (renderFunction === '_drawCharacters') {
         this._drawCharacters(renderArgs);
-      } 
-      else if (renderFunction === '_drawWatermark') {
+      } else if (renderFunction === '_drawWatermark') {
         this._drawWatermark(renderArgs);
-      }
-      else {
+      } else {
         this._drawEveryCellWrapper(this._drawLayer.bind(this, layerName));
       }
     }
@@ -340,45 +325,32 @@ class MapRenderer {
   _drawWatermark(watermarks){
     watermarks.forEach(watermark => {
       const canvasCoordinate = this.mapToCanvasCoordinate(watermark.mapCoord);
-      const topLeftCanvasCoord = {};
-      if (watermark.position === 1){
-        topLeftCanvasCoord.x = canvasCoordinate.x;
-        topLeftCanvasCoord.y = canvasCoordinate.y;
+      const topLeftCanvasCoord = Object.assign({}, canvasCoordinate); // copy
+      // adjust horizontal
+      switch (watermark.position) {
+        case 'topleft': case 'midleft': case 'bottomleft':
+          break;
+        case 'midtop': case 'center': case 'midbottom':
+          topLeftCanvasCoord.x -= watermark.dWidth / 2;
+          break;
+        case 'topright': case 'midright': case 'bottomright':
+          topLeftCanvasCoord.x -= watermark.dWidth;
+          break;
       }
-      else if(watermark.position === 2){
-        topLeftCanvasCoord.x = canvasCoordinate.x - watermark.dWidth / 2;
-        topLeftCanvasCoord.y = canvasCoordinate.y;
+      // adjust vertical
+      switch (watermark.position) {
+        case 'topleft': case 'midtop': case 'topright':
+          break;
+        case 'midleft': case 'center': case 'midright':
+          topLeftCanvasCoord.y -= watermark.dHeight / 2;
+          break;
+        case 'bottomleft': case 'midbottom': case 'bottomright':
+          topLeftCanvasCoord.y -= watermark.dHeight;
+          break;
       }
-      else if(watermark.position === 3){
-        topLeftCanvasCoord.x = canvasCoordinate.x - watermark.dWidth;
-        topLeftCanvasCoord.y = canvasCoordinate.y;
-      }
-      else if(watermark.position === 4){
-        topLeftCanvasCoord.x = canvasCoordinate.x;
-        topLeftCanvasCoord.y = canvasCoordinate.y - watermark.dHeight / 2;
-      }
-      else if(watermark.position === 5){
-        topLeftCanvasCoord.x = canvasCoordinate.x - watermark.dWidth / 2;
-        topLeftCanvasCoord.y = canvasCoordinate.y - watermark.dHeight / 2;
-      }
-      else if(watermark.position === 6){
-        topLeftCanvasCoord.x = canvasCoordinate.x - watermark.dWidth;
-        topLeftCanvasCoord.y = canvasCoordinate.y - watermark.dHeight / 2;
-      }
-      else if(watermark.position === 7){
-        topLeftCanvasCoord.x = canvasCoordinate.x;
-        topLeftCanvasCoord.y = canvasCoordinate.y - watermark.dHeight;
-      }
-      else if(watermark.position === 8){
-        topLeftCanvasCoord.x = canvasCoordinate.x - watermark.dWidth / 2;
-        topLeftCanvasCoord.y = canvasCoordinate.y - watermark.dHeight;
-      }
-      else if(watermark.position === 9){
-        topLeftCanvasCoord.x = canvasCoordinate.x - watermark.dWidth;
-        topLeftCanvasCoord.y = canvasCoordinate.y - watermark.dHeight;
-      }
-
-      if (!this.insideViewport(watermark.mapCoord.mapName, topLeftCanvasCoord, {x: topLeftCanvasCoord.x + watermark.dWidth, y: topLeftCanvasCoord.y + watermark.dHeight})){
+      
+      const rightBottomCanvasCoord = {x: topLeftCanvasCoord.x + watermark.dWidth, y: topLeftCanvasCoord.y + watermark.dHeight};
+      if (!this.insideViewport(watermark.mapCoord.mapName, topLeftCanvasCoord, rightBottomCanvasCoord)) {
         return;
       }
 
