@@ -1,5 +1,5 @@
 {
-  "name": "hitcon-online-guidepost",
+  "name": "hitcon-online-MapWatermark",
   "version": "0.0.1",
   "exports": {
     "standalone": "./standalone.mjs",

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 import {MapCoord} from '/static/common/maplib/map.mjs';
 
-const LAYER_GUIDEPOST = {zIndex: -10, layerName: "guidepost"};
+const LAYER_MAPWATERMARK = {zIndex: -10, layerName: "MapWatermark"};
 /**
  * This class is the browser/client side of an extension.
  * One instance is created for each connected player.
@@ -19,31 +19,31 @@ class Client {
   }
 
   /**
-   * Initialize the layer and send the guidepost data as a parameter from json file
+   * Initialize the layer and send the watermark data as a parameter from json file
    */
   async gameStart() {
-    const guideposts = await $.ajax({url: "/static/run/map/watermark/guideposts.json", type: "GET"});
+    const mapWatermarks = await $.ajax({url: "/static/run/map/watermark/MapWatermarks.json", type: "GET"});
     const arr_promise = [];
 
-    guideposts.forEach((guidepost, index, guideposts) => {
+    mapWatermarks.forEach((mapWatermark, index, mapWatermarks) => {
       arr_promise.push(new Promise((resolve, reject) => {
         const image = new Image();
-        image.assetName = guidepost.assetName;
-        image.src = guidepost.src;
+        image.assetName = mapWatermark.assetName;
+        image.src = mapWatermark.src;
         image.onload = resolve;
         image.onerror = () => {
           reject(`error on loading ${image.src}`);
         }
-        guideposts[index].image = image;  
+        mapWatermarks[index].image = image;  
       }));
     });
 
     await Promise.all(arr_promise).then(() => {
       this.helper.mapRenderer.registerCustomizedLayerToDraw(
-        LAYER_GUIDEPOST.zIndex, 
-        LAYER_GUIDEPOST.layerName, 
+        LAYER_MAPWATERMARK.zIndex, 
+        LAYER_MAPWATERMARK.layerName, 
         '_drawWatermark', 
-        guideposts
+        mapWatermarks
       );
     }).catch((err_msg) => {
       console.error(err_msg);
