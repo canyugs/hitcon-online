@@ -147,8 +147,8 @@ class MapRenderer {
    * @return {bool} isInside - return true if the target is inside the viewport.
    */
   insideViewport(mapName, topleftCoord, bottomrightCoord) {
-    const [x1, y1] = [topleftCoord.x, topleftCoord.y];
-    const [x2, y2] = [bottomrightCoord.x, bottomrightCoord.y];
+    const [x: x1, y: y1] = topleftCoord;
+    const [x: x2, y: y2] = bottomrightCoord;
     const {width: w, height: h} = this.canvas;
 
     if (this.gameClient.playerInfo.mapCoord.mapName !== mapName) {
@@ -320,51 +320,63 @@ class MapRenderer {
 
   /**
    * Draw objects as watermarks onto the canvas
-   * @param {watermarks} players - The watermarks to be drawn. Refer to extensions/guidepost for format.
+   * @param {watermarks} players - The watermarks to be drawn. Refer to extensions/MapWatermark for format.
    */
   _drawWatermark(watermarks) {
     watermarks.forEach(watermark => {
-      const canvasCoordinate = this.mapToCanvasCoordinate(watermark.mapCoord);
-      const topLeftCanvasCoord = Object.assign({}, canvasCoordinate); // copy
-      // adjust horizontal
-      switch (watermark.position) {
-        case 'topleft': case 'midleft': case 'bottomleft':
-          break;
-        case 'midtop': case 'center': case 'midbottom':
-          topLeftCanvasCoord.x -= watermark.dWidth / 2;
-          break;
-        case 'topright': case 'midright': case 'bottomright':
-          topLeftCanvasCoord.x -= watermark.dWidth;
-          break;
-      }
-      // adjust vertical
-      switch (watermark.position) {
-        case 'topleft': case 'midtop': case 'topright':
-          break;
-        case 'midleft': case 'center': case 'midright':
-          topLeftCanvasCoord.y -= watermark.dHeight / 2;
-          break;
-        case 'bottomleft': case 'midbottom': case 'bottomright':
-          topLeftCanvasCoord.y -= watermark.dHeight;
-          break;
-      }
-      
-      const rightBottomCanvasCoord = {x: topLeftCanvasCoord.x + watermark.dWidth, y: topLeftCanvasCoord.y + watermark.dHeight};
-      if (!this.insideViewport(watermark.mapCoord.mapName, topLeftCanvasCoord, rightBottomCanvasCoord)) {
-        return;
-      }
+      watermark.mapCoords.forEach(mapCoord => {
+        const canvasCoordinate = this.mapToCanvasCoordinate(mapCoord);
+        const topLeftCanvasCoord = Object.assign({}, canvasCoordinate);
 
-      this.ctx.drawImage(
-          watermark.image,
-          watermark.srcX,
-          watermark.srcY,
-          watermark.srcWidth,
-          watermark.srcHeight,
-          topLeftCanvasCoord.x,
-          topLeftCanvasCoord.y,
-          watermark.dWidth,
-          watermark.dHeight,
-      );
+        // adjust horizontal
+        switch (watermark.position) {
+          case 'topleft': case 'midleft': case 'bottomleft':
+            break;
+          case 'midtop': case 'center': case 'midbottom':
+            topLeftCanvasCoord.x -= watermark.dWidth / 2;
+            break;
+          case 'topright': case 'midright': case 'bottomright':
+            topLeftCanvasCoord.x -= watermark.dWidth;
+            break;
+        }
+        // adjust vertical
+        switch (watermark.position) {
+          case 'topleft': case 'midtop': case 'topright':
+            break;
+          case 'midleft': case 'center': case 'midright':
+            topLeftCanvasCoord.y -= watermark.dHeight / 2;
+            break;
+          case 'bottomleft': case 'midbottom': case 'bottomright':
+            topLeftCanvasCoord.y -= watermark.dHeight;
+            break;
+        }
+        
+        // Check the watermark is inside the player's viewport
+        const rightBottomCanvasCoord = {x: topLeftCanvasCoord.x + watermark.dWidth, y: topLeftCanvasCoord.y + watermark.dHeight};
+        if (!this.insideViewport(mapCoord.mapName, topLeftCanvasCoord, rightBottomCanvasCoord)) {
+          return;
+        }
+        
+        // if dWidth, dHeight undefined, then use sWidth, sHeight instead
+        if (!watermark.dWidth) {
+          watermark.dWidth = watermark.sWidth;
+        }
+        if (!watermark.dHeight) {
+          watermark.dHeight = watermark.sHeight;
+        }
+
+        this.ctx.drawImage(
+            watermark.image,
+            watermark.srcX,
+            watermark.srcY,
+            watermark.sWidth,
+            watermark.sHeight,
+            topLeftCanvasCoord.x,
+            topLeftCanvasCoord.y,
+            watermark.dWidth,
+            watermark.dHeight,
+        );
+      });
     });
   }
 }
