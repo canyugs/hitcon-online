@@ -14,7 +14,7 @@ const fork = require('child_process').fork;
 async function main() {
   /* start-all.mjs should only be used in multi-process mode */
   if (!config.get('multiprocess')) {
-    console.error("The start-all.mjs should only be used in multi-process mode.");
+    console.error('The start-all.mjs should only be used in multi-process mode.');
     return;
   }
 
@@ -22,7 +22,7 @@ async function main() {
   const redisClient = redis.createClient(config.get('redis.option'));
   redisClient.on('error', (err) => {
     console.error(err);
-    console.error("Can't connect to Redis, make sure that the connection info is correct.");
+    console.error('Can\'t connect to Redis, make sure that the connection info is correct.');
     process.exit();
   });
 
@@ -34,38 +34,37 @@ async function main() {
 
     const ext_addresses = config.get('ext.standalone');
     for (const ext in ext_addresses) {
-      await hmset("ServiceIndex", "ext_" + ext, ext_addresses[ext]);
+      await hmset('ServiceIndex', 'ext_' + ext, ext_addresses[ext]);
     }
 
     const servers = config.get('gatewayServers');
     for (const serverName in servers) {
-      await hmset("ServiceIndex", serverName, servers[serverName].grpcAddress);
+      await hmset('ServiceIndex', serverName, servers[serverName].grpcAddress);
     }
-
   } catch {
-    console.error("Failed to initialize Redis.");
+    console.error('Failed to initialize Redis.');
     process.exit();
-  };
+  }
 
   // Quit Redis connection since we no longer need it.
   // The child processes would create their own connections.
   redisClient.quit();
 
   /* Start asset server */
-  const assetServer = fork('../services/main/asset-server.mjs', {cwd: '.'});
+  const assetServer = fork('../services/assets/asset-server-launcher.mjs', {cwd: '.'});
 
   /* Start gateway service */
   const gatewayServers = {};
   const enabledGatewayServers = config.get('gatewayServers');
   for (const serverName in enabledGatewayServers) {
-    gatewayServers[serverName] = fork('../services/main/gateway-server.mjs', ['--service-name', serverName], {cwd: '.'});
+    gatewayServers[serverName] = fork('../services/gateway/gateway-server.mjs', ['--service-name', serverName], {cwd: '.'});
   }
 
   // Wait for all gateway services to start.
   const promises = Object.entries(gatewayServers).map((entry) => {
     const [name, server] = entry;
     return new Promise((resolve, reject) => {
-      server.on('message', msg => {
+      server.on('message', (msg) => {
         if (msg !== 'started') return;
         console.log(`${name} has started successfully.`);
         resolve(msg);
@@ -81,7 +80,6 @@ async function main() {
   const extServices = {};
   const enabledExtStandalone = config.get('ext.standalone');
   for (const ext in enabledExtStandalone) {
-    if (config.get('ext.enabled').includes(ext)) continue;
     extServices[ext] = fork('../services/standalone/standalone-extension.mjs', ['--ext', ext], {cwd: '.'});
   }
 
@@ -92,35 +90,45 @@ async function main() {
 
     try {
       assetServer.kill();
-    } catch {};
+    } catch {}
 
     for (const serverName in enabledGatewayServers) {
       try {
         gatewayServers[serverName].kill();
-      } catch {};
+      } catch {}
     }
 
     for (const ext in enabledExtStandalone) {
-      if (config.get('ext.enabled').includes(ext)) continue;
       try {
         extServices[ext].kill();
-      } catch {};
+      } catch {}
     }
 
     process.exit();
   };
 
-  assetServer.on('error', (err) => { handler('Asset service error.', err); });
-  assetServer.on('close', (err) => { handler('Asset service closed.', err); });
+  assetServer.on('error', (err) => {
+    handler('Asset service error.', err);
+  });
+  assetServer.on('close', (err) => {
+    handler('Asset service closed.', err);
+  });
 
   for (const serverName in enabledGatewayServers) {
-    gatewayServers[serverName].on('error', (err) => { handler(serverName + ' service error.', err); });
-    gatewayServers[serverName].on('close', (err) => { handler(serverName + ' service closed.', err); });
+    gatewayServers[serverName].on('error', (err) => {
+      handler(serverName + ' service error.', err);
+    });
+    gatewayServers[serverName].on('close', (err) => {
+      handler(serverName + ' service closed.', err);
+    });
   }
   for (const ext in enabledExtStandalone) {
-    if (config.get('ext.enabled').includes(ext)) continue;
-    extServices[ext].on('error', (err) => { handler(ext + ' service error.', err); });
-    extServices[ext].on('close', (err) => { handler(ext + ' service closed.', err); });
+    extServices[ext].on('error', (err) => {
+      handler(ext + ' service error.', err);
+    });
+    extServices[ext].on('close', (err) => {
+      handler(ext + ' service closed.', err);
+    });
   }
 }
 
