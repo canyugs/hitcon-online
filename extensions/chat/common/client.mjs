@@ -15,7 +15,7 @@ class ChatOverlay extends Overlay {
   // TODO(zeze-zeze): Expand on this class (jsdoc and implementation) and
   // implement onPre/PostShow/Hide() as needed.
 
-  hasToolbarButton(){
+  hasToolbarButton() {
     this.toolbarButtonSrc = '/static/extensions/chat/chat.svg';
     return true;
   }

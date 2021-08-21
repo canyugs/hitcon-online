@@ -83,8 +83,7 @@ class Overlay {
     if (this.canHide() && this.position !== undefined) {
       this.positionCache = this.position; // store current position state
       this.hide();
-    }
-    else this.show(this.positionCache); // resore position state
+    } else this.show(this.positionCache); // resore position state
   }
 
   /*
