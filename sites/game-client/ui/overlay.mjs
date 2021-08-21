@@ -52,7 +52,7 @@ class Overlay {
    *
    * @return {Boolean}
    */
-  hasToolbarbutton() {
+  hasToolbarButton() {
     // Fail safe default.
     return false;
   }
