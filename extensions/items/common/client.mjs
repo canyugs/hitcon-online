@@ -5,6 +5,18 @@
  * This class is the browser/client side of an extension.
  * One instance is created for each connected player.
  */
+
+import Modal from '/static/sites/game-client/ui/modal.mjs';
+
+const ITEM_DIV = 'item-modal';
+
+class ItemModal extends Modal {
+  constructor(mainUI) {
+    const dom = document.getElementById(ITEM_DIV);
+    super(mainUI, dom);
+  }
+}
+
 class Client {
   /**
    * this.itemInfo contains the general information of an item.
