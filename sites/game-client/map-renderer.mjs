@@ -147,8 +147,8 @@ class MapRenderer {
    * @return {bool} isInside - return true if the target is inside the viewport.
    */
   insideViewport(mapName, topleftCoord, bottomrightCoord) {
-    const [x: x1, y: y1] = topleftCoord;
-    const [x: x2, y: y2] = bottomrightCoord;
+    const {x: x1, y: y1} = topleftCoord;
+    const {x: x2, y: y2} = bottomrightCoord;
     const {width: w, height: h} = this.canvas;
 
     if (this.gameClient.playerInfo.mapCoord.mapName !== mapName) {
