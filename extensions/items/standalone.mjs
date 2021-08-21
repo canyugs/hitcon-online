@@ -6,8 +6,6 @@ import fs from 'fs';
 import path from 'path';
 import CellSet from '../../common/maplib/cellset.mjs';
 
-import CellSet from '../../common/maplib/cellset.mjs';
-
 /**
  * This represents the standalone extension service for this extension.
  */
@@ -100,7 +98,7 @@ class Standalone {
    * This function packages all the data that need to be stored into a big object
    * This function is usually called before `this.helper.storeData`
    */
-  async _pack_stored_data() {
+  _pack_stored_data() {
     return {
       items: this.items,
       droppedItemCell: this.droppedItemCell,
