@@ -146,19 +146,16 @@ class MapRenderer {
    * @param {object} bottomrightCoord - The target's right-bottom coordinate (x, y) relative to canvas.
    * @return {bool} isInside - return true if the target is inside the viewport.
    */
-  insideViewport(mapName, topleftCoord, bottomrightCoord) {
+  insideViewport(topleftCoord, bottomrightCoord) {
     const {x: x1, y: y1} = topleftCoord;
     const {x: x2, y: y2} = bottomrightCoord;
     const {width: w, height: h} = this.canvas;
 
-    if (this.gameClient.playerInfo.mapCoord.mapName !== mapName) {
-      // check if the player is in the map
-      return false;
-    } else if ((x1 >= 0 && y1 >= 0 && x1 <= w && y1 <= h) || 
-               (x2 >= 0 && y2 >= 0 && x2 <= w && y2 <= h) || 
-               (x1 >= 0 && y2 >= 0 && x1 <= w && y2 <= h) || 
-               (x2 >= 0 && y1 >= 0 && x2 <= w && y1 <= h)) {
-      // check if the target's position is in the player's viewport
+    // check if the target's position is in the player's viewport
+    if ((x1 >= 0 && y1 >= 0 && x1 <= w && y1 <= h) || 
+        (x2 >= 0 && y2 >= 0 && x2 <= w && y2 <= h) || 
+        (x1 >= 0 && y2 >= 0 && x1 <= w && y2 <= h) || 
+        (x2 >= 0 && y1 >= 0 && x2 <= w && y1 <= h)) {
       return true;
     }
     return false;
@@ -325,6 +322,11 @@ class MapRenderer {
   _drawWatermark(watermarks) {
     watermarks.forEach(watermark => {
       watermark.mapCoords.forEach(mapCoord => {
+        // Check the player is in the same map
+        if (this.gameClient.playerInfo.mapCoord.mapName !== mapCoord.mapName) {
+            return;
+        }
+
         const canvasCoordinate = this.mapToCanvasCoordinate(mapCoord);
         const topLeftCanvasCoord = Object.assign({}, canvasCoordinate);
 
@@ -353,7 +355,7 @@ class MapRenderer {
         
         // Check the watermark is inside the player's viewport
         const rightBottomCanvasCoord = {x: topLeftCanvasCoord.x + watermark.dWidth, y: topLeftCanvasCoord.y + watermark.dHeight};
-        if (!this.insideViewport(mapCoord.mapName, topLeftCanvasCoord, rightBottomCanvasCoord)) {
+        if (!this.insideViewport(topLeftCanvasCoord, rightBottomCanvasCoord)) {
           return;
         }
         
