@@ -282,7 +282,7 @@ class MapRenderer {
     this.ctx.font = fontStyle;
     this.ctx.textAlign = 'center';
     this.ctx.textBaseline = 'bottom';
-    for (const {mapCoord, displayName} of Object.values(players)) {
+    for (const {mapCoord, displayName} of players.values()) {
       const {x, y} = mapCoord;
       const canvasCoordinate = this.mapToCanvasCoordinate(new MapCoord(this.viewerPosition.mapName, x + 0.5, y + 1));
       // there is no need for out-of-canvas check
