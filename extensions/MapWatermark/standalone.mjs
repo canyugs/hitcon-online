@@ -1,8 +1,3 @@
-// Copyright 2021 HITCON Online Contributors
-// SPDX-License-Identifier: BSD-2-Clause
-
-import assert from 'assert';
-
 /**
  * This represents the standalone extension service for this extension.
  */
