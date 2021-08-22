@@ -120,7 +120,7 @@ class ClientExtensionManager {
     if (!typeof methodName === 'string') {
       return {'error': 'Expected methodName to be string'};
     }
-    if (!(extName in this.extNameList)) {
+    if (!this.extNameList.includes(extName)) {
       return {'error': 'Extension name not found'};
     }
     if (!typeof args === 'object' || !Array.isArray(args)) {
@@ -147,7 +147,7 @@ class ClientExtensionManager {
         "message": "Expected extName to be string"
       };
     }
-    if (!(extName in this.extNameList)) {
+    if (!this.extNameList.includes(extName)) {
       return {
         "status": "failed",
         "message": "Extension name not found"
