@@ -28,7 +28,8 @@ class ClientExtensionHelper {
     this.ext = ext;
     // Automatically registers all the s2c APIs.
     for (const propertyName of Object.getOwnPropertyNames(Object.getPrototypeOf(ext))) {
-      if (typeof ext[propertyName] === 'function' && propertyName.substr(0, S2C_RPC_FUNC_PREFIX.length) == S2C_RPC_FUNC_PREFIX) {
+      if (typeof ext[propertyName] === 'function'
+          && propertyName.substr(0, S2C_RPC_FUNC_PREFIX.length) == S2C_RPC_FUNC_PREFIX) {
         this.registerS2cAPI(propertyName.substr(S2C_RPC_FUNC_PREFIX.length), ext[propertyName]);
       }
     }
@@ -67,7 +68,7 @@ class ClientExtensionHelper {
     if (typeof extName != 'string' || extName == '') {
       extName = this.extName;
     }
-    const resultPromise = new Promise((resolve, reject) => {
+    const resultPromise = new Promise((resolve) => {
       // TODO: Fill in callArgs so gateway service knows how to handle it.
       const timeoutTimer = setTimeout(() => {
         resolve({error: 'timeout'});

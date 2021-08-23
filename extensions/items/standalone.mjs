@@ -83,12 +83,12 @@ class Standalone {
 
     /* Changed to one cellset per world instead of one cellset per item per world */
     /* The type of item dropped is stored in `this.droppedItemInfo` */
-    for (const mapName of this.helper.gameMap.getOriginalCellSetStartWith('').keys()) { // Get all available maps/worlds. Since there's no reason that one item may not exist in another world.
+    for (const mapName of this.helper.gameMap.getOriginalCellSetStartWith('').keys()) {
       const cellSet = new CellSet(
         'droppedItem' + mapName,
         4,
         Array.from(Object.values(this.droppedItemCell)),
-        { "item": 0 },
+        {"item": 0},
         true);
       this.helper.gameMap.setDynamicCellSet(mapName, cellSet);
     }
@@ -98,13 +98,13 @@ class Standalone {
    * This function packages all the data that need to be stored into a big object
    * This function is usually called before `this.helper.storeData`
    */
-  _pack_stored_data() {
+  PackStoredData() {
     return {
       items: this.items,
       droppedItemCell: this.droppedItemCell,
       droppedItemInfo: this.droppedItemInfo,
       droppedItemIndex: this.droppedItemIndex
-    }
+    };
   }
 
   /**
@@ -121,7 +121,7 @@ class Standalone {
    *   }
    * }
    */
-  async c2s_getItemInfo(playerID) {
+  async c2s_getItemInfo() {
     return this.itemInfo;
   }
 
@@ -134,12 +134,12 @@ class Standalone {
    *   }
    * }
    */
-  async c2s_getAllItems(playerID) {
+  async c2s_getAllItems(player) {
     /* player has not registered yet */
-    if (!(playerID in this.items)) {
-      this.items[playerID] = {};
+    if (!(player.playerID in this.items)) {
+      this.items[player.playerID] = {};
     }
-    const itemObj = this.items[playerID];
+    const itemObj = this.items[player.playerID];
     return itemObj;
   }
 
@@ -152,12 +152,12 @@ class Standalone {
    *   }
    * }
    */
-  async c2s_getAllItems(playerID) {
+  async c2s_getAllItems(player) {
     /* player has not registered yet */
-    if (!(playerID in this.items)) {
-      this.items[playerID] = {};
+    if (!(player.playerID in this.items)) {
+      this.items[player.playerID] = {};
     }
-    const itemObj = this.items[playerID];
+    const itemObj = this.items[player.playerID];
     return itemObj;
   }
 
@@ -168,12 +168,12 @@ class Standalone {
    *   amount: number;
    * }
    */
-  async c2s_getItem(playerID, itemName) {
+  async c2s_getItem(player, itemName) {
     /* player has not registered yet */
-    if (!(playerID in this.items)) {
-      this.items[playerID] = {};
+    if (!(player.playerID in this.items)) {
+      this.items[player.playerID] = {};
     }
-    const itemObj = this.items[playerID];
+    const itemObj = this.items[player.playerID];
     if (!(itemName in itemObj)) {
       console.error('No such item');
       return;
@@ -188,9 +188,9 @@ class Standalone {
    * itemName: string;
    * amount: number;
    */
-  async c2s_giveReceiveItem(playerID, toPlayerID, itemName, amount) {
-    if (!(playerID in this.items)) {
-      this.items[playerID] = {};
+  async c2s_giveReceiveItem(player, toPlayerID, itemName, amount) {
+    if (!(player.playerID in this.items)) {
+      this.items[player.playerID] = {};
     }
     if (!(toPlayerID in this.items)) {
       this.items[toPlayerID] = {};
@@ -204,13 +204,13 @@ class Standalone {
       return;
     }
 
-    const fromPlayerItem = this.items[playerID];
-    if (!itemName in fromPlayerItem || fromPlayerItem[itemName].amount < amount) {
+    const fromPlayerItem = this.items[player.playerID];
+    if (!(itemName in fromPlayerItem) || fromPlayerItem[itemName].amount < amount) {
       console.error('Insufficient quantity');
       return;
     }
     fromPlayerItem[itemName].amount -= amount;
-    this.items[playerID] = fromPlayerItem;
+    this.items[player.playerID] = fromPlayerItem;
 
     const toPlayerItem = this.items.get(toPlayerID);
     if (!(itemName in toPlayerItem)) {
@@ -220,11 +220,11 @@ class Standalone {
     this.items[toPlayerID] = toPlayerItem;
 
     /* Store data into file */
-    this.helper.storeData(this._pack_stored_data());
+    this.helper.storeData(this.PackStoredData());
 
     /* Notify the client that a certain amount of items have been given */
     try {
-      await this.helper.callS2cAPI('items', 'onReceiveItem', 5000, toPlayerID, playerID, itemName, amount);
+      await this.helper.callS2cAPI('items', 'onReceiveItem', 5000, toPlayerID, player.playerID, itemName, amount);
     } catch (e) {
       // ignore if recipient is offline
     }
@@ -236,9 +236,9 @@ class Standalone {
    * itemName: string;
    * amount: number;
    */
-  async c2s_useItem(playerID, itemName, amount) {
-    if (!(playerID in this.items)) {
-      this.items[playerID] = {};
+  async c2s_useItem(player, itemName, amount) {
+    if (!(player.playerID in this.items)) {
+      this.items[player.playerID] = {};
     }
     if (!(itemName in this.itemInfo) || !(itemName in this.itemInstances)) {
       console.log("Item does not exist");
@@ -249,21 +249,21 @@ class Standalone {
       return;
     }
 
-    const item = this.items[playerID];
+    const item = this.items[player.playerID];
     if (!(itemName in item) || item[itemName].amount < amount) {
       console.error('Insufficient quantity');
       return;
     }
     item[itemName].amount -= amount;
-    this.items[playerID, fromPlayerItem];
+    this.items[player.playerID, fromPlayerItem];
 
     itemInstances[itemName].useItem(amount);
 
     /* Store data into file */
-    this.helper.storeData(this._pack_stored_data());
+    this.helper.storeData(this.PackStoredData());
 
     try {
-      await this.helper.callS2cAPI('items', 'onUseItem', 5000, playerID, itemName, amount);
+      await this.helper.callS2cAPI('items', 'onUseItem', 5000, player.playerID, itemName, amount);
     } catch (e) {
       // ignore if player becomes offline for some reason
     }
@@ -275,13 +275,13 @@ class Standalone {
    * itemName: string;
    * amount: number;
    */
-  async c2s_dropItem(playerID, mapCoord, facing, itemName) {
+  async c2s_dropItem(player, mapCoord, facing, itemName) {
     /* player has not registered yet */
-    if (!(playerID in this.items)) {
-      this.items[playerID] = {};
+    if (!(player.playerID in this.items)) {
+      this.items[player.playerID] = {};
     }
 
-    let itemObj = this.items[playerID];
+    let itemObj = this.items[player.playerID];
     if (!(itemName in itemObj)) {
       console.error('No such item');
       return;
@@ -291,17 +291,16 @@ class Standalone {
       return;
     }
     itemObj[itemName].amount -= 1;
-    this.items[playerID, itemObj];
+    this.items[player.playerID, itemObj];
 
     /* update cell set */
     const mapSize = this.gameMap.getMapSize(mapCoord.mapName);
-    let droopedItemCoord = {}
+    let droppedItemCoord = {};
     switch (facing) {
       case 'U':
         if (mapCoord.y === 0) {
           droppedItemCoord.y = mapCoord.y + 1; // dropped back instead of front
-        }
-        else {
+        } else {
           droppedItemCoord.y = mapCoord.y - 1;
         }
         droppedItemCoord.x = mapCoord.x;
@@ -309,8 +308,7 @@ class Standalone {
       case 'D':
         if (mapCoord.y === mapSize.y - 1) {
           droppedItemCoord.y = mapCoord.y - 1; // dropped back instead of front
-        }
-        else {
+        } else {
           droppedItemCoord.y = mapCoord.y + 1;
         }
         droppedItemCoord.x = mapCoord.x;
@@ -318,8 +316,7 @@ class Standalone {
       case 'L':
         if (mapCoord.x === 0) {
           droppedItemCoord.x = mapCoord.x + 1; // dropped right instead of left
-        }
-        else {
+        } else {
           droppedItemCoord.x = mapCoord.x - 1;
         }
         droppedItemCoord.y = mapCoord.y;
@@ -327,22 +324,23 @@ class Standalone {
       case 'R':
         if (mapCoord.x === mapSize - 1) {
           droppedItemCoord.x = mapCoord.x - 1; // dropped left instead of right
-        }
-        else {
+        } else {
           droppedItemCoord.x = mapCoord.x + 1;
         }
         droppedItemCoord.y = mapCoord.y;
         break;
     }
-    this.droppedItemCell[this.droppedItemIndex] = { "x": droppedItemCoord.x, "y": droppedItemCoord.y, "w": 1, "h": 1 };
+    this.droppedItemCell[this.droppedItemIndex] = {"x": droppedItemCoord.x, "y": droppedItemCoord.y, "w": 1, "h": 1};
     this.droppedItemInfo[this.droppedItemIndex] = itemName;
     this.droppedItemIndex++;
 
     /* Store data into file */
-    this.helper.storeData(this._pack_stored_data());
+    this.helper.storeData(this.PackStoredData());
 
     /* Update cell set */
-    this.gameMap.updateDynamicCellSet(mapCoord.mapName, 'droppedItem' + mapCoord.mapName, Array.from(Object.values(this.droppedItemCell)));
+    this.gameMap.updateDynamicCellSet(mapCoord.mapName,
+        'droppedItem' + mapCoord.mapName,
+        Array.from(Object.values(this.droppedItemCell)));
   }
 
   /**
@@ -351,10 +349,10 @@ class Standalone {
    * itemName: string;
    * amount: number;
    */
-  async c2s_pickupItem(playerID, mapCoord, droppedItemIndex) {
+  async c2s_pickupItem(player, mapCoord, droppedItemIndex) {
     /* player has not registered yet */
-    if (!(playerID in this.items)) {
-      this.items[playerID] = {};
+    if (!(player.playerID in this.items)) {
+      this.items[player.playerID] = {};
     }
     const cell = this.droppedItemCell[droppedItemIndex];
     if (Math.abs(mapCoord.x - cell.x) > 1 || Math.abs(mapCoord.y - cell.y) > 1) {
@@ -362,24 +360,26 @@ class Standalone {
       return;
     }
     /* update amount */
-    let itemObj = this.items[playerID];
+    let itemObj = this.items[player.playerID];
     const itemName = this.droppedItemInfo[droppedItemIndex];
     if (!this.itemInfo[itemName].droppable) {
       console.log("Item is not droppable");
       return;
     }
     itemObj[itemName].amount += 1;
-    this.items[playerID, itemObj];
+    this.items[player.playerID, itemObj];
 
     /* remove picked up item from cell */
     delete this.droppedItemCell[droppedItemIndex];
     delete this.droppedItemInfo[droppedItemIndex];
 
     /* Store data into file */
-    this.helper.storeData(this._pack_stored_data());
+    this.helper.storeData(this.PackStoredData());
 
     /* Update cell set */
-    this.gameMap.updateDynamicCellSet(mapCoord.mapName, 'droppedItem' + itemName.toUpperCase(), Array.from(Object.values(this.droppedItemCell)));
+    this.gameMap.updateDynamicCellSet(mapCoord.mapName,
+        'droppedItem' + itemName.toUpperCase(),
+        Array.from(Object.values(this.droppedItemCell)));
   }
 
   /**
