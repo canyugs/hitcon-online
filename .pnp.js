@@ -27,6 +27,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         "reference": "workspace:common/extlib"
       },
       {
+        "name": "hitcon-online-gamelib",
+        "reference": "workspace:common/gamelib"
+      },
+      {
         "name": "hitcon-online-maplib",
         "reference": "workspace:common/maplib"
       },
@@ -104,6 +108,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
       ["hitcon-online-dialog", ["workspace:extensions/dialog"]],
       ["hitcon-online-extlib", ["workspace:common/extlib"]],
       ["hitcon-online-game-client", ["workspace:sites/game-client"]],
+      ["hitcon-online-gamelib", ["workspace:common/gamelib"]],
       ["hitcon-online-gateway", ["workspace:services/gateway"]],
       ["hitcon-online-helloworld", ["workspace:extensions/helloworld"]],
       ["hitcon-online-items", ["workspace:extensions/items"]],
@@ -2025,6 +2030,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./sites/game-client/",
           "packageDependencies": [
             ["hitcon-online-game-client", "workspace:sites/game-client"]
+          ],
+          "linkType": "SOFT",
+        }]
+      ]],
+      ["hitcon-online-gamelib", [
+        ["workspace:common/gamelib", {
+          "packageLocation": "./common/gamelib/",
+          "packageDependencies": [
+            ["hitcon-online-gamelib", "workspace:common/gamelib"]
           ],
           "linkType": "SOFT",
         }]

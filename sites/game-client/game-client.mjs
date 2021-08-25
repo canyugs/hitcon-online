@@ -1,6 +1,7 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
+import Player from '/static/common/gamelib/player.mjs';
 import {MapCoord} from '/static/common/maplib/map.mjs';
 
 /**
@@ -26,7 +27,7 @@ class GameClient {
     this.extMan = extMan;
     this.gameStarted = false;
     // playerInfo stores information regarding the current player.
-    this.playerInfo = {};
+    this.playerInfo = undefined;
     // This function is called if server disconnects us or if any fatal
     // error occurs.
     this.disconnectCallback = undefined;
@@ -92,13 +93,7 @@ class GameClient {
       console.error('Duplicate game start event.');
       return;
     }
-    const pi = this.playerInfo;
-    pi.playerID = msg.playerData.playerID;
-    pi.displayName = msg.playerData.displayName;
-    pi.displayChar = msg.playerData.displayChar;
-    const p = this.gameState.getPlayer(pi.playerID);
-    pi.mapCoord = MapCoord.fromObject(p.mapCoord);
-    pi.facing = p.facing;
+    this.playerInfo = Player.fromObject(msg.playerData);
     console.log('Game started.');
 
     this.gameStarted = true;

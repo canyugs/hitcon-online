@@ -1523,6 +1523,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"hitcon-online-gamelib@workspace:common/gamelib":
+  version: 0.0.0-use.local
+  resolution: "hitcon-online-gamelib@workspace:common/gamelib"
+  languageName: unknown
+  linkType: soft
+
 "hitcon-online-gateway@workspace:services/gateway":
   version: 0.0.0-use.local
   resolution: "hitcon-online-gateway@workspace:services/gateway"

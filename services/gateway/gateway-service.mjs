@@ -185,27 +185,27 @@ class GatewayService {
     }
 
     // Synchronize the state.
-    const firstLocation = {playerID: playerID,
-      displayName: socket.playerData.displayName};
-    firstLocation.mapCoord = socket.playerData.mapCoord;
-    // TODO: if the user existed before, remember their locations.
+    let initLoc = socket.playerData.mapCoord ?? this.gameMap.getRandomSpawnPointNoStarvation();
     while (true) {
-      firstLocation.mapCoord = this.gameMap.getRandomSpawnPointNoStarvation();
-      if (await this._occupyCoord(firstLocation.mapCoord, playerID)) break;
+      if (await this._occupyCoord(initLoc, playerID)) break;
+      initLoc = this.gameMap.getRandomSpawnPointNoStarvation();
     }
-    firstLocation.facing = 'D';
-    firstLocation.displayChar = socket.playerData.displayChar;
+    socket.playerData.mapCoord = initLoc;
     socket.playerData.lastMovingTime = Date.now();
+    const firstLocation = {
+      playerID,
+      displayName: socket.playerData.displayName,
+      displayChar: socket.playerData.displayChar,
+      mapCoord: socket.playerData.mapCoord,
+      facing: socket.playerData.facing,
+      lastMovingTime: socket.playerData.lastMovingTime,
+    };
 
     await this._broadcastUserLocation(firstLocation);
     this.broadcaster.sendStateTransfer(socket);
 
     // Emit the gameStart event.
-    let startPack = {};
-    startPack.playerData = {};
-    for (const k of ['playerID', 'displayName', 'displayChar']) {
-      startPack.playerData[k] = socket.playerData[k];
-    }
+    const startPack = {playerData: socket.playerData};
     socket.emit('gameStart', startPack);
   }
 
