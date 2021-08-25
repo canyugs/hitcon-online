@@ -1,0 +1,37 @@
+{
+	"enabled": true,
+	"initialPosition": {"mapName": "world1", "x": 5, "y": 15},
+  "display": {
+
+  },
+  "FSM": {
+    "initialState": "s1",
+    "states": {
+      "s1": {
+        "func": "showDialog",
+        "kwargs": {
+          "dialogs": "Hello!\nNice to meet you!",
+          "options": {
+            "How are you?": "s2",
+            "Bye!": "s3"
+          }
+        }
+      },
+      "s2": {
+        "func": "showDialog",
+        "kwargs": {
+          "dialogs": "I'm fine thank you!",
+          "options": {
+            "Bye!": "s3"
+          }
+        }
+      },
+      "s3": {
+        "func": "exit",
+        "kwargs": {
+          "next": "s1"
+        }
+      }
+    }
+  }
+}
