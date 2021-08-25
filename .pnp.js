@@ -31,6 +31,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         "reference": "workspace:common/gamelib"
       },
       {
+        "name": "hitcon-online-interactive-object",
+        "reference": "workspace:common/interactive-object"
+      },
+      {
         "name": "hitcon-online-maplib",
         "reference": "workspace:common/maplib"
       },
@@ -75,6 +79,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         "reference": "workspace:extensions/jitsi"
       },
       {
+        "name": "hitcon-online-npc",
+        "reference": "workspace:extensions/npc"
+      },
+      {
         "name": "hitcon-online-playerlist",
         "reference": "workspace:extensions/playerlist"
       },
@@ -115,10 +123,12 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
       ["hitcon-online-gamelib", ["workspace:common/gamelib"]],
       ["hitcon-online-gateway", ["workspace:services/gateway"]],
       ["hitcon-online-helloworld", ["workspace:extensions/helloworld"]],
+      ["hitcon-online-interactive-object", ["workspace:common/interactive-object"]],
       ["hitcon-online-items", ["workspace:extensions/items"]],
       ["hitcon-online-jitsi", ["workspace:extensions/jitsi"]],
       ["hitcon-online-main-server", ["workspace:services/main"]],
       ["hitcon-online-maplib", ["workspace:common/maplib"]],
+      ["hitcon-online-npc", ["workspace:extensions/npc"]],
       ["hitcon-online-playerlist", ["workspace:extensions/playerlist"]],
       ["hitcon-online-rpc-directory", ["workspace:common/rpc-directory"]],
       ["hitcon-online-standalone-server", ["workspace:services/standalone"]]
@@ -2073,6 +2083,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "SOFT",
         }]
       ]],
+      ["hitcon-online-interactive-object", [
+        ["workspace:common/interactive-object", {
+          "packageLocation": "./common/interactive-object/",
+          "packageDependencies": [
+            ["hitcon-online-interactive-object", "workspace:common/interactive-object"]
+          ],
+          "linkType": "SOFT",
+        }]
+      ]],
       ["hitcon-online-items", [
         ["workspace:extensions/items", {
           "packageLocation": "./extensions/items/",
@@ -2112,6 +2131,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./common/maplib/",
           "packageDependencies": [
             ["hitcon-online-maplib", "workspace:common/maplib"]
+          ],
+          "linkType": "SOFT",
+        }]
+      ]],
+      ["hitcon-online-npc", [
+        ["workspace:extensions/npc", {
+          "packageLocation": "./extensions/npc/",
+          "packageDependencies": [
+            ["hitcon-online-npc", "workspace:extensions/npc"]
           ],
           "linkType": "SOFT",
         }]
