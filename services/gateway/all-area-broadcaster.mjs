@@ -1,7 +1,7 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
-import GameState from '../../common/maplib/game-state.mjs';
+import GameState from '../../common/gamelib/game-state.mjs';
 
 /**
  * AllAreaBroadcaster is in charge of broadcasting all player location and
