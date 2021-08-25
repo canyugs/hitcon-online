@@ -77,11 +77,12 @@ class Client {
 
   /**
    * Called when our location changes.
+   * @param {PlayerSyncMessage} msg - The update message.
    */
-  onSelfLocationUpdated(loc) {
+  onSelfPlayerUpdate(msg) {
     const map = this.helper.getMap();
     if (typeof map === 'object') {
-      let m = map.getCell(loc.mapCoord, 'jitsi');
+      let m = map.getCell(msg.mapCoord, 'jitsi');
       this.updateMeeting(m);
     }
   }

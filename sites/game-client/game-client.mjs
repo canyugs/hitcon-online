@@ -1,7 +1,7 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
-import Player from '/static/common/gamelib/player.mjs';
+import {Player, PlayerSyncMessage} from '/static/common/gamelib/player.mjs';
 import {MapCoord} from '/static/common/maplib/map.mjs';
 
 /**
@@ -65,8 +65,8 @@ class GameClient {
         this.gameState.acceptStateTransfer(msg);
         console.debug('State transfer done!');
       });
-      socket.on('location', (msg) => {
-        this.gameState.onLocation(msg);
+      socket.on('playerUpdate', (msg) => {
+        this.gameState.onPlayerUpdate(PlayerSyncMessage.fromObject(msg));
       });
       socket.on('extBC', (msg) => {
         // Note: The method below is async but we ignore its promise.
@@ -97,12 +97,11 @@ class GameClient {
     console.log('Game started.');
 
     this.gameStarted = true;
-    this.gameState.registerPlayerLocationChange((loc) => {
-      if (loc.playerID == this.playerInfo.playerID) {
-        this.playerInfo.mapCoord = MapCoord.fromObject(loc.mapCoord);
-        this.playerInfo.facing = loc.facing;
+    this.gameState.registerOnPlayerUpdate((msg) => {
+      if (msg.playerID === this.playerInfo.playerID) {
+        this.playerInfo.updateFromMessage(msg);
         // Notify the extensions as well.
-        this.extMan.notifySelfLocationUpdate(loc);
+        this.extMan.notifySelfPlayerUpdate(msg);
       }
     });
 
@@ -138,10 +137,12 @@ class GameClient {
    * @param {string} facing
    */
   async moveTo(x, y, facing) {
-    this.socket.emit('location', {
+    const msg = PlayerSyncMessage.fromObject({
+      playerID: this.playerInfo.playerID,
       mapCoord: new MapCoord(this.playerInfo.mapCoord.mapName, x, y),
       facing: facing,
     });
+    this.socket.emit('playerUpdate', msg);
   }
 
   /**

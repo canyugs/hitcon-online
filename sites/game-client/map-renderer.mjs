@@ -43,10 +43,10 @@ class MapRenderer {
      */
     this.viewerPosition = new MapCoord('', NaN, NaN);
     this.viewportFollow = null; // will be initialized in this.initializeViewerPosition()
-    this.gameState.registerPlayerLocationChange((loc) => {
-      if (this.viewportFollow === loc.playerID) {
+    this.gameState.registerOnPlayerUpdate((msg) => {
+      if (this.viewportFollow === msg.playerID) {
         // TODO: smoothly update viewer position
-        this.setViewerPosition(loc.mapCoord, 0.5, 0.5);
+        this.setViewerPosition(msg.mapCoord, 0.5, 0.5);
       }
     });
 
@@ -141,7 +141,6 @@ class MapRenderer {
 
   /**
    * Determine whether the target is inside the viewport.
-   * @param {string} mapName - The map the client using.
    * @param {object} topleftCoord - The target's left-top coordinate (x, y) relative to canvas.
    * @param {object} bottomrightCoord - The target's right-bottom coordinate (x, y) relative to canvas.
    * @return {bool} isInside - return true if the target is inside the viewport.
@@ -152,9 +151,9 @@ class MapRenderer {
     const {width: w, height: h} = this.canvas;
 
     // check if the target's position is in the player's viewport
-    if ((x1 >= 0 && y1 >= 0 && x1 <= w && y1 <= h) || 
-        (x2 >= 0 && y2 >= 0 && x2 <= w && y2 <= h) || 
-        (x1 >= 0 && y2 >= 0 && x1 <= w && y2 <= h) || 
+    if ((x1 >= 0 && y1 >= 0 && x1 <= w && y1 <= h) ||
+        (x2 >= 0 && y2 >= 0 && x2 <= w && y2 <= h) ||
+        (x1 >= 0 && y2 >= 0 && x1 <= w && y2 <= h) ||
         (x2 >= 0 && y1 >= 0 && x2 <= w && y1 <= h)) {
       return true;
     }
@@ -352,13 +351,13 @@ class MapRenderer {
             topLeftCanvasCoord.y -= watermark.dHeight;
             break;
         }
-        
+
         // Check the watermark is inside the player's viewport
         const rightBottomCanvasCoord = {x: topLeftCanvasCoord.x + watermark.dWidth, y: topLeftCanvasCoord.y + watermark.dHeight};
         if (!this.insideViewport(topLeftCanvasCoord, rightBottomCanvasCoord)) {
           return;
         }
-        
+
         // if dWidth, dHeight undefined, then use sWidth, sHeight instead
         if (!watermark.dWidth) {
           watermark.dWidth = watermark.sWidth;

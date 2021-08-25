@@ -1,7 +1,7 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
-import GameState from '../../common/gamelib/game-state.mjs';
+import {PlayerSyncMessage} from '../../common/gamelib/player.mjs';
 
 /**
  * AllAreaBroadcaster is in charge of broadcasting all player location and
@@ -24,7 +24,7 @@ class AllAreaBroadcaster {
     this.gameStateChannel = AllAreaBroadcaster.gameStateChannel;
     this.gameState = gameState;
 
-    this.onLocationCallbacks = [];
+    this.onPlayerUpdateCallbacks = [];
     this.onExtensionBroadcastCallbacks = [];
     this.onCellSetBroadcastCallbacks = [];
 
@@ -42,9 +42,10 @@ class AllAreaBroadcaster {
         if (typeof message === 'string') {
           obj = JSON.parse(message);
         }
-        if (obj.type == 'loc') {
-          this.gameState.onLocation(obj.msg);
-          this.onLocation(obj.msg);
+        if (obj.type === 'playerUpdate') {
+          const msg = PlayerSyncMessage.fromObject(obj.msg);
+          this.gameState.onPlayerUpdate(msg);
+          this.onPlayerUpdate(msg);
         } else if (obj.type == 'extBC') {
           this.onExtensionBroadcast(obj.msg);
         } else if (obj.type == 'cellSet') {
@@ -57,14 +58,13 @@ class AllAreaBroadcaster {
   }
 
   /**
-   * Call this to notify player location change. This will send data to redis.
-   * @param {object} loc - The location object, see Gateway Service for doc.
+   * Call this to notify player update. This will send data to redis.
+   * @param {PlayerSyncMessage} msg - The update message.
    */
-  async notifyPlayerLocationChange(loc) {
-    this.gameState.onLocation(loc);
-    let msg = {type: 'loc', msg: loc};
+  async notifyPlayerUpdate(msg) {
+    this.gameState.onPlayerUpdate(msg);
     await this.dir.getRedis().publishAsync(this.gameStateChannel,
-        JSON.stringify(msg));
+        JSON.stringify({type: 'playerUpdate', msg: msg}));
   }
 
   /**
@@ -90,12 +90,11 @@ class AllAreaBroadcaster {
   }
 
   /**
-   * Register onLocation function.
-   * @param {Function} callback - This is called when we've a location
-   * message from redis.
+   * Register onPlayerUpdate function.
+   * @param {Function} callback - This is called when we receives a playerUpdate from redis.
    */
-  registerOnLocation(callback) {
-    this.onLocationCallbacks.push(callback);
+  registerOnPlayerUpdate(callback) {
+    this.onPlayerUpdateCallbacks.push(callback);
   }
 
   /**
@@ -117,12 +116,12 @@ class AllAreaBroadcaster {
   }
 
   /**
-   * This is called when we've a location message from redis.
-   * @param {object} loc - The location object, see Gateway Service for doc.
+   * This is called when we receive a playerUpdate from redis.
+   * @param {PlayerSyncMessage} msg - The update message.
    */
-  onLocation(loc) {
-    for (const cb of this.onLocationCallbacks) {
-      cb(loc);
+  onPlayerUpdate(msg) {
+    for (const cb of this.onPlayerUpdateCallbacks) {
+      cb(msg);
     }
   }
 

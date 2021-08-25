@@ -168,10 +168,10 @@ class ClientExtensionManager {
    * This is called when we received an update of our own position from the
    * server.
    */
-  async notifySelfLocationUpdate(loc) {
+  async notifySelfPlayerUpdate(msg) {
     for (const name in this.extObjects) {
-      if (typeof this.extObjects[name].onSelfLocationUpdated === 'function') {
-        this.extObjects[name].onSelfLocationUpdated(loc);
+      if (typeof this.extObjects[name].onSelfPlayerUpdate === 'function') {
+        this.extObjects[name].onSelfPlayerUpdate(msg);
       }
     }
   }
