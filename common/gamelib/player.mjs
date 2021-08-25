@@ -35,17 +35,31 @@ class Player {
   }
 
   /**
+   * Update the player data from the message.
+   * @param {PlayerSyncMessage} msg - The message.
+   * @return {Boolean} - Whether the update succeeds or not.
+   */
+  updateFromMessage(msg) {
+    if (msg.playerID !== this.playerID) {
+      return false;
+    }
+    // TODO: check whether msg is in the correct format
+    if (msg.mapCoord !== undefined) this.mapCoord = msg.mapCoord;
+    if (msg.facing !== undefined) this.facing = msg.facing;
+    if (msg.displayName !== undefined) this.displayName = msg.displayName;
+    if (msg.displayChar !== undefined) this.displayChar = msg.displayChar;
+    if (msg.removed !== undefined) this.removed = msg.removed;
+    return true;
+  }
+
+  /**
    * The serialization used by JSON.stringify().
    * @return {Object}
    */
   toJSON() {
     const ret = {};
     for (const key of this.ATTRIBUTES) {
-      if (typeof this[key].toJSON === 'function') {
-        ret[key] = this[key].toJSON();
-      } else {
-        ret[key] = this[key];
-      }
+      ret[key] = this[key];
     }
     return ret;
   }
@@ -110,4 +124,58 @@ class Player {
   }
 }
 
+/**
+ * The message between client and server to synchronize player's status.
+ */
+class PlayerSyncMessage {
+  constructor(playerID, mapCoord, facing, displayName, displayChar, removed) {
+    if (playerID === undefined) {
+      console.error(`'playerID' of class 'PlayerSyncMessage' should not be undefined.`);
+      return;
+    }
+
+    this.playerID = playerID;
+    this.mapCoord = mapCoord;
+    this.facing = facing;
+    this.displayName = displayName;
+    this.displayChar = displayChar;
+    this.removed = removed ?? false;
+  }
+
+  /**
+   * The serialization used by JSON.stringify().
+   * @return {Object}
+   */
+  toJSON() {
+    // If the attribute does not exist, then we don't insert it into the message.
+    // In this way, we can slightly reduce the size of the message.
+    const ret = {playerID: this.playerID};
+    if (this.mapCoord !== undefined) ret.mapCoord = this.mapCoord;
+    if (this.facing !== undefined) ret.facing = this.facing;
+    if (this.displayName !== undefined) ret.displayName = this.displayName;
+    if (this.displayChar !== undefined) ret.displayChar = this.displayChar;
+    if (this.removed !== undefined) ret.removed = this.removed;
+    return ret;
+  }
+
+  /**
+   * Deserialize a JSON object into Player.
+   * @param {Object} obj - TODO
+   * @return {Player}
+   */
+  static fromObject(obj) {
+    const ret = new PlayerSyncMessage(obj.playerID);
+    if (obj.mapCoord !== undefined) ret.mapCoord = obj.mapCoord;
+    if (obj.facing !== undefined) ret.facing = obj.facing;
+    if (obj.displayName !== undefined) ret.displayName = obj.displayName;
+    if (obj.displayChar !== undefined) ret.displayChar = obj.displayChar;
+    if (obj.removed !== undefined) ret.removed = obj.removed;
+    return ret;
+  }
+}
+
 export default Player;
+export {
+  Player,
+  PlayerSyncMessage,
+};

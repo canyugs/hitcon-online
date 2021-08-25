@@ -22,8 +22,8 @@ class Standalone {
    * Initializes the extension.
    */
   async initialize() {
-    this.helper.registerOnLocation((loc) => {
-      console.log('standalone extension received: ', loc);
+    this.helper.registerOnPlayerUpdate((msg) => {
+      console.log('standalone extension received: ', msg);
     });
     this.helper.registerOnCellSetBroadcast((cset) => {
       console.log('standalone extension received: ', cset);

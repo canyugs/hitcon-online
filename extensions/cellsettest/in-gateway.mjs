@@ -22,8 +22,8 @@ class InGateway {
    * the extension.
    */
   async initialize() {
-    this.helper.registerOnLocation((loc) => {
-      console.log('in-gateway extension received: ', loc);
+    this.helper.registerOnPlayerUpdate((msg) => {
+      console.log('in-gateway extension received: ', msg);
     });
     this.helper.registerOnCellSetBroadcast((cset) => {
       console.log('in-gateway extension received: ', cset);

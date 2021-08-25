@@ -5,12 +5,11 @@
 import {createRequire} from 'module';
 const require = createRequire(import.meta.url);
 
-import assert from 'assert';
-const {Server} = require('socket.io');
 const config = require('config');
 const movingRequestThreshold = config.get('movingRequestThreshold');
 
 import {MapCoord} from '../../common/maplib/map.mjs';
+import {PlayerSyncMessage} from '../../common/gamelib/player.mjs';
 
 /**
  * This class handles the connections from the client and does the most
@@ -60,9 +59,9 @@ class GatewayService {
     await this.extMan.startAllInGateway();
 
     // register callbacks for All Area Boardcaster
-    this.broadcaster.registerOnLocation((loc) => {
-      // Broadcast the location message.
-      this.io.emit('location', loc);
+    this.broadcaster.registerOnPlayerUpdate((msg) => {
+      // Broadcast the player update message.
+      this.io.emit('playerUpdate', msg);
     });
     this.broadcaster.registerOnExtensionBroadcast((bc) => {
       // Broadcast the extension broadcast.
@@ -150,9 +149,9 @@ class GatewayService {
     socket.playerID = playerID;
 
     // Register all events.
-    socket.on('location', (location) => {
-      this.onUserLocation(socket, location);
-      // onUserLocation is async, so returns immediately.
+    socket.on('playerUpdate', (msg) => {
+      this.onPlayerUpdate(socket, PlayerSyncMessage.fromObject(msg));
+      // onPlayerUpdate is async, so returns immediately.
     });
     socket.on('callC2sAPI', (msg, callback) => {
       const p = this.extMan.onC2sCalled(msg, socket.playerID);
@@ -192,16 +191,9 @@ class GatewayService {
     }
     socket.playerData.mapCoord = initLoc;
     socket.playerData.lastMovingTime = Date.now();
-    const firstLocation = {
-      playerID,
-      displayName: socket.playerData.displayName,
-      displayChar: socket.playerData.displayChar,
-      mapCoord: socket.playerData.mapCoord,
-      facing: socket.playerData.facing,
-      lastMovingTime: socket.playerData.lastMovingTime,
-    };
 
-    await this._broadcastUserLocation(firstLocation);
+    const firstLocation = PlayerSyncMessage.fromObject(socket.playerData);
+    await this._broadcastPlayerUpdate(firstLocation);
     this.broadcaster.sendStateTransfer(socket);
 
     // Emit the gameStart event.
@@ -230,8 +222,8 @@ class GatewayService {
     // Take socket off first to avoid race condition in the await below.
     delete this.socks[playerID];
 
-    let lastLocation = {playerID: playerID, removed: true};
-    await this._broadcastUserLocation(lastLocation);
+    const lastLocation = PlayerSyncMessage.fromObject({playerID, removed: true});
+    await this._broadcastPlayerUpdate(lastLocation);
 
     // release grid after disconnection
     await this._clearOccupy(socket.playerData.mapCoord, playerID);
@@ -242,22 +234,17 @@ class GatewayService {
   }
 
   /**
-   * Callback for the location message from the client. i.e.
-   * socket.on('location')
+   * Callback for the playerUpdate message from the client.
    * @param {Socket} socket - The socket from which this is sent.
-   * @param {Object} msg - The location message. It includes the following:
-   * - mapCoord: The map coordinate, whose type is MapCoord.
-   * - facing: One of 'U', 'D', 'L', 'R'. The direction the user is facing.
-   * It'll also contain other fields that's added elsewhere.
-   * - playerID: The player's ID.
-   * - displayName: The name to show for this player.
-   * - displayChar: The character asset to display.
+   * @param {PlayerSyncMessage} origMsg - The update message.
    */
-  async onUserLocation(socket, origMsg) {
-    const msg = {};
-    msg.playerID = socket.playerID;
-    msg.displayName = socket.playerData.displayName;
-    msg.displayChar = socket.playerData.displayChar;
+  async onPlayerUpdate(socket, origMsg) {
+    if (socket.playerID !== origMsg.playerID) {
+      console.error(`Player '${origMsg.playerID}' tries to update player '${socket.playerID}'s data, which is invalid.`);
+      return;
+    }
+
+    const msg = PlayerSyncMessage.fromObject(socket.playerData);
     msg.facing = origMsg.facing;
     msg.mapCoord = MapCoord.fromObject(origMsg.mapCoord);
     // TODO: Check if facing is valid.
@@ -267,7 +254,7 @@ class GatewayService {
     const mapSize = this.gameMap.getMapSize(lastCoord.mapName);
     if (lastCoord.x === undefined || lastCoord.y === undefined || lastCoord.mapName === undefined) {
       // Shouldn't happen, log an error.
-      console.error(`Invalid lastCoord in onUserLocation ${lastCoord}`);
+      console.error(`Invalid lastCoord in onPlayerUpdate ${lastCoord}`);
       return;
     }
     if (!this._movementRequestSpeedCheck(socket.playerData)) {
@@ -312,7 +299,7 @@ class GatewayService {
     //release old grid
     socket.playerData.lastMovingTime = Date.now();
     await this._clearOccupy(socket.playerData.mapCoord, msg.playerID);
-    await this._broadcastUserLocation(msg);
+    await this._broadcastPlayerUpdate(msg);
     return true;
   }
 
@@ -324,30 +311,24 @@ class GatewayService {
       console.error(`Can't teleport ${playerID} who is not on our server.`);
       return false;
     }
-    const socket = this.socks[playerID];
-    const msg = {};
-    msg.playerID = socket.playerID;
-    msg.displayName = socket.playerData.displayName;
-    msg.displayChar = socket.playerData.displayChar;
+    const msg = PlayerSyncMessage.fromObject(this.socks[playerID].playerData);
     msg.facing = facing;
     msg.mapCoord = mapCoord;
-
     return this._teleportPlayerInternal(socket, msg);
   }
 
   /**
-   * Broadcast the user's location and direction.
+   * Broadcast the user's status.
    * @private
-   * @param {Object} msg - The location message.
+   * @param {PlayerSyncMessage} msg - The message.
    * @return {Boolean} success - true if successful.
    */
-  async _broadcastUserLocation(msg) {
-    if (msg.playerID in this.socks && !(msg.removed === true)) {
-      const playerData = this.socks[msg.playerID].playerData;
-      playerData.mapCoord = msg.mapCoord;
-      await this.dir.setPlayerData(msg.playerID, playerData);
+  async _broadcastPlayerUpdate(msg) {
+    if (msg.playerID in this.socks && !msg.removed) {
+      this.socks[msg.playerID].playerData.updateFromMessage(msg);
+      await this.dir.setPlayerData(msg.playerID, this.socks[msg.playerID].playerData);
     }
-    await this.broadcaster.notifyPlayerLocationChange(msg);
+    await this.broadcaster.notifyPlayerUpdate(msg);
     return true;
   }
 

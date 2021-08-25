@@ -58,12 +58,11 @@ class ExtensionHelperBase {
   }
 
   /**
-   * Register an onLocation. If any player move, the callback will be called.
-   * @param {function} callback - The callback when any player moved,
-   * take a location object, see Gateway Service for doc.
+   * Register a callback on PlayerUpdate.
+   * @param {Function} callback - The callback when any player updates.
    */
-  registerOnLocation(callback) {
-    this.broadcaster.registerOnLocation(callback);
+  registerOnPlayerUpdate(callback) {
+    this.broadcaster.registerOnPlayerUpdate(callback);
   }
 
   /**

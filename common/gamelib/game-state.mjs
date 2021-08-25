@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 import CellSet from '../maplib/cellset.mjs';
-import {MapCoord} from '../maplib/map.mjs';
+import Player from './player.mjs';
 
 /**
  * GameState represents the state of the map while the game is running.
@@ -44,39 +44,28 @@ class GameState {
      */
     this.cellSetsOfMaps = {};
 
-    this.locationCallbacks = [];
+    this.playerUpdateCallbacks = [];
   }
 
   /**
-   * This is called when a location event is received from the game server or
+   * This is called when a playerUpdate event is received from the game server or
    * upper layer.
    * Usually this is called by the game client or redis client.
-   * @param {object} loc - The location object.
-   * See the documentation in GatewayService for more info on the loc object's
-   * format. It is the same format as the one on socket.on('location')
+   * @param {PlayerSyncMessage} msg - The update message.
    */
-  onLocation(loc) {
-    const playerID = loc.playerID;
-    if ('removed' in loc && loc['removed']) {
+  onPlayerUpdate(msg) {
+    const playerID = msg.playerID;
+    if (msg.removed) {
       // Player is removed. Disconnected.
       if (this.players.has(playerID)) {
         delete this.players.delete(playerID);
       }
     } else {
-      if (!this.players.has(playerID)) {
-        this.players.set(playerID, {
-          playerID,
-          displayName: playerID, // The default, wait for it to be updated later.
-        });
-      }
-      const obj = this.players.get(playerID);
-      if ('displayName' in loc) obj.displayName = loc.displayName;
-      if ('displayChar' in loc) obj.displayChar = loc.displayChar;
-      obj.mapCoord = MapCoord.fromObject(loc.mapCoord);
-      obj.facing = loc.facing;
+      if (!this.players.has(playerID)) this.players.set(playerID, new Player(playerID));
+      this.players.get(playerID).updateFromMessage(msg);
     }
-    for (const f of this.locationCallbacks) {
-      f(loc);
+    for (const f of this.playerUpdateCallbacks) {
+      f(msg);
     }
   }
 
@@ -113,16 +102,12 @@ class GameState {
   }
 
   /**
-   * Register a callback whenever user's location is changed or user is
-   * removed.
+   * Register a callback whenever any player is updated.
    * @param {object} callback - A callback whenever there's any update on
-   * user's location. Its signature is:
-   * function (loc)
-   * Where loc is the location object.
-   * The callback is called after any state update.
+   * players. The callback takes a `PlayerSyncMessage` as parameter.
    */
-  registerPlayerLocationChange(callback) {
-    this.locationCallbacks.push(callback);
+  registerOnPlayerUpdate(callback) {
+    this.playerUpdateCallbacks.push(callback);
   }
 
   /**
@@ -171,7 +156,7 @@ class GameState {
     const newPlayers = new Map(Object.entries(JSON.parse(state.players)));
     this.players.clear();
     for (const [k, v] of newPlayers.entries()) {
-      this.players.set(k, v);
+      this.players.set(k, Player.fromObject(v));
     }
 
     this.cellSetsOfMaps = state.cellSetsOfMaps;
