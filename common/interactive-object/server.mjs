@@ -91,9 +91,6 @@ class InteractiveObjectServerBaseClass {
     if (!fsmValidation(this.config.FSM)) return;
     if (!displayValidation(this.config.display)) return;
 
-    // kwargs in FSM may be edited, e.g. Bulletin
-    this.editedFSM = this.config.FSM
-
     // Stores the state of every player.
     // TODO: store the states in database (or in `/run/small_data`)
     this.dataStore = new Map(); // key: playerID, value: currentState
@@ -117,7 +114,7 @@ class InteractiveObjectServerBaseClass {
     this._fsmWalkLock.add(playerID);
 
     try { // for release the lock
-      const fsm = this.editedFSM; // alias
+      const fsm = this.config.FSM; // alias
 
       // initialize if not exist
       if (!this.dataStore.has(playerID)) this.dataStore.set(playerID, fsm.initialState);
@@ -230,7 +227,13 @@ class InteractiveObjectServerBaseClass {
 
     // prepare dialog
     let d = '';
-    if (typeof dialogs === 'string') d = dialogs;
+    if (typeof dialogs === 'string') {
+      if (this.editableDialogs && this.editableDialogs[dialogs]) {
+        d = this.editableDialogs[dialogs];
+      } else {
+        d = dialogs;
+      }
+    }
     if (Array.isArray(dialogs)) d = randomChoice(dialogs);
 
     // prepare choice
@@ -281,8 +284,8 @@ class InteractiveObjectServerBaseClass {
         return nextState;
       }
     }
-    // No identity match
-    throw 'No identity match';
+    // No identity match and return default next state
+    return options['default'];
   }
 
   /**
@@ -300,9 +303,10 @@ class InteractiveObjectServerBaseClass {
     if (Array.isArray(dialogs)) d = randomChoice(dialogs);
 
     const result = await this.helper.callS2cAPI(playerID, 'dialog', 'showDialogWithPrompt', 60*1000, this.objectName, d, buttonText);
-    console.log(result);
     if (result.msg) {
-      this.editedFSM.states[nextState].kwargs.dialogs = result.msg;
+      if (this.editableDialogs) {
+        this.editableDialogs[this.config.FSM.states[nextState].kwargs.dialogs] = result.msg;
+      }
       return nextState;
     }
     console.warn(`Player '${playerID}' does not choose in 'showDialogWithMultichoice'. Result: ${JSON.stringify(result)}`);

@@ -7,6 +7,16 @@ import InteractiveObjectServerBaseClass from '../../common/interactive-object/se
 /**
  * TODO: jsdoc
  */
+class BulletinNPC extends InteractiveObjectServerBaseClass {
+  constructor(helper, objectName, configFilePath) {
+    super(helper, objectName, configFilePath);
+    this.editableDialogs = {"<editable1>": "Welcome to HITCON online bulletin"};
+  }
+}
+
+/**
+ * TODO: jsdoc
+ */
 class SingleNPC extends InteractiveObjectServerBaseClass {}
 
 /**
@@ -25,9 +35,15 @@ class Standalone {
 
     // create individual NPC
     fs.readdirSync('../run/npc').forEach((file) => {
+      if (file[0] == ".") return;
       const npcName = file.slice(0, -('.json'.length));
-      const npc = new SingleNPC(helper, npcName, `../run/npc/${file}`);
-      this.NPCs.set(npcName, npc);
+      if (npcName === "BulletinNPC") {
+        const npc = new BulletinNPC(helper, npcName, `../run/npc/${file}`);
+        this.NPCs.set(npcName, npc);
+      } else {
+        const npc = new SingleNPC(helper, npcName, `../run/npc/${file}`);
+        this.NPCs.set(npcName, npc);
+      }
     });
   }
 
