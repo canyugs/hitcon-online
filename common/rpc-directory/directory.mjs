@@ -13,7 +13,7 @@ import {promisify} from 'util';
 
 import DataStore from './data-store.mjs';
 import MockRedis from './mock-redis.mjs';
-import {MapCoord} from '../maplib/map.mjs';
+import Player from '../gamelib/player.mjs';
 
 const mockRedis = new MockRedis();
 
@@ -163,14 +163,6 @@ class Directory {
   }
 
   /**
-   * Return the redis key for the corresponding player.
-   * @param {string} playerID - The player's ID.
-   */
-  _getPlayerKey(playerID) {
-    return 'p-'+playerID;
-  }
-
-  /**
    * Register the gateway service handling the user/player.
    * This is called by gateway service when the player connects.
    * @param {string} playerID - The player's ID.
@@ -180,8 +172,8 @@ class Directory {
    */
   async registerPlayer(playerID, serviceName) {
     // NX: Only set if it doesn't exist.
-    let ret = await this.getRedis().setAsync(
-        [this._getPlayerKey(playerID), serviceName, 'NX']);
+    const ret = await this.getRedis().setAsync(
+        [Player.getRedisKey(playerID), serviceName, 'NX']);
     if (ret === null) {
       // Player already connected with another connection.
       return false;
@@ -205,16 +197,16 @@ class Directory {
    */
   async unregisterPlayer(playerID, serviceName) {
     // Get the key to check that we're indeed the service holding the user.
-    let ret = await this.getRedis().getAsync([this._getPlayerKey(playerID)]);
+    let ret = await this.getRedis().getAsync([Player.getRedisKey(playerID)]);
     if (ret !== serviceName) {
       throw (`Service ${serviceName} trying to unregister ${playerID} ` +
           `ownered by ${ret}`);
     }
-    ret = await this.getRedis().delAsync([this._getPlayerKey(playerID)]);
+    ret = await this.getRedis().delAsync([Player.getRedisKey(playerID)]);
     if (ret !== 1) {
       throw `${ret} keys deleted when trying to unregister ${playerID}`;
     }
-    await this.storage.unloadData(this._getPlayerDataName(playerID));
+    await this.storage.unloadData(Player.getDataStoreKey(playerID));
   }
 
   /**
@@ -224,7 +216,7 @@ class Directory {
    * on which the player is on. undefined if failed.
    */
   async getPlayerGatewayService(playerID) {
-    let ret = await this.getRedis().getAsync([this._getPlayerKey(playerID)]);
+    const ret = await this.getRedis().getAsync([Player.getRedisKey(playerID)]);
     if (typeof ret === 'string') {
       return ret;
     }
@@ -232,70 +224,31 @@ class Directory {
   }
 
   /**
-   * Return the data name for use in DataStore for the corresponding player.
-   * @param {string} playerID - The player's ID.
-   */
-  _getPlayerDataName(playerID) {
-    return `p-${playerID}`;
-  }
-
-  /**
    * Return the stored data for player.
    * @param {string} playerID - The player's ID.
-   * @return {object} playerData - The player's data. It's format is in
-   * ensurePlayerData().
+   * @return {Player}
    */
   async getPlayerData(playerID) {
-    const dataName = this._getPlayerDataName(playerID);
-    let data = await this.storage.loadData(dataName);
-    data = this.ensurePlayerData(playerID, data);
-    return data;
+    const dataName = Player.getDataStoreKey(playerID);
+    const playerObject = await this.storage.loadData(dataName);
+
+    // If the player is not initialized, playerObject would be an empty object.
+    if (Object.keys(playerObject).length === 0) {
+      playerObject.playerID = playerID;
+    }
+
+    // If playerObject is empty, Player.fromObject() will initialize it for us.
+    return Player.fromObject(playerObject);
   }
 
   /**
    * Save the player's data.
    * @param {string} playerID - The player's ID.
-   * @return {object} playerData - The player's data. It's format is in
-   * ensurePlayerData().
+   * @param {Player} player - The player object.
    */
-  async setPlayerData(playerID, playerData) {
-    const dataName = this._getPlayerDataName(playerID);
-    let data = await this.storage.saveData(dataName, playerData);
-  }
-
-  /**
-   * Initialize the player data if it's not initialized.
-   * @param {string} playerID - The player's ID.
-   * @param {object} playerData - The player's data.
-   * @return {object} playerData - The player's data that is initialized.
-   */
-  ensurePlayerData(playerID, playerData) {
-    function setDefaultValue(obj, key, val) {
-      if (!(key in obj)) {
-        obj[key] = val;
-      }
-    }
-    // {string} playerID - The player's ID. The primary key used in our
-    // system.
-    setDefaultValue(playerData, 'playerID', playerID);
-    // {string} displayName - The name to show for the player on screen.
-    setDefaultValue(playerData, 'displayName', playerID);
-
-    // TODO: Set them to a default specified by assets.json.
-    // {string} displayChar - The graphic for the character. This is used and
-    // passed to GraphicAssets.
-    setDefaultValue(playerData, 'displayChar', 'char1');
-
-    // If the playerData is loaded from storage, convert playerData.mapCoord
-    // (which is an object) to MapCoord class.
-    if ('mapCoord' in playerData) {
-      playerData.mapCoord = MapCoord.fromObject(playerData.mapCoord);
-    }
-
-    // TODO: Set them to a spawn point specified by map.json.
-    // {MapCoord} mapCoord - Character's map coordinate.
-    setDefaultValue(playerData, 'mapCoord', undefined);
-    return playerData;
+  async setPlayerData(playerID, player) {
+    const dataName = Player.getDataStoreKey(playerID);
+    await this.storage.saveData(dataName, player);
   }
 
   /**

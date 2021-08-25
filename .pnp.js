@@ -27,12 +27,20 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         "reference": "workspace:common/extlib"
       },
       {
+        "name": "hitcon-online-gamelib",
+        "reference": "workspace:common/gamelib"
+      },
+      {
         "name": "hitcon-online-maplib",
         "reference": "workspace:common/maplib"
       },
       {
         "name": "hitcon-online-rpc-directory",
         "reference": "workspace:common/rpc-directory"
+      },
+      {
+        "name": "hitcon-online-MapWatermark",
+        "reference": "workspace:extensions/MapWatermark"
       },
       {
         "name": "hitcon-online-blank",
@@ -91,6 +99,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
     "ignorePatternData": "(^(?:\\.yarn\\/sdks(?:\\/(?!\\.)(?:(?:(?!(?:^|\\/)\\.).)*?)|$))$)",
     "fallbackExclusionList": [
       ["hitcon-online", ["workspace:."]],
+      ["hitcon-online-MapWatermark", ["workspace:extensions/MapWatermark"]],
       ["hitcon-online-asset-server", ["workspace:services/assets"]],
       ["hitcon-online-blank", ["workspace:extensions/blank"]],
       ["hitcon-online-bombman", ["workspace:extensions/bombman"]],
@@ -99,6 +108,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
       ["hitcon-online-dialog", ["workspace:extensions/dialog"]],
       ["hitcon-online-extlib", ["workspace:common/extlib"]],
       ["hitcon-online-game-client", ["workspace:sites/game-client"]],
+      ["hitcon-online-gamelib", ["workspace:common/gamelib"]],
       ["hitcon-online-gateway", ["workspace:services/gateway"]],
       ["hitcon-online-helloworld", ["workspace:extensions/helloworld"]],
       ["hitcon-online-items", ["workspace:extensions/items"]],
@@ -1932,6 +1942,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "SOFT",
         }]
       ]],
+      ["hitcon-online-MapWatermark", [
+        ["workspace:extensions/MapWatermark", {
+          "packageLocation": "./extensions/MapWatermark/",
+          "packageDependencies": [
+            ["hitcon-online-MapWatermark", "workspace:extensions/MapWatermark"]
+          ],
+          "linkType": "SOFT",
+        }]
+      ]],
       ["hitcon-online-asset-server", [
         ["workspace:services/assets", {
           "packageLocation": "./services/assets/",
@@ -2011,6 +2030,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./sites/game-client/",
           "packageDependencies": [
             ["hitcon-online-game-client", "workspace:sites/game-client"]
+          ],
+          "linkType": "SOFT",
+        }]
+      ]],
+      ["hitcon-online-gamelib", [
+        ["workspace:common/gamelib", {
+          "packageLocation": "./common/gamelib/",
+          "packageDependencies": [
+            ["hitcon-online-gamelib", "workspace:common/gamelib"]
           ],
           "linkType": "SOFT",
         }]
