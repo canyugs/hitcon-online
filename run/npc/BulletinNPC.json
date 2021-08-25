@@ -24,7 +24,8 @@
         "kwargs": {
           "options": {
             "online_bulletin_editor": "s2",
-            "point_system": "s4"
+            "point_system": "s4",
+            "default": "s4"
           }
         }
       },
@@ -49,7 +50,7 @@
       "s4": {
         "func": "showDialog",
         "kwargs": {
-          "dialogs": "Welcome to HITCON online bulletin",
+          "dialogs": "<editable1>",
           "options": {
             "HITCON is perfect": "s5"
           }

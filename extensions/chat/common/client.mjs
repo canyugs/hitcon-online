@@ -160,6 +160,15 @@ Usage: !/<Command> <arg1> <arg2> ...
   }
 
   /**
+   * Get nearby message from server
+   * @s2c_getNearbyMessage
+   * @param {object} args - Information of the nearby message including msg_from and msg
+   */
+  s2c_getNearbyMessage(args) {
+    document.getElementById('message_history').innerHTML += '<span>Nearby Message From ' + this.HTMLEncode(args.msg_from) + ': ' + this.HTMLEncode(args.msg) + '</span><br>';
+  }
+
+  /**
    * Get a private message from other player
    * @s2c_getPrivateMessage
    * @param {object} args - Information of the private message
