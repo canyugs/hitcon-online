@@ -1,8 +1,8 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
-import CellSet from './cellset.mjs';
-import {MapCoord} from './map.mjs';
+import CellSet from '../maplib/cellset.mjs';
+import {MapCoord} from '../maplib/map.mjs';
 
 /**
  * GameState represents the state of the map while the game is running.

@@ -16,7 +16,7 @@ import MultiProcessRPCDirectory from
 
 /* Import all utility classes */
 import GameMap from '../../common/maplib/map.mjs';
-import GameState from '../../common/maplib/game-state.mjs';
+import GameState from '../../common/gamelib/game-state.mjs';
 import ExtensionManager from '../../common/extlib/extension-manager.mjs';
 
 async function standaloneExtensionServer() {
