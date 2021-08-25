@@ -26,7 +26,8 @@ class Standalone {
     // create individual NPC
     fs.readdirSync('../run/npc').forEach((file) => {
       const npc = new SingleNPC(helper, `../run/npc/${file}`);
-      this.NPCs.set(file, npc);
+      const npcName = file.slice(0, -('.json'.length));
+      this.NPCs.set(npcName, npc);
     });
   }
 
@@ -55,6 +56,18 @@ class Standalone {
     const npc = this.NPCs.get(npcName);
     if (typeof npc === 'undefined') return {};
     return npc.getDisplayInfo();
+  }
+
+  /**
+   * TODO
+   * @param {Object} player - TODO
+   * @param {String} npcName - TODO
+   * @return {mapCoord}
+   */
+  async c2s_getInitialPosition(player, npcName) {
+    const npc = this.NPCs.get(npcName);
+    if (typeof npc === 'undefined') return null;
+    return npc.getInitialPosition();
   }
 
   /**

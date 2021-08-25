@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 import fs from 'fs';
+import {MapCoord} from '../maplib/map.mjs';
 
 /**
  * TODO
@@ -58,6 +59,9 @@ function displayValidation(display) {
   return true;
 }
 
+/**
+ * TODO: jsdoc
+ */
 class InteractiveObjectServerBaseClass {
   /**
    * Create the standalone extension service object but does not start it.
@@ -122,10 +126,18 @@ class InteractiveObjectServerBaseClass {
 
   /**
    * TODO
-   * @return {Object}
+   * @return {Array}
    */
   getDisplayInfo() {
     return this.config.display;
+  }
+
+  /**
+   * TODO
+   * @return {MapCoord}
+   */
+  getInitialPosition() {
+    return MapCoord.fromObject(this.config.initialPosition);
   }
 
   /**

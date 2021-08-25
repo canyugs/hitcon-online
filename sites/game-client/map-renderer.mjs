@@ -6,7 +6,8 @@ import {MapCoord} from '/static/common/maplib/map.mjs';
 const mapCellSize = 32; // pixel
 const fontStyle = '12px serif';
 
-const LAYER_PLAYER = {zIndex: 10, layerName: 'player'};
+const LAYER_PLAYER_IMAGE = {zIndex: 10, layerName: 'playerImage'};
+const LAYER_PLAYER_NAME = {zIndex: 15, layerName: 'playerName'};
 
 /**
  * MapRender renders the map onto the a canvas element.
@@ -58,8 +59,9 @@ class MapRenderer {
      */
     this.customizedLayers = [];
 
-    // 'player' is a layer defined and used only by MapRenderer
-    this.registerCustomizedLayerToDraw(LAYER_PLAYER.zIndex, LAYER_PLAYER.layerName, '_drawCharacters', this.gameState.players);
+    // 'playerImage' and 'playerName' are layers defined and used only by MapRenderer
+    this.registerCustomizedLayerToDraw(LAYER_PLAYER_IMAGE.zIndex, LAYER_PLAYER_IMAGE.layerName, '_drawManyCharacterImage', this.gameState.players);
+    this.registerCustomizedLayerToDraw(LAYER_PLAYER_NAME.zIndex, LAYER_PLAYER_NAME.layerName, '_drawManyCharacterName', this.gameState.players);
   }
 
   /**
@@ -205,12 +207,29 @@ class MapRenderer {
 
     // draw foreground
     for (const [, layerName, renderFunction, renderArgs] of this.customizedLayers) {
-      if (renderFunction === '_drawCharacters') {
-        this._drawCharacters(renderArgs);
-      } else if (renderFunction === '_drawWatermark') {
-        this._drawWatermark(renderArgs);
-      } else {
-        this._drawEveryCellWrapper(this._drawLayer.bind(this, layerName));
+      switch (renderFunction) {
+        case '_drawManyCharacterImage':
+          this._drawManyCharacterImage(renderArgs);
+          break;
+
+        case '_drawManyCharacterName':
+          this._drawManyCharacterName(renderArgs);
+          break;
+
+        case '_drawOneCharacterImage':
+          this._drawOneCharacterImage(renderArgs);
+          break;
+
+        case '_drawOneCharacterName':
+          this._drawOneCharacterName(renderArgs);
+          break;
+
+        case '_drawWaterMark':
+          this._drawWaterMark(renderArgs);
+          break;
+
+        default:
+          this._drawEveryCellWrapper(this._drawLayer.bind(this, layerName));
       }
     }
   }
@@ -271,50 +290,78 @@ class MapRenderer {
   }
 
   /**
-   * Draw players or NPCs onto the canvas.
-   * @param {Map} players - The players to be drawn. `players.getDrawInfo()` would
-   * be called to get the information for drawing.
+   * Draw the image of one player or NPC onto the canvas.
+   * @param {Object} player - The players to be drawn. `player.getDrawInfo()`
+   * would be called to get the information for drawing.
    */
-  _drawCharacters(players) {
-    for (const player of players.values()) {
-      const {mapCoord, displayChar, facing} = player.getDrawInfo();
-      const canvasCoordinate = this.mapToCanvasCoordinate(mapCoord);
-      const topLeftCanvasCoord = {x: canvasCoordinate.x, y: canvasCoordinate.y - mapCellSize};
-      // check if this player is out of viewport
-      if (topLeftCanvasCoord.x < -mapCellSize ||
-          topLeftCanvasCoord.x >= this.canvas.width ||
-          topLeftCanvasCoord.y < -mapCellSize ||
-          topLeftCanvasCoord.y >= this.canvas.height) {
-        continue;
-      }
-      const renderInfo = this.map.graphicAsset.getCharacter(displayChar,
-          facing);
-      this.ctx.drawImage(
-          renderInfo.image,
-          renderInfo.srcX,
-          renderInfo.srcY,
-          renderInfo.srcWidth,
-          renderInfo.srcHeight,
-          topLeftCanvasCoord.x,
-          topLeftCanvasCoord.y,
-          mapCellSize,
-          mapCellSize,
-      );
+  _drawOneCharacterImage(player) {
+    const {mapCoord, displayChar, facing} = player.getDrawInfo();
+    const canvasCoordinate = this.mapToCanvasCoordinate(mapCoord);
+    const topLeftCanvasCoord = {x: canvasCoordinate.x, y: canvasCoordinate.y - mapCellSize};
+    // check if this player is out of viewport
+    if (topLeftCanvasCoord.x < -mapCellSize ||
+        topLeftCanvasCoord.x >= this.canvas.width ||
+        topLeftCanvasCoord.y < -mapCellSize ||
+        topLeftCanvasCoord.y >= this.canvas.height) {
+      return;
     }
+    const renderInfo = this.map.graphicAsset.getCharacter(displayChar,
+        facing);
+    this.ctx.drawImage(
+        renderInfo.image,
+        renderInfo.srcX,
+        renderInfo.srcY,
+        renderInfo.srcWidth,
+        renderInfo.srcHeight,
+        topLeftCanvasCoord.x,
+        topLeftCanvasCoord.y,
+        mapCellSize,
+        mapCellSize,
+    );
+  }
 
-    // draw displayName
+  /**
+   * Draw the name of one player or NPC onto the canvas.
+   * @param {Object} player - The players to be drawn. `player.getDrawInfo()`
+   * would be called to get the information for drawing.
+   */
+  _drawOneCharacterName(player) {
+    // TODO: Remember whether the previous call of `this.draw()` renders text.
+    // If so, no need to save and restore the context. May improve performance.
     this.ctx.save();
     this.ctx.font = fontStyle;
     this.ctx.textAlign = 'center';
     this.ctx.textBaseline = 'bottom';
-    for (const player of players.values()) {
-      const {mapCoord, displayName} = player.getDrawInfo();
-      const {x, y} = mapCoord;
-      const canvasCoordinate = this.mapToCanvasCoordinate(new MapCoord(this.viewerPosition.mapName, x + 0.5, y + 1));
-      // there is no need for out-of-canvas check
-      this.ctx.fillText(displayName, canvasCoordinate.x, canvasCoordinate.y);
-    }
+
+    const {mapCoord, displayName} = player.getDrawInfo();
+    const {x, y} = mapCoord;
+    const canvasCoordinate = this.mapToCanvasCoordinate(new MapCoord(this.viewerPosition.mapName, x + 0.5, y + 1));
+    // there is no need for out-of-canvas check
+    this.ctx.fillText(displayName, canvasCoordinate.x, canvasCoordinate.y);
+
     this.ctx.restore();
+  }
+
+  /**
+   * Draw the images of players or NPCs onto the canvas.
+   * @param {Map} players - The players to be drawn. For every `player` in `players`,
+   * `player.getDrawInfo()` would be called to get the information for drawing.
+   */
+  _drawManyCharacterImage(players) {
+    for (const player of players.values()) {
+      this._drawOneCharacterImage(player);
+    }
+  }
+
+  /**
+   * Draw the names of players or NPCs onto the canvas.
+   * @param {Map} players - The players to be drawn. For every `player` in `players`,
+   * `player.getDrawInfo()` would be called to get the information for drawing.
+   */
+  _drawManyCharacterName(players) {
+    for (const player of players.values()) {
+      this._drawOneCharacterName(player);
+    }
   }
 
   /**
