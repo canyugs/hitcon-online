@@ -35,6 +35,19 @@ class Player {
   }
 
   /**
+   * Used by MapRenderer.
+   * @return {Object}
+   */
+  getDrawInfo() {
+    return {
+      mapCoord: this.mapCoord,
+      displayChar: this.displayChar,
+      facing: this.facing,
+      displayName: this.displayName,
+    };
+  }
+
+  /**
    * Update the player data from the message.
    * @param {PlayerSyncMessage} msg - The message.
    * @return {Boolean} - Whether the update succeeds or not.
