@@ -34,7 +34,8 @@
     "standalone": {
       "chat": "127.0.0.1:5020",
       "helloworld": "127.0.0.1:5021",
-      "bombman": "127.0.0.1:5022"
+      "bombman": "127.0.0.1:5022",
+      "items": "127.0.0.1:5023"
     }
   },
   "publicAddress": null,
