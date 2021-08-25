@@ -191,6 +191,14 @@ class GatewayService {
     }
     socket.playerData.mapCoord = initLoc;
     socket.playerData.lastMovingTime = Date.now();
+    const firstLocation = {
+      playerID,
+      displayName: socket.playerData.displayName,
+      displayChar: socket.playerData.displayChar,
+      mapCoord: socket.playerData.mapCoord,
+      facing: socket.playerData.facing,
+      lastMovingTime: socket.playerData.lastMovingTime,
+    };
 
     const firstLocation = PlayerSyncMessage.fromObject(socket.playerData);
     await this._broadcastPlayerUpdate(firstLocation);
