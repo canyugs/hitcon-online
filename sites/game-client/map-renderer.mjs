@@ -272,10 +272,12 @@ class MapRenderer {
 
   /**
    * Draw players or NPCs onto the canvas.
-   * @param {Map} players - The players to be drawn. Refer to `GameState.players` for format.
+   * @param {Map} players - The players to be drawn. `players.getDrawInfo()` would
+   * be called to get the information for drawing.
    */
   _drawCharacters(players) {
-    for (const {mapCoord, displayChar, facing} of players.values()) {
+    for (const player of players.values()) {
+      const {mapCoord, displayChar, facing} = player.getDrawInfo();
       const canvasCoordinate = this.mapToCanvasCoordinate(mapCoord);
       const topLeftCanvasCoord = {x: canvasCoordinate.x, y: canvasCoordinate.y - mapCellSize};
       // check if this player is out of viewport
@@ -305,7 +307,8 @@ class MapRenderer {
     this.ctx.font = fontStyle;
     this.ctx.textAlign = 'center';
     this.ctx.textBaseline = 'bottom';
-    for (const {mapCoord, displayName} of players.values()) {
+    for (const player of players.values()) {
+      const {mapCoord, displayName} = player.getDrawInfo();
       const {x, y} = mapCoord;
       const canvasCoordinate = this.mapToCanvasCoordinate(new MapCoord(this.viewerPosition.mapName, x + 0.5, y + 1));
       // there is no need for out-of-canvas check
