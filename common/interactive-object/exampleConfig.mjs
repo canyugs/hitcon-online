@@ -5,9 +5,9 @@ const exampleConfig1 = {
   'enabled': true,
   'initialPosition': {'mapName': 'world1', 'x': 5, 'y': 15},
   // TODO // 'availableDistance': 5,
-  'display': {
+  'display': [
 
-  },
+  ],
   'FSM': {
     'initialState': 's1',
     'states': {
@@ -43,9 +43,9 @@ const exampleConfig1 = {
 const exampleConfig2 = {
   'enabled': true,
   'initialPosition': {'mapName': 'world1', 'x': 5, 'y': 17},
-  'display': {
+  'display': [
 
-  },
+  ],
   'FSM': {
     'initialState': 's1',
     'states': {

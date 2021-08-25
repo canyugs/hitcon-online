@@ -1,6 +1,7 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
+import {MapCoord} from '/static/common/maplib/map.mjs';
 import InteractiveObjectClientBaseClass from '/static/common/interactive-object/client.mjs';
 
 // const LAYER_NPC = {zIndex: 9, layerName: 'NPC'}
@@ -49,11 +50,35 @@ class SingleNPC extends InteractiveObjectClientBaseClass {
    * TODO
    * @param {ClientExtensionHelper} helper - The extension helper.
    * @param {String} npcName - The name of the NPC.
-   * @param {Object} displayConfig - TODO
+   * @param {MapCoord} initialPosition - TODO
+   * @param {Array} displayConfig - TODO
    * @param {Function} mapClickCallback - TODO
    */
-  constructor(helper, npcName, displayConfig, mapClickCallback) {
-    super(helper, displayConfig, mapClickCallback);
+  constructor(helper, npcName, initialPosition, displayConfig, mapClickCallback) {
+    const mapCoord = initialPosition;
+    const facing = 'D';
+
+    for (const cfg of displayConfig) {
+      if (cfg.layerName === 'npcImage') {
+        cfg.renderArgs = {
+          mapCoord: mapCoord,
+          displayChar: cfg.character,
+          facing: facing,
+          getDrawInfo() {
+            return {mapCoord: this.mapCoord, displayChar: this.displayChar, facing: this.facing};
+          },
+        };
+      } else if (cfg.layerName === 'npcName') {
+        cfg.renderArgs = {
+          mapCoord: mapCoord,
+          displayName: npcName,
+          getDrawInfo() {
+            return {mapCoord: this.mapCoord, displayName: this.displayName};
+          },
+        };
+      }
+    }
+    super(helper, initialPosition, displayConfig, mapClickCallback);
     this.npcName = npcName;
   }
 }
@@ -79,11 +104,12 @@ class Client {
   async gameStart() {
     const listOfNPCs = await this.getListOfNPCs();
     for (const npcName of listOfNPCs) {
+      const initialPosition = MapCoord.fromObject(await this.helper.callC2sAPI('npc', 'getInitialPosition', 500, npcName));
       const displayConfig = await this.helper.callC2sAPI('npc', 'getDisplayInfo', 500, npcName);
       const mapClickCallback = (npcName) => {
         this.helper.callC2sAPI('npc', 'startInteraction', 500, npcName);
       };
-      const npc = new SingleNPC(this.helper, npcName, displayConfig, mapClickCallback.bind(this, npcName));
+      const npc = new SingleNPC(this.helper, npcName, initialPosition, displayConfig, mapClickCallback.bind(this, npcName));
       this.NPCs.set(npcName, npc);
     }
   }
