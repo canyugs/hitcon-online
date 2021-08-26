@@ -1,12 +1,40 @@
-<script src='https://meet.jit.si/external_api.js'></script>
+<script src="https://meet.jit.si/libs/lib-jitsi-meet.min.js"></script>
 <style>
-#meet-iframe {
-  background-color: FloralWhite;
-  position: absolute;
-  width: 300px;
-  height: 300px;
-  top: 10px;
-  right: 10px;
+#jitsi-container {
+  display: flex;
+  background-color: plum;
+  padding: 0;
+  margin: 0;
 }
+#jitsi-remote-container {
+  background-color: powderblue;
+  margin: 0;
+  width: calc(80vw - 350px);
+  display: flex;
+  flex-direction: row;
+}
+#jitsi-local-container {
+  background-color: saddlebrown;
+  margin: 0;
+  width: 350px;
+}
+.jitsi-audio {
+  display: none;
+}
+.jitsi-local-video {
+  max-width: 350px;
+  height: 200px;
+}
+.jitsi-remote-video {
+  height: 200px;
+}
+
 </style>
-<div id='meet-iframe'></div>
+<div id='jitsi-container'>
+  <div id='jitsi-remote-container'>
+
+  </div>
+  <div id='jitsi-local-container'>
+    <div id='jitsi-local'></div>
+  </div>
+</div>
