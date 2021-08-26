@@ -65,6 +65,17 @@ body {
   justify-content: center;
 }
 
+.toolbar-button {
+  width: 32px;
+  height: 32px;
+  padding: 2px;
+}
+
+.toolbar-button > img {
+  max-width: 24px;
+  max-height: 24px;
+}
+
 .overlay {
   background-color: Ivory;
   position: absolute;
@@ -91,6 +102,13 @@ body {
   right: 5%;
   width: 15%;
   height: 70%;
+}
+
+#overlay-centertop {
+  top: 0;
+  width: 80vw;
+  height: 200px;
+  left: 10vw;
 }
 
 #main-view {

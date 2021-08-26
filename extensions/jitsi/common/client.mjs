@@ -1,6 +1,20 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
+import JitsiHandler from './jitsi.mjs';
+import Overlay from '/static/sites/game-client/ui/overlay.mjs';
+import OverlayPosition from '/static/sites/game-client/ui/overlay-position.mjs';
+
+const JITSI_DIV = 'jitsi-container';
+
+class JitsiOverlay extends Overlay {
+  constructor(mainUI) {
+    const dom = document.getElementById(JITSI_DIV);
+    super(mainUI, dom);
+  }
+};
+
+
 /**
  * This class is the browser/client side of an extension.
  * One instance is created for each connected player.
@@ -19,36 +33,27 @@ class Client {
   }
 
   async gameStart() {
+    this.overlay = new JitsiOverlay(this.helper.mainUI);
+    this.overlay.hide();
   }
 
   /**
    * Start the Jitsi Meeeting
    */
-  startMeeting(meetingName) {
-    const domain = 'meet.jit.si';
-    const options = {
-        roomName: meetingName,
-        // TODO: Update the size to fit the UI framework.
-        width: 290,
-        height: 290,
-        parentNode: document.querySelector('#meet-iframe'),
-        configOverwrite: {
-          prejoinPageEnabled: false,
-          startWithAudioMuted: true,
-          startVideoMuted: true
-        }
-    };
-    const api = new JitsiMeetExternalAPI(domain, options);
-    this.jitsiObj = api;
+  startMeeting(meetingName, password) {
+    this.jitsiObj = new JitsiHandler(meetingName, password);
     this.currentMeeting = meetingName;
+    this.overlay.show(OverlayPosition.CENTER_TOP);
+    //$('#jitsi-container').css('display', 'flex');
   }
 
   /**
    * Stop the Jitsi Meeting.
    */
-  stopMeeting() {
+  async stopMeeting() {
     if (this.jitsiObj) {
-      this.jitsiObj.dispose();
+      this.overlay.hide();
+      await this.jitsiObj.unload();
       this.jitsiObj = undefined;
       this.currentMeeting = undefined;
     }
@@ -57,8 +62,8 @@ class Client {
   /**
    * Synchronize the state of Jitsi Meeting to the specified meeting.
    */
-  updateMeeting(meetingName) {
-    if (!(typeof meetingName === 'string')) {
+  async updateMeeting(meetingName) {
+    if (typeof meetingName !== 'string') {
       this.stopMeeting();
       return;
     }
@@ -69,10 +74,16 @@ class Client {
         // No change.
         return;
       }
-      this.stopMeeting();
+      await this.stopMeeting();
     }
-    // If we get here, there's no meeting and we should join one.
-    this.startMeeting(meetingName);
+    // If we get here, there's no meeting.
+    // Get the password of the meeting
+    let password = await this.helper.callC2sAPI(null, 'getPassword', 5000, {'meetingName': meetingName});
+    if (!password) {
+      password = null;
+    }
+    // Join meeting
+    this.startMeeting(meetingName, password);
   }
 
   /**

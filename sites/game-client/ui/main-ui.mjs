@@ -16,18 +16,19 @@ const OVERLAY_DIV = new Map();
 OVERLAY_DIV.set(OverlayPosition.LEFT_TOP, 'overlay-topleft');
 OVERLAY_DIV.set(OverlayPosition.LEFT_BOTTOM, 'overlay-bottomleft');
 OVERLAY_DIV.set(OverlayPosition.RIGHT, 'overlay-right');
+OVERLAY_DIV.set(OverlayPosition.CENTER_TOP, 'overlay-centertop');
 OVERLAY_DIV.set(OverlayPosition.MAIN_VIEW, 'main-view');
 
 const TOOLBAR_ID = 'toolbar';
 
 /**
- * MainUI composes components into a window, 
+ * MainUI composes components into a window,
  * components are classified into Notification, Toolbar, Overlay and Modal.
  */
 class MainUI {
   /**
   * TODO(fanlan1210)
-  * 
+  *
   * Create a MainUI.
   */
   constructor() {
@@ -72,6 +73,8 @@ class MainUI {
     if (!target.hasToolbarButton()) return false;
 
     target.toolbarButton = document.createElement('button');
+    target.toolbarButton.classList.add("toolbar-button");
+
     // load icon asset into button
     const icon = new Image();
     icon.src = target.toolbarButtonSrc;
