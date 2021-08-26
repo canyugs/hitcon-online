@@ -60,8 +60,31 @@ class InputManager {
    * @param {Function} callback - Takes two arguments: x and y coordinate
    * relative to the DOM element.
    */
-  registerOnClick(DOMElement, callback) {
+  registerElementOnClick(DOMElement, callback) {
     this.clickCallbacks.push({DOMElement, callback});
+  }
+
+  /**
+   * Register a callback function on clicking the canvas of MapRenderer.
+   * The unit of clicking position is pixel.
+   * @param {Function} callback - Takes two arguments: x and y coordinate
+   * in canvas coordinate.
+   */
+  registerCanvasOnClickPixel(callback) {
+    this.registerElementOnClick(this.canvas, callback);
+  }
+
+  /**
+   * Register a callback function on clicking the canvas of MapRenderer.
+   * The unit of clicking position is pixel.
+   * @param {Function} callback - Takes one argument: the clicked map coordinate.
+   * Note that the map coordinate is not necessarily in integer.
+   */
+  registerCanvasOnClickMapCoord(callback) {
+    this.registerCanvasOnClickPixel((canvasX, canvasY) => {
+      const mapCoord = this.mapRender.canvasToMapCoordinate(canvasX, canvasY);
+      callback(mapCoord);
+    });
   }
 
   /**

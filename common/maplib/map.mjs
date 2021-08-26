@@ -59,14 +59,23 @@ class MapCoord {
   }
 
   /**
-   * Get the distance between two map coordinate.
+   * Get the Manhattan distance between two map coordinate.
    * @param {MapCoord} coord
    * @return {Number}
    */
-  distanceTo(coord) {
-    // TODO
-    console.error('MapCoord.distanceTo not implemented');
-    return -1;
+  distanceTo1(coord) {
+    if (this.mapName !== coord.mapName) return Infinity;
+    return Math.abs(this.x - coord.x) + Math.abs(this.y - coord.y);
+  }
+
+  /**
+   * Get the Euclidean distance between two map coordinate.
+   * @param {MapCoord} coord
+   * @return {Number}
+   */
+  distanceTo2(coord) {
+    if (this.mapName !== coord.mapName) return Infinity;
+    return Math.hypot(this.x - coord.x, this.y - coord.y);
   }
 
   /**

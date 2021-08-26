@@ -12,9 +12,10 @@ class InteractiveObjectClientBaseClass {
    * servicing various functionalities of the extension.
    * @param {MapCoord} initialPosition - TODO
    * @param {Object} displayConfig - TODO
-   * @param {Function} mapClickCallback - The function to be called when the user clicks on this interactive object.
+   * @param {Function} interactFunction - The function to be called when the user tries to
+   * interact with this object (on click, keydown, signal, etc.)
    */
-  constructor(helper, initialPosition, displayConfig, mapClickCallback) {
+  constructor(helper, initialPosition, displayConfig, interactFunction) {
     this.helper = helper;
     this.mapCoord = initialPosition;
     this.displayConfig = displayConfig;
@@ -24,7 +25,20 @@ class InteractiveObjectClientBaseClass {
       this.helper.mapRenderer.registerCustomizedLayerToDraw(zIndex, layerName, renderFunction, renderArgs);
     }
 
-    // TODO: register callback on map clicking
+    // interact on click
+    this.helper.inputManager.registerCanvasOnClickMapCoord((clickedMapCoord) => {
+      // determine whether this object is clicked
+      const {x: cx, y: cy} = clickedMapCoord;
+      const {x, y} = this.mapCoord;
+      if (!(x <= cx && cx < x+1 && y <= cy && cy < y+1)) return;
+
+      // TODO: check whether the player can interact with this object (e.g. too far to interact)
+      // const playerPosition = this.helper.gameClient.playerData.mapCoord;
+      // if (distance(clickedMapCoord, playerPosition) >= ???) return;
+      interactFunction();
+    });
+
+    // TODO: interact on keydown
   }
 }
 
