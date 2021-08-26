@@ -52,9 +52,8 @@ class SingleNPC extends InteractiveObjectClientBaseClass {
    * @param {String} npcName - The name of the NPC.
    * @param {MapCoord} initialPosition - TODO
    * @param {Array} displayConfig - TODO
-   * @param {Function} mapClickCallback - TODO
    */
-  constructor(helper, npcName, initialPosition, displayConfig, mapClickCallback) {
+  constructor(helper, npcName, initialPosition, displayConfig) {
     const mapCoord = initialPosition;
     const facing = 'D';
 
@@ -78,7 +77,12 @@ class SingleNPC extends InteractiveObjectClientBaseClass {
         };
       }
     }
-    super(helper, initialPosition, displayConfig, mapClickCallback);
+
+    const interactFunction = () => {
+      helper.callC2sAPI('npc', 'startInteraction', 500, npcName);
+    };
+
+    super(helper, initialPosition, displayConfig, interactFunction);
     this.npcName = npcName;
   }
 }
@@ -106,10 +110,7 @@ class Client {
     for (const npcName of listOfNPCs) {
       const initialPosition = MapCoord.fromObject(await this.helper.callC2sAPI('npc', 'getInitialPosition', 500, npcName));
       const displayConfig = await this.helper.callC2sAPI('npc', 'getDisplayInfo', 500, npcName);
-      const mapClickCallback = (npcName) => {
-        this.helper.callC2sAPI('npc', 'startInteraction', 500, npcName);
-      };
-      const npc = new SingleNPC(this.helper, npcName, initialPosition, displayConfig, mapClickCallback.bind(this, npcName));
+      const npc = new SingleNPC(this.helper, npcName, initialPosition, displayConfig);
       this.NPCs.set(npcName, npc);
     }
   }

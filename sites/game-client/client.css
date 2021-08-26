@@ -25,7 +25,6 @@ body {
 }
 
 #mapcanvas {
-  border: 2px solid;
   box-sizing: content-box;
 }
 
@@ -39,6 +38,7 @@ body {
 }
 
 #map-render-overlay {
+  border: 2px solid;
   width: 100%;
   height: 100%;
 }

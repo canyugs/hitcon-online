@@ -68,14 +68,16 @@ class InteractiveObjectServerBaseClass {
    * @constructor
    * @param {ExtensionHelper} helper - An extension helper object for servicing
    * various functionalities of the extension.
+   * @param {String} objectName - The name of this interactive object.
    * @param {String} configFilePath - The path of the config file.
    */
-  constructor(helper, configFilePath) {
+  constructor(helper, objectName, configFilePath) {
     this.helper = helper;
 
     // load config
     this.config = JSON.parse(fs.readFileSync(configFilePath));
     if (!this.config.enabled) return;
+    this.objectName = objectName;
 
     // input sanitization
     for (const attr of ['initialPosition', 'display', 'FSM']) {
@@ -134,6 +136,15 @@ class InteractiveObjectServerBaseClass {
 
   /**
    * TODO
+   * @param {String} player - TODO
+   * @return {Array}
+   */
+  async c2s_getDisplayInfo(player) {
+    return this.getDisplayInfo();
+  }
+
+  /**
+   * TODO
    * @return {MapCoord}
    */
   getInitialPosition() {
@@ -142,11 +153,31 @@ class InteractiveObjectServerBaseClass {
 
   /**
    * TODO
+   * @param {String} player - TODO
+   * @return {MapCoord}
+   */
+  async c2s_getInitialPosition(player) {
+    return this.getInitialPosition();
+  }
+
+  /**
+   * TODO
    * @param {Object} player - TODO
    */
   async startInteraction(player) {
+    // TODO: check whether the player can interact with this object (e.g. too far to interact)
+    console.log(`[NPC] Player '${player.playerID}' interacts with NPC '${this.objectName}'`);
     // not using await so as to prevent timeout in the client side
     this.fsmWalk(player);
+  }
+
+  /**
+   * TODO
+   * @param {Object} player - TODO
+   */
+  async c2s_startInteraction(player) {
+    // not using await so as to prevent timeout in the client side
+    this.startInteraction(player);
   }
 
   /**
