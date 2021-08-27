@@ -93,6 +93,10 @@ class JitsiHandler {
             `<audio autoplay='1' muted='true' id='localAudio${i}' class='jitsi-audio' />`);
         this.localTracks[i].attach($(`#localAudio${i}`)[0]);
       }
+
+      // All tracks should be disabled by default, and enabled upon requested.
+      this.localTracks[i].mute();
+
       if (this.isJoined) {
         this.room.addTrack(this.localTracks[i]);
       }
@@ -178,9 +182,7 @@ class JitsiHandler {
       this.remoteTracks[id] = [];
     });
     this.room.on(JitsiMeetJS.events.conference.USER_LEFT, this.onUserLeft.bind(this));
-    this.room.on(JitsiMeetJS.events.conference.TRACK_MUTE_CHANGED, (track) => {
-      console.log(`${track.getType()} - ${track.isMuted()}`);
-    });
+    this.room.on(JitsiMeetJS.events.conference.TRACK_MUTE_CHANGED, this.onTrackMute.bind(this));
     this.room.on(
         JitsiMeetJS.events.conference.DISPLAY_NAME_CHANGED,
         (userID, displayName) => console.log(`${userID} - ${displayName}`));
@@ -205,6 +207,31 @@ class JitsiHandler {
      */
   onDeviceListChanged(devices) {
     console.info('current devices', devices);
+  }
+
+  /**
+   * Handle mute or unmute from the remote track
+   * @param {JitsiTrack} track
+   */
+   onTrackMute(track) {
+    console.log(`${track.getType()} - ${track.isMuted()} ${track.getParticipantId()}`);
+    // Check if tis is a remote track
+    if (track.getParticipantId() && (track.getParticipantId() in this.remoteTracks)) {
+      const id = track.getParticipantId();
+
+      // Find the correct track
+      for (let i = 0; i < this.remoteTracks[id].length; i++) {
+        if (track.getId() === this.remoteTracks[id][i].getId()) {
+          if (track.isMuted()) {
+            $(`#${track.getParticipantId()}${track.getType()}${i+1}`).hide();
+          } else {
+            $(`#${track.getParticipantId()}${track.getType()}${i+1}`).show();
+          }
+
+          break;
+        }
+      }
+    }
   }
 
   /**
@@ -248,6 +275,30 @@ class JitsiHandler {
     JitsiMeetJS.mediaDevices.removeEventListener(
         JitsiMeetJS.events.mediaDevices.DEVICE_LIST_CHANGED,
         this.onDeviceListChangedBinded);
+  }
+
+  /**
+   * Mute the track
+   * @param {string} type Which type to mute (audio|video)
+   */
+  async mute(type) {
+    for (let i = 0; i < this.localTracks.length; i++) {
+      if (this.localTracks[i].getType() === type) {
+        this.localTracks[i].mute();
+      }
+    }
+  }
+
+  /**
+   * Unmute the track
+   * @param {string} type Which type to unmute (audio|video)
+   */
+  async unmute(type) {
+    for (let i = 0; i < this.localTracks.length; i++) {
+      if (this.localTracks[i].getType() === type) {
+        this.localTracks[i].unmute();
+      }
+    }
   }
 
   /**
