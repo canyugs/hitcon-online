@@ -35,6 +35,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         "reference": "workspace:common/rpc-directory"
       },
       {
+        "name": "hitcon-online-MapWatermark",
+        "reference": "workspace:extensions/MapWatermark"
+      },
+      {
         "name": "hitcon-online-blank",
         "reference": "workspace:extensions/blank"
       },
@@ -91,6 +95,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
     "ignorePatternData": "(^(?:\\.yarn\\/sdks(?:\\/(?!\\.)(?:(?:(?!(?:^|\\/)\\.).)*?)|$))$)",
     "fallbackExclusionList": [
       ["hitcon-online", ["workspace:."]],
+      ["hitcon-online-MapWatermark", ["workspace:extensions/MapWatermark"]],
       ["hitcon-online-asset-server", ["workspace:services/assets"]],
       ["hitcon-online-blank", ["workspace:extensions/blank"]],
       ["hitcon-online-bombman", ["workspace:extensions/bombman"]],
@@ -1928,6 +1933,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["redis", "npm:3.1.2"],
             ["socketio-jwt", "npm:4.6.2"],
             ["typescript", "patch:typescript@npm%3A4.2.4#builtin<compat/typescript>::version=4.2.4&hash=a45b0e"]
+          ],
+          "linkType": "SOFT",
+        }]
+      ]],
+      ["hitcon-online-MapWatermark", [
+        ["workspace:extensions/MapWatermark", {
+          "packageLocation": "./extensions/MapWatermark/",
+          "packageDependencies": [
+            ["hitcon-online-MapWatermark", "workspace:extensions/MapWatermark"]
           ],
           "linkType": "SOFT",
         }]

@@ -1456,6 +1456,12 @@ __metadata:
   languageName: node
   linkType: hard
 
+"hitcon-online-MapWatermark@workspace:extensions/MapWatermark":
+  version: 0.0.0-use.local
+  resolution: "hitcon-online-MapWatermark@workspace:extensions/MapWatermark"
+  languageName: unknown
+  linkType: soft
+
 "hitcon-online-asset-server@workspace:services/assets":
   version: 0.0.0-use.local
   resolution: "hitcon-online-asset-server@workspace:services/assets"
