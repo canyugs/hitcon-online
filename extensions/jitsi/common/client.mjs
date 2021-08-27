@@ -3,6 +3,7 @@
 
 import JitsiHandler from './jitsi.mjs';
 import Overlay from '/static/sites/game-client/ui/overlay.mjs';
+import ToolbarButton from '/static/sites/game-client/ui/toolbar-button.mjs';
 import OverlayPosition from '/static/sites/game-client/ui/overlay-position.mjs';
 
 const JITSI_DIV = 'jitsi-container';
@@ -30,11 +31,26 @@ class Client {
     this.helper = helper;
     this.jitsiObj = undefined;
     this.currentMeeting = undefined;
+
+    this.isMicrophoneOn = false;
   }
 
   async gameStart() {
     this.overlay = new JitsiOverlay(this.helper.mainUI);
     this.overlay.hide();
+
+    this.microphoneButton = new ToolbarButton('/static/extensions/jitsi/icons/microphone-off.svg');
+    this.microphoneButton.registerOnClick(() => {
+      console.log('clicked');
+      if (this.isMicrophoneOn) {
+        this.microphoneButton.changeIcon('/static/extensions/jitsi/icons/microphone-off.svg');
+        this.isMicrophoneOn = false;
+      } else {
+        this.microphoneButton.changeIcon('/static/extensions/jitsi/icons/microphone-on.svg');
+        this.isMicrophoneOn = true;
+      }
+    });
+    this.microphoneButton.show();
   }
 
   /**

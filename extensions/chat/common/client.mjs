@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 import Overlay from '/static/sites/game-client/ui/overlay.mjs';
+import ToolbarButton from '/static/sites/game-client/ui/toolbar-button.mjs';
 import OverlayPosition from '/static/sites/game-client/ui/overlay-position.mjs';
 
 const CHAT_DIV = 'chat-overlay';
@@ -10,14 +11,6 @@ class ChatOverlay extends Overlay {
   constructor(mainUI) {
     const dom = document.getElementById(CHAT_DIV);
     super(mainUI, dom);
-  }
-
-  // TODO(zeze-zeze): Expand on this class (jsdoc and implementation) and
-  // implement onPre/PostShow/Hide() as needed.
-
-  hasToolbarButton() {
-    this.toolbarButtonSrc = '/static/extensions/chat/chat.svg';
-    return true;
   }
 };
 
@@ -41,6 +34,10 @@ class Client {
   async gameStart() {
     this.overlay = new ChatOverlay(this.helper.mainUI);
     this.overlay.show(OverlayPosition.RIGHT);
+
+    this.toolbarButton = new ToolbarButton('/static/extensions/chat/chat.svg');
+    this.toolbarButton.registerAsToggle(this.overlay);
+    this.toolbarButton.show();
   }
 
   send_msg(client) {
