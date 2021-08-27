@@ -33,24 +33,50 @@ class Client {
     this.currentMeeting = undefined;
 
     this.isMicrophoneOn = false;
+    this.isCameraOn = false;
   }
 
   async gameStart() {
     this.overlay = new JitsiOverlay(this.helper.mainUI);
     this.overlay.hide();
 
+    // Microphone button
     this.microphoneButton = new ToolbarButton('/static/extensions/jitsi/icons/microphone-off.svg');
     this.microphoneButton.registerOnClick(() => {
-      console.log('clicked');
       if (this.isMicrophoneOn) {
         this.microphoneButton.changeIcon('/static/extensions/jitsi/icons/microphone-off.svg');
         this.isMicrophoneOn = false;
+        if (this.jitsiObj) {
+          this.jitsiObj.mute('audio');
+        }
       } else {
         this.microphoneButton.changeIcon('/static/extensions/jitsi/icons/microphone-on.svg');
         this.isMicrophoneOn = true;
+        if (this.jitsiObj) {
+          this.jitsiObj.unmute('audio');
+        }
       }
     });
-    this.microphoneButton.show();
+    this.microphoneButton.hide();
+
+    // Camera button
+    this.cameraButton = new ToolbarButton('/static/extensions/jitsi/icons/camera-off.svg');
+    this.cameraButton.registerOnClick(() => {
+      if (this.isCameraOn) {
+        this.cameraButton.changeIcon('/static/extensions/jitsi/icons/camera-off.svg');
+        this.isCameraOn = false;
+        if (this.jitsiObj) {
+          this.jitsiObj.mute('video');
+        }
+      } else {
+        this.cameraButton.changeIcon('/static/extensions/jitsi/icons/camera-on.svg');
+        this.isCameraOn = true;
+        if (this.jitsiObj) {
+          this.jitsiObj.unmute('video');
+        }
+      }
+    });
+    this.cameraButton.hide();
   }
 
   /**
@@ -60,13 +86,18 @@ class Client {
     this.jitsiObj = new JitsiHandler(meetingName, password);
     this.currentMeeting = meetingName;
     this.overlay.show(OverlayPosition.CENTER_TOP);
-    //$('#jitsi-container').css('display', 'flex');
+
+    this.microphoneButton.show();
+    this.cameraButton.show();
   }
 
   /**
    * Stop the Jitsi Meeting.
    */
   async stopMeeting() {
+    this.microphoneButton.hide();
+    this.cameraButton.hide();
+
     if (this.jitsiObj) {
       this.overlay.hide();
       await this.jitsiObj.unload();
