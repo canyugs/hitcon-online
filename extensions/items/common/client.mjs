@@ -77,7 +77,7 @@ class Client {
       console.log("Item does not exist");
       return;
     }
-    if (!itemInfo[name].exchangeable) {
+    if (!this.itemInfo[name].exchangeable) {
       console.error('Item is not exchangeable');
       return;
     }

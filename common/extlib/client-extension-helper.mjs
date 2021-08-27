@@ -125,7 +125,7 @@ class ClientExtensionHelper {
     if (!(methodName in this.clientAPIs)) {
       this.clientAPIs[methodName] = methodFunction;
     } else {
-      throw `Duplicate registration of method ${methodNam}`;
+      throw `Duplicate registration of method ${methodName}`;
     }
   }
 

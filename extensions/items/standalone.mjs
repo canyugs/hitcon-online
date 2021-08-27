@@ -255,9 +255,9 @@ class Standalone {
       return;
     }
     item[itemName].amount -= amount;
-    this.items[player.playerID, fromPlayerItem];
+    this.items[player.playerID, item];
 
-    itemInstances[itemName].useItem(amount);
+    this.itemInstances[itemName].useItem(amount);
 
     /* Store data into file */
     this.helper.storeData(this.PackStoredData());
