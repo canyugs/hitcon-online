@@ -42,7 +42,7 @@ class Standalone {
    */
   async c2s_privateMessage(player, args) {
     args['msg_from'] = player.playerID;
-    await this.helper.callS2cAPI(arg.msg_to, 'chat', 'getPrivateMessage', 5000, args);
+    await this.helper.callS2cAPI(args.msg_to, 'chat', 'getPrivateMessage', 5000, args);
     await this.helper.callS2cAPI(player.playerID, 'chat', 'sendedPrivateMessage', 5000, args);
   }
 
@@ -65,7 +65,7 @@ class Standalone {
    * @return {object} result - the result of admin command, state will be false if command not found
    */
   async c2s_otherCommands(cmd) {
-    result = {'state': false, 'reply': ''};
+    const result = {'state': false, 'reply': ''};
     return result;
   }
 
