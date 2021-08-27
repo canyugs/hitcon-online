@@ -1,9 +1,9 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
-/** 
+/**
  * Represents an overlay
- * 
+ *
  * Those who wants to use the Overlay element should extend this class and implement the methods.
 */
 class Overlay {
@@ -14,16 +14,12 @@ class Overlay {
     this.mainUI = mainUI;
     this.dom = dom;
     this.position = undefined;
-    this.toolbarButton = undefined;
-    this.toolbarButtonIconSrc = undefined;
     this.positionCache = undefined;
-
-    mainUI.addToolbarButton(this);
   }
-  
+
   /**
    * If true, user can hide the overlay.
-   * 
+   *
    * This method can be implemented in the derived class if the derived class
    * wishes to adjust this default behaviour.
    */
@@ -44,40 +40,10 @@ class Overlay {
   }
 
   /**
-   * If true, it should set the basic property for toolbarButton,
-   * and mainUI will add a button in toolbar for the overlay.
-   *
-   * *This method can be implemented in the derived class if the derived class
-   * wishes to adjust this default behaviour.*
-   *
-   * @return {Boolean}
-   */
-  hasToolbarButton() {
-    // Fail safe default.
-    return false;
-  }
-
-  /**
-   * Unset ToolbarButton display=none.
-   */
-  showToolbarButton() {
-    // WIP(fanlan1210)
-    this.toolbarButton.style.display = null;
-  }
-
-  /**
-   * Set ToolbarButton display=none.
-   */
-  hideToolbarButton() {
-    // WIP(fanlan1210)
-    this.toolbarButton.style.display = 'none';
-  }
-
-  /**
    * If the overlay has ToolbarButton, it should toggle the overlay hide/show state
    * when the button is clicked.
   */
-  onClickToolbarButton() {
+  onClickToggleButton() {
     // WIP(fanlan1210)
     console.assert(this.positionCache, 'positionCache does not have default value.');
     if (this.canHide() && this.position !== undefined) {
@@ -93,10 +59,10 @@ class Overlay {
      V
   DISMISSED
   */
-  
+
   /**
    * Transfer the state: HIDDEN -> SHOW
-   */ 
+   */
   show(position) {
     const proceed = this.onPreShow();
     // If onPreShow() says don't do it, then don't.
@@ -113,7 +79,7 @@ class Overlay {
 
   /**
    * Unset visibility=hidden.
-   * 
+   *
    * state: SHOW -> HIDE
    */
   hide() {
@@ -132,14 +98,14 @@ class Overlay {
 
   /**
    * Destroy the overlay.
-   * 
+   *
    * state: SHOW/HIDDEN -> DISMISS
    */
   dismiss() {}
 
   /**
    * Executes when the overlay is dismissed.
-   * 
+   *
    * This method can be implemented in the derived class if the derived class
    * wishes to handle this event.
    */
@@ -179,7 +145,7 @@ class Overlay {
 
   /**
    * Executes when the window is resized.
-   * 
+   *
    * This method can be implemented in the derived class if the derived class
    * wishes to handle this event.
    */
