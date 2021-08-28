@@ -3,25 +3,14 @@ Not started
 ===========
 
 - Settings Dialog
-- NPC
-  - Portal NPC
-  - Door NPC
-- Extension
-  - Allow extensions to get player state/location
-  - Allow extensions to listen to broadcast of player move/cellset changes
-- UI
-  - character displayName / displayChar setting
-  - online list
-- Better Jitsi integration
-- Disconnect/Error Screen/Handler
-- Right click menu on character
-  - Follow functionality
+  - Character displayName / displayChar setting
+- XSS Sanitization Library and Refactor
+- Terminal NPC
 - Ghost mode/jump
 - Fix race condition in Gateway connect/disconnect handler.
 - Optimize loading when multiple users are looking for spawn point or have a timer/queue when spawn points are full.
 - Renderer
   - Smoother movement animation with transition
-  - Text layer for directions
 
 
 In Progress
@@ -29,6 +18,14 @@ In Progress
 
 - Chat (text) extension
 - Item/Inventory extension
-- Dialogs extension
 - Productionization
 - Bomb man extension
+- NPC
+  - Portal NPC
+  - Door NPC
+- Better Jitsi integration
+- Online list
+- Right click menu on character
+  - Follow functionality
+  - Private message
+- Disconnect/Error Screen/Handler
