@@ -130,8 +130,44 @@ class ClientExtensionManager {
       return await this.extHelpers[extName].onS2cAPICalled(methodName, args);
     } catch (e) {
       console.error(`Exception '${e}' calling S2cAPI '${methodName}' in '${extName}'`);
+      console.error(e.stack);
       return {'error': 'exception'};
     }
+  }
+
+  /**
+   * Call an API provided by the same extension's standalone part
+   * on the server side.
+   * @param {string} extName - The name of the extension.
+   * @param {string} methodName - The name of the API.
+   * @param {Number} timeout - An optional timeout in ms.
+   * @param {Array} args - Arguments to the call.
+   * @return {object} result - The result from the call.
+   */
+  async callC2sAPI(extName, methodName, timeout, ...args) {
+    // TODO: Emit the corresponding event through socket in game client.
+    if (!timeout) timeout = 0;
+    console.assert(typeof extName === 'string' && extName != '',
+      'extName in callC2sAPI() should be valid');
+    const resultPromise = new Promise((resolve) => {
+      // TODO: Fill in callArgs so gateway service knows how to handle it.
+      const timeoutTimer = setTimeout(() => {
+        resolve({error: 'timeout'});
+      }, timeout);
+
+      const callArgs = {
+        extName: extName,
+        methodName: methodName,
+        args: args
+      };
+      // TODO: Handle timeout.
+      this.socket.emit('callC2sAPI', callArgs, (result) => {
+        // TODO: Resolve the promise and return the result.
+        clearTimeout(timeoutTimer);
+        resolve(result);
+      });
+    });
+    return await resultPromise;
   }
 
   /**

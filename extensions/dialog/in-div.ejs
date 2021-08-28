@@ -21,16 +21,27 @@
     margin: 1vh 1vw 1vh 1vw;
     border: gray solid 3px;
     padding: 3px;
-    overflow:hidden;
     text-overflow:ellipsis;
     white-space:nowrap;
     flex-grow: 10;
   }
+
   #dialog-btn-container {
-    display: flex;
+    display: none;
     flex-direction: row;
     justify-content: right;
   }
+  #dialog-btn-container.visible {
+    display: flex;
+  }
+
+  .dialog-choice-entry {
+    color: blue;
+  }
+  .dialog-choice-entry:hover {
+    text-decoration: underline;
+  }
+
   .button {
     margin-left: 5px;
   }

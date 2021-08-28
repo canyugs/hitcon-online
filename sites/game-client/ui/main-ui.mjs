@@ -168,8 +168,6 @@ class MainUI {
     this._enableModal();
     this.activeModal = modal;
     for (const ele of modal._getModalDOM()) {
-      console.log("Adding ");
-      console.log(ele);
       this.modalContDom.append(ele);
     }
     return true;
