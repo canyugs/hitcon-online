@@ -150,3 +150,17 @@ body {
 .modal-container.visible {
   z-index: 110;
 }
+
+/* error-modal related style */
+#error-modal {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+#error-modal > div {
+  width: 50%;
+}

@@ -29,6 +29,13 @@ absolute URL.
         <div id="map-render-overlay" class="container-center">
           <canvas id="mapcanvas"></canvas>
         </div>
+        <div id="error-modal">
+          <div>
+            <h2>Oops!</h2>
+            <p id="error-message"></p>
+          </div>
+          <p id="error-handler-message"></p>
+        </div> 
         <% inDiv.forEach((i) => { %>
           <%- include(i); %>
         <% }); %>
@@ -65,6 +72,7 @@ absolute URL.
       import MainUI from '/static/sites/game-client/ui/main-ui.mjs';
       import MapRendererOverlay from '/static/sites/game-client/ui/map-renderer-overlay.mjs';
       import OverlayPosition from '/static/sites/game-client/ui/overlay-position.mjs';
+      import ErrorModal from '/static/sites/game-client/ui/error-modal.mjs';
 
       // Export internal classes for ease of debugging.
       let gameClass = {};
@@ -134,6 +142,8 @@ absolute URL.
         // Initializes the UI.
         game.mapRendererOverlay = new MapRendererOverlay(game.mainUI);
         game.mapRendererOverlay.show(OverlayPosition.MAIN_VIEW);
+
+        game.errorModal = new ErrorModal(game.mainUI);
 
         function onGameTick () {
           game.mapRenderer.draw();
