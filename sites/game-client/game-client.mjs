@@ -77,6 +77,11 @@ class GameClient {
       socket.on('callS2cAPI', (msg, callback) => {
         let p = this.extMan.onS2cAPICalled(msg);
         p.then((result) => {
+          if (result.error) {
+            console.warn(`Error on callS2cAPI('${msg.extName}', ` +
+              `'${msg.methodName}', '${msg.args}'): ` +
+              `${JSON.stringify(result)}`);
+          }
           callback(result);
         });
       });
