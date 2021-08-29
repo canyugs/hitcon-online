@@ -48,6 +48,7 @@ class Client {
    * @getPlayerList
    */
   async getPlayerList() {
+    // TODO(zeze-zeze): Optimize the way to update playerlist
     setInterval(() => {
       this.helper.callC2sAPI('playerlist', 'getPlayerList', 1000);
     }, 1000);
@@ -75,17 +76,6 @@ class Client {
    */
   HTMLEncode(str) {
     return $('<div/>').text(str).html();
-  }
-
-  /**
-   * Get a Broadcast message
-   * @onExtensionBroadcast
-   * @param {object} arg - Information of the broadcast message
-  */
-  onExtensionBroadcast(arg) {
-    arg.msg_from = $('<div/>').text(arg.msg_from).html();
-    arg.msg = $('<div/>').text(arg.msg).html();
-    document.getElementById('message_history').innerHTML += '<span>' + arg.msg_from + ': ' + arg.msg + '</span><br>';
   }
 }
 
