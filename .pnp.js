@@ -75,6 +75,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         "reference": "workspace:extensions/jitsi"
       },
       {
+        "name": "hitcon-online-playerlist",
+        "reference": "workspace:extensions/playerlist"
+      },
+      {
         "name": "hitcon-online-asset-server",
         "reference": "workspace:services/assets"
       },
@@ -115,6 +119,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
       ["hitcon-online-jitsi", ["workspace:extensions/jitsi"]],
       ["hitcon-online-main-server", ["workspace:services/main"]],
       ["hitcon-online-maplib", ["workspace:common/maplib"]],
+      ["hitcon-online-playerlist", ["workspace:extensions/playerlist"]],
       ["hitcon-online-rpc-directory", ["workspace:common/rpc-directory"]],
       ["hitcon-online-standalone-server", ["workspace:services/standalone"]]
     ],
@@ -2107,6 +2112,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./common/maplib/",
           "packageDependencies": [
             ["hitcon-online-maplib", "workspace:common/maplib"]
+          ],
+          "linkType": "SOFT",
+        }]
+      ]],
+      ["hitcon-online-playerlist", [
+        ["workspace:extensions/playerlist", {
+          "packageLocation": "./extensions/playerlist/",
+          "packageDependencies": [
+            ["hitcon-online-playerlist", "workspace:extensions/playerlist"]
           ],
           "linkType": "SOFT",
         }]

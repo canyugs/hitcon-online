@@ -1581,6 +1581,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"hitcon-online-playerlist@workspace:extensions/playerlist":
+  version: 0.0.0-use.local
+  resolution: "hitcon-online-playerlist@workspace:extensions/playerlist"
+  languageName: unknown
+  linkType: soft
+
 "hitcon-online-rpc-directory@workspace:common/rpc-directory":
   version: 0.0.0-use.local
   resolution: "hitcon-online-rpc-directory@workspace:common/rpc-directory"
