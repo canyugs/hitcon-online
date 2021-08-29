@@ -44,7 +44,7 @@ class JitsiHandler {
   }
 
   /**
-   *
+   * Create Jitsi connection
    */
   connect() {
     JitsiMeetJS.setLogLevel(JitsiMeetJS.logLevels.ERROR);
@@ -77,8 +77,8 @@ class JitsiHandler {
   }
 
   /**
-   * Handles local tracks.
-   * @param tracks Array with JitsiTrack objects
+   * Handles new local tracks.
+   * @param {JitsiTrack} tracks Array with JitsiTrack objects
    */
   onLocalTracks(tracks) {
     console.log("onLocalTracks", tracks);
@@ -106,8 +106,8 @@ class JitsiHandler {
   }
 
   /**
-   * Handles remote tracks
-   * @param track JitsiTrack object
+   * Handles new remote tracks.
+   * @param {JitsiTrack} track JitsiTrack object
    */
   onRemoteTrack(track) {
     if (track.isLocal()) {
@@ -153,8 +153,8 @@ class JitsiHandler {
   }
 
   /**
-   *
-   * @param id
+   * This is executed when an user left.
+   * @param {Number} id The participant id of the user just left.
    */
   onUserLeft(id) {
     console.log('user left');
@@ -176,6 +176,11 @@ class JitsiHandler {
     }
   }
 
+  /**
+   * Update the user's display name.
+   * @param {Number} id The participant id.
+   * @param {String} displayName The new display name.
+   */
   onDisplayNameChanged(id, displayName) {
     const tracks = this.remoteTracks[id];
 
@@ -187,7 +192,7 @@ class JitsiHandler {
   }
 
   /**
-   * That is called when connection is established successfully
+   * This is called when connection is established successfully
    */
   onConnectionSuccess() {
     this.room = this.connection.initJitsiConference(this.meetingName.toLowerCase(), {});
@@ -226,8 +231,8 @@ class JitsiHandler {
   }
 
   /**
-     * This is called when the connection fail.
-     */
+   * This is called when the connection fail.
+   */
   onDeviceListChanged(devices) {
     console.info('current devices', devices);
   }

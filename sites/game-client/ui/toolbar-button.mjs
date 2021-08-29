@@ -10,6 +10,7 @@ class ToolbarButton {
   /**
    * @param {String} iconSrc The icon of the button.
    * @param {Boolean} createDOM Whether the DOM element should be created by the constructor.
+   * Should set to false if you want to handle the DOM element creation yourself.
    */
   constructor(iconSrc, createDOM = true) {
     this.iconSrc = iconSrc;
@@ -37,7 +38,7 @@ class ToolbarButton {
   }
 
   /**
-   * Register a callback function for the button.
+   * Register the button as overlay or modal visibility switch.
    * @param {Object} toggleTarget A overlay or modal object.
    */
   registerAsToggle(toggleTarget) {
