@@ -136,6 +136,9 @@ class JitsiHandler {
       `);
     }
     track.attach($(`#${trackId}`)[0]);
+    if (track.isMuted()) {
+      $(`#${track.getId()}`).hide();
+    }
   }
 
   /**
