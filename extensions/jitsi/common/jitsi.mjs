@@ -6,15 +6,17 @@
  * One instance is created for each connected player.
  */
 class JitsiHandler {
-  constructor(meetingName, password) {
+  constructor(meetingName, password, userName) {
     this.connection = null;
     this.isVideo = true;
     this.localTracks = [];
     this.remoteTracks = {};
+    this.participantsInfo = {};
     this.isJoined = false;
     this.room = null;
     this.meetingName = meetingName;
     this.password = password;
+    this.userName = userName;
 
     this.options = {
       hosts: {
@@ -23,7 +25,7 @@ class JitsiHandler {
         focus: 'focus.meet.jit.si',
       },
       externalConnectUrl: 'https://meet.jit.si/http-pre-bind',
-      serviceUrl: `https://meet.jit.si/http-bind?room=test`,
+      serviceUrl: `https://meet.jit.si/http-bind?room=${meetingName}`,
       websocket: 'wss://meet.jit.si/xmpp-websocket',
       clientNode: 'http://jitsi.org/jitsimeet',
     };
@@ -111,22 +113,29 @@ class JitsiHandler {
     if (track.isLocal()) {
       return;
     }
-    const participant = track.getParticipantId();
+    const participantId = track.getParticipantId();
 
-    if (!this.remoteTracks[participant]) {
-      this.remoteTracks[participant] = [];
+    if (!this.remoteTracks[participantId]) {
+      this.remoteTracks[participantId] = [];
     }
-    const idx = this.remoteTracks[participant].push(track);
-    const id = participant + track.getType() + idx;
+    this.remoteTracks[participantId].push(track);
+    const trackId = participantId + track.getType() + track.getId();
 
     if (track.getType() === 'video') {
-      $('#jitsi-remote-container').append(
-          `<video autoplay='1' id='${id}' class='jitsi-remote-video' />`);
+      $('#jitsi-remote-container').append(`
+        <div id='${track.getId()}'>
+          <video autoplay='1' id='${trackId}' class='jitsi-remote-video'></video>
+          <p id='${trackId}-text'>${this.participantsInfo[participantId]._displayName}</p>
+        </div>
+      `);
     } else {
-      $('#jitsi-remote-container').append(
-          `<audio autoplay='1' id='${id}' class='jitsi-audio' />`);
+      $('#jitsi-remote-container').append(`
+        <div id='${track.getId()}' class='jitsi-audio'>
+          <audio autoplay='1' id='${trackId}' />
+        </div>
+      `);
     }
-    track.attach($(`#${id}`)[0]);
+    track.attach($(`#${trackId}`)[0]);
   }
 
   /**
@@ -154,13 +163,23 @@ class JitsiHandler {
 
     for (let i = 0; i < tracks.length; i++) {
       try {
-        tracks[i].detach($(`#${id}${tracks[i].getType()}${i+1}`));
+        tracks[i].detach($(`#${id}${tracks[i].getType()}${tracks[i].getId()}`));
       } catch (e) {
         // An error is expected: https://github.com/jitsi/lib-jitsi-meet/issues/1054
         // It seems that we can safely ignore the error.
         // console.error(e);
       }
-      $(`#${id}${tracks[i].getType()}${i+1}`).remove();
+      $(`#${tracks[i].getId()}`).remove();
+    }
+  }
+
+  onDisplayNameChanged(id, displayName) {
+    const tracks = this.remoteTracks[id];
+
+    for (let i = 0; i < tracks.length; i++) {
+      if (track.getType() === 'video') {
+        $(`#${id}${tracks[i].getType()}${tracks[i].getId()}-text`).text(displayName);
+      }
     }
   }
 
@@ -168,7 +187,6 @@ class JitsiHandler {
    * That is called when connection is established successfully
    */
   onConnectionSuccess() {
-    console.log('this.meetingName', this.meetingName.toLowerCase());
     this.room = this.connection.initJitsiConference(this.meetingName.toLowerCase(), {});
     this.room.on(JitsiMeetJS.events.conference.TRACK_ADDED, this.onRemoteTrack.bind(this));
     this.room.on(JitsiMeetJS.events.conference.TRACK_REMOVED, (track) => {
@@ -177,8 +195,9 @@ class JitsiHandler {
     this.room.on(
         JitsiMeetJS.events.conference.CONFERENCE_JOINED,
         this.onConferenceJoined.bind(this));
-    this.room.on(JitsiMeetJS.events.conference.USER_JOINED, (id) => {
-      console.log('user joined: ', id);
+    this.room.on(JitsiMeetJS.events.conference.USER_JOINED, (id, user) => {
+      console.log('user joined: ', id, user._displayName);
+      this.participantsInfo[id] = user;
       this.remoteTracks[id] = [];
     });
     this.room.on(JitsiMeetJS.events.conference.USER_LEFT, this.onUserLeft.bind(this));
@@ -192,6 +211,7 @@ class JitsiHandler {
     this.room.on(
         JitsiMeetJS.events.conference.PHONE_NUMBER_CHANGED,
         () => console.log(`${this.room.getPhoneNumber()} - ${this.room.getPhonePin()}`));
+    this.room.setDisplayName(this.userName);
     this.room.join(this.password);
   }
 
@@ -213,23 +233,14 @@ class JitsiHandler {
    * Handle mute or unmute from the remote track
    * @param {JitsiTrack} track
    */
-   onTrackMute(track) {
+  onTrackMute(track) {
     console.log(`${track.getType()} - ${track.isMuted()} ${track.getParticipantId()}`);
-    // Check if tis is a remote track
+    // Check if this is a remote track
     if (track.getParticipantId() && (track.getParticipantId() in this.remoteTracks)) {
-      const id = track.getParticipantId();
-
-      // Find the correct track
-      for (let i = 0; i < this.remoteTracks[id].length; i++) {
-        if (track.getId() === this.remoteTracks[id][i].getId()) {
-          if (track.isMuted()) {
-            $(`#${track.getParticipantId()}${track.getType()}${i+1}`).hide();
-          } else {
-            $(`#${track.getParticipantId()}${track.getType()}${i+1}`).show();
-          }
-
-          break;
-        }
+      if (track.isMuted()) {
+        $(`#${track.getId()}`).hide();
+      } else {
+        $(`#${track.getId()}`).show();
       }
     }
   }
