@@ -83,12 +83,18 @@ class Client {
    * Start the Jitsi Meeeting
    */
   startMeeting(meetingName, password) {
-    this.jitsiObj = new JitsiHandler(meetingName, password);
+    this.jitsiObj = new JitsiHandler(meetingName, password,
+      this.helper.gameClient.playerInfo.displayName);
     this.currentMeeting = meetingName;
     this.overlay.show(OverlayPosition.CENTER_TOP);
 
-    this.microphoneButton.show();
+    this.isCameraOn = false;
+    this.cameraButton.changeIcon('/static/extensions/jitsi/icons/camera-off.svg');
     this.cameraButton.show();
+
+    this.isMicrophoneOn = false;
+    this.microphoneButton.changeIcon('/static/extensions/jitsi/icons/microphone-off.svg');
+    this.microphoneButton.show();
   }
 
   /**
