@@ -97,10 +97,9 @@ class InteractiveObjectServerBaseClass {
 
   /**
    * TODO
-   * @param {Object} player - TODO
+   * @param {String} playerID - TODO
    */
-  async fsmWalk(player) {
-    const playerID = player;
+  async fsmWalk(playerID) {
     const fsm = this.config.FSM; // alias
 
     // initialize if not exist
@@ -121,7 +120,7 @@ class InteractiveObjectServerBaseClass {
         this.dataStore.set(playerID, fsm.initialState);
         break;
       }
-      const nextState = await this[func](kwargs);
+      const nextState = await this[func](playerID, kwargs);
       this.dataStore.set(playerID, nextState);
     }
   }
@@ -136,7 +135,7 @@ class InteractiveObjectServerBaseClass {
 
   /**
    * TODO
-   * @param {String} player - TODO
+   * @param {Object} player - TODO
    * @return {Array}
    */
   async c2s_getDisplayInfo(player) {
@@ -153,7 +152,7 @@ class InteractiveObjectServerBaseClass {
 
   /**
    * TODO
-   * @param {String} player - TODO
+   * @param {Object} player - TODO
    * @return {MapCoord}
    */
   async c2s_getInitialPosition(player) {
@@ -162,13 +161,13 @@ class InteractiveObjectServerBaseClass {
 
   /**
    * TODO
-   * @param {Object} player - TODO
+   * @param {String} playerID - TODO
    */
-  async startInteraction(player) {
+  async startInteraction(playerID) {
     // TODO: check whether the player can interact with this object (e.g. too far to interact)
-    console.log(`[NPC] Player '${player.playerID}' interacts with NPC '${this.objectName}'`);
+    console.log(`[NPC] Player '${playerID}' interacts with NPC '${this.objectName}'`);
     // not using await so as to prevent timeout in the client side
-    this.fsmWalk(player);
+    this.fsmWalk(playerID);
   }
 
   /**
@@ -177,28 +176,53 @@ class InteractiveObjectServerBaseClass {
    */
   async c2s_startInteraction(player) {
     // not using await so as to prevent timeout in the client side
-    this.startInteraction(player);
+    this.startInteraction(player.playerID);
   }
 
   /**
    * Show an overlay in client browser.
+   * @param {String} playerID
    * @param {Object} kwargs - TODO
    * @return {String} - the next state
    */
-  async sf_showDialog(kwargs) {
-    // TODO
+  async sf_showDialog(playerID, kwargs) {
+    function randomChoice(arr) {
+      const min = 0;
+      const max = arr.length;
+      const index = Math.floor(Math.random() * (max - min) + min); // The maximum is exclusive and the minimum is inclusive
+      return arr[index];
+    }
+
     const {dialogs, options} = kwargs;
-    return Object.values(options)[0];
+
+    // prepare dialog
+    let d = '';
+    if (typeof dialogs === 'string') d = dialogs;
+    if (Array.isArray(dialogs)) d = randomChoice(dialogs);
+
+    // prepare choice
+    const c = [];
+    for (const [message, nextState] of Object.entries(options)) {
+      c.push({token: nextState, display: message});
+    }
+
+    const nextState = await this.helper.callS2cAPI(playerID, 'dialog', 'showDialogWithMultichoice', 60*1000, this.objectName, d, c);
+    if (nextState) return nextState;
+
+    // If we reach here, the showDialog timeouts.
+    this.sf_exit(playerID);
   }
 
   /**
    * Just a placeholder function to provide `exit` function in configuration.
+   * @param {String} playerID
    * @param {Object} kwargs - TODO
    * @return {String} - the next state
    */
-  async sf_exit(kwargs) {
+  async sf_exit(playerID, kwargs) {
     this._fsmWalkExit = true;
-    return kwargs.next;
+    if (kwargs.next) return kwargs.next;
+    return this.config.FSM.initialState;
   }
 }
 
@@ -231,7 +255,7 @@ class Example extends InteractiveObjectServerBaseClass {
    *   }
    * }
    */
-  async sf_customStateFunction1(kwargs) {
+  async sf_customStateFunction1(playerID, kwargs) {
     // maybe call some s2c function
     // return next state
   }

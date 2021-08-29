@@ -32,7 +32,7 @@
       "s2": {
         "func": "showDialog",
         "kwargs": {
-          "dialogs": "I'm fine thank you!",
+          "dialogs": ["I'm fine thank you!", "Not so well ...", "Fantastic!"],
           "options": {
             "Bye!": "s3"
           }

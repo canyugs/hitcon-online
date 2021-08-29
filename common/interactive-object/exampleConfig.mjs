@@ -24,7 +24,7 @@ const exampleConfig1 = {
       's2': {
         'func': 'showDialog',
         'kwargs': {
-          'dialogs': 'I\'m fine thank you!',
+          'dialogs': ['I\'m fine thank you!', 'Not so well ...'], // randomly choose a dialog in the Array
           'options': {
             'Bye!': 's3',
           },

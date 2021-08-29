@@ -78,7 +78,7 @@ class Standalone {
   async c2s_startInteraction(player, npcName) {
     const npc = this.NPCs.get(npcName);
     if (typeof npc === 'undefined') return;
-    await npc.startInteraction(player);
+    await npc.startInteraction(player.playerID);
   }
 
   /**
