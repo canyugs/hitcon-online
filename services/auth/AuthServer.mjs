@@ -24,18 +24,18 @@ class AuthServer {
      * token if verification is successful.
      */
     verifyToken(token) {
-        var ret = null;
-        if (token) {
-            jwt.verify(token, this.app.get('secret'), function(err, decoded) {
-                if (err) {
-                    return;
-                } else {
-                    ret = decoded;
-                }
-            });
-        } else {
+        let ret = null;
+        if (!token) {
             return null;
         }
+
+        try {
+            ret = jwt.verify(token, this.app.get('secret'));
+        } catch (err) {
+            console.error(err);
+            return null;
+        }
+
         // Check for valid subject in the token.
         if (!('sub' in ret) || typeof ret.sub != 'string') {
             console.error('Invalid subject in token found for verifyToken.');
@@ -44,7 +44,7 @@ class AuthServer {
         }
         return ret;
     }
-    
+
     /*
     * Start the auth server to route
     * @run
@@ -70,7 +70,7 @@ class AuthServer {
                     success: false,
                     message: 'No token provided.'
                 });
-            }   
+            }
         });
 
         this.app.get('/get_test_token', function(req, res) {
@@ -86,8 +86,7 @@ class AuthServer {
             payload.iss = 'https://hitcon.org';
             payload.sub = genRandomStr(5);
             payload.iat = Math.floor(Date.now() / 1000);
-            payload.exp = 1630425600; // 2021/09/01
-            const token = jwt.sign(payload, secret);
+            const token = jwt.sign(payload, secret, {expiresIn: 60 * 60 * 24 * 365});
             res.cookie('token', token);
             res.json({
                 success: true,
