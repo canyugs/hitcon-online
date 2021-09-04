@@ -52,7 +52,11 @@ class Client {
         if (typeof playerID.displayName !== 'string' || !playerID.displayName.includes(document.getElementById("searchPlayer").value)) {
           return;
         }
+        // TODO(zeze-zeze): Keep a record of dom elements
+        // TODO(zeze-zeze): Move it to a separate function
         document.getElementById('playerlist').innerHTML += '<span>' + this.HTMLEncode(playerID.displayName); + '</span>';
+
+        // TODO(zeze-zeze): Use onchange callback to update playerlist instead of waiting 1 second
      });
     }, 1000);
   }
