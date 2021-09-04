@@ -41,16 +41,16 @@ class Client {
     this.overlay.hide();
 
     // Microphone button
-    this.microphoneButton = new ToolbarButton('/static/extensions/jitsi/icons/microphone-off.svg');
+    this.microphoneButton = new ToolbarButton('/static/extensions/jitsi/common/icons/microphone-off.svg');
     this.microphoneButton.registerOnClick(() => {
       if (this.isMicrophoneOn) {
-        this.microphoneButton.changeIcon('/static/extensions/jitsi/icons/microphone-off.svg');
+        this.microphoneButton.changeIcon('/static/extensions/jitsi/common/icons/microphone-off.svg');
         this.isMicrophoneOn = false;
         if (this.jitsiObj) {
           this.jitsiObj.mute('audio');
         }
       } else {
-        this.microphoneButton.changeIcon('/static/extensions/jitsi/icons/microphone-on.svg');
+        this.microphoneButton.changeIcon('/static/extensions/jitsi/common/icons/microphone-on.svg');
         this.isMicrophoneOn = true;
         if (this.jitsiObj) {
           this.jitsiObj.unmute('audio');
@@ -60,16 +60,16 @@ class Client {
     this.microphoneButton.hide();
 
     // Camera button
-    this.cameraButton = new ToolbarButton('/static/extensions/jitsi/icons/camera-off.svg');
+    this.cameraButton = new ToolbarButton('/static/extensions/jitsi/common/icons/camera-off.svg');
     this.cameraButton.registerOnClick(() => {
       if (this.isCameraOn) {
-        this.cameraButton.changeIcon('/static/extensions/jitsi/icons/camera-off.svg');
+        this.cameraButton.changeIcon('/static/extensions/jitsi/common/icons/camera-off.svg');
         this.isCameraOn = false;
         if (this.jitsiObj) {
           this.jitsiObj.mute('video');
         }
       } else {
-        this.cameraButton.changeIcon('/static/extensions/jitsi/icons/camera-on.svg');
+        this.cameraButton.changeIcon('/static/extensions/jitsi/common/icons/camera-on.svg');
         this.isCameraOn = true;
         if (this.jitsiObj) {
           this.jitsiObj.unmute('video');
@@ -89,11 +89,11 @@ class Client {
     this.overlay.show(OverlayPosition.CENTER_TOP);
 
     this.isCameraOn = false;
-    this.cameraButton.changeIcon('/static/extensions/jitsi/icons/camera-off.svg');
+    this.cameraButton.changeIcon('/static/extensions/jitsi/common/icons/camera-off.svg');
     this.cameraButton.show();
 
     this.isMicrophoneOn = false;
-    this.microphoneButton.changeIcon('/static/extensions/jitsi/icons/microphone-off.svg');
+    this.microphoneButton.changeIcon('/static/extensions/jitsi/common/icons/microphone-off.svg');
     this.microphoneButton.show();
   }
 

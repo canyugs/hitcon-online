@@ -35,7 +35,7 @@ class Client {
     this.overlay = new ChatOverlay(this.helper.mainUI);
     this.overlay.show(OverlayPosition.RIGHT);
 
-    this.toolbarButton = new ToolbarButton('/static/extensions/chat/chat.svg');
+    this.toolbarButton = new ToolbarButton('/static/extensions/chat/common/chat.svg');
     this.toolbarButton.registerAsToggle(this.overlay);
     this.toolbarButton.show();
   }
