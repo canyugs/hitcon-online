@@ -66,7 +66,10 @@ class Standalone {
    */
   async c2s_getInitialPosition(player, npcName) {
     const npc = this.NPCs.get(npcName);
-    if (typeof npc === 'undefined') return null;
+    if (typeof npc === 'undefined') {
+      console.error(`In 'c2s_getInitialPosition': NPC '${npcName}' not found.`);
+      return null;
+    }
     return npc.getInitialPosition();
   }
 
@@ -77,7 +80,10 @@ class Standalone {
    */
   async c2s_startInteraction(player, npcName) {
     const npc = this.NPCs.get(npcName);
-    if (typeof npc === 'undefined') return;
+    if (typeof npc === 'undefined') {
+      console.error(`In 'c2s_startInteraction': NPC '${npcName}' not found.`);
+      return;
+    }
     await npc.startInteraction(player.playerID);
   }
 
