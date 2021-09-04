@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 import Overlay from '/static/sites/game-client/ui/overlay.mjs';
+import ToolbarButton from '/static/sites/game-client/ui/toolbar-button.mjs';
 import OverlayPosition from '/static/sites/game-client/ui/overlay-position.mjs';
 
 const PLAYERLIST_DIV = 'playerlist-overlay';
@@ -10,14 +11,6 @@ class PlayerlistOverlay extends Overlay {
   constructor(mainUI) {
     const dom = document.getElementById(PLAYERLIST_DIV);
     super(mainUI, dom);
-  }
-
-  // TODO(zeze-zeze): Expand on this class (jsdoc and implementation) and
-  // implement onPre/PostShow/Hide() as needed.
-
-  hasToolbarButton() {
-    this.toolbarButtonSrc = '/static/extensions/playerlist/playerlist.svg';
-    return true;
   }
 };
 
@@ -40,6 +33,10 @@ class Client {
   async gameStart() {
     this.overlay = new PlayerlistOverlay(this.helper.mainUI);
     this.overlay.show(OverlayPosition.LEFT_TOP);
+    this.toolbarButton = new ToolbarButton('/static/extensions/playerlist/common/playerlist.svg');
+    this.toolbarButton.registerAsToggle(this.overlay);
+    this.toolbarButton.show();
+
     this.showPlayerList();
   }
 
