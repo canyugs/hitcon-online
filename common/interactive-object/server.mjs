@@ -92,7 +92,8 @@ class InteractiveObjectServerBaseClass {
     if (!displayValidation(this.config.display)) return;
 
     // TODO: store the states in database (or in `/run/small_data`)
-    this.dataStore = new Map(); // key: playerName, value: currentState
+    this.dataStore = new Map(); // key: playerID, value: currentState
+    this._fsmWalkExit = new Map(); // key: playerID, value: true|false
   }
 
   /**
@@ -105,10 +106,11 @@ class InteractiveObjectServerBaseClass {
     // initialize if not exist
     if (!this.dataStore.has(playerID)) this.dataStore.set(playerID, fsm.initialState);
 
-    this._fsmWalkExit = false;
-    while (!this._fsmWalkExit) {
+    this._fsmWalkExit.set(playerID, false);
+    while (!this._fsmWalkExit.get(playerID)) {
       const currState = fsm.states[this.dataStore.get(playerID)];
       if (typeof currState === 'undefined') {
+        console.warn(`'${this.dataStore.get(playerID)}' is not a valid state, the FSM may have bug`);
         this.dataStore.set(playerID, fsm.initialState);
         break;
       }
@@ -206,8 +208,9 @@ class InteractiveObjectServerBaseClass {
       c.push({token: nextState, display: message});
     }
 
-    const nextState = await this.helper.callS2cAPI(playerID, 'dialog', 'showDialogWithMultichoice', 60*1000, this.objectName, d, c);
-    if (nextState) return nextState;
+    const result = await this.helper.callS2cAPI(playerID, 'dialog', 'showDialogWithMultichoice', 60*1000, this.objectName, d, c);
+    if (result.token) return result.token;
+    console.warn(`Player '${playerID}' does not choose in 'showDialogWithMultichoice'. Result: ${result}`);
 
     // If we reach here, the showDialog timeouts.
     this.sf_exit(playerID);
@@ -220,8 +223,8 @@ class InteractiveObjectServerBaseClass {
    * @return {String} - the next state
    */
   async sf_exit(playerID, kwargs) {
-    this._fsmWalkExit = true;
-    if (kwargs.next) return kwargs.next;
+    this._fsmWalkExit.set(playerID, true);
+    if (kwargs && kwargs.next) return kwargs.next;
     return this.config.FSM.initialState;
   }
 }

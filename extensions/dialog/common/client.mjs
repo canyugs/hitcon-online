@@ -71,7 +71,6 @@ class DialogModal extends Modal {
 
   /**
    * Call to set the dialog to display a multi choice dialog.
-   * @return {String} - The token of the chosen option. Empty string if error.
    */
   async displayAsMultiChoice(subject, message, choices) {
     const result = await this._displayDialogInternal(() => {
@@ -96,8 +95,8 @@ class DialogModal extends Modal {
       return btnList;
     });
 
-    if (result) return result.dataset.token;
-    return '';
+    if (result === false) return {cancelled: true};
+    return {token: result.dataset.token};
   }
 
   /**
