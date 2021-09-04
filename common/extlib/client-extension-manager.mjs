@@ -64,7 +64,7 @@ class ClientExtensionManager {
   async loadExtensionClient(extName) {
     // ignore invalid extensions
     if (this.extNameList.includes(extName)) {
-      const modulePath = `/static/extensions/${extName}/client.mjs`;
+      const modulePath = `/static/extensions/${extName}/common/client.mjs`;
       const extModule = await import(modulePath);
       // TODO: check the type of extModule.default is a function.
       if (typeof extModule.default !== 'function') {
