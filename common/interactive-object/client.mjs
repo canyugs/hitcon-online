@@ -26,6 +26,10 @@ class InteractiveObjectClientBaseClass {
     }
 
     // interact on click
+    // TODO: use `class InteractiveObjectManager` to handle the callback.
+    // `InteractiveObjectManager.lookupTable` is a Map() whose key and value are coordinate and callback, respectively.
+    // In this way, there will be only one callback in InputManager and InteractiveObjectManager will find the
+    // respective callback in O(1) complexity.
     this.helper.inputManager.registerCanvasOnClickMapCoord((clickedMapCoord) => {
       // determine whether this object is clicked
       const {x: cx, y: cy} = clickedMapCoord;

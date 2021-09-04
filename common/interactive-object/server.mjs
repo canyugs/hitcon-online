@@ -91,8 +91,14 @@ class InteractiveObjectServerBaseClass {
     if (!fsmValidation(this.config.FSM)) return;
     if (!displayValidation(this.config.display)) return;
 
+    // Stores the state of every player.
     // TODO: store the states in database (or in `/run/small_data`)
     this.dataStore = new Map(); // key: playerID, value: currentState
+
+    // To ensure that a player can have only one fsmWalk() activated simultaneously.
+    this._fsmWalkLock = new Set();
+
+    // Stores whether the while loop in fsmWalk should exit.
     this._fsmWalkExit = new Map(); // key: playerID, value: true|false
   }
 
@@ -101,29 +107,46 @@ class InteractiveObjectServerBaseClass {
    * @param {String} playerID - TODO
    */
   async fsmWalk(playerID) {
-    const fsm = this.config.FSM; // alias
+    if (this._fsmWalkLock.has(playerID)) {
+      console.warn(`Player '${playerID}' tries to interact '${this.objectName}', but the lock is still there.`);
+      return;
+    }
+    this._fsmWalkLock.add(playerID);
 
-    // initialize if not exist
-    if (!this.dataStore.has(playerID)) this.dataStore.set(playerID, fsm.initialState);
+    try { // for release the lock
+      const fsm = this.config.FSM; // alias
 
-    this._fsmWalkExit.set(playerID, false);
-    while (!this._fsmWalkExit.get(playerID)) {
-      const currState = fsm.states[this.dataStore.get(playerID)];
-      if (typeof currState === 'undefined') {
-        console.warn(`'${this.dataStore.get(playerID)}' is not a valid state, the FSM may have bug`);
-        this.dataStore.set(playerID, fsm.initialState);
-        break;
+      // initialize if not exist
+      if (!this.dataStore.has(playerID)) this.dataStore.set(playerID, fsm.initialState);
+
+      this._fsmWalkExit.set(playerID, false);
+      while (!this._fsmWalkExit.get(playerID)) {
+        const currStateStr = this.dataStore.get(playerID);
+        const currState = fsm.states[currStateStr];
+        if (typeof currState === 'undefined') {
+          console.warn(`'${currStateStr}' is not a valid state, the FSM may have bug`);
+          this.dataStore.set(playerID, fsm.initialState);
+          break;
+        }
+
+        const kwargs = currState.kwargs;
+        const func = 'sf_' + currState.func; // 'sf_' stands for state function
+        if (!(func in this)) {
+          console.error(`'${func}' is not a valid state function`);
+          this.dataStore.set(playerID, fsm.initialState);
+          break;
+        }
+        let nextState = '';
+        try {
+          nextState = await this[func](playerID, kwargs);
+        } catch (e) {
+          console.error(`Error on calling '${func}' with argument '${playerID}' and ${kwargs}.`);
+          nextState = this.sf_exit(playerID, {next: currStateStr});
+        }
+        this.dataStore.set(playerID, nextState);
       }
-
-      const kwargs = currState.kwargs;
-      const func = 'sf_' + currState.func; // 'sf_' stands for state function
-      if (!(func in this)) {
-        console.error(`'${func}' is not a valid state function`);
-        this.dataStore.set(playerID, fsm.initialState);
-        break;
-      }
-      const nextState = await this[func](playerID, kwargs);
-      this.dataStore.set(playerID, nextState);
+    } finally { // for release the lock
+      this._fsmWalkLock.delete(playerID);
     }
   }
 
@@ -210,10 +233,10 @@ class InteractiveObjectServerBaseClass {
 
     const result = await this.helper.callS2cAPI(playerID, 'dialog', 'showDialogWithMultichoice', 60*1000, this.objectName, d, c);
     if (result.token) return result.token;
-    console.warn(`Player '${playerID}' does not choose in 'showDialogWithMultichoice'. Result: ${result}`);
+    console.warn(`Player '${playerID}' does not choose in 'showDialogWithMultichoice'. Result: ${JSON.stringify(result)}`);
 
     // If we reach here, the showDialog timeouts.
-    this.sf_exit(playerID);
+    return this.sf_exit(playerID, {next: this.dataStore.get(playerID)});
   }
 
   /**
