@@ -40,33 +40,24 @@ class Client {
   async gameStart() {
     this.overlay = new PlayerlistOverlay(this.helper.mainUI);
     this.overlay.show(OverlayPosition.LEFT_TOP);
-    this.getPlayerList();
+    this.showPlayerList();
   }
 
   /**
-   * Get playerlist from server.
-   * @getPlayerList
+   * Show player list on left top.
+   * @showPlayerList
    */
-  async getPlayerList() {
+  showPlayerList() {
     // TODO(zeze-zeze): Optimize the way to update playerlist
     setInterval(() => {
-      this.helper.callC2sAPI('playerlist', 'getPlayerList', 1000);
+      document.getElementById('playerlist').innerHTML = '';
+      this.helper.gameState.getPlayers().forEach(playerID => {
+        if (typeof playerID.displayName !== 'string' || !playerID.displayName.includes(document.getElementById("searchPlayer").value)) {
+          return;
+        }
+        document.getElementById('playerlist').innerHTML += '<span>' + this.HTMLEncode(playerID.displayName); + '</span>';
+     });
     }, 1000);
-  }
-  
-  /**
-   * Show player list on left top.
-   * @s2c_showPlayerList
-   * @param {object} playerIDs - an array of all player ids online.
-   */
-  s2c_showPlayerList(playerIDs) {
-    document.getElementById('playerlist').innerHTML = '';
-    playerIDs.forEach(playerID => {
-      if (typeof playerID !== 'string') {
-        return;
-      }
-      document.getElementById('playerlist').innerHTML += '<span>' + this.HTMLEncode(playerID); + '</span>';
-    });
   }
 
   /**
