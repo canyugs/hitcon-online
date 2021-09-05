@@ -35,6 +35,31 @@ class Standalone {
   }
 
   /**
+   * Check every player's position and send message to them if they are nearby the sender
+   * @c2s_nearbyMessage
+   * @param {Player} player - player information
+   * @param {object} args - nearby message including msg
+   */
+  async c2s_nearbyMessage(player, args) {
+    const centerPlayerCoord = [...this.helper.gameState.getPlayers().entries()]
+      .filter((entry) => entry[0] === player.playerID)
+      .map((k) => k)[0][1]
+      .mapCoord;
+    if (!centerPlayerCoord) {
+      console.error('Cannot find target player id');
+      return;
+    }
+
+    args['msg_from'] = player.playerID;
+    this.helper.gameState.players.forEach(async (value, key, map) => {
+      // TODO(zeze-zeze): Check the definition of "nearby". Now is equal to or less than two blocks in x, y coordinates.
+      if (Math.abs(value.mapCoord.x - centerPlayerCoord.x) <= 2 && Math.abs(value.mapCoord.y - centerPlayerCoord.y) <= 2) {
+        await this.helper.callS2cAPI(value.playerID, 'chat', 'getNearbyMessage', 5000, args);
+      }
+    });
+  }
+
+  /**
    * Send the chat message to specified player
    * @c2s_privateMessage
    * @param {Player} player - player information
@@ -53,9 +78,8 @@ class Standalone {
    * @param {MapCoord} mapCoord - teleport information including map, x, y
    */
   async c2s_teleport(player, mapCoord) {
-    console.log('Teleport to ' + mapCoord.mapName + ' (' + mapCoord.x + ', '+ mapCoord.y + ')');
+    console.log('Teleport to ' + mapCoord.mapName + ' (' + parseInt(mapCoord.x, 10) + ', '+ parseInt(mapCoord.y, 10) + ')');
     console.log(await this.helper.teleport(player.playerID, mapCoord));
-    console.log('haha');
   }
 
   /**

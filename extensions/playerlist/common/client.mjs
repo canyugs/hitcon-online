@@ -36,7 +36,7 @@ class Client {
     this.toolbarButton = new ToolbarButton('/static/extensions/playerlist/common/playerlist.svg');
     this.toolbarButton.registerAsToggle(this.overlay);
     this.toolbarButton.show();
-
+   
     this.showPlayerList();
   }
 
@@ -54,7 +54,7 @@ class Client {
         }
         // TODO(zeze-zeze): Keep a record of dom elements
         // TODO(zeze-zeze): Move it to a separate function
-        document.getElementById('playerlist').innerHTML += '<span>' + this.HTMLEncode(playerID.displayName); + '</span>';
+        document.getElementById('playerlist').innerHTML += '<span class="playerName" onclick="startPrivateMessage(\'' + playerID.playerID + '\')">' + this.HTMLEncode(playerID.displayName); + '</span>';
 
         // TODO(zeze-zeze): Use onchange callback to update playerlist instead of waiting 1 second
      });
