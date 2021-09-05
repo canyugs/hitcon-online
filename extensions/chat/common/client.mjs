@@ -88,9 +88,9 @@ Usage: !/<Command> <arg1> <arg2> ...
     } else if (cmd.split(' ')[0] === '!/teleport') {
       const mapCoord = this.helper.gameClient.playerInfo.mapCoord;
       mapCoord.mapName = cmd.split(' ')[1];
-      mapCoord.x = cmd.split(' ')[2];
-      mapCoord.y = cmd.split(' ')[3];
-      if (isNaN(parseInt(mapCoord.x, 10)) || isNaN(parseInt(mapCoord.y, 10))) {
+      mapCoord.x = parseInt(cmd.split(' ')[2], 10);
+      mapCoord.y = parseInt(cmd.split(' ')[3], 10);
+      if (isNaN(mapCoord.x) || isNaN(mapCoord.y)) {
         document.getElementById('message_history').innerHTML += '<span>Invalid Coordinate</span><br>';
         this.listCommand();
       } else {
