@@ -4,6 +4,13 @@
   }
 </style>
 
+<script type="text/javascript">
+  function startPrivateMessage(playerID) {
+    console.log(playerID);
+    document.getElementById("message_to").value = playerID;
+  }
+</script>
+
 <div id="playerlist-overlay">
   <h2>Player List</h2>
   <!-- Use onchange callback to deal with it -->

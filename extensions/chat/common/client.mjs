@@ -40,6 +40,11 @@ class Client {
     this.toolbarButton.show();
   }
 
+  /**
+   * Send message to one of the channels.
+   * @send_msg
+   * @param {client} - The pointer of this Client class
+   */
   send_msg(client) {
     return async function(evt) {
       if (evt.keyCode === 13) {
@@ -47,10 +52,12 @@ class Client {
         const chat_message_id = document.getElementById('chat_message');
         if (chat_message_id.value.substring(0, 2) === '!/') {
           client.handleCommand(chat_message_id.value.trim());
+        } else if (message_to_id.value.toLowerCase() == 'nearby') {
+          await client.helper.callC2sAPI('chat', 'nearbyMessage', 5000, {'msg': chat_message_id.value});
         } else if (message_to_id.value) {
-          client.helper.callC2sAPI(null, 'privateMessage', 5000, {'msg_to': message_to_id.value, 'msg': chat_message_id.value});
+          await client.helper.callC2sAPI('chat', 'privateMessage', 5000, {'msg_to': message_to_id.value, 'msg': chat_message_id.value});
         } else {
-          client.helper.callC2sAPI(null, 'broadcastMessage', 5000, {'msg': chat_message_id.value});
+          await client.helper.callC2sAPI('chat', 'broadcastMessage', 5000, {'msg': chat_message_id.value});
         }
         chat_message_id.value = '';
       }
@@ -66,7 +73,7 @@ class Client {
     this.HTMLEncode(`
 Usage: !/<Command> <arg1> <arg2> ...
   !/teleport <Map> <x> <y>    Teleport to the map Map at coordinate (x, y)
-  !/help                List command usages
+  !/help                      List command usages
     `) + '</pre>';
   }
 
@@ -110,32 +117,41 @@ Usage: !/<Command> <arg1> <arg2> ...
   }
 
   /**
+   * Get nearby message from server
+   * @s2c_getNearbyMessage
+   * @param {object} args - Information of the nearby message including msg_from and msg
+   */
+  s2c_getNearbyMessage(args) {
+    document.getElementById('message_history').innerHTML += '<span>Nearby Message From ' + this.HTMLEncode(args.msg_from) + ': ' + this.HTMLEncode(args.msg) + '</span><br>';
+  }
+
+  /**
    * Get a private message from other player
    * @s2c_getPrivateMessage
-   * @param {object} arg - Information of the private message
+   * @param {object} args - Information of the private message
    */
-  s2c_getPrivateMessage(arg) {
-    document.getElementById('message_history').innerHTML += '<span>Private Message From ' + this.HTMLEncode(arg.msg_from) + ': ' + this.HTMLEncode(arg.msg) + '</span><br>';
+  s2c_getPrivateMessage(args) {
+    document.getElementById('message_history').innerHTML += '<span>Private Message From ' + this.HTMLEncode(args.msg_from) + ': ' + this.HTMLEncode(args.msg) + '</span><br>';
   }
 
   /**
    * Display a private message after sending the private message to other player
    * @s2c_senderPrivateMessage
-   * @param {object} arg - Information of the private message
+   * @param {object} args - Information of the private message
    */
-  s2c_sendedPrivateMessage(arg) {
-    document.getElementById('message_history').innerHTML += '<span>Private Message To ' + this.HTMLEncode(arg.msg_to) + ': ' + this.HTMLEncode(arg.msg) + '</span><br>';
+  s2c_sendedPrivateMessage(args) {
+    document.getElementById('message_history').innerHTML += '<span>Private Message To ' + this.HTMLEncode(args.msg_to) + ': ' + this.HTMLEncode(args.msg) + '</span><br>';
   }
 
   /**
    * Get a Broadcast message
    * @onExtensionBroadcast
-   * @param {object} arg - Information of the broadcast message
+   * @param {object} args - Information of the broadcast message
   */
-  onExtensionBroadcast(arg) {
-    arg.msg_from = $('<div/>').text(arg.msg_from).html();
-    arg.msg = $('<div/>').text(arg.msg).html();
-    document.getElementById('message_history').innerHTML += '<span>' + arg.msg_from + ': ' + arg.msg + '</span><br>';
+  onExtensionBroadcast(args) {
+    args.msg_from = $('<div/>').text(args.msg_from).html();
+    args.msg = $('<div/>').text(args.msg).html();
+    document.getElementById('message_history').innerHTML += '<span>' + args.msg_from + ': ' + args.msg + '</span><br>';
   }
 }
 
