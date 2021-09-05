@@ -78,8 +78,7 @@ class Standalone {
    * @param {MapCoord} mapCoord - teleport information including map, x, y
    */
   async c2s_teleport(player, mapCoord) {
-    console.log('Teleport to ' + mapCoord.mapName + ' (' + parseInt(mapCoord.x, 10) + ', '+ parseInt(mapCoord.y, 10) + ')');
-    console.log(await this.helper.teleport(player.playerID, mapCoord));
+    return await this.helper.teleport(player.playerID, mapCoord);
   }
 
   /**
