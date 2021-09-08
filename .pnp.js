@@ -246,6 +246,14 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@types/node", "npm:16.3.0"]
           ],
           "linkType": "HARD",
+        }],
+        ["npm:1.3.7", {
+          "packageLocation": "./.yarn/cache/@grpc-grpc-js-npm-1.3.7-7d78cd9616-fabcc38f5c.zip/node_modules/@grpc/grpc-js/",
+          "packageDependencies": [
+            ["@grpc/grpc-js", "npm:1.3.7"],
+            ["@types/node", "npm:16.3.0"]
+          ],
+          "linkType": "HARD",
         }]
       ]],
       ["@grpc/proto-loader", [
@@ -2359,7 +2367,9 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         ["workspace:extensions/escape-game", {
           "packageLocation": "./extensions/escape-game/",
           "packageDependencies": [
-            ["hitcon-online-escape-game", "workspace:extensions/escape-game"]
+            ["hitcon-online-escape-game", "workspace:extensions/escape-game"],
+            ["@grpc/grpc-js", "npm:1.3.7"],
+            ["@grpc/proto-loader", "npm:0.6.4"]
           ],
           "linkType": "SOFT",
         }]
@@ -2532,6 +2542,8 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./terminal-server/",
           "packageDependencies": [
             ["hitcon-online-terminal-server", "workspace:terminal-server"],
+            ["@grpc/grpc-js", "npm:1.3.7"],
+            ["@grpc/proto-loader", "npm:0.6.4"],
             ["config", "npm:3.3.6"],
             ["express", "npm:4.17.1"],
             ["jsonwebtoken", "npm:8.5.1"],

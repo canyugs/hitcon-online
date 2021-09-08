@@ -66,26 +66,49 @@ class Client {
     this.token = null;
     this.socket = null;
     this.term = null;
+    this.roomId = null;
+  }
+
+  async gameStart() {
+    this.modal = new TerminalModal(this.helper.mainUI);
+    this.modal.registerCallbacks(this.setupPty.bind(this), this.cleanup.bind(this));
   }
 
   /**
    * Get the access token for the container.
    */
-  async getAccessToken() {
-    const result = await this.helper.callC2sAPI('escape-game', 'getAccessToken', 5000);
+   async getAccessToken() {
+    const result = await this.helper.callC2sAPI('escape-game', 'getAccessToken', 5000, 'test');
     this.token = result;
     console.log(`Access token for the container: ${JSON.stringify(result)}`);
   }
 
-  async gameStart() {
-    this.modal = new TerminalModal(this.helper.mainUI);
-    this.modal.registerCallbacks(this.setup.bind(this), this.cleanup.bind(this));
+  /**
+   * Create a new room.
+   */
+  async createRoom() {
+    const result = await this.helper.callC2sAPI('escape-game', 'createRoom', 5000);
+    console.log('create room', result);
+    this.roomId = result;
+  }
+
+  /**
+   * Join room
+   */
+  async joinRoom() {
+    const result = await this.helper.callC2sAPI('escape-game', 'joinRoom', 5000, this.roomId);
+    console.log('join room', result);
+    this.roomId = result;
   }
 
   /**
    * Setup the socket.io connection and xterm.js.
    */
-  async setup() {
+  async setupPty() {
+    // TODO: for test.
+    await this.createRoom();
+    await this.joinRoom();
+
     await this.getAccessToken();
 
     if (!this.token) {
@@ -113,13 +136,15 @@ class Client {
       });
     });
 
-    this.socket.emit('authenticate', {
+    this.socket.emit('connectTerminal', {
       token: this.token
     });
   }
 
   cleanup() {
-    this.socket.emit('destroyContainer');
+    this.helper.callC2sAPI('escape-game', 'destroyRoom', 5000, this.roomId);
+
+
     this.socket.disconnect();
     this.socket = null;
 

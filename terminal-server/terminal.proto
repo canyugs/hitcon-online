@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package TerminalServer;
+
+service TerminalServer {
+  rpc CreateContainer (CreateContainerRequest) returns (CreateContainerResponse);
+  rpc DestroyContainer (DestroyContainerRequest) returns (DestroyContainerResponse);
+}
+
+message CreateContainerRequest {
+  string imageName = 1;
+}
+
+message CreateContainerResponse {
+  bool success = 1;
+  string containerId = 2;
+}
+
+message DestroyContainerRequest {
+    string containerId = 1;
+}
+
+message DestroyContainerResponse {
+    bool success = 1;
+}
