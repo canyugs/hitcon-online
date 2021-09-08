@@ -16,8 +16,9 @@ const containerPrefix = 'escape_';
  * One should call `spawn` and `destroyContainer` explicitly.
  */
 class ContainerHandler {
-  constructor() {
+  constructor(imageName) {
     this.containerName = containerPrefix + randomBytes(32).toString('hex');
+    this.imageName = imageName;
     this.ptys = {};
   }
 
@@ -26,7 +27,7 @@ class ContainerHandler {
    */
   async spawn() {
     try {
-      let ret = await exec(`docker run -it -d --name ${this.containerName} --rm debian:stable`);
+      let ret = await exec(`docker run -it -d --name ${this.containerName} --rm ${this.imageName}`);
       return !!ret.stderr;
     } catch (err) {
       console.log(err);
