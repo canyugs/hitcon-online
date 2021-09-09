@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 import Modal from '/static/sites/game-client/ui/modal.mjs';
+import {MapCoord} from '/static/common/maplib/map.mjs';
+import InteractiveObjectClientBaseClass from '/static/common/interactive-object/client.mjs';
 
 const TERMINAL_CONTAINER = 'terminal-container';
 const TERMINAL_DIV = 'terminal';
@@ -12,12 +14,10 @@ class TerminalModal extends Modal {
     const DOM = document.getElementById(TERMINAL_CONTAINER);
     super(mainUI, DOM);
 
-    $('#terminal-button').on('click', () => {
-      this.show();
-    });
     $('#terminal-close-btn').on('click', () => {
       this.hide();
     });
+
     this.customOnPostShow = () => {};
     this.customOnPostHide = () => {};
   }
@@ -67,11 +67,20 @@ class Client {
     this.socket = null;
     this.term = null;
     this.roomId = null;
+
+    this.terminals = new Map();
   }
 
   async gameStart() {
     this.modal = new TerminalModal(this.helper.mainUI);
     this.modal.registerCallbacks(this.setupPty.bind(this), this.cleanup.bind(this));
+
+    const listOfTerminals = await this.helper.callC2sAPI('escape-game', 'getListOfTerminals', 500);
+    for (const terminalId of listOfTerminals) {
+      const initialPosition = MapCoord.fromObject(await this.helper.callC2sAPI('escape-game', 'getTerminalInitialPosition', 500, terminalId));
+      const displayConfig = await this.helper.callC2sAPI('escape-game', 'getTerminalDisplayInfo', 500, terminalId);
+      this.terminals.set(terminalId, new TerminalObject(this.helper, terminalId, initialPosition, displayConfig));
+    }
   }
 
   /**
@@ -88,7 +97,7 @@ class Client {
    */
   async createRoom() {
     const result = await this.helper.callC2sAPI('escape-game', 'createRoom', 5000);
-    console.log('create room', result);
+    console.log('create escape-game room', result);
     this.roomId = result;
   }
 
@@ -97,7 +106,7 @@ class Client {
    */
   async joinRoom() {
     const result = await this.helper.callC2sAPI('escape-game', 'joinRoom', 5000, this.roomId);
-    console.log('join room', result);
+    console.log('join escape-game room', result);
     this.roomId = result;
   }
 
@@ -105,7 +114,7 @@ class Client {
    * Setup the socket.io connection and xterm.js.
    */
   async setupPty() {
-    // TODO: for test.
+    // TODO: for testing only.
     await this.createRoom();
     await this.joinRoom();
 
@@ -141,9 +150,14 @@ class Client {
     });
   }
 
-  cleanup() {
-    this.helper.callC2sAPI('escape-game', 'destroyRoom', 5000, this.roomId);
+  async s2c_showTerminalModal() {
+    this.modal.show();
+    return true;
+  }
 
+  cleanup() {
+    // TODO: for testing only.
+    this.helper.callC2sAPI('escape-game', 'destroyRoom', 5000, this.roomId);
 
     this.socket.disconnect();
     this.socket = null;
@@ -151,8 +165,53 @@ class Client {
     this.term.dispose();
     this.term = null;
   }
+}
 
 
+/**
+ * TODO: jsdoc
+ */
+ class TerminalObject extends InteractiveObjectClientBaseClass {
+  /**
+   * TODO
+   * @param {ClientExtensionHelper} helper - The extension helper.
+   * @param {String} terminalId - The identifier of the terminal.
+   * @param {MapCoord} initialPosition - Position of the terminal.
+   * @param {Array} displayConfig - Display config.
+   */
+  constructor(helper, terminalId, initialPosition, displayConfig) {
+    const mapCoord = initialPosition;
+    const facing = 'D';
+
+    for (const cfg of displayConfig) {
+      if (cfg.layerName === 'terminalImage') {
+        cfg.renderArgs = {
+          mapCoord: mapCoord,
+          displayChar: cfg.character,
+          facing: facing,
+          getDrawInfo() {
+            return {mapCoord: this.mapCoord, displayChar: this.displayChar, facing: this.facing};
+          },
+        };
+      } else if (cfg.layerName === 'terminalName') {
+        cfg.renderArgs = {
+          mapCoord: mapCoord,
+          displayName: terminalId,
+          getDrawInfo() {
+            return {mapCoord: this.mapCoord, displayName: this.displayName};
+          },
+        };
+      }
+    }
+
+    const interactFunction = () => {
+      console.log('terminal start interaction.');
+      helper.callC2sAPI('escape-game', 'startInteraction', 500, terminalId);
+    };
+
+    super(helper, initialPosition, displayConfig, interactFunction);
+    this.terminalId = terminalId;
+  }
 }
 
 export default Client;
