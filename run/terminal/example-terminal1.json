@@ -1,0 +1,48 @@
+{
+    "enabled": true,
+    "initialPosition": {"mapName": "world1", "x": 10, "y": 10},
+    "display": [
+      {
+        "zIndex": 11,
+        "layerName": "terminalImage",
+        "renderFunction": "_drawOneCharacterImage",
+        "renderArgs": null,
+        "character": "char1"
+      },
+      {
+        "zIndex": 16,
+        "layerName": "terminalName",
+        "renderFunction": "_drawOneCharacterName",
+        "renderArgs": null
+      }
+    ],
+    "FSM": {
+      "initialState": "s1",
+      "states": {
+        "s1": {
+          "func": "showDialog",
+          "kwargs": {
+            "dialogs": "Hello!\nNice to meet you! Want to access the terminal?",
+            "options": {
+              "Yes": "s2",
+              "No. QQ": "s3"
+            }
+          }
+        },
+        "s2": {
+          "func": "showTerminal",
+          "kwargs": {
+            "options": {
+              "Bye!": "s3"
+            }
+          }
+        },
+        "s3": {
+          "func": "exit",
+          "kwargs": {
+            "next": "s1"
+          }
+        }
+      }
+    }
+  }
