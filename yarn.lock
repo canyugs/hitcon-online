@@ -577,6 +577,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"axios@npm:^0.21.4":
+  version: 0.21.4
+  resolution: "axios@npm:0.21.4"
+  dependencies:
+    follow-redirects: ^1.14.0
+  checksum: e6d42b269b599d36eb13be0671c237781f32e6ae72be824297c55a3e1ce63b22ba4f46bad5ab28da7d3bae50a72637d55c792cf803be1cf9de6a8bcd6d0dcc1a
+  languageName: node
+  linkType: hard
+
 "backo2@npm:~1.0.2":
   version: 1.0.2
   resolution: "backo2@npm:1.0.2"
@@ -1542,6 +1551,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"follow-redirects@npm:^1.14.0":
+  version: 1.14.3
+  resolution: "follow-redirects@npm:1.14.3"
+  peerDependenciesMeta:
+    debug:
+      optional: true
+  checksum: 0467b0f5c0d2ccde2d0e684c9346127d746fe27c79af8065e78164f7f88ca78b4873ee12b02e3e1e8d6b6a60dbacba7b002b0e773d1171e4f3a37bdf8423a577
+  languageName: node
+  linkType: hard
+
 "forwarded@npm:~0.1.2":
   version: 0.1.2
   resolution: "forwarded@npm:0.1.2"
@@ -1895,6 +1914,16 @@ __metadata:
 "hitcon-online-playerlist@workspace:extensions/playerlist":
   version: 0.0.0-use.local
   resolution: "hitcon-online-playerlist@workspace:extensions/playerlist"
+  languageName: unknown
+  linkType: soft
+
+"hitcon-online-point-system@workspace:extensions/point-system":
+  version: 0.0.0-use.local
+  resolution: "hitcon-online-point-system@workspace:extensions/point-system"
+  dependencies:
+    axios: ^0.21.4
+    config: ^3.3.6
+    jsonwebtoken: ^8.5.1
   languageName: unknown
   linkType: soft
 

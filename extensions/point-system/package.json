@@ -1,0 +1,13 @@
+{
+  "name": "hitcon-online-point-system",
+  "version": "0.0.1",
+  "exports": {
+    "standalone": "./standalone.mjs",
+    "in-gateway": "./in-gateway.mjs"
+  },
+  "dependencies": {
+    "axios": "^0.21.4",
+    "config": "^3.3.6",
+    "jsonwebtoken": "^8.5.1"
+  }
+}
