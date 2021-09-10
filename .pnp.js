@@ -95,6 +95,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         "reference": "workspace:extensions/playerlist"
       },
       {
+        "name": "hitcon-online-point-system",
+        "reference": "workspace:extensions/point-system"
+      },
+      {
         "name": "hitcon-online-asset-server",
         "reference": "workspace:services/assets"
       },
@@ -144,6 +148,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
       ["hitcon-online-maplib", ["workspace:common/maplib"]],
       ["hitcon-online-npc", ["workspace:extensions/npc"]],
       ["hitcon-online-playerlist", ["workspace:extensions/playerlist"]],
+      ["hitcon-online-point-system", ["workspace:extensions/point-system"]],
       ["hitcon-online-rpc-directory", ["workspace:common/rpc-directory"]],
       ["hitcon-online-standalone-server", ["workspace:services/standalone"]],
       ["hitcon-online-terminal-server", ["workspace:terminal-server"]]
@@ -897,6 +902,14 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageDependencies": [
             ["axios", "npm:0.21.1"],
             ["follow-redirects", "virtual:d192f6b3b31cd5d11a443145a3883a70c04cbd7c813c53085dbaf50263735f1162f10fdbddd53c24e162ec3bc37b90966413084323739b7cf942b8bfb4da8831#npm:1.14.1"]
+          ],
+          "linkType": "HARD",
+        }],
+        ["npm:0.21.4", {
+          "packageLocation": "./.yarn/cache/axios-npm-0.21.4-e278873748-e6d42b269b.zip/node_modules/axios/",
+          "packageDependencies": [
+            ["axios", "npm:0.21.4"],
+            ["follow-redirects", "virtual:e278873748b4e9d158db595d2f6cb0351c74052f52b53924aec4d9299e7b6babfb62aead374cf2f6e453bc8bea3b052380dc6b1137a162bbfc102bbb1c8cac42#npm:1.14.3"]
           ],
           "linkType": "HARD",
         }]
@@ -2027,10 +2040,28 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           ],
           "linkType": "SOFT",
         }],
+        ["npm:1.14.3", {
+          "packageLocation": "./.yarn/cache/follow-redirects-npm-1.14.3-37aea15e53-0467b0f5c0.zip/node_modules/follow-redirects/",
+          "packageDependencies": [
+            ["follow-redirects", "npm:1.14.3"]
+          ],
+          "linkType": "SOFT",
+        }],
         ["virtual:d192f6b3b31cd5d11a443145a3883a70c04cbd7c813c53085dbaf50263735f1162f10fdbddd53c24e162ec3bc37b90966413084323739b7cf942b8bfb4da8831#npm:1.14.1", {
           "packageLocation": "./.yarn/$$virtual/follow-redirects-virtual-0c4ea90a75/0/cache/follow-redirects-npm-1.14.1-e6bdc0f8e5-761a186996.zip/node_modules/follow-redirects/",
           "packageDependencies": [
             ["follow-redirects", "virtual:d192f6b3b31cd5d11a443145a3883a70c04cbd7c813c53085dbaf50263735f1162f10fdbddd53c24e162ec3bc37b90966413084323739b7cf942b8bfb4da8831#npm:1.14.1"],
+            ["debug", null]
+          ],
+          "packagePeers": [
+            "debug"
+          ],
+          "linkType": "HARD",
+        }],
+        ["virtual:e278873748b4e9d158db595d2f6cb0351c74052f52b53924aec4d9299e7b6babfb62aead374cf2f6e453bc8bea3b052380dc6b1137a162bbfc102bbb1c8cac42#npm:1.14.3", {
+          "packageLocation": "./.yarn/$$virtual/follow-redirects-virtual-a24f58a86d/0/cache/follow-redirects-npm-1.14.3-37aea15e53-0467b0f5c0.zip/node_modules/follow-redirects/",
+          "packageDependencies": [
+            ["follow-redirects", "virtual:e278873748b4e9d158db595d2f6cb0351c74052f52b53924aec4d9299e7b6babfb62aead374cf2f6e453bc8bea3b052380dc6b1137a162bbfc102bbb1c8cac42#npm:1.14.3"],
             ["debug", null]
           ],
           "packagePeers": [
@@ -2505,6 +2536,18 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./extensions/playerlist/",
           "packageDependencies": [
             ["hitcon-online-playerlist", "workspace:extensions/playerlist"]
+          ],
+          "linkType": "SOFT",
+        }]
+      ]],
+      ["hitcon-online-point-system", [
+        ["workspace:extensions/point-system", {
+          "packageLocation": "./extensions/point-system/",
+          "packageDependencies": [
+            ["hitcon-online-point-system", "workspace:extensions/point-system"],
+            ["axios", "npm:0.21.4"],
+            ["config", "npm:3.3.6"],
+            ["jsonwebtoken", "npm:8.5.1"]
           ],
           "linkType": "SOFT",
         }]
