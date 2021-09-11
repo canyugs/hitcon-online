@@ -79,7 +79,6 @@ class Standalone {
   async refreshUserListCache() {
     try {
       this.userListCache = (await this.requestApiAsAdmin('/users', 'GET'))?.data;
-      console.log(this.userListCache);
       return true;
     } catch (e) {
       console.error(e);
