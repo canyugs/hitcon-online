@@ -52,6 +52,7 @@ class Client {
         const chat_message_id = document.getElementById('chat_message');
         if (chat_message_id.value.substring(0, 2) === '!/') {
           client.handleCommand(chat_message_id.value.trim());
+          // TODO(zeze-zeze): Use drop down menu to replace it
         } else if (message_to_id.value.toLowerCase() == 'nearby') {
           await client.helper.callC2sAPI('chat', 'nearbyMessage', 5000, {'msg': chat_message_id.value});
         } else if (message_to_id.value) {
