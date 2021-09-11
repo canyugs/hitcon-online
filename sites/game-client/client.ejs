@@ -142,6 +142,11 @@ absolute URL.
         game.mapRendererOverlay.show(OverlayPosition.MAIN_VIEW);
 
         game.errorModal = new ErrorModal(game.mainUI);
+        game.socket.on("disconnect", (reason) => {
+          if (reason !== "io client disconnect") {
+            game.errorModal.displayError(reason, "Please refresh to reconnect.");
+          }
+        });
 
         function onGameTick () {
           game.mapRenderer.draw();
