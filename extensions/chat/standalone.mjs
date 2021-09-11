@@ -41,10 +41,7 @@ class Standalone {
    * @param {object} args - nearby message including msg
    */
   async c2s_nearbyMessage(player, args) {
-    const centerPlayerCoord = [...this.helper.gameState.getPlayers().entries()]
-      .filter((entry) => entry[0] === player.playerID)
-      .map((k) => k)[0][1]
-      .mapCoord;
+    const centerPlayerCoord = this.helper.gameState.getPlayer(player.playerID).mapCoord;
     if (!centerPlayerCoord) {
       console.error('Cannot find target player id');
       return;
