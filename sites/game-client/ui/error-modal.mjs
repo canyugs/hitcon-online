@@ -16,6 +16,12 @@ class ErrorModal extends Modal {
     this.handlerMessageDom = document.getElementById(ERROR_HANDLER_MESSAGE_DIV);
   }
 
+  displayError(errorMsg, handlerMsg) {
+    this.errorMessageDom.innerText = errorMsg;
+    this.handlerMessageDom.innerText = handlerMsg;
+    this.show();
+  }
+
   canDismiss() {
     return false;
   }
