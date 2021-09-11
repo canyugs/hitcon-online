@@ -34,14 +34,16 @@ class Client {
     this.overlay = new RemainingPointsOverlay(this.helper.mainUI);
     this.overlay.show(OverlayPosition.LEFT_BOTTOM);
 
+    console.log('The gameStart function is called. This should be called **after** the socket is authenticated.')
     // Register the user
     // TODO:
     // This workaround aims to keep the callC2sAPI called after the socket.io connection is built.
     // We should fix it in the near future.
-    setTimeout(async () => {
-      this.registerResult = await this.helper.callC2sAPI('point-system', 'registerUser', 5000);
-      await this.updatePoints();
-    }, 2000);
+    //setTimeout(async () => {
+    this.registerResult = await this.helper.callC2sAPI('point-system', 'registerUser', 5000);
+    console.log("Points system register status: ", this.registerResult);
+    await this.updatePoints();
+    //}, 2000);
   }
 
   /**
