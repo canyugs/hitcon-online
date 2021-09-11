@@ -55,7 +55,9 @@ class GameClient {
       socket.emit('authenticate', {token: token});
       socket.on('authenticated', () => {
         console.log('Authenticated!');
-        // We need to wait for the gameStart event.
+
+        // Start the browser side of all extensions.
+        this.extMan.startAllExtensionClient();
       });
       socket.on('unauthorized', (msg) => {
         console.error(`Authorization failed: ${JSON.stringify(msg.data)}`);
