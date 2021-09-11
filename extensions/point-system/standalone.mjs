@@ -110,7 +110,6 @@ class Standalone {
     let token = jwt.sign({
       scope: ['point_system', 'admin']
     }, config.get('secret'), {expiresIn: 60 * 60 * 24 * 365});
-    console.log(config.get('secret'), token);
     return token;
   }
 }
