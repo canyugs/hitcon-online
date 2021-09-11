@@ -79,7 +79,14 @@ class ClientExtensionManager {
 
       this.extObjects[extName] = new this.extModules[extName].default(extHelper);
       extHelper.setExt(this.extObjects[extName]);
+    }
+  }
 
+  /**
+   * Start the browser side of all extensions.
+   */
+  async startAllExtensionClient() {
+    for (let extName of this.extNameList) {
       this.startExtensionClient(extName);
     }
   }
