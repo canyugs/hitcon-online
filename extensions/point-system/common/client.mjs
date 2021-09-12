@@ -40,19 +40,20 @@ class Client {
       console.log("Failed to register to the points system: ", this.registerResult);
     }
 
-    await this.updatePoints();
+    await this.s2c_updatePoints();
   }
 
   /**
    * Update the displayed points
    */
-  async updatePoints() {
+  async s2c_updatePoints() {
     if (!this.registerResult) {
       return false;
     }
 
     let p = await this.getPoints();
     $('#remaining-points').text('$' + p.toString());
+    return true;
   }
 
   /**
@@ -87,12 +88,21 @@ class Client {
         points: points,
         receiver: receiver
       });
-      await this.updatePoints();
+      await this.s2c_updatePoints();
+      this.notifyUpdatePoints(receiver);
       return ret?.message === "OK";
     } catch (e) {
       console.error(e);
       throw new Error('Failed to transfer points.');
     }
+  }
+
+  /**
+   * Notify other users to update the points.
+   * @param uid User id
+   */
+  async notifyUpdatePoints(uid) {
+    return await this.helper.callC2sAPI('point-system', 'notifyUpdatePoints', 5000, uid);
   }
 
   /**

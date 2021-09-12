@@ -48,10 +48,8 @@ class Standalone {
    * Register a new user.
    * TODO: we should move the register stage out of HITCON online.
    * @param {Player} player - player information
-   * @returns string
    */
   async c2s_registerUser(player) {
-    console.log('c2s_registerUser');
     try {
       if (this.userListCache.filter(m => m.uid === player.playerID).length > 0) {
         console.warn(`${player.playerID} had already registered to the point system.`);
@@ -71,6 +69,15 @@ class Standalone {
       console.error(e);
       return false;
     }
+  }
+
+  /**
+   * Notify other users to update the points.
+   * @param {Player} player - player information
+   * @param {string} uid - The user to be notified.
+   */
+  async c2s_notifyUpdatePoints(player, uid) {
+    return await this.helper.callS2cAPI(uid, 'point-system', 'updatePoints', 5000);
   }
 
   /**
