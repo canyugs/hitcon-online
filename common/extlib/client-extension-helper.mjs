@@ -116,6 +116,13 @@ class ClientExtensionHelper {
   getMap() {
     return this.extMan.gameMap;
   }
+
+  /**
+   * Return the token
+   */
+  getToken() {
+    return this.extMan.gameClient.token;
+  }
 };
 
 export default ClientExtensionHelper;
