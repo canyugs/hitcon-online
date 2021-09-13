@@ -3,8 +3,6 @@
 
 import {createRequire} from 'module';
 const require = createRequire(import.meta.url);
-const jwt = require('jsonwebtoken');
-const config = require('config');
 const axios = require('axios');
 
 const POINT_SYSTEM_LOCATION = 'http://ho.zuan.im:4000/api/v1';
@@ -21,18 +19,12 @@ class Standalone {
    */
   constructor(helper) {
     this.helper = helper;
-
-    // Maintain a user list cache to prevent communication overhead.
-    // TODO: we should ensure that the user has registered to the point system in the first place,
-    // so that we don't need to register new users here.
-    this.userListCache = [];
   }
 
   /**
    * Initializes the extension.
    */
   async initialize() {
-    await this.refreshUserListCache();
   }
 
   /**
@@ -45,33 +37,6 @@ class Standalone {
   }
 
   /**
-   * Register a new user.
-   * TODO: we should move the register stage out of HITCON online.
-   * @param {Player} player - player information
-   */
-  async c2s_registerUser(player) {
-    try {
-      if (this.userListCache.filter(m => m.uid === player.playerID).length > 0) {
-        console.warn(`${player.playerID} had already registered to the point system.`);
-        return true;
-      }
-      let ret = await this.requestApiAsAdmin('/users', 'POST', {
-        'uid': player.playerID,
-        'role': 'client',
-        'points': 0
-      });
-
-      await this.refreshUserListCache();
-
-      console.log(`${player.playerID} has registered to the point system.`);
-      return ret.status === 200;
-    } catch (e) {
-      console.error(e);
-      return false;
-    }
-  }
-
-  /**
    * Notify other users to update the points.
    * @param {Player} player - player information
    * @param {string} uid - The user to be notified.
@@ -81,42 +46,19 @@ class Standalone {
   }
 
   /**
-   * Refresh the user list cache. Called when we expected the user list to update.
-   */
-  async refreshUserListCache() {
-    try {
-      this.userListCache = (await this.requestApiAsAdmin('/users', 'GET'))?.data;
-      return true;
-    } catch (e) {
-      console.error(e);
-      return false;
-    }
-  }
-
-  /**
-   * Send request to the point system with all credential set up.
+   * Send request to the point system.
    * @param {string} endpoint
    */
-  requestApiAsAdmin(endpoint, method, data) {
+  requestApi(endpoint, method, data, token) {
     return axios({
       url: POINT_SYSTEM_LOCATION + endpoint,
       method: method,
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + this.getAdminToken()
+        'Authorization': 'Bearer ' + token
       },
       data: data
     });
-  }
-
-  /**
-   * Get JWT token with admin permission.
-   */
-  getAdminToken() {
-    let token = jwt.sign({
-      scope: ['point_system', 'admin']
-    }, config.get('secret'), {expiresIn: 60 * 60 * 24 * 365});
-    return token;
   }
 }
 

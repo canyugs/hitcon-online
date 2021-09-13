@@ -27,18 +27,11 @@ class Client {
    */
   constructor(helper) {
     this.helper = helper;
-    this.registerResult = false;
   }
 
   async gameStart() {
     this.overlay = new RemainingPointsOverlay(this.helper.mainUI);
     this.overlay.show(OverlayPosition.LEFT_BOTTOM);
-
-    // Register the user
-    this.registerResult = await this.helper.callC2sAPI('point-system', 'registerUser', 5000);
-    if (this.registerResult !== true) {
-      console.log("Failed to register to the points system: ", this.registerResult);
-    }
 
     await this.s2c_updatePoints();
   }
@@ -47,10 +40,6 @@ class Client {
    * Update the displayed points
    */
   async s2c_updatePoints() {
-    if (!this.registerResult) {
-      return false;
-    }
-
     let p = await this.getPoints();
     $('#remaining-points').text('$' + p.toString());
     return true;
@@ -60,10 +49,6 @@ class Client {
    * Get the remaining points of the user.
    */
   async getPoints() {
-    if (!this.registerResult) {
-      return false;
-    }
-
     try {
       let ret = await this.requestApi('/users/me', 'GET');
       return ret?.points;
@@ -79,10 +64,6 @@ class Client {
    * @param {string} receiver The uid of the receiver.
    */
    async transferPoints(points, receiver) {
-    if (!this.registerResult) {
-      return false;
-    }
-
     try {
       let ret = await this.requestApi('/points/transactions', 'POST', {
         points: points,
@@ -119,24 +100,12 @@ class Client {
       dataType: "json",
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + this.getToken()
+        'Authorization': 'Bearer ' + this.helper.getToken()
       },
       processData: false,
       data: JSON.stringify(data)
     });
   }
-
-  /**
-   * Get the JWT token.
-   * TODO: this method would not work when we use HttpOnly. May need to seek other ways to get the token securely.
-   * @returns token
-   */
-  getToken() {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; token=`);
-    if (parts.length === 2) return parts.pop().split(';').shift();
-  }
-
 }
 
 export default Client;
