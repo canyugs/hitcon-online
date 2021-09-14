@@ -35,7 +35,7 @@ absolute URL.
             <p id="error-message"></p>
           </div>
           <p id="error-handler-message"></p>
-        </div> 
+        </div>
         <% inDiv.forEach((i) => { %>
           <%- include(i); %>
         <% }); %>
@@ -58,6 +58,13 @@ absolute URL.
       <div id="modal-background" class="modal-background">
       </div>
       <div id="modal-container" class="modal-container">
+      </div>
+      <!-- context menu -->
+      <div id="context-menu-other" class="context-menu">
+        <ul id="context-menu-list-other" class="context-menu-list"></ul>
+      </div>
+      <div id="context-menu-self" class="context-menu">
+        <ul id="context-menu-list-self" class="context-menu-list"></ul>
       </div>
     </div>
 
@@ -149,6 +156,8 @@ absolute URL.
             game.errorModal.displayError(reason, "Please refresh to reconnect.");
           }
         });
+
+        game.mainUI.createContextMenu(game.gameState, game.mapRenderer);
 
         function onGameTick () {
           game.mapRenderer.draw();

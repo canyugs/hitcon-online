@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 import OverlayPosition from './overlay-position.mjs';
+import ContextMenu from './context-menu.mjs';
 
 // enum
 const UIState = Object.freeze({
@@ -33,6 +34,7 @@ class MainUI {
     this.state = UIState.NORMAL_UI;
     this.overlays = new Map();
     this.activeModal = undefined;
+    this.mapRenderer = undefined;
 
     window.addEventListener('resize', (evt) => { this._onResize(evt); });
     window.addEventListener('gameStart', (evt) => { this._onResize(evt); });
@@ -66,6 +68,15 @@ class MainUI {
    */
   showNotification(msg, timeout) {
     // TODO(lisasasasa)
+  }
+
+  /**
+   * Initiate the context menu.
+   * @param {GameState} gameState - The GameState object.
+   * @param {MapRenderer} mapRenderer
+   */
+  createContextMenu(gameState, mapRenderer) {
+    this.contextMenu = new ContextMenu(gameState, mapRenderer);
   }
 
   // If we want to use individual overlay for meeting
