@@ -139,6 +139,11 @@ class ContextMenu {
         document.getElementById(CONTEXT_MENU_LIST_SELF_UL).appendChild(newItemDOM);
     }
 
+    /**
+     * Handle the callback of the item.
+     * @param name The name of the clicked item.
+     * @param menuType others or self.
+     */
     handleCallback(name, menuType) {
         if (menuType === 'others' && this.othersMenu.get(name)) {
             return this.othersMenu.get(name)(this.focusedPlayer);
