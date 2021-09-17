@@ -138,7 +138,7 @@ absolute URL.
         game.extMan = new ClientExtensionManager(game.socket, game.extensionList);
         game.mapRenderer = new MapRenderer(document.querySelector('#mapcanvas'), game.map, game.gameState);
         game.inputManager = new InputManager(game.mapRenderer);
-        game.gameClient = new GameClient(game.socket, game.gameState, game.mapRenderer, game.inputManager, game.extMan); // bug
+        game.gameClient = new GameClient(game.socket, game.gameState, game.mapRenderer, game.inputManager, game.extMan, game.mainUI); // bug
 
         game.gameClient.initialize(game.token);
         game.mapRenderer.setGameClient(game.gameClient);
@@ -151,11 +151,6 @@ absolute URL.
         game.mapRendererOverlay.show(OverlayPosition.MAIN_VIEW);
 
         game.errorModal = new ErrorModal(game.mainUI);
-        game.socket.on("disconnect", (reason) => {
-          if (reason !== "io client disconnect") {
-            game.errorModal.displayError(reason, "Please refresh to reconnect.");
-          }
-        });
 
         game.mainUI.createContextMenu(game.gameState, game.mapRenderer);
 
