@@ -19,12 +19,13 @@ class GameClient {
    * state.
    * @constructor
    */
-  constructor(socket, gameState, mapRenderer, inputManager, extMan) {
+  constructor(socket, gameState, mapRenderer, inputManager, extMan, mainUI) {
     this.socket = socket;
     this.gameState = gameState;
     this.mapRenderer = mapRenderer;
     this.inputManager = inputManager;
     this.extMan = extMan;
+    this.mainUI = mainUI;
     this.gameStarted = false;
     // playerInfo stores information regarding the current player.
     this.playerInfo = undefined;
@@ -56,6 +57,7 @@ class GameClient {
       });
       socket.on('unauthorized', (msg) => {
         console.error(`Authorization failed: ${JSON.stringify(msg.data)}`);
+        game.errorModal.displayError(`Authorization failed: ${JSON.stringify(msg.data)}`, "Please refresh to reconnect.");
         this.onDisconnect();
       });
       socket.on('gameStart', (msg) => {
@@ -86,6 +88,11 @@ class GameClient {
           callback(result);
         });
       });
+    });
+    socket.on("disconnect", (reason) => {
+      if (reason !== "io client disconnect") {
+        game.errorModal.displayError(reason, "Please refresh to reconnect.");
+      }
     });
   }
 
