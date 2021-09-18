@@ -57,7 +57,7 @@ class GameClient {
       });
       socket.on('unauthorized', (msg) => {
         console.error(`Authorization failed: ${JSON.stringify(msg.data)}`);
-        game.errorModal.displayError(`Authorization failed: ${JSON.stringify(msg.data)}`, "Please refresh to reconnect.");
+        game.errorModal.displayError("Authorization failed.", "Please refresh to reconnect.");
         this.onDisconnect();
       });
       socket.on('gameStart', (msg) => {
