@@ -44,11 +44,20 @@ class Standalone {
     this.playerToRoom = new Map();
 
     // Terminals
-    this.terminals = new Map();
+    this.terminalObjects = new Map();
     fs.readdirSync('../run/terminal').forEach((file) => {
       const terminalName = file.slice(0, -('.json'.length));
       const terminal = new TerminalObject(helper, terminalName, `../run/terminal/${file}`);
-      this.terminals.set(terminalName, terminal);
+      this.terminalObjects.set(terminalName, terminal);
+    });
+
+    // this.defaultTerminals determines the list of containers to start when the room is created.
+    this.defaultTerminals = [];
+    this.terminalObjects.forEach((terminalObject, terminalId) => {
+      this.defaultTerminals.push({
+        terminalId: terminalId,
+        imageName: terminalObject.config.terminalInfo.imageName
+      });
     });
 
     // gRPC server
@@ -93,7 +102,7 @@ class Standalone {
 
     // Create a new room
     let roomId = randomBytes(32).toString('hex');
-    this.rooms.set(roomId, new Room(roomId, this.terminalServerGrpcService));
+    this.rooms.set(roomId, new Room(roomId, this.terminalServerGrpcService, this.defaultTerminals));
     await this.rooms.get(roomId).startContainers();
     return roomId;
   }
@@ -145,41 +154,42 @@ class Standalone {
 
   /**
    * Get the access token of a specific terminal.
-   * @param player The player object.
-   * @param terminalId The terminal to be accessed.
+   * @param serviceName Which service call this.
+   * @param playerID The ID of the playerID interacting with the terminal project.
+   * @param terminalName The terminal to be accessed.
    * @returns
    */
-  async c2s_getAccessToken(player, terminalId) {
-    return this.playerToRoom.get(player.playerID).getAccessToken(terminalId);
+  async s2s_getAccessToken(serviceName, playerID, terminalName) {
+    return this.playerToRoom.get(playerID).getAccessToken(terminalName);
   }
 
   /**
-   * Get the list of all terminals.
+   * Get the list of all terminals. (for the interactive object)
    */
   async c2s_getAllTerminalsList(player) {
-    return this.terminals.keys();
+    return this.terminalObjects.keys();
   }
 
   /**
-   * TODO
-   * @param {Object} player - TODO
-   * @param {String} terminalId - TODO
+   * Get the display info of the terminal. (for the interactive object)
+   * @param {Object} player The player object
+   * @param {String} terminalId The terminal to be accessed.
    * @return {Object}
    */
   async c2s_getTerminalDisplayInfo(player, terminalId) {
-    const terminal = this.terminals.get(terminalId);
+    const terminal = this.terminalObjects.get(terminalId);
     if (typeof terminal === 'undefined') return {};
     return terminal.getDisplayInfo();
   }
 
   /**
-   * TODO
-   * @param {Object} player - TODO
-   * @param {String} terminalId - TODO
+   * Get the initial position of the terminal. (for the interactive object)
+   * @param {Object} player The player object
+   * @param {String} terminalId The terminal to be accessed.
    * @return {mapCoord}
    */
   async c2s_getTerminalInitialPosition(player, terminalId) {
-    const terminal = this.terminals.get(terminalId);
+    const terminal = this.terminalObjects.get(terminalId);
     if (typeof terminal === 'undefined') {
       console.error(`Terminal '${terminalId}' not found.`);
       return null;
@@ -188,27 +198,26 @@ class Standalone {
   }
 
   /**
-   * TODO
-   * @param {Object} player - TODO
-   * @param {String} terminalId - TODO
+   * This is called when the user interact with the Terminal interactive object.
+   * @param {Object} player The player object
+   * @param {String} terminalId The terminal to be accessed.
    */
   async c2s_startInteraction(player, terminalId) {
-    const terminal = this.terminals.get(terminalId);
+    const terminal = this.terminalObjects.get(terminalId);
     if (typeof terminal === 'undefined') {
       console.error(`Terminal '${terminalId}' not found.`);
       return;
     }
-    console.log('c2s_startInteraction', player, terminalId);
     await terminal.startInteraction(player.playerID);
   }
 
   /**
-   * TODO
-   * @param {Object} player - TODO
+   * Get the list of terminals. (for the interactive object)
+   * @param {Object} player The player object
    * @return {Array}
    */
   async c2s_getListOfTerminals(player) {
-    return Array.from(this.terminals.keys());
+    return Array.from(this.terminalObjects.keys());
   }
 }
 
@@ -222,13 +231,13 @@ class Room {
    * @param {string} roomId The identifier of the room.
    * @param {} terminalServerGrpcService The gRPC service.
    */
-  constructor(roomId, terminalServerGrpcService) {
+  constructor(roomId, terminalServerGrpcService, defaultTerminals) {
     this.roomId = roomId;
     this.terminalServerGrpcService = terminalServerGrpcService;
     this.players = [];
-    this.terminals = {}; // Mapping the terminal id to the container id in the terminal server.
+    this.terminals = new Map(); // Mapping the terminal id to the container id in the terminal server.
 
-    this.defaultTerminals = [{imageName: 'debian:stable', terminalId: 'test'}];
+    this.defaultTerminals = defaultTerminals;
   }
 
   /**
@@ -256,7 +265,7 @@ class Room {
           console.error(`Fail to start container with image ${defaultTerminal.imageName}.`);
           return false;
         }
-        this.terminals[defaultTerminal.terminalId] = ret.containerId;
+        this.terminals.set(defaultTerminal.terminalId, ret.containerId);
       } catch (e) {
         console.error(e);
       }
@@ -271,11 +280,11 @@ class Room {
     for (const defaultTerminal of this.defaultTerminals) {
       try {
         let ret = await promisify(this.terminalServerGrpcService.DestroyContainer.bind(this.terminalServerGrpcService))({
-          containerId: this.terminals[defaultTerminal.terminalId]
+          containerId: this.terminals.get(defaultTerminal.terminalId)
         }, {deadline: new Date(Date.now() + 20000)});
 
         if (!ret.success) {
-          console.error(`Fail to kill container ${defaultTerminal.terminalId} ${this.terminals[defaultTerminal.terminalId]}.`);
+          console.error(`Fail to kill container ${defaultTerminal.terminalId} ${this.terminals.get(defaultTerminal.terminalId)}.`);
           return false;
         }
       } catch (e) {
@@ -290,11 +299,11 @@ class Room {
    * @param {string} terminalId The identifier of the terminal.
    */
   getAccessToken(terminalId) {
-    if (!(terminalId in this.terminals)) {
+    if (!this.terminals.has(terminalId)) {
       throw new Error(`Terminal ${terminalId} doesn't exist.`);
     }
     return jwt.sign({
-      containerId: this.terminals[terminalId]
+      containerId: this.terminals.get(terminalId)
     }, 'secret', {expiresIn: 10});
    }
 }
@@ -304,7 +313,8 @@ class Room {
  */
 class TerminalObject extends InteractiveObjectServerBaseClass {
   async sf_showTerminal(playerID, kwargs) {
-    await this.helper.callS2cAPI(playerID, 'escape-game', 'showTerminalModal', 60*1000);
+    const token = await this.helper.callS2sAPI('escape-game', 'getAccessToken', playerID, this.objectName);
+    await this.helper.callS2cAPI(playerID, 'escape-game', 'showTerminalModal', 60*1000, token);
     return this.sf_exit(playerID, {});
   }
 }

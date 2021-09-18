@@ -81,15 +81,10 @@ class Client {
       const displayConfig = await this.helper.callC2sAPI('escape-game', 'getTerminalDisplayInfo', 500, terminalId);
       this.terminals.set(terminalId, new TerminalObject(this.helper, terminalId, initialPosition, displayConfig));
     }
-  }
 
-  /**
-   * Get the access token for the container.
-   */
-   async getAccessToken() {
-    const result = await this.helper.callC2sAPI('escape-game', 'getAccessToken', 5000, 'test');
-    this.token = result;
-    console.log(`Access token for the container: ${JSON.stringify(result)}`);
+    // For testing only.
+    await this.createRoom();
+    await this.joinRoom();
   }
 
   /**
@@ -114,12 +109,6 @@ class Client {
    * Setup the socket.io connection and xterm.js.
    */
   async setupPty() {
-    // TODO: for testing only.
-    await this.createRoom();
-    await this.joinRoom();
-
-    await this.getAccessToken();
-
     if (!this.token) {
       throw new Error('No token found.');
     }
@@ -150,15 +139,13 @@ class Client {
     });
   }
 
-  async s2c_showTerminalModal() {
+  async s2c_showTerminalModal(token) {
+    this.token = token;
     this.modal.show();
     return true;
   }
 
   cleanup() {
-    // TODO: for testing only.
-    this.helper.callC2sAPI('escape-game', 'destroyRoom', 5000, this.roomId);
-
     this.socket.disconnect();
     this.socket = null;
 
