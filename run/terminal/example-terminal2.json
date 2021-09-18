@@ -1,6 +1,6 @@
 {
   "enabled": true,
-  "initialPosition": {"mapName": "world1", "x": 10, "y": 10},
+  "initialPosition": {"mapName": "world1", "x": 15, "y": 15},
   "terminalInfo": {
     "imageName": "debian:stable"
   },
