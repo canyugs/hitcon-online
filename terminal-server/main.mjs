@@ -158,7 +158,7 @@ class TerminalServer {
   /**
    * Create a gRPC server
    */
-   createGrpcServer() {
+  createGrpcServer() {
     const packageDefinition = protoLoader.loadSync(
       path.dirname(fileURLToPath(import.meta.url)) + '/terminal.proto',
       {
