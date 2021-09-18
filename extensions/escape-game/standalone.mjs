@@ -166,7 +166,7 @@ class Standalone {
    * @param {String} terminalId - TODO
    * @return {Object}
    */
-   async c2s_getTerminalDisplayInfo(player, terminalId) {
+  async c2s_getTerminalDisplayInfo(player, terminalId) {
     const terminal = this.terminals.get(terminalId);
     if (typeof terminal === 'undefined') return {};
     return terminal.getDisplayInfo();
