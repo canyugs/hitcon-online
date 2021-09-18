@@ -36,8 +36,13 @@ class AuthServer {
             return null;
         }
 
+        if (typeof ret !== 'object') {
+            console.error('JWT Payload is not object.');
+            return null;
+        }
+
         // Check for valid subject in the token.
-        if (!('sub' in ret) || typeof ret.sub != 'string') {
+        if (!('sub' in ret) || typeof ret.sub !== 'string') {
             console.error('Invalid subject in token found for verifyToken.');
             // Reject the client.
             return null;
