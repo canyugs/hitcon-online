@@ -11,17 +11,18 @@ Not started
 - Optimize loading when multiple users are looking for spawn point or have a timer/queue when spawn points are full.
 - Renderer
   - Smoother movement animation with transition
-
+- Item/Inventory extension
+- Cancel in-flight c2s/s2c API on disconnect.
+- Optimize player look-up data structure in MapRender and InteractiveObjectBase.
 
 In Progress
 ===========
 
 - Chat (text) extension
-- Item/Inventory extension
 - Productionization
 - Bomb man extension
 - NPC
-  - Portal NPC
+  - Password/Passwordless Portal NPC
   - Door NPC
 - Better Jitsi integration
 - Online list
@@ -29,3 +30,5 @@ In Progress
   - Follow functionality
   - Private message
 - Disconnect/Error Screen/Handler
+- Command/Item for Announcement
+- Player context menu
