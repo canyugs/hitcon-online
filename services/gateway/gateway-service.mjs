@@ -10,6 +10,7 @@ const movingRequestThreshold = config.get('movingRequestThreshold');
 
 import {MapCoord} from '../../common/maplib/map.mjs';
 import {PlayerSyncMessage} from '../../common/gamelib/player.mjs';
+import {checkPlayerMove} from '../../common/gamelib/move-check.mjs';
 
 /**
  * This class handles the connections from the client and does the most
@@ -52,7 +53,7 @@ class GatewayService {
     await this.rpcHandler.registerAsGateway();
     this.rpcHandler.registerRPC('callS2c', this.callS2c.bind(this));
     this.rpcHandler.registerRPC('teleport', async (serviceName, playerID, mapCoord, facing) => {
-      return await this.teleportPlayer(playerID, new MapCoord(mapCoord.mapName, mapCoord.x, mapCoord.y), facing);
+      return await this.teleportPlayer(playerID, MapCoord.fromObject(mapCoord), facing);
     });
     this.servers = [];
     await this.extMan.createAllInGateway(this.rpcHandler, this);
@@ -235,57 +236,28 @@ class GatewayService {
 
   /**
    * Callback for the playerUpdate message from the client.
+   * Performs some check on the update message.
    * @param {Socket} socket - The socket from which this is sent.
-   * @param {PlayerSyncMessage} origMsg - The update message.
+   * @param {PlayerSyncMessage} updateMsg - The update message.
    */
-  async onPlayerUpdate(socket, origMsg) {
-    if (socket.playerID !== origMsg.playerID) {
-      console.error(`Player '${origMsg.playerID}' tries to update player '${socket.playerID}'s data, which is invalid.`);
+  async onPlayerUpdate(socket, updateMsg) {
+    if (socket.playerID !== updateMsg.playerID) {
+      console.error(`Player '${updateMsg.playerID}' tries to update player '${socket.playerID}'s data, which is invalid.`);
       return;
     }
 
-    const msg = PlayerSyncMessage.fromObject(socket.playerData);
-    msg.facing = origMsg.facing;
-    msg.mapCoord = MapCoord.fromObject(origMsg.mapCoord);
-    // TODO: Check if facing is valid.
-    // TODO: Check if movement is legal.
+    if (checkPlayerMove(socket.playerData, updateMsg, this.gameMap)) {
+      return;
+    }
 
-    const lastCoord = socket.playerData.mapCoord;
-    const mapSize = this.gameMap.getMapSize(lastCoord.mapName);
-    if (lastCoord.x === undefined || lastCoord.y === undefined || lastCoord.mapName === undefined) {
-      // Shouldn't happen, log an error.
-      console.error(`Invalid lastCoord in onPlayerUpdate ${lastCoord}`);
-      return;
-    }
-    if (!this._movementRequestSpeedCheck(socket.playerData)) {
-      console.warn(`Player ${msg.playerID} is overspeed.`);
-      return;
-    }
-    // TODO(whyang9701): Move this into the library as well.
-    if (!(lastCoord.mapName === msg.mapCoord.mapName)) {
-      console.warn(`Player ${msg.playerID} changed map from ` +
-        `${lastCoord.mapName} to ${msg.mapCoord.mapName} without permission.`);
-      return;
-    }
-    // target position is in the map
-    if (!this._borderCheck(msg.mapCoord, mapSize)) {
-      console.warn(`Player ${msg.playerID} is trying to go outside the map.`);
-      return;
-    }
-    // nearby grid check
-    if (!this._nearbyGridCheck(msg.mapCoord, lastCoord)) {
-      console.warn(`Player ${msg.playerID} is trynig to teleport.`);
-      return;
-    }
-    // TODO(whyang9701): Add checks for cells that is marked as blocked
-    // in the map.
-    // TODO: Maybe log any cell collision.
-    await this._teleportPlayerInternal(socket, msg);
+    await this._teleportPlayerInternal(socket, updateMsg);
   }
 
   /**
-   * Teleport the player to the specified map coordinate.
+   * Teleport the player to the specified map coordinate (without any checking).
    * This is an internal function that requires the socket.
+   * @param {Socket} socket - TODO
+   * @param {PlayerSyncMessage} msg - TODO
    */
   async _teleportPlayerInternal(socket, msg) {
     // try occupy grid
@@ -304,7 +276,7 @@ class GatewayService {
   }
 
   /**
-   * Teleport the player to the specified map coordinate.
+   * Teleport the player to the specified map coordinate (without any checking).
    */
   async teleportPlayer(playerID, mapCoord, facing) {
     if (!(playerID in this.socks)) {
@@ -330,40 +302,6 @@ class GatewayService {
       await this.dir.setPlayerData(msg.playerID, this.socks[msg.playerID].playerData);
     }
     await this.broadcaster.notifyPlayerUpdate(msg);
-    return true;
-  }
-
-  // TODO(whyang9701): Move this into map.mjs.
-  _getManhattanDistance(a, b) {
-    return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
-  }
-
-  _borderCheck(coord, mapSize) {
-    if (coord.x >= mapSize.width || coord.x < 0) {
-      return false;
-    }
-    if (coord.y >= mapSize.height || coord.y < 0) {
-      return false;
-    }
-    return true;
-  }
-
-  _nearbyGridCheck(coord, lastCoord) {
-    let distanceSquire = this._getManhattanDistance(lastCoord, coord);
-    if (distanceSquire > 1) {
-      return false;
-    }
-    return true;
-  }
-
-  _movementRequestSpeedCheck(playerData) {
-    if (playerData.lastMovingTime === undefined) {
-      console.log('player has no last time record');
-      return false;
-    }
-    if (Date.now() - playerData.lastMovingTime < movingRequestThreshold ) {
-      return false;
-    }
     return true;
   }
 

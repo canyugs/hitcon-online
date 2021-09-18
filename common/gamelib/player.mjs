@@ -178,7 +178,7 @@ class PlayerSyncMessage {
    */
   static fromObject(obj) {
     const ret = new PlayerSyncMessage(obj.playerID);
-    if (obj.mapCoord !== undefined) ret.mapCoord = obj.mapCoord;
+    if (obj.mapCoord !== undefined) ret.mapCoord = MapCoord.fromObject(obj.mapCoord);
     if (obj.facing !== undefined) ret.facing = obj.facing;
     if (obj.displayName !== undefined) ret.displayName = obj.displayName;
     if (obj.displayChar !== undefined) ret.displayChar = obj.displayChar;
