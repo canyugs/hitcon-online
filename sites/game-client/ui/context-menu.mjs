@@ -26,7 +26,7 @@ class ContextMenu {
 
     // bind the contextmenu and click event.
     $('#mapcanvas').on('contextmenu', this.canvasOnContextMenu.bind(this));
-    $('body').on('contextmenu', '[data-player-context-menu]', (e) => this.elementOnContextMenu(e));
+    $('body').on('contextmenu', '[data-player-context-menu]', this.elementOnContextMenu.bind(this));
     $('body').on('click', this.hideMenu);
 
     // Get current player
@@ -84,15 +84,17 @@ class ContextMenu {
     }
 
     let menu = document.getElementById(div);
-    if (menu.style.display == "block") {
-      // If the menu is already opened, closed it.
+
+    // If the menu is already opened, closed it.
+    if (document.getElementById(CONTEXT_MENU_SELF_DIV).style.display == "block" ||
+        document.getElementById(CONTEXT_MENU_OTHER_DIV).style.display == "block") {
       this.hideMenu();
-    } else {
-      // Open the menu
-      menu.style.display = 'block';
-      menu.style.left = e.pageX + "px";
-      menu.style.top = e.pageY + "px";
     }
+
+    // Open the menu
+    menu.style.display = 'block';
+    menu.style.left = e.pageX + "px";
+    menu.style.top = e.pageY + "px";
   }
 
   /**
