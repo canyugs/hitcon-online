@@ -25,8 +25,9 @@ class ContextMenu {
     this.playerInfo = null;
 
     // bind the contextmenu and click event.
-    document.getElementById('mapcanvas').addEventListener('contextmenu', this.onContextMenu.bind(this));
-    document.body.addEventListener('click', this.hideMenu);
+    $('#mapcanvas').on('contextmenu', this.canvasOnContextMenu.bind(this));
+    $('body').on('contextmenu', '[data-player-context-menu]', (e) => this.elementOnContextMenu(e));
+    $('body').on('click', this.hideMenu);
 
     // Get current player
     window.addEventListener('gameStart', (d) => {
@@ -35,23 +36,47 @@ class ContextMenu {
   }
 
   /**
-   * Called when user clicked on the player.
+   * Called when user right-clicked on the player in the canvas.
    * @param {Event} e event
    */
-  onContextMenu(e) {
-    e.preventDefault();
+  canvasOnContextMenu(e) {
 
     // Check if the user actually clicked on a player.
     if (!this.findFocusedUser(e.pageX, e.pageY)) {
       return;
     }
 
+    e.preventDefault();
+    this.onContextMenu(e);
+  }
+
+  /**
+   * Called when user right-clicked on the elements with data-player-context-menu attribute.
+   * @param {Event} e event
+   */
+  elementOnContextMenu(e) {
+    // Check if the player exists.
+    if (!this.gameState.players.has($(e.target).attr('data-player-context-menu'))) {
+      return;
+    }
+
+    this.focusedPlayer = $(e.target).attr('data-player-context-menu');
+
+    e.preventDefault();
+    this.onContextMenu(e);
+  }
+
+  /**
+   * Called when user right-clicked on the player in the canvas.
+   * @param {Event} e event
+   */
+  onContextMenu(e) {
     // Identify whether the menu is for the user itself or other players.
     // Stop if the menu is empty.
     let div;
-    if (this.focusedPlayer.playerID === this.playerInfo.playerID && this.selfMenu.size > 0) {
+    if (this.focusedPlayer === this.playerInfo.playerID && this.selfMenu.size > 0) {
       div = CONTEXT_MENU_SELF_DIV;
-    } else if (this.focusedPlayer.playerID !== this.playerInfo.playerID && this.othersMenu.size > 0) {
+    } else if (this.focusedPlayer !== this.playerInfo.playerID && this.othersMenu.size > 0) {
       div = CONTEXT_MENU_OTHER_DIV;
     } else {
       this.focusedPlayer = null;
@@ -60,13 +85,14 @@ class ContextMenu {
 
     let menu = document.getElementById(div);
     if (menu.style.display == "block") {
+      // If the menu is already opened, closed it.
       this.hideMenu();
     } else {
+      // Open the menu
       menu.style.display = 'block';
       menu.style.left = e.pageX + "px";
       menu.style.top = e.pageY + "px";
     }
-
   }
 
   /**
@@ -96,7 +122,7 @@ class ContextMenu {
         canvasCoordinate.y >= y &&
         canvasCoordinate.y - mapCellSize <= y
       ) {
-        this.focusedPlayer = player;
+        this.focusedPlayer = player.playerID;
         return true;
       }
     }
