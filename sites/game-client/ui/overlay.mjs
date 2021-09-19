@@ -15,6 +15,7 @@ class Overlay {
     this.dom = dom;
     this.position = undefined;
     this.positionCache = undefined;
+    this.isOpen = undefined;
   }
 
   /**
@@ -125,7 +126,10 @@ class Overlay {
    * This method can be implemented in the derived class if the derived class
    * wishes to handle this event.
    */
-  onPostShow() { return true; }
+  onPostShow() {
+    this.isOpen = true;
+    return true;
+  }
 
   /**
    * Executes before the overlay is hidden.
@@ -141,7 +145,10 @@ class Overlay {
    * This method can be implemented in the derived class if the derived class
    * wishes to handle this event.
    */
-  onPostHide() { return true; }
+  onPostHide() {
+    this.isOpen = false;
+    return true;
+  }
 
   /**
    * Executes when the window is resized.

@@ -1549,6 +1549,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"hitcon-online-iframe@workspace:extensions/iframe":
+  version: 0.0.0-use.local
+  resolution: "hitcon-online-iframe@workspace:extensions/iframe"
+  languageName: unknown
+  linkType: soft
+
 "hitcon-online-interactive-object@workspace:common/interactive-object":
   version: 0.0.0-use.local
   resolution: "hitcon-online-interactive-object@workspace:common/interactive-object"

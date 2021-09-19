@@ -29,6 +29,11 @@
         "base",
         15,
         1
+      ],
+      "TV": [
+        "base",
+        11,
+        4
       ]
     },
     "bombmanObstacle": {

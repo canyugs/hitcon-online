@@ -32,7 +32,8 @@
       "items",
       "MapWatermark",
       "npc",
-      "playerlist"
+      "playerlist",
+      "iframe"
     ],
     "standalone": {
       "chat": "127.0.0.1:5020",

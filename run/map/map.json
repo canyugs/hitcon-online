@@ -88,6 +88,28 @@
       null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
       null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
     ],
+    "videoIframe": [
+      null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
+      null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
+       null,null,null,null,null,null,null,null,null,"https://www.youtube.com/embed/rkUFhseLoB4","https://www.youtube.com/embed/rkUFhseLoB4","https://www.youtube.com/embed/rkUFhseLoB4",null,null,null,null,null,null,null,null,
+      null,null,null,null,null,null,null,null,null,"https://www.youtube.com/embed/rkUFhseLoB4","https://www.youtube.com/embed/rkUFhseLoB4","https://www.youtube.com/embed/rkUFhseLoB4",null,null,null,null,null,null,null,null,
+      null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
+      null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
+      null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
+      null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
+      null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
+      null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
+      null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
+      null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
+      null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
+      null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
+      null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
+      null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
+      null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
+      null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
+      null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
+      null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null
+    ],
     "startX": 0,
     "startY": 0,
     "width": 20,
@@ -122,6 +144,17 @@
           { "x": 1, "y": 1, "w": 2, "h": 2 },
           { "x": 5, "y": 6, "w": 1, "h": 1 }
         ]
+      },
+      {
+        "name": "markVideoIframe",
+        "cells": [
+          { "x": 10, "y": 3, "w": 1, "h": 1}
+        ],
+        "priority": 1,
+        "layers": {
+          "ground": "TV",
+          "wall": true
+        }
       }
     ]
   }

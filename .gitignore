@@ -15,3 +15,6 @@
 
 # some runtime data
 run/small_data
+
+# other
+**/.DS_Store
