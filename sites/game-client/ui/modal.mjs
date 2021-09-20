@@ -4,12 +4,13 @@
 /**
  * The modal is a center aligned window above the MainView.
  * Before closing the modal, user cannot interactive with other components.
- * 
+ *
  * Those who wants to use the Modal element should extend this class and implement the methods.
  */
 class Modal {
   /**
    * The modal have a default size, can call setSize() to change it.
+   * @param {MainUI} mainUI
    * @param dom HTML DOM element.
    */
   constructor(mainUI, dom) {
@@ -29,8 +30,8 @@ class Modal {
    * Set the modal container size.
    * This is usually called by the derived class to set the modal container
    * size.
-   * @param {String} width - The width of modal, should be a vaild css units.
-   * @param {String} height - The height of modal, should be a vaild css units.
+   * @param {String} width - The width of modal, should be a valid css units.
+   * @param {String} height - The height of modal, should be a valid css units.
    */
   setSize(width, height) {
     this._assertActive();
@@ -114,12 +115,12 @@ class Modal {
   onClickToolbarButton() {
     this.show();
   }
-  
+
   // Return root dom element.
   getDOM() {
     return this.dom;
   }
-  
+
   /**
    * Transition from HIDDEN to ACTIVE.
    */
@@ -153,7 +154,7 @@ class Modal {
       console.warn('Calling hide() on inactive modal.');
       return false;
     }
-  
+
     const proceed = this.onPreHide();
     // If onPreHide() says don't do it, then don't.
     if (!proceed) return proceed;
@@ -167,7 +168,7 @@ class Modal {
   }
 
   /**
-   * Transition to DIMISSED state.
+   * Transition to DISMISSED state.
    */
   dismiss() {
     this.hide();

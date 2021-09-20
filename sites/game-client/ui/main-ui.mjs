@@ -163,7 +163,7 @@ class MainUI {
   /**
    * Show notification in notification area.
    * @param {String} msg The message want to be shown.
-   * @param {Number} timeout The duraion of showing notification, the unit is millisecond. Should be an integer, otherwise the default is used.
+   * @param {Number} timeout The duration of showing notification, the unit is millisecond. Should be an integer, otherwise the default is used.
    */
   showNotification(msg, timeout) {
     // Sanitize to prevent XSS
