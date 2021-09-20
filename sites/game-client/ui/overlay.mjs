@@ -73,6 +73,7 @@ class Overlay {
     // If setOverlay failed, then we stop here.
     if (!ret) return ret;
     this.position = position;
+    this.isOpen = true;
 
     this.onPostShow();
     return ret;
@@ -92,6 +93,7 @@ class Overlay {
     // If clearOverlay failed, then we stop here.
     if (!ret) return ret;
     this.position = undefined;
+    this.isOpen = false;
 
     this.onPostHide();
     return ret;
@@ -126,10 +128,7 @@ class Overlay {
    * This method can be implemented in the derived class if the derived class
    * wishes to handle this event.
    */
-  onPostShow() {
-    this.isOpen = true;
-    return true;
-  }
+  onPostShow() { return true; }
 
   /**
    * Executes before the overlay is hidden.
@@ -145,10 +144,7 @@ class Overlay {
    * This method can be implemented in the derived class if the derived class
    * wishes to handle this event.
    */
-  onPostHide() {
-    this.isOpen = false;
-    return true;
-  }
+  onPostHide() { return true; }
 
   /**
    * Executes when the window is resized.
