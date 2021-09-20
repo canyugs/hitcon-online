@@ -113,7 +113,7 @@ class GatewayService {
 
   /**
    * Add a new socket.io server to this service.
-   * This is typtically called by the main class/function.
+   * This is typically called by the main class/function.
    * @param {Server} server - The socket.io server to add to this class.
    */
   addServer(server) {

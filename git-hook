@@ -6,7 +6,7 @@ exec 1>&2
 STAGED_FILES="$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.m?js$')"
 
 if [[ "$STAGED_FILES" = ""  ]]; then
-	 printf "\t\033[32mESLint Passed: no modified .mjs files found.\033[0m\n"
+	printf "\t\033[32mESLint Passed: no modified .mjs files found.\033[0m\n"
 	exit 0
 fi
 

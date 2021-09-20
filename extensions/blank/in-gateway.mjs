@@ -20,7 +20,7 @@ class InGateway {
   }
 
   /**
-   * This is called by gateway service to initialie the in gateway part of
+   * This is called by gateway service to initialize the in gateway part of
    * the extension.
    */
   async initialize() {

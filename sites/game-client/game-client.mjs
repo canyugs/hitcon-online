@@ -12,10 +12,10 @@ class GameClient {
    * Create a game client.
    * @param {Socket} socket - A socket.io socket.
    * @param {GameState} gameState - The map state object for tracking the map
+   * state.
    * @param {MapRenderer} mapRenderer
    * @param {InputManager} inputManager
    * @param {ClientExtensionManager} extMan
-   * state.
    * @constructor
    */
   constructor(socket, gameMap, gameState, mapRenderer, inputManager, movementManager, extMan, mainUI) {
@@ -84,7 +84,7 @@ class GameClient {
             console.warn(`Result of callS2cAPI('${msg.extName}', ` +
               `'${msg.methodName}', '${msg.args}') is not an object: ` +
               `${JSON.stringify(result)}`);
-          } else if (typeof result === 'object' && result.error) {
+          } else if (result.error) {
             console.warn(`Error on callS2cAPI('${msg.extName}', ` +
               `'${msg.methodName}', '${msg.args}'): ` +
               `${JSON.stringify(result)}`);
