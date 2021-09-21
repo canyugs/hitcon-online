@@ -45,6 +45,8 @@ body {
   border: 2px solid;
   width: 100%;
   height: 100%;
+  /* We want to make sure that 100% width/height doesn't result in overflow. */
+  box-sizing: border-box;
 }
 
 .overlay {
