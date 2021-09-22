@@ -172,7 +172,7 @@ absolute URL.
         game.extMan = new ClientExtensionManager(game.socket, game.extensionList);
         game.mapRenderer = new MapRenderer(document.querySelector('#mapcanvas'), game.map, game.gameState);
         game.inputManager = new InputManager(game.mapRenderer);
-        game.gameClient = new GameClient(game.socket, game.gameState, game.mapRenderer, game.inputManager, game.extMan, game.mainUI); // bug
+        game.gameClient = new GameClient(game.socket, game.map, game.gameState, game.mapRenderer, game.inputManager, game.extMan, game.mainUI);
 
         game.gameClient.initialize(game.token);
         game.mapRenderer.setGameClient(game.gameClient);
