@@ -1,6 +1,7 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
+import {checkPlayerMove} from '/static/common/gamelib/move-check.mjs';
 import {Player, PlayerSyncMessage} from '/static/common/gamelib/player.mjs';
 import {MapCoord} from '/static/common/maplib/map.mjs';
 
@@ -19,8 +20,9 @@ class GameClient {
    * state.
    * @constructor
    */
-  constructor(socket, gameState, mapRenderer, inputManager, extMan, mainUI) {
+  constructor(socket, gameMap, gameState, mapRenderer, inputManager, extMan, mainUI) {
     this.socket = socket;
+    this.gameMap = gameMap;
     this.gameState = gameState;
     this.mapRenderer = mapRenderer;
     this.inputManager = inputManager;
@@ -154,6 +156,10 @@ class GameClient {
       mapCoord: new MapCoord(this.playerInfo.mapCoord.mapName, x, y),
       facing: facing,
     });
+    if (!checkPlayerMove(this.playerInfo, msg, this.gameMap)) {
+      return;
+    }
+    this.playerInfo.lastMovingTime = Date.now();
     this.socket.emit('playerUpdate', msg);
   }
 

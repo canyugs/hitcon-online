@@ -48,7 +48,7 @@ function _speedCheck(oldPlayerData, newPlayerData) {
 function _borderAndWallCheck(oldPlayerData, newPlayerData, gameMap) {
   // check wall
   // TODO: check all the map coordinates between old position and new position
-  if (!gameMap.getCell(newPlayerData.mapCoord, 'wall')) {
+  if (gameMap.getCell(newPlayerData.mapCoord, 'wall')) {
     return false;
   }
 
@@ -62,4 +62,7 @@ function _borderAndWallCheck(oldPlayerData, newPlayerData, gameMap) {
   return true;
 }
 
-export {checkPlayerMove};
+export {checkPlayerMove,
+  PLAYER_MOVE_TIME_INTERVAL,
+  PLAYER_MOVE_DISTANCE_LIMIT,
+};

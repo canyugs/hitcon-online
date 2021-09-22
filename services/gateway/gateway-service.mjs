@@ -246,7 +246,7 @@ class GatewayService {
       return;
     }
 
-    if (checkPlayerMove(socket.playerData, updateMsg, this.gameMap)) {
+    if (!checkPlayerMove(socket.playerData, updateMsg, this.gameMap)) {
       return;
     }
 
