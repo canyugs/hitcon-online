@@ -9,6 +9,8 @@ import {PLAYER_MOVE_TIME_INTERVAL} from './move-check.mjs';
  * It should be used whenever anyone wants to pass players to function calls or between client and server.
  */
 
+const PLAYER_MOVE_ANIMATION_FRAME_RATE = 100; // ms per frame
+
 /**
  * The player class.
  */
@@ -43,21 +45,32 @@ class Player {
     // smoothly move the player
     const now = Date.now();
     const smoothMoveEnd = this.lastMovingTime + PLAYER_MOVE_TIME_INTERVAL;
-    let retMapCoord;
+    let retMapCoord, retFacing;
     if (now < smoothMoveEnd) {
+      // moving, calculate interpolated coordinate
       const inter = MapCoord.fromObject(this.mapCoord);
       const frac = (now - this.lastMovingTime) / PLAYER_MOVE_TIME_INTERVAL;
       inter.x = (1 - frac) * this._previousMapCoord.x + frac * this.mapCoord.x;
       inter.y = (1 - frac) * this._previousMapCoord.y + frac * this.mapCoord.y;
       retMapCoord = inter;
+      // calculate the moving animation phase
+      const phase = Math.floor(now / PLAYER_MOVE_ANIMATION_FRAME_RATE) % 4;
+      if (phase === 0) {
+        retFacing = this.facing + 'R';
+      } else if (phase === 2) {
+        retFacing = this.facing + 'L';
+      } else { // phase === 1 || phase === 3
+        retFacing = this.facing;
+      }
     } else {
       retMapCoord = this.mapCoord;
+      retFacing = this.facing;
     }
 
     return {
       mapCoord: retMapCoord,
       displayChar: this.displayChar,
-      facing: this.facing,
+      facing: retFacing,
       displayName: this.displayName,
     };
   }

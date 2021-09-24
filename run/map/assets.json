@@ -53,26 +53,18 @@
   },
   "characters":{
     "char1":{
-      "L":[
-        "char1img",
-        1,
-        1
-      ],
-      "R":[
-        "char1img",
-        1,
-        2
-      ],
-      "U":[
-        "char1img",
-        1,
-        3
-      ],
-      "D":[
-        "char1img",
-        1,
-        0
-      ]
+      "D":["char1img", 1, 0],
+      "DR":["char1img", 0, 0],
+      "DL":["char1img", 2, 0],
+      "L":["char1img", 1, 1],
+      "LR":["char1img", 0, 1],
+      "LL":["char1img", 2, 1],
+      "R":["char1img", 1, 2],
+      "RR":["char1img", 0, 2],
+      "RL":["char1img", 2, 2],
+      "U":["char1img", 1, 3],
+      "UR":["char1img", 0, 3],
+      "UL":["char1img", 2, 3]
     }
   }
 }
