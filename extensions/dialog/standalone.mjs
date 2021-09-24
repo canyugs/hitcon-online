@@ -67,7 +67,7 @@ class Standalone {
   }
 
   /**
-   * Get the specific NPC data from Server (npc.json), 
+   * Get the specific NPC data from Server (npc.json),
    * than send NPC data back to user to render the dialog.
    * @param {object} player - Player ID
    * @@param {object} arg - NPC name
@@ -75,7 +75,7 @@ class Standalone {
   async c2s_getSpecificNpcData(player, arg) {
     const npcName = arg['npc'] ;
     const npcObject = this.npcObj[npcName];
-    
+
     if (npcObject == undefined) {
       assert.fail(`[Error] Does not have NPC ${npcName}'s data`);
     } else {

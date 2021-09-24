@@ -1,0 +1,58 @@
+{
+    "enabled": true,
+    "initialPosition": {"mapName": "world1", "x": 3, "y": 15},
+    "display": [
+      {
+        "zIndex": 11,
+        "layerName": "npcImage",
+        "renderFunction": "_drawOneCharacterImage",
+        "renderArgs": null,
+        "character": "char1"
+      },
+      {
+        "zIndex": 16,
+        "layerName": "npcName",
+        "renderFunction": "_drawOneCharacterName",
+        "renderArgs": null
+      }
+    ],
+    "FSM": {
+      "initialState": "s1",
+      "states": {
+        "s1": {
+          "func": "showDialog",
+          "kwargs": {
+            "dialogs": "Hello!\nNice to meet you!",
+            "options": {
+              "Magic!": "s2",
+              "Bye!": "s4"
+            }
+          }
+        },
+        "s2": {
+            "func": "showDialogAndCheckKey",
+            "kwargs": {
+              "dialog": "Give me your key!",
+              "nextState": "s3",
+              "nextStateIncorrect" : "s4",
+              "key": "0000"
+            }
+        },
+        "s3": {
+          "func": "teleport",
+          "kwargs": {
+            "mapCoord": {
+                "mapName": "world1", "x": 10, "y": 15
+            },
+            "nextState": "s4"
+          }
+        },
+        "s4": {
+          "func": "exit",
+          "kwargs": {
+            "next": "s1"
+          }
+        }
+      }
+    }
+  }
