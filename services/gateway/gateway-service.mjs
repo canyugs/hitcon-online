@@ -269,7 +269,6 @@ class GatewayService {
     }
 
     //release old grid
-    socket.playerData.lastMovingTime = Date.now();
     await this._clearOccupy(socket.playerData.mapCoord, msg.playerID);
     await this._broadcastPlayerUpdate(msg);
     return true;

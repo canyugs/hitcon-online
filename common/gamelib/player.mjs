@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 import {MapCoord} from '../maplib/map.mjs';
+import {PLAYER_MOVE_TIME_INTERVAL} from './move-check.mjs';
 
 /**
  * This module provides an interface of player object.
@@ -39,8 +40,22 @@ class Player {
    * @return {Object}
    */
   getDrawInfo() {
+    // smoothly move the player
+    const now = Date.now();
+    const smoothMoveEnd = this.lastMovingTime + PLAYER_MOVE_TIME_INTERVAL;
+    let retMapCoord;
+    if (now < smoothMoveEnd) {
+      const inter = MapCoord.fromObject(this.mapCoord);
+      const frac = (now - this.lastMovingTime) / PLAYER_MOVE_TIME_INTERVAL;
+      inter.x = (1 - frac) * this._previousMapCoord.x + frac * this.mapCoord.x;
+      inter.y = (1 - frac) * this._previousMapCoord.y + frac * this.mapCoord.y;
+      retMapCoord = inter;
+    } else {
+      retMapCoord = this.mapCoord;
+    }
+
     return {
-      mapCoord: this.mapCoord,
+      mapCoord: retMapCoord,
       displayChar: this.displayChar,
       facing: this.facing,
       displayName: this.displayName,
@@ -57,11 +72,15 @@ class Player {
       return false;
     }
     // TODO: check whether msg is in the correct format
-    if (msg.mapCoord !== undefined) this.mapCoord = msg.mapCoord;
+    if (msg.mapCoord !== undefined) {
+      this._previousMapCoord = (this.mapCoord ?? msg.mapCoord); // for smoothly move the player
+      this.mapCoord = msg.mapCoord;
+    }
     if (msg.facing !== undefined) this.facing = msg.facing;
     if (msg.displayName !== undefined) this.displayName = msg.displayName;
     if (msg.displayChar !== undefined) this.displayChar = msg.displayChar;
     if (msg.removed !== undefined) this.removed = msg.removed;
+    this.lastMovingTime = Date.now();
     return true;
   }
 
@@ -98,6 +117,7 @@ class Player {
     // special case for mapCoord
     if (obj.mapCoord !== undefined) {
       ret.mapCoord = MapCoord.fromObject(obj.mapCoord);
+      ret._previousMapCoord = MapCoord.fromObject(obj.mapCoord);
     }
     return ret;
   }
