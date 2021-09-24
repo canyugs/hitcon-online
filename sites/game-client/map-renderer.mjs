@@ -376,11 +376,11 @@ class MapRenderer {
    * @param {watermarks} players - The watermarks to be drawn. Refer to extensions/MapWatermark for format.
    */
   _drawWatermark(watermarks) {
-    watermarks.forEach(watermark => {
-      watermark.mapCoords.forEach(mapCoord => {
+    watermarks.forEach((watermark) => {
+      watermark.mapCoords.forEach((mapCoord) => {
         // Check the player is in the same map
         if (this.gameClient.playerInfo.mapCoord.mapName !== mapCoord.mapName) {
-            return;
+          return;
         }
 
         const canvasCoordinate = this.mapToCanvasCoordinate(mapCoord);
