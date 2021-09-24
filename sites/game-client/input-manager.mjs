@@ -1,6 +1,8 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
+const KEYSTROKE_RATE = 10; // keystroke per second
+
 /**
  * Input manager deals with all user input.
  */
@@ -22,15 +24,23 @@ class InputManager {
     this.focusedElement = document.activeElement;
 
     // TODO: Maintain a list of pressed key for better user experience (player moving)
-
+    this.pressedKeys = new Map(); // key: event.key, value: event.code
     document.addEventListener('keydown', (event) => {
+      this.pressedKeys.set(event.key, event.code);
+    });
+    document.addEventListener('keyup', (event) => {
+      this.pressedKeys.delete(event.key);
+    });
+    setInterval(() => {
       for (const {DOMElement, callback} of this.keydownCallbacks) {
         // TODO: Send event to the focused element only.
-        if (this.focusedElement === DOMElement) {
-          callback(event);
+        for (const [key, code] of this.pressedKeys.entries()) {
+          if (this.focusedElement === DOMElement) {
+            callback(new KeyboardEvent('keydown', {key, code}));
+          }
         }
       }
-    });
+    }, 1000 / KEYSTROKE_RATE);
 
     document.addEventListener('click', (event) => {
       this.focusedElement = event.target;
