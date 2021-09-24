@@ -44,12 +44,6 @@ class MapRenderer {
      */
     this.viewerPosition = new MapCoord('', NaN, NaN);
     this.viewportFollow = null; // will be initialized in this.initializeViewerPosition()
-    this.gameState.registerOnPlayerUpdate((msg) => {
-      if (this.viewportFollow === msg.playerID) {
-        // TODO: smoothly update viewer position
-        this.setViewerPosition(msg.mapCoord, 0.5, 0.5);
-      }
-    });
 
     window.addEventListener('gameStart', this.initializeViewerPosition.bind(this));
 
@@ -78,6 +72,16 @@ class MapRenderer {
   initializeViewerPosition() {
     this.viewportFollow = this.gameClient.playerInfo.playerID;
     const coord = this.gameState.getPlayer(this.viewportFollow).mapCoord;
+    this.setViewerPosition(coord, 0.5, 0.5);
+  }
+
+  /**
+   * Update viewer position.
+   * Since getDrawInfo() handles movement smoothly, this function will update viewer position smoothly.
+   */
+  updateViewerPosition() {
+    this.viewportFollow = this.gameClient.playerInfo.playerID;
+    const coord = this.gameState.getPlayer(this.viewportFollow).getDrawInfo().mapCoord;
     this.setViewerPosition(coord, 0.5, 0.5);
   }
 
@@ -201,6 +205,9 @@ class MapRenderer {
   draw() {
     // if not initialized
     if (this.viewportFollow === null) return;
+
+    // update viewer position
+    this.updateViewerPosition();
 
     // draw background
     this._drawEveryCellWrapper(this._drawLayer.bind(this, 'ground'));
