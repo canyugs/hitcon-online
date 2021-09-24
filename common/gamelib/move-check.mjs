@@ -1,7 +1,7 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
-const PLAYER_MOVE_TIME_INTERVAL = 150; // ms
+const PLAYER_MOVE_TIME_INTERVAL = 250; // ms
 const PLAYER_MOVE_DISTANCE_LIMIT = 1; // cell
 
 /**
