@@ -143,6 +143,7 @@ class InteractiveObjectServerBaseClass {
           console.error(`Error on calling '${func}' with argument '${playerID}' and ${kwargs}.`);
           nextState = this.sf_exit(playerID, {next: currStateStr});
         }
+
         this.dataStore.set(playerID, nextState);
       }
     } finally { // for release the lock
@@ -239,6 +240,25 @@ class InteractiveObjectServerBaseClass {
     return this.sf_exit(playerID, {next: this.dataStore.get(playerID)});
   }
 
+  async sf_showDialogAndCheckKey(playerID, kwargs) {
+    const {nextState, nextStateIncorrect, dialog, key} = kwargs;
+    const res = await this.helper.callS2cAPI(playerID, 'dialog',
+    'showDialogWithPrompt', 60*1000, this.objectName, dialog);
+    if (res.msg === key) return nextState;
+
+    //The key is wrong,
+    return nextStateIncorrect;
+  }
+
+  async sf_teleport(playerID, kwargs) {
+    const {mapCoord, nextState} = kwargs;
+    const result = await this.helper.teleport(playerID, mapCoord);
+
+    if (result) return nextState;
+    console.warn(`Player '${playerID}' cannot go to the place`);
+
+    return this.sf_exit(playerID, {next: this.dataStore.get(playerID)});
+  }
   /**
    * Just a placeholder function to provide `exit` function in configuration.
    * @param {String} playerID

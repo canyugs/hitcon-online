@@ -311,6 +311,7 @@ class GatewayService {
       console.error(`Can't teleport ${playerID} who is not on our server.`);
       return false;
     }
+    const socket = this.socks[playerID];
     const msg = PlayerSyncMessage.fromObject(this.socks[playerID].playerData);
     msg.facing = facing;
     msg.mapCoord = mapCoord;
