@@ -61,7 +61,7 @@ class GameClient {
       });
       socket.on('unauthorized', (msg) => {
         console.error(`Authorization failed: ${JSON.stringify(msg.data)}`);
-        game.errorModal.displayError("Authorization failed.", "Please refresh to reconnect.");
+        this.mainUI.errorModal.displayError("Authorization failed.", "Please refresh to reconnect.");
         this.onDisconnect();
       });
       socket.on('gameStart', (msg) => {
@@ -95,7 +95,7 @@ class GameClient {
     });
     socket.on("disconnect", (reason) => {
       if (reason !== "io client disconnect") {
-        game.errorModal.displayError(reason, "Please refresh to reconnect.");
+        this.mainUI.errorModal.displayError(reason, "Please refresh to reconnect.");
       }
     });
     socket.on("kicked", (reason) => {

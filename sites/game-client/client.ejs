@@ -194,7 +194,7 @@ absolute URL.
         game.mapRendererOverlay = new MapRendererOverlay(game.mainUI);
         game.mapRendererOverlay.show(OverlayPosition.MAIN_VIEW);
 
-        game.errorModal = new ErrorModal(game.mainUI);
+        game.mainUI.errorModal = new ErrorModal(game.mainUI);
 
         game.mainUI.createContextMenu(game.gameState, game.mapRenderer);
 
