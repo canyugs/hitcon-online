@@ -33,6 +33,12 @@ class Client {
     this.overlay = new RemainingPointsOverlay(this.helper.mainUI);
     this.overlay.show(OverlayPosition.LEFT_BOTTOM);
 
+    this.helper.mainUI.contextMenu.addToOthersMenu('Transfer Points', (playerID) => {
+      // TODO: use modal or something else instead of prompt.
+      console.log(playerID);
+      this.transferPoints(parseInt(prompt("How many points to transfer:", 0)), playerID);
+    });
+
     await this.s2c_updatePoints();
   }
 
@@ -63,7 +69,7 @@ class Client {
    * @param {Number} points The number of points to be transferred.
    * @param {string} receiver The uid of the receiver.
    */
-   async transferPoints(points, receiver) {
+  async transferPoints(points, receiver) {
     try {
       let ret = await this.requestApi('/points/transactions', 'POST', {
         points: points,
