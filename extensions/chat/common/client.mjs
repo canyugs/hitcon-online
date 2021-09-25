@@ -69,6 +69,7 @@ class Client {
     document.getElementById('message_history').innerHTML += '<pre>' +
     this.HTMLEncode(`
 Usage: !/<Command> <arg1> <arg2> ...
+  !/announce <message>        announce a message to all users
   !/teleport <Map> <x> <y>    Teleport to the map Map at coordinate (x, y)
   !/help                      List command usages
     `) + '</pre>';
@@ -92,6 +93,15 @@ Usage: !/<Command> <arg1> <arg2> ...
         this.listCommand();
       } else {
         this.helper.callC2sAPI(null, 'teleport', 5000, mapCoord);
+      }
+    } else if (cmd.split(' ')[0] === '!/announce') {
+      const msg = cmd.substring(10);
+      if (msg.trim() === '') {
+        document.getElementById('message_history').innerHTML += '<span>Invalid message</span><br>';
+        this.listCommand();
+      } else {
+        //this.helper.callC2sAPI(null, 'announce', 5000, msg);
+        this.helper.callC2sAPI(null, 'broadcastMessage', 5000, {'msg': msg, 'type': 'announcement'});
       }
     } else {
       const result = await Promise.resolve(this.helper.callC2sAPI(null, 'otherCommands', 5000));
@@ -172,10 +182,16 @@ Usage: !/<Command> <arg1> <arg2> ...
    * @param {object} args - Information of the broadcast message
   */
   onExtensionBroadcast(args) {
-    args.msg_from = $('<div/>').text(args.msg_from).html();
-    args.msg = $('<div/>').text(args.msg).html();
-    document.getElementById('message_history').innerHTML += '<span>' + args.msg_from + ': ' + args.msg + '</span><br>';
+    if (args.type === 'announcement') {
+      //this.mainUI.showAnnouncement(args.msg,3000); // it doesn't work
+      game.mainUI.showAnnouncement(args.msg, 3000);
+    } else {
+      args.msg_from = $('<div/>').text(args.msg_from).html();
+      args.msg = $('<div/>').text(args.msg).html();
+      document.getElementById('message_history').innerHTML += '<span>' + args.msg_from + ': ' + args.msg + '</span><br>';
+    }
   }
+
 }
 
 export default Client;
