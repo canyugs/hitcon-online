@@ -41,7 +41,7 @@ class Client {
    * @showPlayerList
    */
   showPlayerList() {
-    const template =  document.getElementById('playerlist-player').cloneNode(true);;
+    const template = document.getElementById('playerlist-player').cloneNode(true);
     // TODO(zeze-zeze): Optimize the way to update playerlist
     setInterval(() => {
       document.getElementById('playerlist').innerHTML = '';
@@ -51,10 +51,11 @@ class Client {
         }
         const playerDOM = template.cloneNode(true);
         playerDOM.setAttribute('id', playerID.playerID);
+        // TODO: Potential XSS hazard.
         playerDOM.setAttribute('onclick', 'startPrivateMessage(\'' + playerID.playerID + '\')');
         playerDOM.querySelector('.player-name').textContent = this.HTMLEncode(playerID.displayName);
         // TODO: get user role;
-        playerDOM.querySelector('.player-role').textContent = 'unknown role'
+        playerDOM.querySelector('.player-role').textContent = 'unknown role';
         // TODO: get user picture;
         playerDOM.querySelector('.player-picture').setAttribute('src', 'https://via.placeholder.com/56x61');
         // TODO(zeze-zeze): Keep a record of dom elements
