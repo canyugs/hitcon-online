@@ -1,0 +1,61 @@
+.user--overlay {
+  position: absolute;
+  top: 65px;
+  right: 104px;
+}
+
+.user {
+  background: #FFFFFF 0% 0% no-repeat padding-box;
+  box-shadow: 0px 3px 6px #00000029;
+  border-radius: 16px;
+  width: 339px;
+  border-left: 15px solid #1F436F;
+  padding: 14px 24px 14px 21px;
+  opacity: 70%; /* TODO tmp style, see things under toolbar */
+  z-index: 10; /* TODO tmp style, make toolbar visible */
+}
+
+.user-profile {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 5px;
+}
+
+.user-name {
+  text-align: left;
+  font: normal normal bold 34px/40px Noto Sans CJK TC;
+  letter-spacing: 0px;
+  color: #151515;
+}
+
+.user-points {
+  background: #1F3D62 0% 0% no-repeat padding-box;
+  box-shadow: inset 0px 2px 7px #262626AA;
+  border-radius: 27px;
+  text-align: center;
+  font: normal normal normal 24px/40px Noto Sans CJK TC;
+  letter-spacing: 0px;
+  color: #FFFFFF;
+  width: 151px;
+  position: relative;
+}
+
+.user-point {
+  position: absolute;
+  left: 30px;
+}
+
+.user-point-unit {
+  position: absolute;
+  right: 20px;
+}
+
+
+.user-action {
+  width: 39px;
+  height: 39px;
+  background: #0658B7 0% 0% no-repeat padding-box;
+  box-shadow: 0px 1px 3px #1A34525A;
+  border-radius: 6px;
+  margin-right: 17px;
+}

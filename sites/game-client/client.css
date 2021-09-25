@@ -1,5 +1,6 @@
 /* Code for ensuring rootdiv covers the entire screen. */
 @import url('toolbar.css');
+@import url('user-info.css');
 
 html, body {
   margin: 0px;
