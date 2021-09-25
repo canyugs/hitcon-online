@@ -2,6 +2,62 @@
   #playerlist span {
     margin: 5px;
   }
+
+  .playerlist-container {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    background: #495672;
+  }
+  .playerlist-search {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 15px;
+    border-radius: 35px;
+    background: #FFF;
+    height: 33px;
+    margin-bottom: 30px;
+  }
+  .playerlist-search-input > input {
+    background: none;
+    border: none;
+    width: 100%;
+    height: 100%;
+  }
+
+  .playerlist-search-input > img {
+    width: 19px;
+    height: 19px;
+  }
+  .playerlist-player {
+    display:flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 5px;
+    margin-bottom: 30px;
+  }
+
+  .playerlist-player .player-picture {
+    width: 56px;
+    height: 61px;
+  }
+
+  .playerlist-player > .player-information {
+    text-align: right;
+    font: normal normal bold 16px/40px Noto Sans CJK TC;
+    color: #FFFFFF;
+  }
+
+  .player-information > .player-name {
+    height: 24px;
+  }
+
+  .player-information > .player-role {
+    font: normal normal bold 12px/40px Noto Sans CJK TC;
+  }
+
+
 </style>
 
 <script type="text/javascript">
@@ -11,11 +67,22 @@
   }
 </script>
 
-<div id="playerlist-overlay">
-  <h2>Player List</h2>
+<div class="playerlist-container" id="playerlist-overlay">
   <!-- Use onchange callback to deal with it -->
-  <input type="text" id="searchPlayer">
-  <div id="playerlist">
-
+  <div class="playerlist-search">
+    <div class="playerlist-search-input">
+      <input type="text" id="searchPlayer" placeholder="搜尋線上玩家">
+    </div>
+    <img src="/static/extensions/playerlist/common/awesome-search.svg">
   </div>
+  <div class="playerlist-list" id="playerlist">
+    <div class="playerlist-player" id="playerlist-player">
+      <img class="player-picture" src="https://via.placeholder.com/56x61">
+      <div class="player-information">
+        <div class="player-name">Beverly Bailey</div>
+        <div class="player-role">與會者</div>
+      </div>
+    </div>
+  </div>
+
 </div>
