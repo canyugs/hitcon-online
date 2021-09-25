@@ -39,6 +39,13 @@ body {
   top: 0px;
   left: 0px;
   z-index: 2;
+
+  /* We want to prevent overflow or scrollbar on the main page when
+   * staging div gets big.
+   */
+  max-height: 80vh;
+  max-width: 80vw;
+  overflow: auto;
 }
 
 #map-render-overlay {
