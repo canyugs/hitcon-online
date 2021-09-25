@@ -117,6 +117,26 @@
   width: auto;
 }
 
+.volume-visualizer {
+  --volume: 0%;
+  position: relative;
+  width: 200px;
+  height: 20px;
+  margin: 10px;
+  background-color: #DDD;
+}
+
+.volume-visualizer::before {
+   content: '';
+   position: absolute;
+   top: 0;
+   bottom: 0;
+   left: 0;
+   width: var(--volume);
+   background-color: green;
+   transition: width 100ms linear;
+}
+
 </style>
 <div class="jitsi-container" id='jitsi-container'>
   <div class='jitsi-remote-container' id='jitsi-remote-container'>

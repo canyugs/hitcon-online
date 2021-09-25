@@ -11,6 +11,7 @@ class JitsiHandler {
     this.isVideo = true;
     this.localTracks = [];
     this.remoteTracks = {};
+    this.volumeMeters = {};
     this.participantsInfo = {};
     this.isJoined = false;
     this.room = null;
@@ -28,6 +29,7 @@ class JitsiHandler {
       serviceUrl: `https://meet.jit.si/http-bind?room=${meetingName}`,
       websocket: 'wss://meet.jit.si/xmpp-websocket',
       clientNode: 'http://jitsi.org/jitsimeet',
+      openBridgeChannel: 'websocket'
     };
 
     $(window).bind('beforeunload', this.unload.bind(this));
@@ -124,7 +126,9 @@ class JitsiHandler {
           <div id='jitsi-${participantId}-status-container' class='jitsi-status-container'>
             <img src='/static/extensions/jitsi/common/icons/microphone-off.svg' data-type='audio' />
             <img src='/static/extensions/jitsi/common/icons/camera-off.svg' data-type='video' />
+            <div id="volume-visualizer-${participantId}" class="volume-visualizer"></div>
           </div>
+          <div id='jitsi-${participantId}-volume-meter' class='jitsi-volume-meter'></div>
           <p id='${participantId}-text'>${this.participantsInfo[participantId]._displayName}</p>
         </div>
       `);
@@ -142,6 +146,7 @@ class JitsiHandler {
           <audio autoplay='1' id='${trackId}' />
         </div>
       `);
+      this.setAudioVolumeMeter($(`#${trackId}`)[0], participantId);
     }
     track.attach($(`#${trackId}`)[0]);
     if (track.isMuted()) {
@@ -184,6 +189,10 @@ class JitsiHandler {
       }
       $(`#${tracks[i].getId()}`).remove();
     }
+
+    clearInterval(this.volumeMeters[id]);
+    delete this.volumeMeters[id];
+
     $(`#jitsi-${id}-container`).remove();
   }
 
@@ -230,6 +239,12 @@ class JitsiHandler {
     this.room.on(
         JitsiMeetJS.events.conference.PHONE_NUMBER_CHANGED,
         () => console.log(`${this.room.getPhoneNumber()} - ${this.room.getPhonePin()}`));
+
+    // This is required yet not documented :(
+    // https://github.com/jitsi/lib-jitsi-meet/issues/1333
+    this.room.setReceiverVideoConstraint(720);
+    this.room.setSenderVideoConstraint(720);
+
     this.room.setDisplayName(this.userName);
     this.room.join(this.password);
   }
@@ -365,6 +380,39 @@ class JitsiHandler {
   changeAudioOutput(selected) {
     JitsiMeetJS.mediaDevices.setAudioOutputDevice(selected.value);
   }
-}
 
+  setAudioVolumeMeter(element, participantId) {
+    let volumeCallback;
+    const volumeVisualizer = document.getElementById(`volume-visualizer-${participantId}`);
+    try {
+      const audioContext = new AudioContext();
+      const audioSource = audioContext.createMediaElementSource(element);
+      const analyser = audioContext.createAnalyser();
+      analyser.fftSize = 512;
+      analyser.minDecibels = -127;
+      analyser.maxDecibels = 0;
+      analyser.smoothingTimeConstant = 0.4;
+      audioSource.connect(analyser);
+      const volumes = new Uint8Array(analyser.frequencyBinCount);
+      volumeCallback = () => {
+        analyser.getByteFrequencyData(volumes);
+        const averageVolume = volumes.reduce((a, b) => a + b, 0) / volumes.length;
+        volumeVisualizer.style.setProperty(
+          '--volume',
+          ((averageVolume - 40) * 100 / (analyser.maxDecibels - analyser.minDecibels)) + '%');
+      };
+    } catch (e) {
+      console.error(e);
+    }
+
+    this.volumeMeters[participantId] = setInterval(() => {
+      try {
+        volumeCallback();
+      } catch (e) {
+        console.error(e);
+        clearInterval(this.volumeMeters[participantId]);
+      }
+    }, 100);
+  }
+}
 export default JitsiHandler;
