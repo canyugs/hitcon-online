@@ -57,7 +57,10 @@
     font: normal normal bold 12px/40px Noto Sans CJK TC;
   }
 
-
+  /* Playerlist button should be the second on the right */
+  #utilpanel-button-playerlist {
+    order: -50;
+  }
 </style>
 
 <script type="text/javascript">
@@ -68,12 +71,17 @@
 </script>
 
 <div class="playerlist-container" id="playerlist-overlay">
-  <!-- Use onchange callback to deal with it -->
-  <div class="playerlist-search">
-    <div class="playerlist-search-input">
-      <input type="text" id="searchPlayer" placeholder="搜尋線上玩家">
+  <div class="utilpanel-viewer">
+    <!-- Use onchange callback to deal with it -->
+    <div class="playerlist-search">
+      <div class="playerlist-search-input">
+        <input type="text" id="searchPlayer" placeholder="搜尋線上玩家">
+      </div>
+      <img src="/static/extensions/playerlist/common/awesome-search.svg">
     </div>
-    <img src="/static/extensions/playerlist/common/awesome-search.svg">
+    <div id="playerlist">
+
+    </div>
   </div>
   <div class="playerlist-list" id="playerlist">
     <div class="playerlist-player" id="playerlist-player">

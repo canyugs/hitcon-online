@@ -1,16 +1,16 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
-import Overlay from '/static/sites/game-client/ui/overlay.mjs';
-import ToolbarButton from '/static/sites/game-client/ui/toolbar-button.mjs';
+import UtilPanelTab from '/static/sites/game-client/ui/utilpanel/utilpanel-tab.mjs';
 import OverlayPosition from '/static/sites/game-client/ui/overlay-position.mjs';
 
 const PLAYERLIST_DIV = 'playerlist-overlay';
+const ICON_SVG = '/static/extensions/playerlist/common/playerlist.svg';
 
-class PlayerlistOverlay extends Overlay {
+class PlayerlistTab extends UtilPanelTab {
   constructor(mainUI) {
     const dom = document.getElementById(PLAYERLIST_DIV);
-    super(mainUI, dom);
+    super(mainUI.utilPanelManager, dom, 'playerlist', ICON_SVG);
   }
 };
 
@@ -31,11 +31,7 @@ class Client {
   }
 
   async gameStart() {
-    this.overlay = new PlayerlistOverlay(this.helper.mainUI);
-    this.overlay.show(OverlayPosition.LEFT_TOP);
-    this.toolbarButton = new ToolbarButton('/static/extensions/playerlist/common/playerlist.svg');
-    this.toolbarButton.registerAsToggle(this.overlay);
-    this.toolbarButton.show();
+    this.tab = new PlayerlistTab(this.helper.mainUI);
 
     this.showPlayerList();
   }
