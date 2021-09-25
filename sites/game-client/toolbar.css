@@ -1,0 +1,116 @@
+.toolbar--overlay {
+  position: absolute;
+  top: 65px;
+  left: 65px;
+}
+
+.toolbar {
+  display: flex;
+  flex-direction: column;
+  background: rgba(16, 24, 56, 1);
+  border-radius: 24px;
+  padding: 20px 0;
+  color: #FFF;
+  opacity: 70%; /* TODO tmp style, see things under toolbar */
+  z-index: 10; /* TODO tmp style, make toolbar visible */
+}
+
+.toolbar-tabs {
+  display: flex;
+  justify-content: center;
+  margin: 0 21px;
+}
+
+.toolbar-button {
+  width: 102px;
+  height: 66px;
+  border-radius: 12px;
+  background: none;
+  border: none;
+}
+
+.toolbar-button.active {
+  background: rgba(72, 89, 149, 1);
+}
+
+.toolbar-button img {
+  width: 30px;
+  height: 30px;
+}
+
+.toolbar-content {
+  display: flex;
+  flex-direction: column;
+  padding: 0 20px 20px 20px;
+}
+
+.toolbar-viewer {
+  background: rgba(73, 86, 114, 1) 0% 0% no-repeat padding-box;
+  box-shadow: inset 0px 0px 10px rgba(0, 0, 0, 0.82);
+  border-radius: 21px;
+  padding: 26px 19px 0 29px;
+  height: 200px; /* tmp setup depend on content */
+}
+
+.toolbar-divider {
+  display: flex;
+  justify-content: center;
+  padding-top: 9px;
+  padding-bottom: 9px;
+}
+
+.toolbar-divider img {
+  transform: rotate(180deg);
+}
+
+.toolbar-divider span {
+  position: relative;
+}
+
+.toolbar-divider span::after,
+.toolbar-divider span::before {
+  content: "";
+  position: absolute;
+  border-top: 1px solid white;
+  width: 130px;
+}
+
+.toolbar-divider span::before {
+  right: 100%;
+  margin-right: 15px;
+  margin-top: 10px;
+}
+
+.toolbar-divider span::after {
+  left: 100%;
+  margin-left: 15px;
+  margin-top: 10px;
+}
+
+.toolbar.collapse {
+  padding-bottom: 0px;
+}
+
+.toolbar.collapse > .toolbar-divider {
+  /* toolbar-content close */
+  border-radius: 0 0 24px 24px;
+  background: rgba(53, 70, 139, 1);
+}
+
+.toolbar.collapse > .toolbar-divider img {
+  transform: none;
+}
+
+.toolbar.collapse > .toolbar-divider span::before,
+.toolbar.collapse > .toolbar-divider span::after {
+  border-top: 0px solid white;
+}
+
+
+.toolbar.collapse > .toolbar-content {
+  display: none;
+}
+
+.toolbar-actions {
+  padding: 20px 19px 0 29px;
+}

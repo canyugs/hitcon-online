@@ -1,7 +1,7 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
-const TOOLBAR_ID = 'toolbar';
+const TOOLBAR_ID = 'toolbar-tabs';
 
 /**
  * A toolbar button
@@ -24,7 +24,7 @@ class ToolbarButton {
     if (createDOM) {
       // Create DOM element
       this.dom = document.createElement('button');
-      this.dom.classList.add("toolbar-button");
+      this.dom.classList.add('toolbar-button');
       this.dom.style.display = 'none';
 
       // load icon asset into button
@@ -47,6 +47,8 @@ class ToolbarButton {
 
     if (this.dom) {
       this.dom.addEventListener('click', () => {
+        // TODO remove active from other button;
+        this.dom.classList.toggle('active');
         this.toggleTarget?.onClickToggleButton();
       });
     }

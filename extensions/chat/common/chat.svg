@@ -1,12 +1,6 @@
-<svg width="32" height="32" xmlns="http://www.w3.org/2000/svg">
- <g>
-  <title>Layer 1</title>
-  <rect id="svg_2" height="20.68744" width="25.81242" y="5.65628" x="3.09379" stroke="#000000" fill="none"/>
-  <g id="svg_5">
-   <line fill="none" stroke="#000000" x1="7.32451" y1="10.99826" x2="24.67549" y2="10.99826" id="svg_1"/>
-   <line fill="none" stroke="#000000" x1="7.32451" y1="21.00174" x2="24.67549" y2="21.00174" id="svg_3"/>
-   <line fill="none" stroke="#000000" x1="7.32451" y1="15.93748" x2="24.67549" y2="15.93748" id="svg_4"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="29.25" height="29.25" viewBox="0 0 29.25 29.25">
+  <g id="Icon_ionic-md-chatbubbles" data-name="Icon ionic-md-chatbubbles" transform="translate(-3.375 -3.375)">
+    <path id="Path_91" data-name="Path 91" d="M9.337,25.875a3.67,3.67,0,0,1-3.15-3.15V11.25H5.512a2.146,2.146,0,0,0-2.137,2.137V32.625l4.113-4.078H22.612a2.171,2.171,0,0,0,2.138-2.173v-.5Z" fill="#fff"/>
+    <path id="Path_92" data-name="Path 92" d="M30.171,3.375H10.54A2.461,2.461,0,0,0,8.086,5.829v15.9a2.467,2.467,0,0,0,2.454,2.461H27.288l5.337,3.727V5.829A2.461,2.461,0,0,0,30.171,3.375Z" fill="#fff"/>
   </g>
- </g>
-
 </svg>
