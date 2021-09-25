@@ -1,16 +1,17 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
-import Overlay from '/static/sites/game-client/ui/overlay.mjs';
+import UtilPanelTab from '/static/sites/game-client/ui/utilpanel/utilpanel-tab.mjs';
 import ToolbarButton from '/static/sites/game-client/ui/toolbar-button.mjs';
 import OverlayPosition from '/static/sites/game-client/ui/overlay-position.mjs';
 
 const CHAT_DIV = 'chat-overlay';
+const ICON_SVG = '/static/extensions/chat/common/chat.svg';
 
-class ChatOverlay extends Overlay {
+class ChatTab extends UtilPanelTab {
   constructor(mainUI) {
     const dom = document.getElementById(CHAT_DIV);
-    super(mainUI, dom);
+    super(mainUI.utilPanelManager, dom, 'chat', ICON_SVG);
   }
 };
 
@@ -32,12 +33,7 @@ class Client {
   }
 
   async gameStart() {
-    this.overlay = new ChatOverlay(this.helper.mainUI);
-    this.overlay.show(OverlayPosition.RIGHT);
-
-    this.toolbarButton = new ToolbarButton('/static/extensions/chat/common/chat.svg');
-    this.toolbarButton.registerAsToggle(this.overlay);
-    this.toolbarButton.show();
+    this.tab = new ChatTab(this.helper.mainUI);
   }
 
   /**

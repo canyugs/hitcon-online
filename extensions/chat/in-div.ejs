@@ -26,14 +26,13 @@
     border: none;
     width: 100%;
     padding: 10px 0;
-    font-size: 20px;
+    font-size: 14px;
     border-bottom: 1px solid #d5d5d5;
     text-indent: 10px;
   }
 
   #message_history{
     overflow:auto;
-    height:50vh;
     line-height:20px;
   }
 
@@ -41,13 +40,18 @@
     overflow: auto;
   }
 
+  /* Chat button should be the first on the right */
+  #utilpanel-button-chat {
+    order: -100;
+  }
 </style>
 
-<div id="chat-overlay">
-  <div id="message_history">
-    <h2>Message History:</h2>
+<div class="chat-overlay" id="chat-overlay">
+  <div class="utilpanel-viewer">
+    <div id="message_history">
+    </div>
   </div>
-  <div>
+  <div class="utilpanel-actions">
     <div class="input-container">
       <input type="text" id="message_to" placeholder="Channel (Default: Broadcast)">
     </div>
