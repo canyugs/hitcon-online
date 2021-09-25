@@ -22,7 +22,7 @@ OVERLAY_DIV.set(OverlayPosition.CENTER_TOP, 'overlay-centertop');
 OVERLAY_DIV.set(OverlayPosition.MAIN_VIEW, 'main-view');
 
 const TOOLBAR_ID = 'toolbar';
-const NOTIFICATIONBAR_ID = 'notification-bar';
+const NOTIFICATIONBAR_ID = 'notification-text';
 const NOTIFICATION_NUM_LIMIT = 4;
 const ANNOUNCEMENT_ID = 'announcement';
 const ANNOUNCEMENT_STRING = 'announcement-text';

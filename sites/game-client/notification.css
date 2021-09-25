@@ -1,11 +1,59 @@
 .notification--overlay {
-
+  position: absolute;
+  bottom: 107px;
 }
 
-.notification-bar {
+.notification {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: #FFFFFF 0% 0% no-repeat padding-box;
+  box-shadow: 0px 3px 6px #0000006E;
+  border-radius: 16px;
+  width: 565px;
+  height: 111px;
+  padding-top: 10px;
+  color: #000000;
   opacity: 70%; /* TODO tmp style, see things under toolbar */
   z-index: 10; /* TODO tmp style, make toolbar visible */
+}
 
+.notification-type {
+  text-align: center;
+  font: normal normal normal 15px/36px Noto Sans CJK TC;
+}
+
+.notification-text div {
+  text-align: center;
+  font: normal normal normal 24px/36px Noto Sans CJK TC;
+}
+
+.notification-progress-bar {
+  height: 7px;
+  margin: 0 2px;
+}
+
+.notification-progress-bar > span {
+  display: block;
+  height: 100%;
+  border-bottom-left-radius: 10px;
+  background-color: #1465FF;
+  animation-duration: 5s;
+  animation-name: progress-bar;
+  overflow: hidden;
+}
+
+.notification-progress-bar > span[style="width: 100%"] {
+  border-bottom-right-radius: 10px;
+}
+
+@keyframes progress-bar {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
 }
 
 .announcement--overlay {
