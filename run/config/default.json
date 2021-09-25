@@ -19,7 +19,7 @@
   ],
   "assets": "map/assets.json",
   "redis": {
-    "type": "real",
+    "type": "mock",
     "option": {}
   },
   "multiprocess": false,
