@@ -42,7 +42,11 @@ class Standalone {
    * @param {string} uid - The user to be notified.
    */
   async c2s_notifyUpdatePoints(player, uid) {
-    return await this.helper.callS2cAPI(uid, 'point-system', 'updatePoints', 5000);
+    try {
+      return await this.helper.callS2cAPI(uid, 'point-system', 'updatePoints', 5000);
+    } catch (e) {
+      return false;
+    }
   }
 
   /**
