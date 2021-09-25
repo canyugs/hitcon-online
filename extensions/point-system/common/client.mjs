@@ -1,18 +1,7 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
-import Overlay from '/static/sites/game-client/ui/overlay.mjs';
-import OverlayPosition from '/static/sites/game-client/ui/overlay-position.mjs';
-
-const REMIANING_POINTS_DIV = 'remaining-points-overlay';
 const POINT_SYSTEM_LOCATION = 'http://ho.zuan.im:4000/api/v1';
-
-class RemainingPointsOverlay extends Overlay {
-  constructor(mainUI) {
-    const dom = document.getElementById(REMIANING_POINTS_DIV);
-    super(mainUI, dom);
-  }
-};
 
 /**
  * This class is the browser/client side of an extension.
@@ -30,12 +19,8 @@ class Client {
   }
 
   async gameStart() {
-    this.overlay = new RemainingPointsOverlay(this.helper.mainUI);
-    this.overlay.show(OverlayPosition.LEFT_BOTTOM);
-
     this.helper.mainUI.contextMenu.addToOthersMenu('Transfer Points', (playerID) => {
       // TODO: use modal or something else instead of prompt.
-      console.log(playerID);
       this.transferPoints(parseInt(prompt("How many points to transfer:", 0)), playerID);
     });
 
@@ -47,7 +32,7 @@ class Client {
    */
   async s2c_updatePoints() {
     let p = await this.getPoints();
-    $('#remaining-points').text('$' + p.toString());
+    $('#user-point').text(p.toString());
     return true;
   }
 
