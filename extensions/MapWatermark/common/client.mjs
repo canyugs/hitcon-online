@@ -42,7 +42,7 @@ class Client {
       this.helper.mapRenderer.registerCustomizedLayerToDraw(
         LAYER_MAPWATERMARK.zIndex, 
         LAYER_MAPWATERMARK.layerName, 
-        '_drawWatermark', 
+        '_drawWaterMark', 
         mapWatermarks
       );
     }).catch((err_msg) => {
