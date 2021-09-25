@@ -84,7 +84,7 @@ body {
 }
 
 #overlay-centertop {
-  top: 0;
+  top: 3%; /* height of the notification bar */
   width: 80vw;
   height: 200px;
   left: 10vw;
