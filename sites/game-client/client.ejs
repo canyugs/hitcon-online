@@ -58,18 +58,21 @@ absolute URL.
       </div>
 
       <!-- TODO add `collapse` in class toggle style for child element (close toolbar)-->
-      <div class="toolbar toolbar--overlay" id="toolbar">
-       <div class="toolbar-tabs" id="toolbar-tabs">
-        <button id="example" class="toolbar-button">
-         <img src="/static/sites/game-client/settings.svg">
+      <div class="utilpanel utilpanel--overlay" id="utilpanel">
+        <div class="utilpanel-tabs" id="utilpanel-tabs">
+          <label class="utilpanel-button">
+            <input type="radio" name="utilpanel" value="example" class="utilpanel-radio" />
+            <div><img src="/static/sites/game-client/settings.svg"></div>
+          </label>
+        </div>
+        <button class="utilpanel-divider" id="utilpanel-divider">
+          <span class="utilpanel-divider"><img src="/static/sites/game-client/triangle.svg"></span>
         </button>
-       </div>
-       <div class="toolbar-divider">
-         <span class="toolbar-divider"><img src="/static/sites/game-client/triangle.svg"></span>
-       </div>
-       <div class="toolbar-content" id="toolbar-viewer">
-        <div class="toolbar-viewer">setup information</div>
-        <div class="toolbar-actions">setup action here</div>
+       <div class="utilpanel-content" id="utilpanel-content">
+        <div>
+        <div class="utilpanel-viewer">setup information</div>
+        <div class="utilpanel-actions">setup action here</div>
+        </div>
        </div>
       </div>
 

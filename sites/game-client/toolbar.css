@@ -1,50 +1,72 @@
-.toolbar--overlay {
+.utilpanel--overlay {
   position: absolute;
   top: 65px;
   left: 65px;
 }
 
-.toolbar {
+.utilpanel {
   display: flex;
   flex-direction: column;
   background: rgba(16, 24, 56, 1);
   border-radius: 24px;
   padding: 20px 0;
   color: #FFF;
-  opacity: 70%; /* TODO tmp style, see things under toolbar */
-  z-index: 10; /* TODO tmp style, make toolbar visible */
+  opacity: 70%; /* TODO tmp style, see things under utilpanel */
+  z-index: 10; /* TODO tmp style, make utilpanel visible */
 }
 
-.toolbar-tabs {
+.utilpanel-tabs {
   display: flex;
   justify-content: center;
   margin: 0 21px;
 }
 
-.toolbar-button {
+.utilpanel-button {
   width: 102px;
   height: 66px;
   border-radius: 12px;
   background: none;
   border: none;
+  box-sizing: border-box;
 }
 
-.toolbar-button.active {
+.utilpanel-button > div {
+  width: 100%;
+  height: 100%;
+  padding: 1px 6px;
+  border-radius: 12px;
+  background: none;
+  border: none;
+  box-sizing: border-box;
+
+  /* Vertical and horizontal centering for the img */
+  align-items: center;
+  display: flex;
+  justify-content: center;
+}
+
+.utilpanel-button.active, .utilpanel-button > input:checked + div {
   background: rgba(72, 89, 149, 1);
 }
 
-.toolbar-button img {
+.utilpanel-button img {
   width: 30px;
   height: 30px;
 }
 
-.toolbar-content {
+.utilpanel-button > input, .utilpanel-divider-label > input {
+  /* Hide the actual radio button. */
+  visibility: hidden;
+  position: absolute; /* Doesn't take up space. */
+}
+
+.utilpanel-content {
   display: flex;
   flex-direction: column;
   padding: 0 20px 20px 20px;
 }
 
-.toolbar-viewer {
+.utilpanel-viewer {
   background: rgba(73, 86, 114, 1) 0% 0% no-repeat padding-box;
   box-shadow: inset 0px 0px 10px rgba(0, 0, 0, 0.82);
   border-radius: 21px;
@@ -52,65 +74,67 @@
   height: 200px; /* tmp setup depend on content */
 }
 
-.toolbar-divider {
+.utilpanel-divider {
   display: flex;
   justify-content: center;
   padding-top: 9px;
   padding-bottom: 9px;
+  background: none;
+  border: none;
 }
 
-.toolbar-divider img {
+.utilpanel-divider img {
   transform: rotate(180deg);
 }
 
-.toolbar-divider span {
+.utilpanel-divider span {
   position: relative;
 }
 
-.toolbar-divider span::after,
-.toolbar-divider span::before {
+.utilpanel-divider span::after,
+.utilpanel-divider span::before {
   content: "";
   position: absolute;
   border-top: 1px solid white;
   width: 130px;
 }
 
-.toolbar-divider span::before {
+.utilpanel-divider span::before {
   right: 100%;
   margin-right: 15px;
   margin-top: 10px;
 }
 
-.toolbar-divider span::after {
+.utilpanel-divider span::after {
   left: 100%;
   margin-left: 15px;
   margin-top: 10px;
 }
 
-.toolbar.collapse {
+.utilpanel.collapse {
   padding-bottom: 0px;
 }
 
-.toolbar.collapse > .toolbar-divider {
-  /* toolbar-content close */
+.utilpanel.collapse .utilpanel-divider {
+  /* utilpanel-content close */
   border-radius: 0 0 24px 24px;
   background: rgba(53, 70, 139, 1);
 }
 
-.toolbar.collapse > .toolbar-divider img {
+.utilpanel.collapse .utilpanel-divider img {
   transform: none;
 }
 
-.toolbar.collapse > .toolbar-divider span::before,
-.toolbar.collapse > .toolbar-divider span::after {
+.utilpanel.collapse .utilpanel-divider span::before,
+.utilpanel.collapse .utilpanel-divider span::after {
   border-top: 0px solid white;
 }
 
 
-.toolbar.collapse > .toolbar-content {
+.utilpanel.collapse > .utilpanel-content {
   display: none;
 }
 
-.toolbar-actions {
+.utilpanel-actions {
   padding: 20px 19px 0 29px;
 }
