@@ -7,31 +7,31 @@ const PLAYER_MOVE_DISTANCE_LIMIT = 1; // cell
 /**
  * TODO
  * @param {Player} oldPlayerData - TODO
- * @param {PlayerSyncMessage} newPlayerData - TODO
+ * @param {PlayerSyncMessage} updateMessage - TODO
  * @param {GameMap} gameMap - TODO
  * @return {Boolean}
  */
-function checkPlayerMove(oldPlayerData, newPlayerData, gameMap) {
+function checkPlayerMove(oldPlayerData, updateMessage, gameMap) {
   let canMove = true;
-  canMove = canMove && _speedCheck(oldPlayerData, newPlayerData);
-  canMove = canMove && _borderAndWallCheck(oldPlayerData, newPlayerData, gameMap);
+  canMove = canMove && _speedCheck(oldPlayerData, updateMessage);
+  canMove = canMove && _borderAndWallCheck(oldPlayerData, updateMessage, gameMap);
   return canMove;
 }
 
 /**
  * TODO
  * @param {Player} oldPlayerData - TODO
- * @param {PlayerSyncMessage} newPlayerData - TODO
+ * @param {PlayerSyncMessage} updateMessage - TODO
  * @return {Boolean}
  */
-function _speedCheck(oldPlayerData, newPlayerData) {
+function _speedCheck(oldPlayerData, updateMessage) {
   // check time
   if (Date.now() < oldPlayerData.lastMovingTime + PLAYER_MOVE_TIME_INTERVAL) {
     return false;
   }
 
   // check distance
-  if (oldPlayerData.mapCoord.distanceTo1(newPlayerData.mapCoord) > PLAYER_MOVE_DISTANCE_LIMIT) {
+  if (oldPlayerData.mapCoord.distanceTo1(updateMessage.mapCoord) > PLAYER_MOVE_DISTANCE_LIMIT) {
     return false;
   }
 
@@ -41,20 +41,20 @@ function _speedCheck(oldPlayerData, newPlayerData) {
 /**
  * TODO
  * @param {Player} oldPlayerData - TODO
- * @param {PlayerSyncMessage} newPlayerData - TODO
+ * @param {PlayerSyncMessage} updateMessage - TODO
  * @param {GameMap} gameMap - TODO
  * @return {Boolean}
  */
-function _borderAndWallCheck(oldPlayerData, newPlayerData, gameMap) {
+function _borderAndWallCheck(oldPlayerData, updateMessage, gameMap) {
   // check wall
   // TODO: check all the map coordinates between old position and new position
-  if (gameMap.getCell(newPlayerData.mapCoord, 'wall')) {
+  if (gameMap.getCell(updateMessage.mapCoord, 'wall')) {
     return false;
   }
 
   // check border
-  const {width, height} = gameMap.getMapSize(newPlayerData.mapCoord.mapName);
-  const {x, y} = newPlayerData.mapCoord;
+  const {width, height} = gameMap.getMapSize(updateMessage.mapCoord.mapName);
+  const {x, y} = updateMessage.mapCoord;
   if (!(0 <= x && x <= width && 0 <= y && y <= height)) {
     return false;
   }

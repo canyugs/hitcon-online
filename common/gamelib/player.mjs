@@ -86,6 +86,9 @@ class Player {
     }
     // TODO: check whether msg is in the correct format
     if (msg.mapCoord !== undefined) {
+      if (this.mapCoord !== undefined && !msg.mapCoord.equalsTo(this.mapCoord)) {
+        this.lastMovingTime = Date.now();
+      }
       this._previousMapCoord = (this.mapCoord ?? msg.mapCoord); // for smoothly move the player
       this.mapCoord = msg.mapCoord;
     }
@@ -93,7 +96,6 @@ class Player {
     if (msg.displayName !== undefined) this.displayName = msg.displayName;
     if (msg.displayChar !== undefined) this.displayChar = msg.displayChar;
     if (msg.removed !== undefined) this.removed = msg.removed;
-    this.lastMovingTime = Date.now();
     return true;
   }
 
