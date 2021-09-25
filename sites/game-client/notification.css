@@ -1,0 +1,46 @@
+.notification--overlay {
+
+}
+
+.notification-bar {
+  opacity: 70%; /* TODO tmp style, see things under toolbar */
+  z-index: 10; /* TODO tmp style, make toolbar visible */
+
+}
+
+.announcement--overlay {
+  position: absolute;
+  top: 65px;
+}
+
+.announcement {
+  display: flex;
+  background: #FFF;
+  width: 373px;
+  padding: 7px 17px;
+  background: #FFFFFF 0% 0% no-repeat padding-box;
+  box-shadow: 0px 3px 6px #00000062;
+  border-radius: 52px;
+  opacity: 70%; /* TODO tmp style, see things under toolbar */
+  z-index: 10; /* TODO tmp style, make toolbar visible */
+}
+
+.announcement-type {
+  white-space: nowrap;
+  text-align: center;
+  font: normal normal normal 16px/40px Noto Sans CJK TC;
+  color: #FFFFFF;
+  background: #000462 0% 0% no-repeat padding-box;
+  box-shadow: 0px 2px 5px #0000005A;
+  border-radius: 24px;
+  padding: 0px 15px;
+}
+
+.announcement-text {
+  font: normal normal bold 16px/40px Noto Sans CJK TC;
+  color: #000000;
+}
+.announcement-close {
+  background: none;
+  border: none;
+}

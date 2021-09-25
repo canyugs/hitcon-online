@@ -24,8 +24,8 @@ OVERLAY_DIV.set(OverlayPosition.MAIN_VIEW, 'main-view');
 const TOOLBAR_ID = 'toolbar';
 const NOTIFICATIONBAR_ID = 'notification-bar';
 const NOTIFICATION_NUM_LIMIT = 4;
-const ANNOUNCEMENT_ID = 'announcement-bar';
-const ANNOUNCEMENT_STRING = 'announcement-bar-span';
+const ANNOUNCEMENT_ID = 'announcement';
+const ANNOUNCEMENT_STRING = 'announcement-text';
 const ANNOUNCEMENT_NUM_LIMIT = 4;
 
 /**

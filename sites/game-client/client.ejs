@@ -41,11 +41,15 @@ absolute URL.
         <% }); %>
       </div>
 
-      <div id="notification-bar">
+      <div class="notification-bar notification--overlay" id="notification-bar"></div>
+
+      <div class="announcement announcement--overlay" id="announcement">
+        <div class="announcement-type">公告類別</div>
+        <marquee>
+          <span class="announcement-text" id="announcement-text"></span>
+        </marquee>
+        <button class="announcement-close">X</button>
       </div>
-      <marquee id="announcement-bar">
-        <span id="announcement-bar-span"></span>
-      </marquee>
 
       <!-- TODO add `collapse` in class toggle style for child element (close toolbar)-->
       <div class="toolbar toolbar--overlay" id="toolbar">
