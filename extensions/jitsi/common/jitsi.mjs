@@ -15,6 +15,7 @@ class JitsiHandler {
     this.participantsInfo = {};
     this.isJoined = false;
     this.room = null;
+    this.isWebcam = true; // Is webcam or screen sharing.
     this.meetingName = meetingName;
     this.password = password;
     this.userName = userName;
@@ -71,11 +72,39 @@ class JitsiHandler {
 
     this.connection.connect();
 
-    JitsiMeetJS.createLocalTracks({devices: ['audio', 'video']})
-        .then(this.onLocalTracks.bind(this))
-        .catch((e) => {
-          console.error(e);
-        });
+    this.createLocalTracks();
+  }
+
+  /**
+   * Create local track. This method would drop all current local tracks.
+   * @param isWebcam Whether the video stream should be the webcam or desktop sharing.
+   */
+  createLocalTracks(isWebcam = true) {
+    if (!isWebcam && !JitsiMeetJS.isDesktopSharingEnabled()) {
+      alert('Screen sharing is not enabled.');
+    }
+
+    this.isWebcam = isWebcam;
+
+    // Drop the current local tracks.
+    for (const track of this.localTracks) {
+      this.room.removeTrack(track);
+    }
+    this.localTracks = [];
+    $('#jitsi-local').empty();
+
+    // Create new local tracks
+    JitsiMeetJS.createLocalTracks({
+      devices: ['audio', isWebcam ? 'video' : 'desktop']
+    })
+    .then(this.onLocalTracks.bind(this))
+    .catch((e) => {
+      if (!isWebcam) {
+        // something goes wrong, switch back to video.
+        this.createLocalTracks(true);
+      }
+      console.error(e);
+    });
   }
 
   /**
@@ -87,7 +116,7 @@ class JitsiHandler {
     this.localTracks = tracks;
     for (let i = 0; i < this.localTracks.length; i++) {
       console.log(this.localTracks[i].getType());
-      if (this.localTracks[i].getType() === 'video') {
+      if (this.localTracks[i].getType() !== 'audio') {
         $('#jitsi-local').append(`<video autoplay='1' id='localVideo${i}' class='jitsi-local-video' />`);
         this.localTracks[i].attach($(`#localVideo${i}`)[0]);
       } else {
@@ -95,8 +124,10 @@ class JitsiHandler {
         this.localTracks[i].attach($(`#localAudio${i}`)[0]);
       }
 
-      // All tracks should be disabled by default, and enabled upon requested.
-      this.localTracks[i].mute();
+      // All tracks should be disabled by default (except screen sharing), and enabled upon requested.
+      if (this.isWebcam || this.localTracks[i].getType() !== 'video') {
+        this.localTracks[i].mute();
+      }
 
       if (this.isJoined) {
         this.room.addTrack(this.localTracks[i]);
@@ -134,7 +165,7 @@ class JitsiHandler {
       `);
     }
 
-    if (track.getType() === 'video') {
+    if (track.getType() !== 'audio') {
       $(`#jitsi-${participantId}-container`).append(`
         <div id='${track.getId()}'>
           <video autoplay='1' id='${trackId}' class='jitsi-remote-video'></video>
@@ -146,13 +177,32 @@ class JitsiHandler {
           <audio autoplay='1' id='${trackId}' />
         </div>
       `);
-      this.setAudioVolumeMeter($(`#${trackId}`)[0], participantId);
+      if (!track.isMuted()) {
+        this.setAudioVolumeMeter($(`#${trackId}`)[0], participantId);
+      }
     }
     track.attach($(`#${trackId}`)[0]);
     if (track.isMuted()) {
       $(`#jitsi-${participantId}-status-container > [data-type=${track.getType()}]`).show();
     } else {
       $(`#jitsi-${participantId}-status-container > [data-type=${track.getType()}]`).hide();
+    }
+  }
+
+  onRemoteTrackRemove(track) {
+    console.log('track remove', track.getId());
+    try {
+      track.detach($(`#${id}${track.getType()}${track.getId()}`));
+    } catch (e) {
+      // An error is expected: https://github.com/jitsi/lib-jitsi-meet/issues/1054
+      // It seems that we can safely ignore the error.
+      // console.error(e);
+    }
+    $(`#${track.getId()}`).remove();
+
+    if (track.type === 'audio' && !track.isMuted() && (track.getParticipantId() in this.volumeMeters)) {
+      clearInterval(this.volumeMeters[track.getParticipantId()]);
+      delete this.volumeMeters[track.getParticipantId()];
     }
   }
 
@@ -202,24 +252,16 @@ class JitsiHandler {
    * @param {String} displayName The new display name.
    */
   onDisplayNameChanged(id, displayName) {
-    const tracks = this.remoteTracks[id];
-
-    for (let i = 0; i < tracks.length; i++) {
-      if (track.getType() === 'video') {
-        $(`#${tracks[i].getParticipantId()}-text`).text(displayName);
-      }
-    }
+    $(`#${id}-text`).text(displayName);
   }
 
   /**
    * This is called when connection is established successfully
    */
   onConnectionSuccess() {
-    this.room = this.connection.initJitsiConference(this.meetingName.toLowerCase(), {});
+    this.room = this.connection.initJitsiConference(this.meetingName.toLowerCase(), {e2eping: {pingInterval: -1}});
     this.room.on(JitsiMeetJS.events.conference.TRACK_ADDED, this.onRemoteTrack.bind(this));
-    this.room.on(JitsiMeetJS.events.conference.TRACK_REMOVED, (track) => {
-      console.log(`track removed: ${track}`);
-    });
+    this.room.on(JitsiMeetJS.events.conference.TRACK_REMOVED, this.onRemoteTrackRemove.bind(this));
     this.room.on(
         JitsiMeetJS.events.conference.CONFERENCE_JOINED,
         this.onConferenceJoined.bind(this));
@@ -269,12 +311,21 @@ class JitsiHandler {
    */
   onTrackMute(track) {
     console.log(`${track.getType()} - ${track.isMuted()} ${track.getParticipantId()}`);
+    const participantId = track.getParticipantId();
     // Check if this is a remote track
-    if (track.getParticipantId() && (track.getParticipantId() in this.remoteTracks)) {
+    if (participantId && (participantId in this.remoteTracks)) {
       if (track.isMuted()) {
-        $(`#jitsi-${track.getParticipantId()}-status-container > [data-type=${track.getType()}]`).show();
+        $(`#jitsi-${participantId}-status-container > [data-type=${track.getType()}]`).show();
+        if (track.getType() === 'audio') {
+          clearInterval(this.volumeMeters[participantId]);
+          delete this.volumeMeters[participantId];
+        }
       } else {
-        $(`#jitsi-${track.getParticipantId()}-status-container > [data-type=${track.getType()}]`).hide();
+        $(`#jitsi-${participantId}-status-container > [data-type=${track.getType()}]`).hide();
+        if (track.getType() === 'audio') {
+          const trackId = participantId + track.getType() + track.getId();
+          this.setAudioVolumeMeter($(`#${trackId}`)[0], participantId);
+        }
       }
     }
   }
@@ -307,7 +358,6 @@ class JitsiHandler {
 
     // We can safely remove all DOMs at this point.
     $('#jitsi-remote-container').empty();
-    $('#jitsi-temp-container').empty();
     $('#jitsi-local').empty();
 
     if (this.room) {
@@ -345,32 +395,6 @@ class JitsiHandler {
         this.localTracks[i].unmute();
       }
     }
-  }
-
-  /**
-   *
-   */
-  switchVideo() {
-    this.isVideo = !this.isVideo;
-    if (this.localTracks[1]) {
-      this.localTracks[1].dispose();
-      this.localTracks.pop();
-    }
-    JitsiMeetJS.createLocalTracks({
-      devices: [this.isVideo ? 'video' : 'desktop'],
-    })
-    .then((tracks) => {
-      this.localTracks.push(tracks[0]);
-      this.localTracks[1].addEventListener(
-          JitsiMeetJS.events.track.TRACK_MUTE_CHANGED,
-          () => console.log('local track muted'));
-      this.localTracks[1].addEventListener(
-          JitsiMeetJS.events.track.LOCAL_TRACK_STOPPED,
-          () => console.log('local track stoped'));
-      this.localTracks[1].attach($('#localVideo1')[0]);
-      this.room.addTrack(this.localTracks[1]);
-    })
-    .catch((error) => console.log(error));
   }
 
   /**

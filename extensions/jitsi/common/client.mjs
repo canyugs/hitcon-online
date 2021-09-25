@@ -34,6 +34,7 @@ class Client {
 
     this.isMicrophoneOn = false;
     this.isCameraOn = false;
+    this.isScreenSharingOn = false;
   }
 
   async gameStart() {
@@ -77,6 +78,34 @@ class Client {
       }
     });
     this.cameraButton.show();
+
+    // Screen sharing button
+    this.screenButton = new ToolbarButton('/static/extensions/jitsi/common/icons/screen-off.svg');
+    this.screenButton.registerOnClick(() => {
+      if (this.isScreenSharingOn) {
+        this.screenButton.changeIcon('/static/extensions/jitsi/common/icons/screen-off.svg');
+        this.isScreenSharingOn = false;
+
+        this.cameraButton.show();
+
+        if (this.jitsiObj) {
+          this.jitsiObj.createLocalTracks(true);
+        }
+      } else {
+        this.screenButton.changeIcon('/static/extensions/jitsi/common/icons/screen-on.svg');
+        this.isScreenSharingOn = true;
+
+        // webcam would be disabled when screen sharing is on.
+        this.cameraButton.hide();
+        this.isCameraOn = false;
+        this.cameraButton.changeIcon('/static/extensions/jitsi/common/icons/camera-off.svg');
+
+        if (this.jitsiObj) {
+          this.jitsiObj.createLocalTracks(false);
+        }
+      }
+    });
+    this.screenButton.show();
   }
 
   /**
