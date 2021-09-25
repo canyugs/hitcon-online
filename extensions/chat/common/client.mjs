@@ -98,7 +98,7 @@ Usage: !/<Command> <arg1> <arg2> ...
       } else {
         this.helper.callC2sAPI(null, 'teleport', 5000, mapCoord);
       }
-    } else if (cmd.split(' ')[0] === '!/announce') {
+    } else if (cmd.split(' ')[0] === '!/announce') { // TODO: restrict this using permission to admin
       const msg = cmd.substring(10);
       if (msg.trim() === '') {
         document.getElementById('message_history').innerHTML += '<span>Invalid message</span><br>';
