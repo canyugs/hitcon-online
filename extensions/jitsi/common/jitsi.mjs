@@ -86,13 +86,10 @@ class JitsiHandler {
     for (let i = 0; i < this.localTracks.length; i++) {
       console.log(this.localTracks[i].getType());
       if (this.localTracks[i].getType() === 'video') {
-        console.log('onLocalTracks insert video');
         $('#jitsi-local').append(`<video autoplay='1' id='localVideo${i}' class='jitsi-local-video' />`);
         this.localTracks[i].attach($(`#localVideo${i}`)[0]);
       } else {
-        console.log('onLocalTracks insert audio');
-        $('#jitsi-local').append(
-            `<audio autoplay='1' muted='true' id='localAudio${i}' class='jitsi-audio' />`);
+        $('#jitsi-local').append(`<audio autoplay='1' muted='true' id='localAudio${i}' class='jitsi-audio' />`);
         this.localTracks[i].attach($(`#localAudio${i}`)[0]);
       }
 
@@ -121,15 +118,26 @@ class JitsiHandler {
     this.remoteTracks[participantId].push(track);
     const trackId = participantId + track.getType() + track.getId();
 
-    if (track.getType() === 'video') {
+    if ($(`#jitsi-${participantId}-container`).length === 0) {
       $('#jitsi-remote-container').append(`
+        <div id='jitsi-${participantId}-container'>
+          <div id='jitsi-${participantId}-status-container' class='jitsi-status-container'>
+            <img src='/static/extensions/jitsi/common/icons/microphone-off.svg' data-type='audio' />
+            <img src='/static/extensions/jitsi/common/icons/camera-off.svg' data-type='video' />
+          </div>
+          <p id='${participantId}-text'>${this.participantsInfo[participantId]._displayName}</p>
+        </div>
+      `);
+    }
+
+    if (track.getType() === 'video') {
+      $(`#jitsi-${participantId}-container`).append(`
         <div id='${track.getId()}'>
           <video autoplay='1' id='${trackId}' class='jitsi-remote-video'></video>
-          <p id='${trackId}-text'>${this.participantsInfo[participantId]._displayName}</p>
         </div>
       `);
     } else {
-      $('#jitsi-remote-container').append(`
+      $(`#jitsi-${participantId}-container`).append(`
         <div id='${track.getId()}' class='jitsi-audio'>
           <audio autoplay='1' id='${trackId}' />
         </div>
@@ -137,7 +145,9 @@ class JitsiHandler {
     }
     track.attach($(`#${trackId}`)[0]);
     if (track.isMuted()) {
-      $(`#${track.getId()}`).hide();
+      $(`#jitsi-${participantId}-status-container > [data-type=${track.getType()}]`).show();
+    } else {
+      $(`#jitsi-${participantId}-status-container > [data-type=${track.getType()}]`).hide();
     }
   }
 
@@ -174,6 +184,7 @@ class JitsiHandler {
       }
       $(`#${tracks[i].getId()}`).remove();
     }
+    $(`#jitsi-${id}-container`).remove();
   }
 
   /**
@@ -186,7 +197,7 @@ class JitsiHandler {
 
     for (let i = 0; i < tracks.length; i++) {
       if (track.getType() === 'video') {
-        $(`#${id}${tracks[i].getType()}${tracks[i].getId()}-text`).text(displayName);
+        $(`#${tracks[i].getParticipantId()}-text`).text(displayName);
       }
     }
   }
@@ -246,9 +257,9 @@ class JitsiHandler {
     // Check if this is a remote track
     if (track.getParticipantId() && (track.getParticipantId() in this.remoteTracks)) {
       if (track.isMuted()) {
-        $(`#${track.getId()}`).hide();
+        $(`#jitsi-${track.getParticipantId()}-status-container > [data-type=${track.getType()}]`).show();
       } else {
-        $(`#${track.getId()}`).show();
+        $(`#jitsi-${track.getParticipantId()}-status-container > [data-type=${track.getType()}]`).hide();
       }
     }
   }
@@ -281,6 +292,7 @@ class JitsiHandler {
 
     // We can safely remove all DOMs at this point.
     $('#jitsi-remote-container').empty();
+    $('#jitsi-temp-container').empty();
     $('#jitsi-local').empty();
 
     if (this.room) {
@@ -297,7 +309,7 @@ class JitsiHandler {
   }
 
   /**
-   * Mute the track
+   * Mute the local track
    * @param {string} type Which type to mute (audio|video)
    */
   async mute(type) {
@@ -309,7 +321,7 @@ class JitsiHandler {
   }
 
   /**
-   * Unmute the track
+   * Unmute the local track
    * @param {string} type Which type to unmute (audio|video)
    */
   async unmute(type) {
@@ -332,18 +344,18 @@ class JitsiHandler {
     JitsiMeetJS.createLocalTracks({
       devices: [this.isVideo ? 'video' : 'desktop'],
     })
-        .then((tracks) => {
-          this.localTracks.push(tracks[0]);
-          this.localTracks[1].addEventListener(
-              JitsiMeetJS.events.track.TRACK_MUTE_CHANGED,
-              () => console.log('local track muted'));
-          this.localTracks[1].addEventListener(
-              JitsiMeetJS.events.track.LOCAL_TRACK_STOPPED,
-              () => console.log('local track stoped'));
-          this.localTracks[1].attach($('#localVideo1')[0]);
-          this.room.addTrack(this.localTracks[1]);
-        })
-        .catch((error) => console.log(error));
+    .then((tracks) => {
+      this.localTracks.push(tracks[0]);
+      this.localTracks[1].addEventListener(
+          JitsiMeetJS.events.track.TRACK_MUTE_CHANGED,
+          () => console.log('local track muted'));
+      this.localTracks[1].addEventListener(
+          JitsiMeetJS.events.track.LOCAL_TRACK_STOPPED,
+          () => console.log('local track stoped'));
+      this.localTracks[1].attach($('#localVideo1')[0]);
+      this.room.addTrack(this.localTracks[1]);
+    })
+    .catch((error) => console.log(error));
   }
 
   /**

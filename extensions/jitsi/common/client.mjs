@@ -57,7 +57,7 @@ class Client {
         }
       }
     });
-    this.microphoneButton.hide();
+    this.microphoneButton.show();
 
     // Camera button
     this.cameraButton = new ToolbarButton('/static/extensions/jitsi/common/icons/camera-off.svg');
@@ -76,7 +76,7 @@ class Client {
         }
       }
     });
-    this.cameraButton.hide();
+    this.cameraButton.show();
   }
 
   /**
@@ -90,20 +90,15 @@ class Client {
 
     this.isCameraOn = false;
     this.cameraButton.changeIcon('/static/extensions/jitsi/common/icons/camera-off.svg');
-    this.cameraButton.show();
 
     this.isMicrophoneOn = false;
     this.microphoneButton.changeIcon('/static/extensions/jitsi/common/icons/microphone-off.svg');
-    this.microphoneButton.show();
   }
 
   /**
    * Stop the Jitsi Meeting.
    */
   async stopMeeting() {
-    this.microphoneButton.hide();
-    this.cameraButton.hide();
-
     if (this.jitsiObj) {
       this.overlay.hide();
       await this.jitsiObj.unload();
