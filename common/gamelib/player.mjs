@@ -174,6 +174,7 @@ class Player {
 
 /**
  * The message between client and server to synchronize player's status.
+ * Note that the ALL the fields in this class can be modified by user.
  */
 class PlayerSyncMessage {
   constructor(playerID, mapCoord, facing, displayName, displayChar, removed) {
