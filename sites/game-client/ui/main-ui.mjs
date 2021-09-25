@@ -4,6 +4,7 @@
 import OverlayPosition from './overlay-position.mjs';
 import ContextMenu from './context-menu.mjs';
 import LinkedList from '../../../common/utility/linked-list.mjs';
+import UtilPanelManager from './utilpanel/utilpanel-manager.mjs';
 
 // enum
 const UIState = Object.freeze({
@@ -60,6 +61,8 @@ class MainUI {
     this.notificationDom = document.getElementById(NOTIFICATIONBAR_ID);
     this.announcementDom = document.getElementById(ANNOUNCEMENT_ID);
     this.announcementWord = document.getElementById(ANNOUNCEMENT_STRING);
+
+    this.utilPanelManager = new UtilPanelManager(this);
   }
 
   /**
@@ -191,13 +194,22 @@ class MainUI {
    * Reset all elements of the modal container into the staging container.
    */
   _evictModalContainer() {
-    // We look at children and not childNode because we only care about
-    // the DOM elements. We do not place text or other stuff in the modal
+    // We do not place text or other stuff in the modal
     // container.
-    for (const ele of this.modalContDom.children) {
+    this._evictDOM(this.modalContDom);
+  }
+
+  /**
+   * Evict all children of the given DOM back into the staging div.
+   * All text nodes under the DOM will be LOST.
+   */
+  _evictDOM(dom) {
+    // We look at children and not childNode because we only care about
+    // the DOM elements. Text nodes will be lost.
+    for (const ele of dom.children) {
       this._restoreToStaging(ele);
     }
-    this.modalContDom.innerHTML = '';
+    dom.innerHTML = '';
   }
 
   /**
