@@ -40,28 +40,37 @@ absolute URL.
           <%- include(i); %>
         <% }); %>
       </div>
+
       <div id="notification-bar">
       </div>
       <marquee id="announcement-bar">
         <span id="announcement-bar-span"></span>
       </marquee>
-      <div id="toolbar">
+
+      <!-- TODO add `collapse` in class toggle style for child element (close toolbar)-->
+      <div class="toolbar toolbar--overlay" id="toolbar">
+       <div class="toolbar-tabs" id="toolbar-tabs">
+        <button id="example" class="toolbar-button">
+         <img src="/static/sites/game-client/settings.svg">
+        </button>
+       </div>
+       <div class="toolbar-divider">
+         <span class="toolbar-divider"><img src="/static/sites/game-client/triangle.svg"></span>
+       </div>
+       <div class="toolbar-content" id="toolbar-viewer">
+        <div class="toolbar-viewer">setup information</div>
+        <div class="toolbar-actions">setup action here</div>
+       </div>
       </div>
-      <div id="overlay-topleft" class="overlay">
-      </div>
-      <div id="overlay-bottomleft" class="overlay">
-      </div>
-      <div id="overlay-right" class="overlay">
-      </div>
-      <div id="overlay-centertop" class="overlay">
-      </div>
-      <div id="main-view">
-      </div>
+
+      <div id="overlay-topleft" class="overlay"></div>
+      <div id="overlay-bottomleft" class="overlay"></div>
+      <div id="overlay-right" class="overlay"></div>
+      <div id="overlay-centertop" class="overlay"></div>
+      <div id="main-view"></div>
       <!-- used to block out the rest of the stuffs when model is visible -->
-      <div id="modal-background" class="modal-background">
-      </div>
-      <div id="modal-container" class="modal-container">
-      </div>
+      <div id="modal-background" class="modal-background"></div>
+      <div id="modal-container" class="modal-container"></div>
       <!-- context menu -->
       <div id="context-menu-other" class="context-menu">
         <ul id="context-menu-list-other" class="context-menu-list"></ul>
