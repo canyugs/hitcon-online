@@ -55,6 +55,9 @@ class GatewayService {
     this.rpcHandler.registerRPC('teleport', async (serviceName, playerID, mapCoord, facing) => {
       return await this.teleportPlayer(playerID, MapCoord.fromObject(mapCoord), facing);
     });
+    this.rpcHandler.registerRPC('getToken', async (serviceName, playerID) => {
+      return await this.handleGetToken(playerID);
+    });
     this.servers = [];
     await this.extMan.createAllInGateway(this.rpcHandler, this);
     await this.extMan.startAllInGateway();
@@ -72,6 +75,16 @@ class GatewayService {
       // Broadcast the cell set modification.
       this.io.emit('cellSet', msg);
     });
+  }
+
+  /**
+   * TODO(zeze)
+   */
+  async handleGetToken(playerID) {
+    if (playerID in this.socks) {
+      return this.socks[playerID].decoded_token;
+    }
+    return null;
   }
 
   async callS2c(serviceName, playerID, extName, methodName, timeout, args) {
