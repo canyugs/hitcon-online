@@ -11,6 +11,7 @@
   border-radius: 24px;
   padding: 20px 0;
   color: #FFF;
+  width: 378px;
   opacity: 70%; /* TODO tmp style, see things under utilpanel */
   z-index: 10; /* TODO tmp style, make utilpanel visible */
 }
@@ -72,7 +73,7 @@
   background: rgba(73, 86, 114, 1) 0% 0% no-repeat padding-box;
   box-shadow: inset 0px 0px 10px rgba(0, 0, 0, 0.82);
   border-radius: 21px;
-  padding: 26px 19px 0 29px;
+  padding: 15px;
   min-height: 30vh;
   height: 100%;
 }
@@ -139,5 +140,4 @@
 }
 
 .utilpanel-actions {
-  padding: 20px 19px 0 29px;
 }
