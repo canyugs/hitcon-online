@@ -267,6 +267,7 @@ class InteractiveObjectServerBaseClass {
    * @return {String} - the next state
    */
   async sf_checkPermission(playerID, kwargs) {
+    console.log(this.helper);
     // TODO: Get permission from JWT token
     const permission = 'editor';
 
