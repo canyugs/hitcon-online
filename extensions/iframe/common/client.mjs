@@ -14,10 +14,16 @@ class IframeOverlay extends Overlay {
   }
 
   updateIframe(src) {
+    if (src === null || src === undefined || src === '') {
+      // These 3 should be treated the same.
+      src = null;
+    }
+
     if (this.lastSrc === src) return;
     if (src === null) {
       this.hide();
-      this.lastSrc = null
+      this.lastSrc = null;
+      this.iframe.src = '';
       return;
     }
 
