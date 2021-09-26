@@ -98,6 +98,9 @@ class GameClient {
         game.errorModal.displayError(reason, "Please refresh to reconnect.");
       }
     });
+    socket.on("kicked", (reason) => {
+      game.errorModal.displayError(reason, "Please refresh to reconnect.");
+    });
   }
 
   /**
