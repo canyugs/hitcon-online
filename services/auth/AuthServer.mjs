@@ -66,7 +66,7 @@ class AuthServer {
                             message: 'Failed to authenticate token.'
                         });
                     } else {
-                        res.cookie('token', token, {httpOnly: true});
+                        res.cookie('token', token);
                         res.redirect('/');
                     }
                 });
