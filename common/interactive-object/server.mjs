@@ -260,8 +260,14 @@ class InteractiveObjectServerBaseClass {
     return this.sf_exit(playerID, {next: this.dataStore.get(playerID)});
   }
 
+  /**
+   * Check permission by JWT token and go to corresponding state
+   * @param {String} playerID
+   * @param {Object} kwargs - TODO
+   * @return {String} - the next state
+   */
   async sf_checkPermission(playerID, kwargs) {
-    // TODO: Give edit permission according to JWT token
+    // TODO: Get permission from JWT token
     const permission = 'editor';
 
     const {options} = kwargs;
