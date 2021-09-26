@@ -259,6 +259,21 @@ class InteractiveObjectServerBaseClass {
 
     return this.sf_exit(playerID, {next: this.dataStore.get(playerID)});
   }
+
+  async sf_checkPermission(playerID, kwargs) {
+    // TODO: Give edit permission according to JWT token
+    const permission = 'editor';
+
+    const {options} = kwargs;
+    for (const [identity, nextState] of Object.entries(options)) {
+      if (permission === identity) {
+        return nextState;
+      }
+    }
+    // No identity match
+    throw 'No identity match';
+  }
+
   /**
    * Just a placeholder function to provide `exit` function in configuration.
    * @param {String} playerID
