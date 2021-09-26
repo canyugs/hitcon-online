@@ -231,8 +231,8 @@ class MapRenderer {
           this._drawOneCharacterName(renderArgs);
           break;
 
-        case '_drawWaterMark':
-          this._drawWaterMark(renderArgs);
+        case '_drawWatermark':
+          this._drawWatermark(renderArgs);
           break;
 
         default:
