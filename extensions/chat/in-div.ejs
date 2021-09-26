@@ -1,43 +1,125 @@
 <style type="text/css">
-  #overlay-right{
+  #overlay-right {
     width:20%;
     padding:20px;
   }
 
-  .input-container{
+  .input-container {
     position:relative;
     display: -webkit-box;
     display: -ms-flexbox;
     display: flex;
+    flex-direction: row;
     -webkit-box-orient: vertical;
     -webkit-bot-direction: reverse;
-    -ms-flex-flow: column-reverse;
-    flex-flow: column-reverse;
     -webkit-box-align: start;
-    -ms-flex-align: start;
-    align-items: flex-start;
+    -ms-flex-align: center;
     margin:20px;
+    background: #FFFFFF 0% 0% no-repeat padding-box;
+    border-radius: 35px;
+    text-align: center;
   }
 
-  .input-container input{
-    -webkit-box-ordinal-group: 11;
-    order:10;
+  .input-container input {
     outline: none;
     border: none;
     width: 100%;
     padding: 10px 0;
     font-size: 14px;
-    border-bottom: 1px solid #d5d5d5;
     text-indent: 10px;
+    border-radius: 35px;
+    padding-right: 20px;
   }
 
-  #message_history{
-    overflow:auto;
-    line-height:20px;
+  .input-container div {
+    background: #1D52CB 0% 0% no-repeat padding-box;
+    width: 105px;
+    font: normal normal bold 18px/36px Noto Sans CJK TC;
+    border-top-left-radius: 35px;
+    border-bottom-left-radius: 35px;
   }
+
+  #message_history {
+    overflow: auto;
+    line-height: 20px;
+    max-height: 60vh;
+  }
+
+  .chat-message-to {
+    text-align: right;
+  }
+  .chat-message-submit {
+    background: url('/static/extensions/chat/common/awesome-arrow-alt-circle-right.svg') no-repeat center;
+    border: none;
+    padding-right: 28px;
+  }
+
+
 
   pre{
     overflow: auto;
+  }
+
+  .chat-message-box {
+    padding: 5px;
+    background: #FFFFFF 0% 0% no-repeat padding-box;
+    box-shadow: 0px 3px 6px #0000004E;
+    border: 1px solid #707070;
+    border-radius: 11px;
+    color: #000;
+    margin-bottom: 10px;
+    padding: 10px;
+  }
+  .chat-message-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 26px;
+  }
+
+  .chat-message-type:empty,
+  .chat-message-time:empty {
+    display: none;
+  }
+
+  .chat-message-type {
+    border-radius: 6px;
+    padding: 2px 15px;
+    color: #FFF;
+    font-size: 12px;
+    font-weight: bolder;
+  }
+
+  .chat-message-type--all {
+    background: #676767 0% 0% no-repeat padding-box;
+  }
+
+  .chat-message-type--nearby {
+    background: #989898 0% 0% no-repeat padding-box;
+  }
+
+  .chat-message-type--private-message {
+    background: #725FDB 0% 0% no-repeat padding-box;
+  }
+
+  .chat-message-type--announcement {
+    background: #000462 0% 0% no-repeat padding-box;
+  }
+  .chat-message-type--advertise {
+    background: #795615 0% 0% no-repeat padding-box;
+  }
+
+  .chat-message-time {
+    text-align: left;
+    font: normal normal medium 12px/40px Noto Sans CJK TC;
+  }
+
+  .chat-message-source {
+    text-align: right;
+    font: normal normal bold 18px/40px Noto Sans CJK TC;
+  }
+  .chat-message-body {
+    text-align: right;
   }
 
   /* Chat button should be the first on the right */
@@ -48,15 +130,34 @@
 
 <div class="chat-overlay" id="chat-overlay">
   <div class="utilpanel-viewer">
-    <div id="message_history">
-    </div>
+    <div id="message_history"></div>
   </div>
   <div class="utilpanel-actions">
     <div class="input-container">
-      <input type="text" id="message_to" placeholder="Channel (Default: Broadcast)">
+      <div>TO:</div>
+      <input class="chat-message-to"type="text" id="message_to" list="chat-target-list" placeholder="Channel (Default: Broadcast)">
+      <datalist id="chat-target-list">
+        <option value="nearby">
+        <option value="all">
+      </datalist>
     </div>
     <div class="input-container">
       <input type="text" id="chat_message" placeholder="Message">
+      <button class="chat-message-submit" type="submit"></button>
     </div>
   </div>
 </div>
+
+<!-- Message Box template -->
+<div class="chat-message-box" id="chat-message-box">
+  <div class="chat-message-title">
+    <div class="chat-message-type"></div>
+    <div class="chat-message-time"></div>
+    <div class="chat-message-source">Bobby Diaz</div>
+  </div>
+  <div class="chat-message-body">
+  Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna
+  </div>
+</div>
+
+

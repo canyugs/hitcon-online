@@ -113,13 +113,37 @@ Usage: !/<Command> <arg1> <arg2> ...
     return $('<div/>').text(str).html();
   }
 
+
+  /**
+   * Generate styled dom for message
+   * @generateMessageBox
+   * @param {string} source - who send this message
+   * @param {string} body - message content
+   @ @param {string} msgType - label message type
+   */
+  generateMessageBox(source, body, msgType='') {
+    const t = new Date();
+    const hour = (t.getHours() < 10 ? '0' : '') + t.getHours();
+    const minute = (t.getMinutes() < 10 ? '0' : '') + t.getMinutes();
+    const currentTime = `${hour}:${minute}`;
+    const msgBox = document.getElementById('chat-message-box').cloneNode(true);
+    const currentType = msgBox.querySelector('.chat-message-type').classList.toString();
+    msgBox.querySelector('.chat-message-type').classList.add(`${currentType}--${msgType}`);
+    msgBox.querySelector('.chat-message-type').textContent = msgType;
+    msgBox.querySelector('.chat-message-time').textContent = currentTime;
+    msgBox.querySelector('.chat-message-body').textContent = body;
+    msgBox.querySelector('.chat-message-source').textContent = source;
+    return msgBox;
+  }
+
   /**
    * Get nearby message from server
    * @s2c_getNearbyMessage
    * @param {object} args - Information of the nearby message including msg_from and msg
    */
   s2c_getNearbyMessage(args) {
-    document.getElementById('message_history').innerHTML += '<span>Nearby Message From ' + this.HTMLEncode(args.msg_from) + ': ' + this.HTMLEncode(args.msg) + '</span><br>';
+    document.getElementById('message_history').appendChild(
+    this.generateMessageBox(this.HTMLEncode(args.msg_from), this.HTMLEncode(args.msg), 'nearby'));
   }
 
   /**
@@ -128,7 +152,8 @@ Usage: !/<Command> <arg1> <arg2> ...
    * @param {object} args - Information of the private message
    */
   s2c_getPrivateMessage(args) {
-    document.getElementById('message_history').innerHTML += '<span>Private Message From ' + this.HTMLEncode(args.msg_from) + ': ' + this.HTMLEncode(args.msg) + '</span><br>';
+    document.getElementById('message_history').appendChild(
+    this.generateMessageBox(this.HTMLEncode(args.msg_from), this.HTMLEncode(args.msg), 'private-message'));
   }
 
   /**
@@ -137,7 +162,8 @@ Usage: !/<Command> <arg1> <arg2> ...
    * @param {object} args - Information of the private message
    */
   s2c_sendedPrivateMessage(args) {
-    document.getElementById('message_history').innerHTML += '<span>Private Message To ' + this.HTMLEncode(args.msg_to) + ': ' + this.HTMLEncode(args.msg) + '</span><br>';
+    document.getElementById('message_history').appendChild(
+    this.generateMessageBox(this.HTMLEncode(args.msg_to), this.HTMLEncode(args.msg), 'private-message'));
   }
 
   /**

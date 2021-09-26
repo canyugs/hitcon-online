@@ -12,6 +12,7 @@
   border-radius: 16px;
   width: 565px;
   height: 111px;
+  box-sizing: border-box;
   padding-top: 10px;
   color: #000000;
   opacity: 70%; /* TODO tmp style, see things under toolbar */
@@ -64,7 +65,8 @@
 .announcement {
   display: flex;
   background: #FFF;
-  width: 373px;
+  box-sizing: border-box;
+  width: 565px;
   padding: 7px 17px;
   background: #FFFFFF 0% 0% no-repeat padding-box;
   box-shadow: 0px 3px 6px #00000062;
