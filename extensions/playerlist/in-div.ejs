@@ -6,9 +6,8 @@
   .playerlist-container {
     display: flex;
     flex-direction: column;
-    padding: 20px;
-    background: #495672;
   }
+
   .playerlist-search {
     display: flex;
     justify-content: space-between;
@@ -19,6 +18,7 @@
     height: 33px;
     margin-bottom: 30px;
   }
+
   .playerlist-search-input > input {
     background: none;
     border: none;
@@ -30,6 +30,13 @@
     width: 19px;
     height: 19px;
   }
+
+  .playerlist-list {
+    max-height: 80vh;
+    overflow: auto;
+    overflow-x: hidden;
+  }
+
   .playerlist-player {
     display:flex;
     justify-content: space-between;
@@ -79,18 +86,15 @@
       </div>
       <img src="/static/extensions/playerlist/common/awesome-search.svg">
     </div>
-    <div id="playerlist">
-
-    </div>
+    <div class="playerlist-list" id="playerlist"></div>
   </div>
-  <div class="playerlist-list" id="playerlist">
-    <div class="playerlist-player" id="playerlist-player">
-      <img class="player-picture" src="https://via.placeholder.com/56x61">
-      <div class="player-information">
-        <div class="player-name">Beverly Bailey</div>
-        <div class="player-role">與會者</div>
-      </div>
-    </div>
-  </div>
+</div>
 
+<!-- Template for player item -->
+<div class="playerlist-player" id="playerlist-player">
+  <img class="player-picture" src="https://via.placeholder.com/56x61">
+  <div class="player-information">
+    <div class="player-name">Beverly Bailey</div>
+    <div class="player-role">與會者</div>
+  </div>
 </div>
