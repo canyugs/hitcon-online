@@ -176,7 +176,8 @@ absolute URL.
         }
         game.map = new GameMap(game.graphicAsset, game.mapData);
         game.gameState = new GameState(game.map);
-        game.socket = game.io("ws://" + ( "<%= gatewayAddress %>" ?? window.location), {reconnection: false});
+        game.socketURL = ("<%= gatewayAddress %>" || "");
+        game.socket = game.io(game.socketURL, {reconnection: false});
 
         game.extMan = new ClientExtensionManager(game.socket, game.extensionList);
         game.mapRenderer = new MapRenderer(document.querySelector('#mapcanvas'), game.map, game.gameState);
