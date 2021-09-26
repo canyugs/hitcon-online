@@ -1,0 +1,72 @@
+{
+  "enabled": true,
+  "initialPosition": {"mapName": "world1", "x": 10, "y": 15},
+  "display": [
+    {
+      "zIndex": 11,
+      "layerName": "npcImage",
+      "renderFunction": "_drawOneCharacterImage",
+      "renderArgs": null,
+      "character": "char1"
+    },
+    {
+      "zIndex": 16,
+      "layerName": "npcName",
+      "renderFunction": "_drawOneCharacterName",
+      "renderArgs": null
+    }
+  ],
+  "FSM": {
+    "initialState": "s1",
+    "states": {
+      "s1": {
+        "func": "checkPermission",
+        "kwargs": {
+          "options": {
+            "editor": "s2",
+            "user": "s3"
+          }
+        }
+      },
+      "s2": {
+        "func": "showDialog",
+        "kwargs": {
+          "dialogs": "Hello Editor",
+          "options": {
+            "Meeting Room 1": "s4",
+            "Meeting Room 2": "s5",
+            "Edit": "s6"
+          }
+        }
+      },
+      "s3": {
+        "func": "showDialog",
+        "kwargs": {
+          "dialogs": "Welcome to HITCON online bulletin",
+          "options": {
+            "Meeting Room 1": "s4",
+            "Meeting Room 2": "s5"
+          }
+        }
+      },
+      "s4": {
+        "func": "exit",
+        "kwargs": {
+          "next": "s1"
+        }
+      },
+      "s5": {
+        "func": "exit",
+        "kwargs": {
+          "next": "s1"
+        }
+      },
+      "s6": {
+        "func": "exit",
+        "kwargs": {
+          "next": "s1"
+        }
+      }
+    }
+  }
+}
