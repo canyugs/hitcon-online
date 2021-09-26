@@ -125,6 +125,12 @@ class GatewayService {
     });
   }
 
+  async notifyKicked(socket, reason) {
+    socket.emit('kicked', reason);
+    await new Promise((r) => setTimeout(r, 5000));
+    socket.disconnect();
+  };
+
   /**
    * Accept an authorized user's socket.
    * This is usually called by addUnauthSocket() above.
@@ -141,7 +147,7 @@ class GatewayService {
     if (!ret) {
       // Player already connected.
       console.warn(`Player ${playerID} already connected`);
-      socket.disconnect();
+      await this.notifyKicked(socket, 'Duplicate connection');
       return;
     }
 
