@@ -139,7 +139,9 @@ class ExtensionHelperBase {
   }
 
   /**
-   * TODO(zeze)
+   * Get JWT token according to playerID from gateway service
+   * @param {String} playerID - The ID of the player to call.
+   * @return {object} result - decoded JWT token
    */
   async getToken(playerID) {
     const playerService = await this.dir.getPlayerGatewayService(playerID);

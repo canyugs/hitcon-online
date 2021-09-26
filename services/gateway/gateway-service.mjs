@@ -78,7 +78,9 @@ class GatewayService {
   }
 
   /**
-   * TODO(zeze)
+   * Get JWT token according to playerID
+   * @param {String} playerID - The ID of the player to call.
+   * @return {object} decoded_token - decoded JWT token
    */
   async handleGetToken(playerID) {
     if (playerID in this.socks) {
