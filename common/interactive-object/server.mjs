@@ -91,6 +91,9 @@ class InteractiveObjectServerBaseClass {
     if (!fsmValidation(this.config.FSM)) return;
     if (!displayValidation(this.config.display)) return;
 
+    // kwargs in FSM may be edited, e.g. Bulletin
+    this.editedFSM = this.config.FSM
+
     // Stores the state of every player.
     // TODO: store the states in database (or in `/run/small_data`)
     this.dataStore = new Map(); // key: playerID, value: currentState
@@ -114,7 +117,7 @@ class InteractiveObjectServerBaseClass {
     this._fsmWalkLock.add(playerID);
 
     try { // for release the lock
-      const fsm = this.config.FSM; // alias
+      const fsm = this.editedFSM; // alias
 
       // initialize if not exist
       if (!this.dataStore.has(playerID)) this.dataStore.set(playerID, fsm.initialState);
@@ -267,18 +270,42 @@ class InteractiveObjectServerBaseClass {
    * @return {String} - the next state
    */
   async sf_checkPermission(playerID, kwargs) {
-    console.log(this.helper);
-    // TODO: Get permission from JWT token
-    const permission = 'editor';
-
+    const permission = await this.helper.getToken(playerID);
+    permission.scope.push('online_bulletin_editor');
     const {options} = kwargs;
     for (const [identity, nextState] of Object.entries(options)) {
-      if (permission === identity) {
+      if (permission.scope.includes(identity)) {
         return nextState;
       }
     }
     // No identity match
     throw 'No identity match';
+  }
+
+  /**
+   * Show an input prompt for user to edit the content of dialog.
+   * @param {String} playerID
+   * @param {Object} kwargs - TODO
+   * @return {String} - the next state
+   */
+  async sf_editDialog(playerID, kwargs) {
+    const {dialogs, buttonText, nextState} = kwargs;
+
+    // prepare dialog
+    let d = '';
+    if (typeof dialogs === 'string') d = dialogs;
+    if (Array.isArray(dialogs)) d = randomChoice(dialogs);
+
+    const result = await this.helper.callS2cAPI(playerID, 'dialog', 'showDialogWithPrompt', 60*1000, this.objectName, d, buttonText);
+    console.log(result);
+    if (result.msg) {
+      this.editedFSM.states[nextState].kwargs.dialogs = result.msg;
+      return nextState;
+    }
+    console.warn(`Player '${playerID}' does not choose in 'showDialogWithMultichoice'. Result: ${JSON.stringify(result)}`);
+
+    // If we reach here, the editDialog timeouts.
+    return this.sf_exit(playerID, {next: this.dataStore.get(playerID)});
   }
 
   /**

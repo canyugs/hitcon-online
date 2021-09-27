@@ -56,6 +56,8 @@ class DialogModal extends Modal {
     const result = await this._displayDialogInternal(() => {
       this.subjectDOM.innerHTML = subject;
       this.msgDOM.innerHTML = message;
+
+      // TODO: Sanitize to prevent XSS
       this.btnContDOM.innerHTML = `<button id="dialog-btn-OK">${buttonText}</button>`;
       const btnOK = document.getElementById('dialog-btn-OK');
 
@@ -78,6 +80,8 @@ class DialogModal extends Modal {
 
       let choicesHTML = '<ul>';
       for (const {token, display} of choices) {
+        
+        // TODO: Sanitize to prevent XSS
         choicesHTML += `<li data-token=${token} id="dialog-btn-${token}" `;
         choicesHTML += `class="dialog-choice-entry">${display}</li>`;
       }
@@ -108,6 +112,8 @@ class DialogModal extends Modal {
       const promptHtml = '<br /><input type="text" class="dialog-textinput"' +
         ' id="dialog-textinput" />';
       this.msgDOM.innerHTML = message + promptHtml;
+
+      // TODO: Sanitize to prevent XSS
       this.btnContDOM.innerHTML = `<button id="dialog-btn-OK">${buttonText}</button>`;
       const btnOK = document.getElementById('dialog-btn-OK');
 

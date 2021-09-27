@@ -4,10 +4,6 @@
 import fs from 'fs';
 import InteractiveObjectServerBaseClass from '../../common/interactive-object/server.mjs';
 
-class Bulletin extends InteractiveObjectServerBaseClass {
-  
-}
-
 /**
  * TODO: jsdoc
  */
