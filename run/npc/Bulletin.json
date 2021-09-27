@@ -1,6 +1,6 @@
 {
   "enabled": true,
-  "initialPosition": {"mapName": "world1", "x": 10, "y": 15},
+  "initialPosition": {"mapName": "world1", "x": 15, "y": 15},
   "display": [
     {
       "zIndex": 11,
@@ -23,8 +23,8 @@
         "func": "checkPermission",
         "kwargs": {
           "options": {
-            "editor": "s2",
-            "user": "s3"
+            "online_bulletin_editor": "s2",
+            "point_system": "s4"
           }
         }
       },
@@ -33,35 +33,29 @@
         "kwargs": {
           "dialogs": "Hello Editor",
           "options": {
-            "Meeting Room 1": "s4",
-            "Meeting Room 2": "s5",
-            "Edit": "s6"
+            "Edit": "s3",
+            "Preview": "s4"
           }
         }
       },
       "s3": {
+        "func": "editDialog",
+        "kwargs": {
+          "dialogs": "Input the new dialog",
+          "buttonText": "Submit",
+          "nextState": "s4"
+        }
+      },
+      "s4": {
         "func": "showDialog",
         "kwargs": {
           "dialogs": "Welcome to HITCON online bulletin",
           "options": {
-            "Meeting Room 1": "s4",
-            "Meeting Room 2": "s5"
+            "HITCON is perfect": "s5"
           }
         }
       },
-      "s4": {
-        "func": "exit",
-        "kwargs": {
-          "next": "s1"
-        }
-      },
       "s5": {
-        "func": "exit",
-        "kwargs": {
-          "next": "s1"
-        }
-      },
-      "s6": {
         "func": "exit",
         "kwargs": {
           "next": "s1"
