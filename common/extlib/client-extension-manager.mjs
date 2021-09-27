@@ -22,6 +22,13 @@ class ClientExtensionManager {
     this.extModules = {};
     this.extObjects = {};
     this.extHelpers = {};
+
+    // This promise will become available once we've finished loading all
+    // extensions. It is used to avoid race condition between
+    // loadAllExtensionClient() and startAllExtensionClient().
+    this.allLoadedPromise = new Promise((resolve) => {
+      this.allLoadedResolve = resolve;
+    });
   }
 
   /**
@@ -51,9 +58,14 @@ class ClientExtensionManager {
   }
 
   async loadAllExtensionClient() {
+    let p = [];
     for (let extName of this.extNameList) {
-      this.loadExtensionClient(extName);
+      p.push(this.loadExtensionClient(extName));
     }
+    await Promise.all(p);
+
+    // Notify that we're done.
+    this.allLoadedResolve(true);
   }
 
   /**
@@ -86,9 +98,14 @@ class ClientExtensionManager {
    * Start the browser side of all extensions.
    */
   async startAllExtensionClient() {
+    // Can't start before everything is loaded.
+    await this.allLoadedPromise;
+
+    let p = [];
     for (let extName of this.extNameList) {
-      this.startExtensionClient(extName);
+      p.push(this.startExtensionClient(extName));
     }
+    await Promise.all(p);
   }
 
   /**
