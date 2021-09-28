@@ -86,7 +86,7 @@ class Client {
     this.jitsiObj = new JitsiHandler(meetingName, password,
       this.helper.gameClient.playerInfo.displayName);
     this.currentMeeting = meetingName;
-    this.overlay.show(OverlayPosition.CENTER_TOP);
+    this.overlay.show(OverlayPosition.RIGHT);
 
     this.isCameraOn = false;
     this.cameraButton.changeIcon('/static/extensions/jitsi/common/icons/camera-off.svg');
