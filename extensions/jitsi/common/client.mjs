@@ -42,7 +42,8 @@ class Client {
     this.overlay.hide();
 
     // Microphone button
-    this.microphoneButton = new ToolbarButton('/static/extensions/jitsi/common/icons/microphone-off.svg');
+    this.microphoneButton = new ToolbarButton('/static/extensions/jitsi/common/icons/microphone-off.svg', false);
+    this.microphoneButton.registerDom(document.getElementById('jitsi-microphone'));
     this.microphoneButton.registerOnClick(() => {
       if (this.isMicrophoneOn) {
         this.microphoneButton.changeIcon('/static/extensions/jitsi/common/icons/microphone-off.svg');
@@ -61,7 +62,8 @@ class Client {
     this.microphoneButton.show();
 
     // Camera button
-    this.cameraButton = new ToolbarButton('/static/extensions/jitsi/common/icons/camera-off.svg');
+    this.cameraButton = new ToolbarButton('/static/extensions/jitsi/common/icons/camera-off.svg', false);
+    this.cameraButton.registerDom(document.getElementById('jitsi-camera'));
     this.cameraButton.registerOnClick(() => {
       if (this.isCameraOn) {
         this.cameraButton.changeIcon('/static/extensions/jitsi/common/icons/camera-off.svg');
@@ -80,7 +82,8 @@ class Client {
     this.cameraButton.show();
 
     // Screen sharing button
-    this.screenButton = new ToolbarButton('/static/extensions/jitsi/common/icons/screen-off.svg');
+    this.screenButton = new ToolbarButton('/static/extensions/jitsi/common/icons/screen-off.svg', false);
+    this.screenButton.registerDom(document.getElementById('jitsi-screen'));
     this.screenButton.registerOnClick(() => {
       if (this.isScreenSharingOn) {
         this.screenButton.changeIcon('/static/extensions/jitsi/common/icons/screen-off.svg');

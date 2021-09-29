@@ -3,7 +3,7 @@
 #jitsi-container {}
 #jitsi-remote-container {}
 #jitsi-local-container {
-  background-color: saddlebrown;
+  /* background-color: saddlebrown; */
 }
 .jitsi-audio {
   display: none;
@@ -124,6 +124,7 @@
   height: 20px;
   margin: 10px;
   background-color: #DDD;
+  display: none;
 }
 
 .volume-visualizer::before {
@@ -140,41 +141,6 @@
 </style>
 <div class="jitsi-container" id='jitsi-container'>
   <div class='jitsi-remote-container' id='jitsi-remote-container'>
-    <!-- Examples for User state -->
-    <div class='jitsi-user-container active' id=''>
-      <div class='jitsi-user-loading'></div>
-      <div class='jitsi-user-audio jitsi-user-audio--close'></div>
-      <div class='jitsi-user-video jitsi-user-video--close'></div>
-      <div class='jitsi-user-name'>name</div>
-    </div>
-
-    <div class='jitsi-user-container' id=''>
-      <div class='jitsi-user-loading'></div>
-      <div class='jitsi-user-video'></div>
-      <div class='jitsi-user-audio'></div>
-      <div class='jitsi-user-name'>name</div>
-    </div>
-
-    <div class='jitsi-user-container active' id=''>
-      <div class='jitsi-user-loading'></div>
-      <div class='jitsi-user-video'></div>
-      <div class='jitsi-user-audio active'></div>
-      <div class='jitsi-user-name'>name</div>
-    </div>
-
-    <div class='jitsi-user-container active' id=''>
-      <div class='jitsi-user-loading'></div>
-      <div class='jitsi-user-video'></div>
-      <div class='jitsi-user-audio active'></div>
-      <div class='jitsi-user-name'>name</div>
-    </div>
-
-    <div class='jitsi-user-container active' id=''>
-      <div class='jitsi-user-loading'></div>
-      <div class='jitsi-user-video'></div>
-      <div class='jitsi-user-audio active'></div>
-      <div class='jitsi-user-name'>name</div>
-    </div>
 
   </div>
   <div class='jitsi-local-container' id='jitsi-local-container'>

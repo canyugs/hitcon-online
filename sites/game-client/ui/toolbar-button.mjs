@@ -90,6 +90,10 @@ class ToolbarButton {
       });
     }
 
+    if (this.dom && this.dom.getElementsByTagName('img').length > 0) {
+      this.dom.getElementsByTagName('img')[0].src = this.iconSrc;
+    }
+
     if (this.isVisible) {
       this.dom.style.display = null;
     } else {

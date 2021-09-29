@@ -79,7 +79,7 @@ class JitsiHandler {
    * Create local track. This method would drop all current local tracks.
    * @param isWebcam Whether the video stream should be the webcam or desktop sharing.
    */
-  createLocalTracks(isWebcam = true) {
+  async createLocalTracks(isWebcam = true) {
     if (!isWebcam && !JitsiMeetJS.isDesktopSharingEnabled()) {
       alert('Screen sharing is not enabled.');
     }
@@ -87,8 +87,10 @@ class JitsiHandler {
     this.isWebcam = isWebcam;
 
     // Drop the current local tracks.
-    for (const track of this.localTracks) {
-      this.room.removeTrack(track);
+    try {
+      await Promise.all(this.localTracks.map(track => track.dispose()));
+    } catch (e) {
+      console.error(e);
     }
     this.localTracks = [];
     $('#jitsi-local').empty();
@@ -154,36 +156,29 @@ class JitsiHandler {
 
     if ($(`#jitsi-${participantId}-container`).length === 0) {
       $('#jitsi-remote-container').append(`
-        <div id='jitsi-${participantId}-container'>
-          <div id='jitsi-${participantId}-status-container' class='jitsi-status-container'>
-            <img src='/static/extensions/jitsi/common/icons/microphone-off.svg' data-type='audio' />
-            <img src='/static/extensions/jitsi/common/icons/camera-off.svg' data-type='video' />
-            <div id="volume-visualizer-${participantId}" class="volume-visualizer"></div>
-          </div>
-          <div id='jitsi-${participantId}-volume-meter' class='jitsi-volume-meter'></div>
-          <p id='${participantId}-text'>${this.participantsInfo[participantId]._displayName}</p>
+        <div class='jitsi-user-container active' id='jitsi-${participantId}-container'>
+          <div class='jitsi-user-loading'></div>
+          <div class='jitsi-user-video'></div>
+          <div class='jitsi-user-audio'></div>
+          <div class='jitsi-user-name' id='jitsi-${participantId}-user-name'>${this.participantsInfo[participantId]._displayName}</div>
         </div>
       `);
     }
 
     if (track.getType() !== 'audio') {
-      $(`#jitsi-${participantId}-container`).append(`
-        <div id='${track.getId()}'>
+      $(`#jitsi-${participantId}-container > .jitsi-user-video`).append(`
           <video autoplay='1' id='${trackId}' class='jitsi-remote-video'></video>
-        </div>
       `);
     } else {
-      $(`#jitsi-${participantId}-container`).append(`
-        <div id='${track.getId()}' class='jitsi-audio'>
-          <audio autoplay='1' id='${trackId}' />
-        </div>
+      $(`#jitsi-${participantId}-container > .jitsi-user-audio`).append(`
+          <audio autoplay='1' id='${trackId}' class='jitsi-audio' />
       `);
     }
     track.attach($(`#${trackId}`)[0]);
     if (track.isMuted()) {
-      $(`#jitsi-${participantId}-status-container > [data-type=${track.getType()}]`).show();
+      $(`#jitsi-${participantId}-container > .jitsi-user-${track.getType()}`).addClass(`jitsi-user-${track.getType()}--close`);
     } else {
-      $(`#jitsi-${participantId}-status-container > [data-type=${track.getType()}]`).hide();
+      $(`#jitsi-${participantId}-container > .jitsi-user-${track.getType()}`).removeClass(`jitsi-user-${track.getType()}--close`);
     }
   }
 
@@ -198,7 +193,7 @@ class JitsiHandler {
       // console.error(e);
     }
 
-    $(`#${track.getId()}`).remove();
+    $(`#${participantId}${track.getType()}${track.getId()}`).remove();
   }
 
   /**
@@ -211,9 +206,9 @@ class JitsiHandler {
     // Check if this is a remote track
     if (participantId && (participantId in this.remoteTracks)) {
       if (track.isMuted()) {
-        $(`#jitsi-${participantId}-status-container > [data-type=${track.getType()}]`).show();
+        $(`#jitsi-${participantId}-container > .jitsi-user-${track.getType()}`).addClass(`jitsi-user-${track.getType()}--close`);
       } else {
-        $(`#jitsi-${participantId}-status-container > [data-type=${track.getType()}]`).hide();
+        $(`#jitsi-${participantId}-container > .jitsi-user-${track.getType()}`).removeClass(`jitsi-user-${track.getType()}--close`);
       }
     }
   }
@@ -249,7 +244,7 @@ class JitsiHandler {
         // It seems that we can safely ignore the error.
         // console.error(e);
       }
-      $(`#${tracks[i].getId()}`).remove();
+      $(`#${id}${tracks[i].getType()}${tracks[i].getId()}`).remove();
     }
 
     $(`#jitsi-${id}-container`).remove();
@@ -261,7 +256,7 @@ class JitsiHandler {
    * @param {String} displayName The new display name.
    */
   onDisplayNameChanged(id, displayName) {
-    $(`#${id}-text`).text(displayName);
+    $(`#jitsi-${id}-user-name`).text(displayName);
   }
 
   /**
