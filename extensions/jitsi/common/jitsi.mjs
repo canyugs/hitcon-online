@@ -115,12 +115,13 @@ class JitsiHandler {
     console.log("onLocalTracks", tracks);
     this.localTracks = tracks;
     for (let i = 0; i < this.localTracks.length; i++) {
-      console.log(this.localTracks[i].getType());
       if (this.localTracks[i].getType() !== 'audio') {
         $('#jitsi-local').append(`<video autoplay='1' id='localVideo${i}' class='jitsi-local-video' />`);
         this.localTracks[i].attach($(`#localVideo${i}`)[0]);
       } else {
         $('#jitsi-local').append(`<audio autoplay='1' muted='true' id='localAudio${i}' class='jitsi-audio' />`);
+        $('#jitsi-local').append(`<div id="volume-visualizer-local" class="volume-visualizer"></div>`);
+        this.setLocalAudioVolumeMeter($(`#volume-visualizer-local`)[0]);
         this.localTracks[i].attach($(`#localAudio${i}`)[0]);
       }
 
@@ -177,9 +178,6 @@ class JitsiHandler {
           <audio autoplay='1' id='${trackId}' />
         </div>
       `);
-      if (!track.isMuted()) {
-        this.setAudioVolumeMeter($(`#${trackId}`)[0], participantId);
-      }
     }
     track.attach($(`#${trackId}`)[0]);
     if (track.isMuted()) {
@@ -191,18 +189,32 @@ class JitsiHandler {
 
   onRemoteTrackRemove(track) {
     console.log('track remove', track.getId());
+    const participantId = track.getParticipantId();
     try {
-      track.detach($(`#${id}${track.getType()}${track.getId()}`));
+      track.detach($(`#${participantId}${track.getType()}${track.getId()}`));
     } catch (e) {
       // An error is expected: https://github.com/jitsi/lib-jitsi-meet/issues/1054
       // It seems that we can safely ignore the error.
       // console.error(e);
     }
-    $(`#${track.getId()}`).remove();
 
-    if (track.type === 'audio' && !track.isMuted() && (track.getParticipantId() in this.volumeMeters)) {
-      clearInterval(this.volumeMeters[track.getParticipantId()]);
-      delete this.volumeMeters[track.getParticipantId()];
+    $(`#${track.getId()}`).remove();
+  }
+
+  /**
+   * Handle mute or unmute from the remote track
+   * @param {JitsiTrack} track
+   */
+  onTrackMute(track) {
+    console.log(`${track.getType()} - ${track.isMuted()} ${track.getParticipantId()}`);
+    const participantId = track.getParticipantId();
+    // Check if this is a remote track
+    if (participantId && (participantId in this.remoteTracks)) {
+      if (track.isMuted()) {
+        $(`#jitsi-${participantId}-status-container > [data-type=${track.getType()}]`).show();
+      } else {
+        $(`#jitsi-${participantId}-status-container > [data-type=${track.getType()}]`).hide();
+      }
     }
   }
 
@@ -239,9 +251,6 @@ class JitsiHandler {
       }
       $(`#${tracks[i].getId()}`).remove();
     }
-
-    clearInterval(this.volumeMeters[id]);
-    delete this.volumeMeters[id];
 
     $(`#jitsi-${id}-container`).remove();
   }
@@ -282,6 +291,7 @@ class JitsiHandler {
         JitsiMeetJS.events.conference.PHONE_NUMBER_CHANGED,
         () => console.log(`${this.room.getPhoneNumber()} - ${this.room.getPhonePin()}`));
 
+    //this.room.on(JitsiMeetJS.events.conference.MESSAGE_RECEIVED, this.setRemoteVolumeMeter.bind(this));
     // This is required yet not documented :(
     // https://github.com/jitsi/lib-jitsi-meet/issues/1333
     this.room.setReceiverVideoConstraint(720);
@@ -303,31 +313,6 @@ class JitsiHandler {
    */
   onDeviceListChanged(devices) {
     console.info('current devices', devices);
-  }
-
-  /**
-   * Handle mute or unmute from the remote track
-   * @param {JitsiTrack} track
-   */
-  onTrackMute(track) {
-    console.log(`${track.getType()} - ${track.isMuted()} ${track.getParticipantId()}`);
-    const participantId = track.getParticipantId();
-    // Check if this is a remote track
-    if (participantId && (participantId in this.remoteTracks)) {
-      if (track.isMuted()) {
-        $(`#jitsi-${participantId}-status-container > [data-type=${track.getType()}]`).show();
-        if (track.getType() === 'audio') {
-          clearInterval(this.volumeMeters[participantId]);
-          delete this.volumeMeters[participantId];
-        }
-      } else {
-        $(`#jitsi-${participantId}-status-container > [data-type=${track.getType()}]`).hide();
-        if (track.getType() === 'audio') {
-          const trackId = participantId + track.getType() + track.getId();
-          this.setAudioVolumeMeter($(`#${trackId}`)[0], participantId);
-        }
-      }
-    }
   }
 
   /**
@@ -405,12 +390,16 @@ class JitsiHandler {
     JitsiMeetJS.mediaDevices.setAudioOutputDevice(selected.value);
   }
 
-  setAudioVolumeMeter(element, participantId) {
+  /**
+   * Start the local volume meter.
+   * @param volumeVisualizer The element of the volume meter.
+   */
+  async setLocalAudioVolumeMeter(volumeVisualizer) {
     let volumeCallback;
-    const volumeVisualizer = document.getElementById(`volume-visualizer-${participantId}`);
     try {
+      const audioStream = await navigator.mediaDevices.getUserMedia({audio: true, video: false});
       const audioContext = new AudioContext();
-      const audioSource = audioContext.createMediaElementSource(element);
+      const audioSource = audioContext.createMediaStreamSource(audioStream);
       const analyser = audioContext.createAnalyser();
       analyser.fftSize = 512;
       analyser.minDecibels = -127;
@@ -423,20 +412,35 @@ class JitsiHandler {
         const averageVolume = volumes.reduce((a, b) => a + b, 0) / volumes.length;
         volumeVisualizer.style.setProperty(
           '--volume',
-          ((averageVolume - 40) * 100 / (analyser.maxDecibels - analyser.minDecibels)) + '%');
+          ((averageVolume - 20) * 100 / (analyser.maxDecibels - analyser.minDecibels)) + '%');
+        this.room?.sendTextMessage(averageVolume.toString());
       };
     } catch (e) {
       console.error(e);
     }
 
-    this.volumeMeters[participantId] = setInterval(() => {
+
+    this.volumeMeterIntervalId = setInterval(() => {
       try {
         volumeCallback();
       } catch (e) {
         console.error(e);
-        clearInterval(this.volumeMeters[participantId]);
+        clearInterval(this.volumeMeterIntervalId);
       }
-    }, 100);
+    }, 200);
+  }
+
+  /**
+   * Set the volume meter of the remote participant.
+   */
+  setRemoteVolumeMeter(id, text, ts) {
+    console.log('setRemoteVolumeMeter', id, text);
+    const element = document.getElementById('volume-visualizer-' + id);
+    if (element != null && element.value == '') {
+      element.style.setProperty(
+        '--volume',
+        ((parseFloat(text) - 20) * 100 / (analyser.maxDecibels - analyser.minDecibels)) + '%');
+    }
   }
 }
 export default JitsiHandler;
