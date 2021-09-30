@@ -2,6 +2,7 @@
 @import url('utilpanel.css');
 @import url('user-info.css');
 @import url('notification.css');
+@import url('context-menu.css');
 
 html, body {
   margin: 0px;
@@ -142,40 +143,4 @@ body {
 
 #error-modal > div {
   width: 50%;
-}
-
-/* Context Menu */
-.context-menu {
-  padding: 0;
-  margin: 0;
-  position: absolute;
-  z-index: 1000;
-  display: none;
-}
-.context-menu-list {
-  display: flex;
-  flex-direction: column;
-  background-color: #fff;
-  border-radius: 3px;
-  box-shadow: 0 10px 20px rgb(64 64 64 / 5%);
-  padding: 3px 0;
-  margin: 0;
-  list-style: none;
-}
-.context-menu-list > li > a {
-  border: 0;
-  padding: 6px 15px 6px 15px;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  position: relative;
-  text-decoration: unset;
-  color: #000;
-  font-weight: 500;
-  transition: 0.15s linear;
-  box-sizing: border-box;
-}
-.context-menu-list > li > a:hover {
-  background-color: #f1f3f7;
-  color: #4b00ff;
 }
