@@ -45,7 +45,7 @@ class MapRenderer {
     this.viewerPosition = new MapCoord('', NaN, NaN);
     this.viewportFollow = null; // will be initialized in this.initializeViewerPosition()
 
-    window.addEventListener('gameStart', this.initializeViewerPosition.bind(this));
+    window.addEventListener('dataReady', this.initializeViewerPosition.bind(this));
 
     /**
      * @member {Array} customizedLayers - Customized layer that needs to be rendered.

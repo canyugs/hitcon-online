@@ -56,7 +56,7 @@ class InputManager {
     });
 
     this.gameClient = null;
-    window.addEventListener('gameStart', (event) => {
+    window.addEventListener('dataReady', (event) => {
       this.gameClient = event.detail.gameClient;
       this.registerMapMove((direction) => {
         this.gameClient.onDirection(direction);
