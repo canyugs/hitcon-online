@@ -30,7 +30,7 @@ class ContextMenu {
     $('body').on('click', this.hideMenu);
 
     // Get current player
-    window.addEventListener('gameStart', (d) => {
+    window.addEventListener('dataReady', (d) => {
       this.playerInfo = d.detail.gameClient.playerInfo;
     });
   }

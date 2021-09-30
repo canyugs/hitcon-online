@@ -262,6 +262,12 @@ absolute URL.
 
         game.mainUI.createContextMenu(game.gameState, game.mapRenderer);
 
+        window.dispatchEvent(new CustomEvent(
+          'uiReady', {
+            detail: {mainUI: game.mainUI},
+          },
+        ));
+
         function onGameTick () {
           game.mapRenderer.draw();
           requestAnimationFrame(onGameTick);

@@ -46,7 +46,7 @@ class MainUI {
     this.mapRenderer = undefined;
 
     window.addEventListener('resize', (evt) => { this._onResize(evt); });
-    window.addEventListener('gameStart', (evt) => { this._onResize(evt); });
+    window.addEventListener('uiReady', (evt) => { this._onResize(evt); });
 
     // Cache the common used DOM elements.
     this.stagingDom = document.getElementById(STAGING_ID);

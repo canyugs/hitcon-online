@@ -113,7 +113,6 @@ class GameClient {
       return;
     }
     this.playerInfo = Player.fromObject(msg.playerData);
-    console.log('Game started.');
 
     this.gameStarted = true;
     this.gameState.registerOnPlayerUpdate((msg) => {
@@ -125,7 +124,7 @@ class GameClient {
     });
 
     window.dispatchEvent(new CustomEvent(
-        'gameStart', {
+        'dataReady', {
           detail: {gameClient: this},
         },
     ));
