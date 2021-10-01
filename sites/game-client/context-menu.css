@@ -6,7 +6,7 @@
   border-radius: 18px;
   display:flex;
   flex-direction: column;
-  z-index: 1000;
+  z-index: 99;
   margin: 15% auto;
   justify-content: center;
   padding: 24px 23px 20px 20px;
