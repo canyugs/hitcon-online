@@ -3,10 +3,8 @@
 
 import {MAP_CELL_SIZE} from '/static/sites/game-client/map-renderer.mjs';
 
-const CONTEXT_MENU_OTHER_DIV = 'context-menu-other';
-const CONTEXT_MENU_LIST_OTHER_UL = 'context-menu-list-other';
-const CONTEXT_MENU_SELF_DIV = 'context-menu-self';
-const CONTEXT_MENU_LIST_SELF_UL = 'context-menu-list-self';
+const CONTEXT_MENU_OTHER = 'context-menu-other';
+const CONTEXT_MENU_SELF = 'context-menu-self';
 
 /**
  * Maintain the state of the context menu for players.
@@ -40,12 +38,8 @@ class ContextMenu {
    * @param {Event} e event
    */
   canvasOnContextMenu(e) {
-
     // Check if the user actually clicked on a player.
-    if (!this.findFocusedUser(e.pageX, e.pageY)) {
-      return;
-    }
-
+    this.focusedPlayer = this.findFocusedUser(e.pageX, e.pageY);
     e.preventDefault();
     this.onContextMenu(e);
   }
@@ -60,7 +54,7 @@ class ContextMenu {
       return;
     }
 
-    this.focusedPlayer = $(e.target).attr('data-player-context-menu');
+    this.focusedPlayer = this.gameState.getPlayer($(e.target).attr('data-player-context-menu'));
 
     e.preventDefault();
     this.onContextMenu(e);
@@ -72,27 +66,33 @@ class ContextMenu {
    */
   onContextMenu(e) {
     // Identify whether the menu is for the user itself or other players.
-    // Stop if the menu is empty.
-    let div;
-    if (this.focusedPlayer === this.playerInfo.playerID && this.selfMenu.size > 0) {
-      div = CONTEXT_MENU_SELF_DIV;
-    } else if (this.focusedPlayer !== this.playerInfo.playerID && this.othersMenu.size > 0) {
-      div = CONTEXT_MENU_OTHER_DIV;
+    // Stop if the menu is empty or no focused player found.
+    let elementPrefix;
+    if (this.focusedPlayer == null) {
+      return;
+    } else if (this.focusedPlayer.playerID === this.playerInfo.playerID && this.selfMenu.size > 0) {
+      elementPrefix = CONTEXT_MENU_SELF;
+    } else if (this.focusedPlayer.playerID !== this.playerInfo.playerID && this.othersMenu.size > 0) {
+      elementPrefix = CONTEXT_MENU_OTHER;
     } else {
       this.focusedPlayer = null;
       return;
     }
 
-    let menu = document.getElementById(div);
+    let menu = document.getElementById(elementPrefix);
 
     // If the menu is already opened, closed it.
-    if (document.getElementById(CONTEXT_MENU_SELF_DIV).style.display == "block" ||
-        document.getElementById(CONTEXT_MENU_OTHER_DIV).style.display == "block") {
+    if (document.getElementById(CONTEXT_MENU_SELF).style.display == "flex" ||
+        document.getElementById(CONTEXT_MENU_OTHER).style.display == "flex") {
       this.hideMenu();
     }
 
+    console.log(this.focusedPlayer);
+    document.getElementById(elementPrefix + '-name').textContent = this.focusedPlayer.displayName;
+    document.getElementById(elementPrefix + '-role').textContent = 'unknown role';
+
     // Open the menu
-    menu.style.display = 'block';
+    menu.style.display = 'flex';
     menu.style.left = e.pageX + "px";
     menu.style.top = e.pageY + "px";
   }
@@ -101,16 +101,15 @@ class ContextMenu {
    * Hide menu
    */
   hideMenu() {
-    document.getElementById(CONTEXT_MENU_SELF_DIV).style.display = "none";
-    document.getElementById(CONTEXT_MENU_OTHER_DIV).style.display = "none";
-    this.focusedPlayer = null;
+    document.getElementById(CONTEXT_MENU_SELF).style.display = "none";
+    document.getElementById(CONTEXT_MENU_OTHER).style.display = "none";
   }
 
   /**
    * Find the player at the specific position in the page, and assign to this.focusedPlayer
    * @param pageX Event.pageX
    * @param pageY Event.pageX
-   * @returns {Boolean} Whether there exist a player at the position.
+   * @returns {Player} The player object at the position.
    */
   findFocusedUser(pageX, pageY) {
     const x = pageX - this.mapRenderer.canvas.offsetLeft;
@@ -124,47 +123,56 @@ class ContextMenu {
         canvasCoordinate.y >= y &&
         canvasCoordinate.y - MAP_CELL_SIZE <= y
       ) {
-        this.focusedPlayer = player.playerID;
-        return true;
+        return player;
       }
     }
-    return false;
+    return null;
   }
 
 
   /**
    * Add a item to the context menu for other player.
    * @param {string} name The displayed name of the item.
+   * @param {string} icon The displayed icon of the item.
    * @param {Function} callback A callback function which takes a Player object.
    */
-  addToOthersMenu(name, callback) {
+  addToOthersMenu(name, icon, callback) {
     this.othersMenu.set(name, callback);
 
-    const newItemDOM = document.createElement('li');
+    const newItemDOM = document.createElement('button');
     newItemDOM.setAttribute('id', `context-menu-others-${this.othersMenu.size}`);
-    newItemDOM.innerHTML = `<a href="#">${name}</a></li>`;
+    newItemDOM.setAttribute('class', 'context-menu-action');
+    newItemDOM.innerHTML = `
+      <div>${name}</div>
+      <img src="${icon}" alt="">
+    `;
     newItemDOM.addEventListener('click', () => {
       this.handleCallback(name, 'others');
     });
 
-    document.getElementById(CONTEXT_MENU_LIST_OTHER_UL).appendChild(newItemDOM);
+    document.getElementById(CONTEXT_MENU_OTHER + '-actions').appendChild(newItemDOM);
   }
   /**
    * Add a item to the context menu for oneself.
    * @param {string} name The displayed name of the item.
+   * @param {string} icon The displayed icon of the item.
    * @param {Function} callback A callback function which takes a Player object.
    */
-  addToSelfMenu(name, callback) {
+  addToSelfMenu(name, icon, callback) {
     this.selfMenu.set(name, callback);
 
-    const newItemDOM = document.createElement('li');
+    const newItemDOM = document.createElement('button');
     newItemDOM.setAttribute('id', `context-menu-self-${this.selfMenu.size}`);
-    newItemDOM.innerHTML = `<a href="#">${name}</a></li>`;
+    newItemDOM.setAttribute('class', 'context-menu-action');
+    newItemDOM.innerHTML = `
+      <div>${name}</div>
+      <img src="${icon}" alt="">
+    `;
     newItemDOM.addEventListener('click', () => {
       this.handleCallback(name, 'self');
     });
 
-    document.getElementById(CONTEXT_MENU_LIST_SELF_UL).appendChild(newItemDOM);
+    document.getElementById(CONTEXT_MENU_SELF + '-actions').appendChild(newItemDOM);
   }
 
   /**

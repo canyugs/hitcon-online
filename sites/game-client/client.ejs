@@ -84,78 +84,31 @@ absolute URL.
       <!-- used to block out the rest of the stuffs when model is visible -->
       <div id="modal-background" class="modal-background"></div>
       <div id="modal-container" class="modal-container"></div>
-      <!-- context menu -->
-      <div id="context-menu-other">
-        <div class="context-menu-user">
-          <div class="context-menu-user-picture">
-            <img src="https://via.placeholder.com/56x61">
-          </div>
-          <div class="context-menu-user-name">Beverly Bailey</div>
-          <div class="context-menu-user-role">與會者</div>
-        </div>
-        <div class="context-menu-action"></div>
-      </div>
 
+      <!-- context menu -->
       <div class="context-menu" id="context-menu-other">
         <div class="context-menu-user">
           <img class="context-menu-picture" src="https://via.placeholder.com/56x61">
           <div class="context-menu-user-info">
-            <div class="context-menu-user-name">Beverly Bailey</div>
-            <div class="context-menu-user-role">與會者</div>
+            <div class="context-menu-user-name" id="context-menu-other-name">Beverly Bailey</div>
+            <div class="context-menu-user-role" id="context-menu-other-role">與會者</div>
           </div>
         </div>
-        <div class="context-menu-actions">
-          <button class="context-menu-action">
-            <div>私人訊息</div>
-            <!-- TODO change real icon -->
-            <img src="https://via.placeholder.com/15x15" alt="">
-          </button>
-
-          <button class="context-menu-action">
-            <div>跟隨</div>
-            <img src="https://via.placeholder.com/15x15" alt="">
-          </button>
-          <button class="context-menu-action">
-            <div>給予點數</div>
-            <img src="https://via.placeholder.com/15x15" alt="">
-          </button>
-          <button class="context-menu-action">
-            <div>說再見</div>
-            <img src="https://via.placeholder.com/15x15" alt="">
-          </button>
-        </div>
-
+        <div class="context-menu-actions" id="context-menu-other-actions"></div>
       </div>
+
       <div class="context-menu" id="context-menu-self">
         <div class="context-menu-user">
           <img class="context-menu-picture" src="https://via.placeholder.com/56x61">
           <div class="context-menu-user-info">
-            <div class="context-menu-user-name">Beverly Bailey</div>
-            <div class="context-menu-user-role">與會者</div>
+            <div class="context-menu-user-name" id="context-menu-self-name">Beverly Bailey</div>
+            <div class="context-menu-user-role" id="context-menu-self-role">與會者</div>
           </div>
         </div>
-        <div class="context-menu-actions">
-          <button class="context-menu-action">
-            <div>私人訊息</div>
-            <!-- TODO change real icon -->
-            <img src="https://via.placeholder.com/15x15" alt="">
-          </button>
-
-          <button class="context-menu-action">
-            <div>跟隨</div>
-            <img src="https://via.placeholder.com/15x15" alt="">
-          </button>
-          <button class="context-menu-action">
-            <div>給予點數</div>
-            <img src="https://via.placeholder.com/15x15" alt="">
-          </button>
-          <button class="context-menu-action">
-            <div>說再見</div>
-            <img src="https://via.placeholder.com/15x15" alt="">
-          </button>
-        </div>
+        <div class="context-menu-actions" id="context-menu-self-actions"></div>
       </div>
 
+      <!-- User overlay -->
       <div class="user user--overlay">
         <div class="user-profile">
           <div class="user-name">eevee</div>
