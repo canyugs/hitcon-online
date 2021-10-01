@@ -3,11 +3,13 @@
 
 import {MapCoord} from '/static/common/maplib/map.mjs';
 
-const mapCellSize = 32; // pixel
+const MAP_CELL_SIZE = 32; // pixel
 const fontStyle = '12px serif';
 
 const LAYER_PLAYER_IMAGE = {zIndex: 10, layerName: 'playerImage'};
 const LAYER_PLAYER_NAME = {zIndex: 15, layerName: 'playerName'};
+
+const OUTER_SPACE_TILE = ['ground', 'H']; // the parameters of GraphicAsset.getTile()
 
 /**
  * MapRender renders the map onto the a canvas element.
@@ -105,14 +107,8 @@ class MapRenderer {
   setViewerPosition(coord, dx, dy) {
     dx ??= 0;
     dy ??= 0;
-    const {x, y} = coord;
-    const mapSize = this.map.getMapSize(coord.mapName);
-    const minX = (this.canvas.width / 2) / mapCellSize;
-    const maxX = mapSize.width - minX;
-    const minY = (this.canvas.height / 2) / mapCellSize;
-    const maxY = mapSize.height - minY;
-    this.viewerPosition.x = Math.min(Math.max(x + dx, minX), maxX);
-    this.viewerPosition.y = Math.min(Math.max(y + dy, minY), maxY);
+    this.viewerPosition.x = coord.x + dx;
+    this.viewerPosition.y = coord.y + dy;
     this.viewerPosition.mapName = coord.mapName;
   }
 
@@ -125,8 +121,8 @@ class MapRenderer {
    */
   canvasToMapCoordinate(x, y) {
     const canvasCenter = {x: this.canvas.width / 2, y: this.canvas.height / 2};
-    const newX = this.viewerPosition.x + (x - canvasCenter.x) / mapCellSize;
-    const newY = this.viewerPosition.y - (y - canvasCenter.y) / mapCellSize;
+    const newX = this.viewerPosition.x + (x - canvasCenter.x) / MAP_CELL_SIZE;
+    const newY = this.viewerPosition.y - (y - canvasCenter.y) / MAP_CELL_SIZE;
     return new MapCoord(this.viewerPosition.mapName, newX, newY);
   }
 
@@ -140,8 +136,8 @@ class MapRenderer {
     const {x, y} = coord;
     const canvasCenter = {x: this.canvas.width / 2, y: this.canvas.height / 2};
     return {
-      x: Math.floor(canvasCenter.x + (x - this.viewerPosition.x) * mapCellSize),
-      y: Math.floor(canvasCenter.y - (y - this.viewerPosition.y) * mapCellSize),
+      x: Math.floor(canvasCenter.x + (x - this.viewerPosition.x) * MAP_CELL_SIZE),
+      y: Math.floor(canvasCenter.y - (y - this.viewerPosition.y) * MAP_CELL_SIZE),
     };
   }
 
@@ -266,7 +262,23 @@ class MapRenderer {
 
     for (let mapY = firstCellMapCoordInt.y; mapY <= lastCellMapCoordInt.y; ++mapY) {
       for (let mapX = firstCellMapCoordInt.x; mapX <= lastCellMapCoordInt.x; ++mapX) {
-        if (mapX < 0 || mapX >= mapSize.width || mapY < 0 || mapY >= mapSize.height) continue;
+        if (mapX < 0 || mapX >= mapSize.width || mapY < 0 || mapY >= mapSize.height) {
+          // out of bound
+          const renderInfo = this.map.graphicAsset.getTile(...OUTER_SPACE_TILE);
+          const canvasCoordinate = this.mapToCanvasCoordinate(new MapCoord(this.viewerPosition.mapName, mapX, mapY));
+          this.ctx.drawImage(
+            renderInfo.image,
+            renderInfo.srcX,
+            renderInfo.srcY,
+            renderInfo.srcWidth,
+            renderInfo.srcHeight,
+            canvasCoordinate.x,
+            canvasCoordinate.y - renderInfo.srcHeight,
+            MAP_CELL_SIZE,
+            MAP_CELL_SIZE,
+          );
+          continue;
+        }
         const coord = new MapCoord(this.viewerPosition.mapName, mapX, mapY);
         fn(coord);
       }
@@ -291,8 +303,8 @@ class MapRenderer {
         renderInfo.srcHeight,
         canvasCoordinate.x,
         canvasCoordinate.y - renderInfo.srcHeight,
-        mapCellSize,
-        mapCellSize,
+        MAP_CELL_SIZE,
+        MAP_CELL_SIZE,
     );
   }
 
@@ -304,11 +316,11 @@ class MapRenderer {
   _drawOneCharacterImage(player) {
     const {mapCoord, displayChar, facing} = player.getDrawInfo();
     const canvasCoordinate = this.mapToCanvasCoordinate(mapCoord);
-    const topLeftCanvasCoord = {x: canvasCoordinate.x, y: canvasCoordinate.y - mapCellSize};
+    const topLeftCanvasCoord = {x: canvasCoordinate.x, y: canvasCoordinate.y - MAP_CELL_SIZE};
     // check if this player is out of viewport
-    if (topLeftCanvasCoord.x < -mapCellSize ||
+    if (topLeftCanvasCoord.x < -MAP_CELL_SIZE ||
         topLeftCanvasCoord.x >= this.canvas.width ||
-        topLeftCanvasCoord.y < -mapCellSize ||
+        topLeftCanvasCoord.y < -MAP_CELL_SIZE ||
         topLeftCanvasCoord.y >= this.canvas.height) {
       return;
     }
@@ -322,8 +334,8 @@ class MapRenderer {
         renderInfo.srcHeight,
         topLeftCanvasCoord.x,
         topLeftCanvasCoord.y,
-        mapCellSize,
-        mapCellSize,
+        MAP_CELL_SIZE,
+        MAP_CELL_SIZE,
     );
   }
 
@@ -440,3 +452,8 @@ class MapRenderer {
 }
 
 export default MapRenderer;
+
+export {
+  MapRenderer,
+  MAP_CELL_SIZE,
+};

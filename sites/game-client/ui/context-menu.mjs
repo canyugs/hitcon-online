@@ -1,12 +1,12 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
+import {MAP_CELL_SIZE} from '/static/sites/game-client/map-renderer.mjs';
+
 const CONTEXT_MENU_OTHER_DIV = 'context-menu-other';
 const CONTEXT_MENU_LIST_OTHER_UL = 'context-menu-list-other';
 const CONTEXT_MENU_SELF_DIV = 'context-menu-self';
 const CONTEXT_MENU_LIST_SELF_UL = 'context-menu-list-self';
-
-const mapCellSize = 32;
 
 /**
  * Maintain the state of the context menu for players.
@@ -120,9 +120,9 @@ class ContextMenu {
       const canvasCoordinate = this.mapRenderer.mapToCanvasCoordinate(mapCoord);
 
       if (canvasCoordinate.x <= x &&
-        canvasCoordinate.x + mapCellSize >= x &&
+        canvasCoordinate.x + MAP_CELL_SIZE >= x &&
         canvasCoordinate.y >= y &&
-        canvasCoordinate.y - mapCellSize <= y
+        canvasCoordinate.y - MAP_CELL_SIZE <= y
       ) {
         this.focusedPlayer = player.playerID;
         return true;
