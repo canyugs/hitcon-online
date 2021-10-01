@@ -1,6 +1,7 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
+import {MAP_CELL_SIZE} from '/static/sites/game-client/map-renderer.mjs';
 import Overlay from './overlay.mjs';
 
 const MAP_RENDERER_DIV = 'map-render-overlay';
@@ -21,9 +22,11 @@ class MapRendererOverlay extends Overlay {
    * @param {UIEvent} event
    */
   onResize(event) {
-    // TODO: more detailed tweak
-    this.canvas.height = 32 * 15; // 15 tiles
-    this.canvas.width = 32 * 20; // 20 tiles
+    const widthCount = Math.floor(this.dom.clientWidth / MAP_CELL_SIZE);
+    const heightCount = Math.floor(this.dom.clientHeight / MAP_CELL_SIZE);
+
+    this.canvas.height = 32 * heightCount;
+    this.canvas.width = 32 * widthCount;
   }
 };
 
