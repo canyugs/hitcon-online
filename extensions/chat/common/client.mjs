@@ -34,6 +34,9 @@ class Client {
 
   async gameStart() {
     this.tab = new ChatTab(this.helper.mainUI);
+    this.helper.mainUI.contextMenu.addToOthersMenu('Private Chat', '/static/extensions/chat/common/chat.svg', (player) => {
+      startPrivateMessage(player.playerID);
+    });
   }
 
   /**

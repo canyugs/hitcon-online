@@ -19,9 +19,9 @@ class Client {
   }
 
   async gameStart() {
-    this.helper.mainUI.contextMenu.addToOthersMenu('Transfer Points', (playerID) => {
+    this.helper.mainUI.contextMenu.addToOthersMenu('Transfer Points', 'https://via.placeholder.com/15x15', (player) => {
       // TODO: use modal or something else instead of prompt.
-      this.transferPoints(parseInt(prompt("How many points to transfer:", 0)), playerID);
+      this.transferPoints(parseInt(prompt("How many points to transfer:", 0)), player.playerID);
     });
 
     await this.s2c_updatePoints();
