@@ -117,14 +117,17 @@ class JitsiHandler {
     console.log("onLocalTracks", tracks);
     this.localTracks = tracks;
     for (let i = 0; i < this.localTracks.length; i++) {
-      if (this.localTracks[i].getType() !== 'audio') {
+      if (this.localTracks[i].getType() === 'video') {
         $('#jitsi-local').append(`<video autoplay='1' id='localVideo${i}' class='jitsi-local-video' />`);
         this.localTracks[i].attach($(`#localVideo${i}`)[0]);
-      } else {
+      } else if (this.localTracks[i].getType() === 'audio') {
         $('#jitsi-local').append(`<audio autoplay='1' muted='true' id='localAudio${i}' class='jitsi-audio' />`);
         $('#jitsi-local').append(`<div id="volume-visualizer-local" class="volume-visualizer"></div>`);
         this.setLocalAudioVolumeMeter($(`#volume-visualizer-local`)[0]);
         this.localTracks[i].attach($(`#localAudio${i}`)[0]);
+      } else {
+        console.error('Unknown track type:', this.localTracks[i].getType());
+        continue;
       }
 
       // All tracks should be disabled by default (except screen sharing), and enabled upon requested.
