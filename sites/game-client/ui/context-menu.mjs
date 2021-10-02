@@ -11,26 +11,24 @@ const CONTEXT_MENU_SELF = 'context-menu-self';
 */
 class ContextMenu {
   /**
-   *
+   * Initialize the context menu.
+   * @param {GameState} gameState The GameState object.
+   * @param {MapRenderer} mapRenderer The Map Renderer
+   * @param {GameClient} gameClient The GameClient
    */
-  constructor(gameState, mapRenderer) {
+  constructor(gameState, mapRenderer, gameClient) {
     this.gameState = gameState;
     this.mapRenderer = mapRenderer;
     this.othersMenu = new Map();
     this.selfMenu = new Map();
 
     this.focusedPlayer = null;
-    this.playerInfo = null;
+    this.gameClient = gameClient;
 
     // bind the contextmenu and click event.
     $('#mapcanvas').on('contextmenu', this.canvasOnContextMenu.bind(this));
     $('body').on('contextmenu', '[data-player-context-menu]', this.elementOnContextMenu.bind(this));
     $('body').on('click', this.hideMenu);
-
-    // Get current player
-    window.addEventListener('dataReady', (d) => {
-      this.playerInfo = d.detail.gameClient.playerInfo;
-    });
   }
 
   /**
@@ -70,9 +68,9 @@ class ContextMenu {
     let elementPrefix;
     if (this.focusedPlayer == null) {
       return;
-    } else if (this.focusedPlayer.playerID === this.playerInfo.playerID && this.selfMenu.size > 0) {
+    } else if (this.focusedPlayer.playerID === this.gameClient.playerInfo.playerID && this.selfMenu.size > 0) {
       elementPrefix = CONTEXT_MENU_SELF;
-    } else if (this.focusedPlayer.playerID !== this.playerInfo.playerID && this.othersMenu.size > 0) {
+    } else if (this.focusedPlayer.playerID !== this.gameClient.playerInfo.playerID && this.othersMenu.size > 0) {
       elementPrefix = CONTEXT_MENU_OTHER;
     } else {
       this.focusedPlayer = null;
@@ -87,7 +85,6 @@ class ContextMenu {
       this.hideMenu();
     }
 
-    console.log(this.focusedPlayer);
     document.getElementById(elementPrefix + '-name').textContent = this.focusedPlayer.displayName;
     document.getElementById(elementPrefix + '-role').textContent = 'unknown role';
 

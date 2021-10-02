@@ -213,7 +213,7 @@ absolute URL.
 
         game.mainUI.errorModal = new ErrorModal(game.mainUI);
 
-        game.mainUI.createContextMenu(game.gameState, game.mapRenderer);
+        game.mainUI.createContextMenu(game.gameState, game.mapRenderer, game.gameClient);
 
         window.dispatchEvent(new CustomEvent(
           'uiReady', {
