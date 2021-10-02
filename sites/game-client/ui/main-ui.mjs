@@ -110,7 +110,7 @@ class MainUI {
       removeNotification.bind(this, listNode, false)();
     }, timeout);
     listNode.content.timer = timer;
-    console.log(this._msgList)
+    console.log(this._msgList);
   }
 
   /**
@@ -146,11 +146,12 @@ class MainUI {
 
   /**
    * Initiate the context menu.
-   * @param {GameState} gameState - The GameState object.
-   * @param {MapRenderer} mapRenderer
+   * @param {GameState} gameState The GameState object.
+   * @param {MapRenderer} mapRenderer The Map Renderer
+   * @param {GameClient} gameClient The GameClient
    */
-  createContextMenu(gameState, mapRenderer) {
-    this.contextMenu = new ContextMenu(gameState, mapRenderer);
+  createContextMenu(gameState, mapRenderer, gameClient) {
+    this.contextMenu = new ContextMenu(gameState, mapRenderer, gameClient);
   }
 
   // If we want to use individual overlay for meeting
