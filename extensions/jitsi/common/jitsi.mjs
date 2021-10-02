@@ -286,7 +286,8 @@ class JitsiHandler {
         JitsiMeetJS.events.conference.PHONE_NUMBER_CHANGED,
         () => console.log(`${this.room.getPhoneNumber()} - ${this.room.getPhonePin()}`));
 
-    //this.room.on(JitsiMeetJS.events.conference.MESSAGE_RECEIVED, this.setRemoteVolumeMeter.bind(this));
+    this.room.on(JitsiMeetJS.events.conference.PARTICIPANT_PROPERTY_CHANGED, this.setRemoteVolumeMeter.bind(this));
+
     // This is required yet not documented :(
     // https://github.com/jitsi/lib-jitsi-meet/issues/1333
     this.room.setReceiverVideoConstraint(720);
@@ -408,7 +409,7 @@ class JitsiHandler {
         volumeVisualizer.style.setProperty(
           '--volume',
           ((averageVolume - 20) * 100 / (analyser.maxDecibels - analyser.minDecibels)) + '%');
-        this.room?.sendTextMessage(averageVolume.toString());
+        this.room?.setLocalParticipantProperty('volume', this. averageVolume.toString());
       };
     } catch (e) {
       console.error(e);
@@ -428,13 +429,16 @@ class JitsiHandler {
   /**
    * Set the volume meter of the remote participant.
    */
-  setRemoteVolumeMeter(id, text, ts) {
-    console.log('setRemoteVolumeMeter', id, text);
-    const element = document.getElementById('volume-visualizer-' + id);
+  setRemoteVolumeMeter(user, propertyKey, oldPropertyValue, propertyValue) {
+    if (propertyKey !== 'volume') {
+      return;
+    }
+
+    const element = document.getElementById('volume-visualizer-' + user.getId());
     if (element != null && element.value == '') {
       element.style.setProperty(
         '--volume',
-        ((parseFloat(text) - 20) * 100 / (analyser.maxDecibels - analyser.minDecibels)) + '%');
+        ((parseFloat(propertyValue) - 20) * 100 / (analyser.maxDecibels - analyser.minDecibels)) + '%');
     }
   }
 }
