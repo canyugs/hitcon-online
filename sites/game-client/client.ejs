@@ -41,19 +41,20 @@ absolute URL.
         <% }); %>
       </div>
 
-      <div class="notification notification--overlay" id="notification">
+      <div class="notification notification--overlay notification--inactive" id="notification">
         <div class="notification-type">遊戲通知</div>
         <div class="notification-text" id="notification-text"></div>
-        <div class="notification-progress-bar">
-          <span style="width: 100%"></span>
+        <div class="notification-progress-bar" id="notification-progress-bar">
+          <span style="width: 100%" id="notification-progress-bar-inner"></span>
         </div>
       </div>
 
-      <div class="announcement announcement--overlay" id="announcement">
+      <div class="announcement announcement--overlay announcement--inactive" id="announcement">
         <div class="announcement-type">公告類別</div>
-        <marquee>
-          <span class="announcement-text" id="announcement-text"></span>
-        </marquee>
+        <div class="announcement-gap"></div>
+        <div class="announcement-marquee-container">
+          <span class="announcement-marquee-inner announcement-text" id="announcement-text"></span>
+        </div>
         <button class="announcement-close">X</button>
       </div>
 

@@ -19,14 +19,20 @@
   z-index: 10; /* TODO tmp style, make toolbar visible */
 }
 
+.notification--inactive {
+  display: none;
+}
+
 .notification-type {
   text-align: center;
   font: normal normal normal 15px/36px Noto Sans CJK TC;
 }
 
-.notification-text div {
+.notification-text {
   text-align: center;
   font: normal normal normal 24px/36px Noto Sans CJK TC;
+  margin-left: 1em;
+  margin-right: 1em;
 }
 
 .notification-progress-bar {
@@ -39,13 +45,17 @@
   height: 100%;
   border-bottom-left-radius: 10px;
   background-color: #1465FF;
-  animation-duration: 5s;
-  animation-name: progress-bar;
   overflow: hidden;
+  --animation-time: 5s;
 }
 
 .notification-progress-bar > span[style="width: 100%"] {
   border-bottom-right-radius: 10px;
+}
+
+.notification-progress-bar--active > span{
+  animation-duration: var(--animation-time);
+  animation-name: progress-bar;
 }
 
 @keyframes progress-bar {
@@ -72,7 +82,11 @@
   box-shadow: 0px 3px 6px #00000062;
   border-radius: 52px;
   opacity: 70%; /* TODO tmp style, see things under toolbar */
-  z-index: 10; /* TODO tmp style, make toolbar visible */
+  z-index: 15; /* TODO tmp style, make toolbar visible */
+}
+
+.announcement--inactive {
+  display: none;
 }
 
 .announcement-type {
@@ -86,10 +100,45 @@
   padding: 0px 15px;
 }
 
+.announcement-gap {
+  width: 0.7em
+}
+
+.announcement-marquee-container {
+  flex-grow: 10;
+  overflow: hidden;
+}
+
+.announcement-marquee-inner {
+  position: relative;
+  display: inline-block;
+  /* Variable updated by JS to compensate for longer text. */
+  --animation-time: 5s;
+}
+
+.announcement-marquee-inner--active {
+  animation: announcement-marquee var(--animation-time) linear infinite;
+}
+
+@keyframes announcement-marquee {
+  0% {
+    /* left border of the text is exactly at the right most end of the parent div */
+    left: 100%;
+    transform: translateX(0%);
+  }
+  100% {
+    /* right border of the text is exactly at the left most end of the parent div */
+    left: 0%;
+    transform: translateX(-100%);
+  }
+}
+
 .announcement-text {
   font: normal normal bold 16px/40px Noto Sans CJK TC;
   color: #000000;
+  white-space: nowrap;
 }
+
 .announcement-close {
   background: none;
   border: none;
