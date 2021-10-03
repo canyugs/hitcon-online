@@ -22,6 +22,7 @@ OVERLAY_DIV.set(OverlayPosition.RIGHT, 'overlay-right');
 OVERLAY_DIV.set(OverlayPosition.CENTER_TOP, 'overlay-centertop');
 OVERLAY_DIV.set(OverlayPosition.MAIN_VIEW, 'main-view');
 
+const ROOTDIV_ID = 'rootdiv';
 const TOOLBAR_ID = 'toolbar';
 const NOTIFICATIONBAR_ID = 'notification-text';
 const NOTIFICATION_CONTAINER_ID = 'notification';
@@ -60,6 +61,7 @@ class MainUI {
       this.overlayDom[pos] = document.getElementById(div);
     }
 
+    this.rootdivDom = document.getElementById(ROOTDIV_ID);
     this.toolbarDom = document.getElementById(TOOLBAR_ID);
     this.notificationDom = document.getElementById(NOTIFICATIONBAR_ID);
     this.notificationContDom = document.getElementById(NOTIFICATION_CONTAINER_ID);
@@ -222,6 +224,16 @@ class MainUI {
   // setTopbarOverlay(position, overlay);
   // count=0 for no topbar.
   // resizeTopbarOverlay(count);
+
+  /**
+   * Extensions can call this to add custom DOM elements to the rootdiv.
+   * It is usually recommended that callers first try other methods (such as
+   * UtilPanelTab) to add content to the UI.
+   * @param {DOM} dom - The DOM to add.
+   */
+  addCustomDOM(dom) {
+    this.rootdivDom.appendChild(dom);
+  }
 
   // ========== Internal Methods ============
   // Methods below should only be used by UI classes such as Model/Overlay.

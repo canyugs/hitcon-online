@@ -1,6 +1,12 @@
 <script src='https://meet.jit.si/libs/lib-jitsi-meet.min.js'></script>
 <style>
-#jitsi-container {}
+#jitsi-container {
+  position: absolute;
+  bottom: 0px;
+  right: 25px;
+  z-index: 9;
+}
+
 #jitsi-remote-container {}
 #jitsi-local-container {
   /* background-color: saddlebrown; */
@@ -24,6 +30,9 @@
   align-items: center;
   padding: 0;
   margin: 0;
+}
+.jitsi-container--inactive {
+  display: none;
 }
 .jitsi-remote-container {
   display: flex;
@@ -123,7 +132,7 @@
 }
 
 </style>
-<div class="jitsi-container" id='jitsi-container'>
+<div class="jitsi-container jitsi-container--inactive" id='jitsi-container'>
   <div class='jitsi-remote-container' id='jitsi-remote-container'>
 
   </div>

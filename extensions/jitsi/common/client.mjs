@@ -2,16 +2,27 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 import JitsiHandler from './jitsi.mjs';
-import Overlay from '/static/sites/game-client/ui/overlay.mjs';
 import ToolbarButton from '/static/sites/game-client/ui/toolbar-button.mjs';
-import OverlayPosition from '/static/sites/game-client/ui/overlay-position.mjs';
 
 const JITSI_DIV = 'jitsi-container';
 
-class JitsiOverlay extends Overlay {
+class JitsiContainer {
   constructor(mainUI) {
     const dom = document.getElementById(JITSI_DIV);
-    super(mainUI, dom);
+    this.dom = dom;
+    this.mainUI = mainUI;
+
+    this.mainUI.addCustomDOM(dom);
+  }
+
+  show() {
+    this.dom.classList.remove('jitsi-container--inactive');
+  }
+
+  hide() {
+    this.dom.classList.add('jitsi-container--inactive');
+    $('#jitsi-local').html('');
+    $('#jitsi-remote-container').html('');
   }
 };
 
@@ -38,8 +49,8 @@ class Client {
   }
 
   async gameStart() {
-    this.overlay = new JitsiOverlay(this.helper.mainUI);
-    this.overlay.hide();
+    this.container = new JitsiContainer(this.helper.mainUI);
+    this.container.hide();
 
     // Microphone button
     this.microphoneButton = new ToolbarButton('/static/extensions/jitsi/common/icons/microphone-off.svg', false);
@@ -118,7 +129,7 @@ class Client {
     this.jitsiObj = new JitsiHandler(meetingName, password,
       this.helper.gameClient.playerInfo.displayName);
     this.currentMeeting = meetingName;
-    this.overlay.show(OverlayPosition.RIGHT);
+    this.container.show();
 
     this.isCameraOn = false;
     this.cameraButton.changeIcon('/static/extensions/jitsi/common/icons/camera-off.svg');
@@ -132,7 +143,7 @@ class Client {
    */
   async stopMeeting() {
     if (this.jitsiObj) {
-      this.overlay.hide();
+      this.container.hide();
       await this.jitsiObj.unload();
       this.jitsiObj = undefined;
       this.currentMeeting = undefined;
