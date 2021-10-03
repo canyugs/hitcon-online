@@ -59,3 +59,10 @@
   border-radius: 6px;
   margin-right: 17px;
 }
+
+.user-action > img {
+  width: 28px;
+  height: 28px;
+  display:block;
+  margin:auto;
+}
