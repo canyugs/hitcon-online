@@ -29,7 +29,12 @@ class UtilPanelManager {
    */
   onDividerClick() {
     if (this.isCollapsed()) {
-      this.uncollapse();
+      if (this.getSelected() === 'collapse') {
+        // We need to select one, so simulate a click.
+        $(`input[name="${UTILPANEL_RADIO_NAME}"]:first`).click();
+      } else {
+        this.uncollapse();
+      }
     } else {
       this.collapse();
     }
