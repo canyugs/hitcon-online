@@ -98,7 +98,7 @@
   position: absolute;
 }
 
-.jitsi-user-video--close {
+.jitsi-user-container.active > .jitsi-user-video--close {
   background: transparent url("/static/extensions/jitsi/common/icons/awesome-video-slash.svg") 0% 0% no-repeat padding-box;
   background-position: 50% 40%;
 }
@@ -110,34 +110,13 @@
 .jitsi-user-audio.active {
   box-shadow: 0px 3px 14px #5CC11CE0;
 }
-.jitsi-user-audio--close {
+.jitsi-user-container.active > .jitsi-user-audio--close {
   background: transparent url('/static/extensions/jitsi/common/icons/awesome-microphone-alt-slash.svg') 0% 0% no-repeat padding-box;
   background-position: 95% 77%;
 }
 .jitsi-status-container > img {
   height: 20px;
   width: auto;
-}
-
-.volume-visualizer {
-  --volume: 0%;
-  position: relative;
-  width: 200px;
-  height: 20px;
-  margin: 10px;
-  background-color: #DDD;
-  display: none;
-}
-
-.volume-visualizer::before {
-   content: '';
-   position: absolute;
-   top: 0;
-   bottom: 0;
-   left: 0;
-   width: var(--volume);
-   background-color: green;
-   transition: width 100ms linear;
 }
 
 </style>
