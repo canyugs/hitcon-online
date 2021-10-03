@@ -24,8 +24,12 @@ OVERLAY_DIV.set(OverlayPosition.MAIN_VIEW, 'main-view');
 
 const TOOLBAR_ID = 'toolbar';
 const NOTIFICATIONBAR_ID = 'notification-text';
+const NOTIFICATION_CONTAINER_ID = 'notification';
+const NOTIFICATION_PROGRESS_ID = 'notification-progress-bar';
+const NOTIFICATION_PROGRESS_INNER_ID = 'notification-progress-bar-inner';
 const NOTIFICATION_NUM_LIMIT = 4;
 const ANNOUNCEMENT_ID = 'announcement-text';
+const ANNOUNCEMENT_CONTAINER_ID = 'announcement';
 const ANNOUNCEMENT_NUM_LIMIT = 10;
 
 /**
@@ -58,7 +62,11 @@ class MainUI {
 
     this.toolbarDom = document.getElementById(TOOLBAR_ID);
     this.notificationDom = document.getElementById(NOTIFICATIONBAR_ID);
+    this.notificationContDom = document.getElementById(NOTIFICATION_CONTAINER_ID);
+    this.notificationProgressDom = document.getElementById(NOTIFICATION_PROGRESS_ID);
+    this.notificationProgressInnerDom = document.getElementById(NOTIFICATION_PROGRESS_INNER_ID);
     this.announcementDom = document.getElementById(ANNOUNCEMENT_ID);
+    this.announcementContDom = document.getElementById(ANNOUNCEMENT_CONTAINER_ID);
 
     this.utilPanelManager = new UtilPanelManager(this);
     this._notificationList = new Array();
@@ -76,26 +84,75 @@ class MainUI {
    */
   setMainView(overlay) {}
 
-  updateNotification() {
-    this.notificationDom.innerHTML = '';
-    if (this._notificationList.length === 0) return;
+  _setNotificationText(msg, timeout) {
+    this.notificationDom.textContent = msg;
+    this.notificationProgressInnerDom.style.setProperty('--animation-time', `${timeout}ms`);
 
-    const {msg, timeout} = this._notificationList.shift();
-    this.notificationDom.innerHTML = msg;
-    setTimeout(() =>{
-      this.updateNotification();
-    }, timeout);
+    // Restart the animation by re-adding the animation class.
+    this.notificationProgressDom.classList.remove('notification-progress-bar--active');
+    // Force a reflow.
+    this._unusedvar1 = this.notificationProgressDom.offsetHeight;
+    this.notificationProgressDom.classList.add('notification-progress-bar--active');
+  }
+
+  updateNotification() {
+    console.assert(this._notificationList.length > 0, 'Race condition in updateAnnouncement');
+
+    // this._notificationList[0] was on display and it's now timed out.
+    this._notificationList.shift();
+    if (this._notificationList.length === 0) {
+      // No more messages.
+      this.notificationContDom.classList.add('notification--inactive');
+      // No reflow necessary since we're hiding it.
+      this.notificationDom.textContent = '';
+      return;
+    } else {
+      // Continue to show the next message.
+      const {msg, timeout} = this._notificationList[0];
+      this._setNotificationText(msg, timeout);
+      setTimeout(() => {
+        this.updateNotification();
+      }, timeout);
+    }
   };
 
-  updateAnnouncement() {
-    this.announcementDom.innerHTML = '';
-    if (this._announcementList.length === 0) return;
+  _setAnnouncementMarquee(msg) {
+    // We need this method because we want to compensate for longer text.
+    this.announcementDom.textContent = msg;
 
-    const {msg, timeout} = this._announcementList.shift();
-    this.announcementDom.innerHTML = msg;
-    setTimeout(() =>{
-      this.updateAnnouncementDom();
-    }, timeout);
+    // Calculate the new animation length.
+    const textLen = this.announcementDom.clientWidth;
+    const parentLen = this.announcementDom.parentElement.clientWidth;
+    const singleWidthTime = 5; // Going across the width should take 5s.
+    const result = (textLen+parentLen)/(parentLen)*singleWidthTime;
+    this.announcementDom.style.setProperty('--animation-time', `${result}s`);
+
+    // Remove and add back the active class to force the animation to restart.
+    this.announcementDom.classList.remove('announcement-marquee-inner--active');
+    // Force a reflow.
+    this._unusedvar1 = this.announcementDom.offsetHeight;
+    this.announcementDom.classList.add('announcement-marquee-inner--active');
+  }
+
+  updateAnnouncement() {
+    console.assert(this._announcementList.length > 0, 'Race condition in updateAnnouncement');
+
+    // this._announcementList[0] was on display and it's now timed out.
+    this._announcementList.shift();
+    if (this._announcementList.length === 0) {
+      // No more messages.
+      this.announcementContDom.classList.add('announcement--inactive');
+      // No reflow necessary since we're hiding it.
+      this.announcementDom.textContent = '';
+      return;
+    } else {
+      // Continue to show the next message.
+      const {msg, timeout} = this._announcementList[0];
+      this._setAnnouncementMarquee(msg);
+      setTimeout(() => {
+        this.updateAnnouncement();
+      }, timeout);
+    }
   };
 
   /**
@@ -103,20 +160,24 @@ class MainUI {
    * @param {String} msg The message want to be shown.
    * @param {Number} timeout The duraion of showing notification, the unit is millisecond.
    */
-  showNotification(msg, timeout) {
-    // TODO(lisasasasa)
+  showNotification(msg, timeout = 8000) {
+    // Always enqueue the incoming notification. The first element of the list
+    // is on display.
+    const add_ele = {msg: msg, timeout: timeout};
+    this._notificationList.push(add_ele);
+
     // Start the notification
-    if (this._notificationList.length === 0) {
-      this.notificationDom.innerHTML = msg;
+    if (this._notificationList.length <= 1) {
+      // Nothing was on display at the moment, we can display it directly.
+      this.notificationContDom.classList.remove('notification--inactive');
+      this._setNotificationText(msg, timeout);
       setTimeout(() =>{
         this.updateNotification();
       }, timeout);
       return;
     }
-
-    // Store the msg queue
-    const add_ele = {msg: msg, timeout: timeout};
-    this._notificationList.push(add_ele);
+    // If not, updateNotification() that was already scheduled by the previous
+    // announcement will take care of things.
   }
 
   /**
@@ -124,19 +185,26 @@ class MainUI {
    * @param {String} msg The message want to be shown.
    * @param {Number} timeout The duraion of showing notification, the unit is millisecond.
    */
-  showAnnouncement(msg, timeout) {
+  showAnnouncement(msg, timeout = 20000) {
+    // TODO: Handle the close button in annoucement's UI.
+
+    // Always enqueue the incoming announcement. The first element of the list
+    // is on display.
+    const add_ele = {msg: msg, timeout: timeout};
+    this._announcementList.push(add_ele);
+
     // Start the notification
-    if (this._announcementList.length === 0) {
-      this.announcementDom.innerHTML = msg;
+    if (this._announcementList.length <= 1) {
+      // Nothing was on display at the moment, we can display it directly.
+      this.announcementContDom.classList.remove('announcement--inactive');
+      this._setAnnouncementMarquee(msg);
       setTimeout(() =>{
         this.updateAnnouncement();
       }, timeout);
       return;
     }
-
-    // Store the msg queue
-    const add_ele = {msg: msg, timeout: timeout};
-    this._announcementList.push(add_ele);
+    // If not, updateAnnouncement() that was already scheduled by the previous
+    // announcement will take care of things.
   }
 
   /**
