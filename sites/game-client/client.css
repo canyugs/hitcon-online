@@ -65,6 +65,10 @@ body {
   z-index: 5;
 }
 
+.overlay--inactive {
+  display: none;
+}
+
 #overlay-topleft {
   top: 10%;
   left: 5%;
@@ -80,9 +84,10 @@ body {
 }
 
 #overlay-right {
-  bottom: 0;
+  bottom: 10%;
   right: 5%;
   width: 15%;
+  height: 60%;
 }
 
 #overlay-centertop {
