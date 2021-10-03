@@ -115,28 +115,45 @@ class JitsiHandler {
    */
   onLocalTracks(tracks) {
     console.log("onLocalTracks", tracks);
+
+    if ($('#jitsi-local').is(':empty')) {
+      $('#jitsi-local').append(`
+        <div class='jitsi-user-loading'></div>
+        <div class='jitsi-user-video'></div>
+        <div class='jitsi-user-audio'></div>
+        <div class='jitsi-user-name' id='jitsi-local-user-name'></div>
+      `);
+    }
+
     this.localTracks = tracks;
-    for (let i = 0; i < this.localTracks.length; i++) {
-      if (this.localTracks[i].getType() === 'video') {
-        $('#jitsi-local').append(`<video autoplay='1' id='localVideo${i}' class='jitsi-local-video' />`);
-        this.localTracks[i].attach($(`#localVideo${i}`)[0]);
-      } else if (this.localTracks[i].getType() === 'audio') {
-        $('#jitsi-local').append(`<audio autoplay='1' muted='true' id='localAudio${i}' class='jitsi-audio' />`);
-        $('#jitsi-local').append(`<div id="volume-visualizer-local" class="volume-visualizer"></div>`);
-        this.setLocalAudioVolumeMeter($(`#volume-visualizer-local`)[0]);
-        this.localTracks[i].attach($(`#localAudio${i}`)[0]);
+    for (const track of tracks) {
+      const trackId = 'local' + track.getType();
+      if (track.getType() === 'video') {
+        $('#jitsi-local > .jitsi-user-video').append(`<video autoplay='1' id='${trackId}' class='jitsi-local-video' />`);
+        track.attach($(`#${trackId}`)[0]);
+      } else if (track.getType() === 'audio') {
+        $('#jitsi-local > .jitsi-user-audio').append(`<audio autoplay='1' muted='true' id='${trackId}' class='jitsi-audio' />`);
+        track.attach($(`#${trackId}`)[0]);
       } else {
-        console.error('Unknown track type:', this.localTracks[i].getType());
+        console.error('Unknown track type:', track.getType());
         continue;
       }
 
       // All tracks should be disabled by default (except screen sharing), and enabled upon requested.
-      if (this.isWebcam || this.localTracks[i].getType() !== 'video') {
-        this.localTracks[i].mute();
+      if (this.isWebcam || track.getType() !== 'video') {
+        track.mute();
+      }
+
+      // Add mute overlay
+      if (this.isWebcam || track.getType() !== 'video') {
+        $(`#jitsi-local > .jitsi-user-${track.getType()}`).addClass(`jitsi-user-${track.getType()}--close`);
+        $(`#${trackId}`).css('display', 'none');
+      } else {
+        $(`#jitsi-local > .jitsi-user-${track.getType()}`).removeClass(`jitsi-user-${track.getType()}--close`);
       }
 
       if (this.isJoined) {
-        this.room.addTrack(this.localTracks[i]);
+        this.room.addTrack(track);
       }
     }
   }
@@ -229,6 +246,9 @@ class JitsiHandler {
     for (let i = 0; i < this.localTracks.length; i++) {
       this.room.addTrack(this.localTracks[i]);
     }
+    $('#jitsi-local').addClass('active');
+    $('#jitsi-local-user-name').text(this.userName);
+    this.setLocalAudioVolumeMeter();
   }
 
   /**
@@ -366,9 +386,12 @@ class JitsiHandler {
    * @param {string} type Which type to mute (audio|video)
    */
   async mute(type) {
-    for (let i = 0; i < this.localTracks.length; i++) {
-      if (this.localTracks[i].getType() === type) {
-        this.localTracks[i].mute();
+    for (const track of this.localTracks) {
+      if (track.getType() === type) {
+        track.mute();
+
+        $(`#jitsi-local > .jitsi-user-${track.getType()}`).addClass(`jitsi-user-${track.getType()}--close`);
+        $(`#local${track.getType()}`).css('display', 'none');
       }
     }
   }
@@ -378,9 +401,14 @@ class JitsiHandler {
    * @param {string} type Which type to unmute (audio|video)
    */
   async unmute(type) {
-    for (let i = 0; i < this.localTracks.length; i++) {
-      if (this.localTracks[i].getType() === type) {
-        this.localTracks[i].unmute();
+    for (const track of this.localTracks) {
+      if (track.getType() === type) {
+        track.unmute();
+
+        $(`#jitsi-local > .jitsi-user-${track.getType()}`).removeClass(`jitsi-user-${track.getType()}--close`);
+        if (track.getType() === 'video') {
+          $(`#local${track.getType()}`).css('display', 'block');
+        }
       }
     }
   }
@@ -395,9 +423,8 @@ class JitsiHandler {
 
   /**
    * Start the local volume meter.
-   * @param volumeVisualizer The element of the volume meter.
    */
-  async setLocalAudioVolumeMeter(volumeVisualizer) {
+  async setLocalAudioVolumeMeter() {
     let volumeCallback;
     try {
       const audioStream = await navigator.mediaDevices.getUserMedia({audio: true, video: false});
@@ -419,11 +446,18 @@ class JitsiHandler {
 
         analyser.getByteFrequencyData(volumes);
         const averageVolume = volumes.reduce((a, b) => a + b, 0) / volumes.length;
+
         // parsed volume = round((normalize(original volume - noise threshold) * 100 [transform [0, 1] to [0, 100]]) / 25) [discretization]
         let averageVolumeParsed = (Math.round(((averageVolume - 30) / (analyser.maxDecibels - analyser.minDecibels - 30) * 100) / 25));
         averageVolumeParsed = Math.min(Math.max(averageVolumeParsed, 0), 4); // clip to [0, 4]
-        volumeVisualizer.style.setProperty('--volume', averageVolumeParsed + '%');
+
         this.room?.setLocalParticipantProperty('volume', averageVolumeParsed.toString());
+
+        if (parseInt(averageVolumeParsed) >= 1) {
+          $(`#jitsi-local > .jitsi-user-audio`).addClass('active');
+        } else {
+          $(`#jitsi-local > .jitsi-user-audio`).removeClass('active');
+        }
       };
     } catch (e) {
       console.error(e);
@@ -437,7 +471,7 @@ class JitsiHandler {
         console.error(e);
         clearInterval(this.volumeMeterIntervalId);
       }
-    }, 200);
+    }, 100);
   }
 
   /**
@@ -447,10 +481,13 @@ class JitsiHandler {
     if (propertyKey !== 'volume') {
       return;
     }
-    console.log(propertyValue,);
-    const element = document.getElementById('volume-visualizer-' + user.getId());
-    if (element != null && element.value == '') {
-      element.style.setProperty('--volume', propertyValue + '%');
+
+    console.log('volume recieved:', user.getId(), propertyValue);
+
+    if (parseInt(propertyValue) >= 1) {
+      $(`#jitsi-${user.getId()}-container > .jitsi-user-audio`).addClass('active');
+    } else {
+      $(`#jitsi-${user.getId()}-container > .jitsi-user-audio`).removeClass('active');
     }
   }
 }
