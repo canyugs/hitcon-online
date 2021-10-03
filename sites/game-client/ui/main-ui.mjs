@@ -335,6 +335,7 @@ class MainUI {
     this.overlays.set(position, overlay);
     const container = this.overlayDom[position];
     container.appendChild(overlay.dom);
+    container.classList.remove('overlay--inactive');
     return true;
   }
 
@@ -354,6 +355,7 @@ class MainUI {
       return false;
     }
     this._restoreToStaging(overlay.dom);
+    this.overlayDom[position].classList.add('overlay--inactive');
     this.overlays.delete(position);
     return true;
   }
