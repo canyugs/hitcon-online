@@ -180,6 +180,7 @@ class JitsiHandler {
     track.attach($(`#${trackId}`)[0]);
     if (track.isMuted()) {
       $(`#jitsi-${participantId}-container > .jitsi-user-${track.getType()}`).addClass(`jitsi-user-${track.getType()}--close`);
+      $(`#${participantId}${track.getType()}${track.getId()}`).css('display', 'none');
     } else {
       $(`#jitsi-${participantId}-container > .jitsi-user-${track.getType()}`).removeClass(`jitsi-user-${track.getType()}--close`);
     }
@@ -187,16 +188,15 @@ class JitsiHandler {
 
   onRemoteTrackRemove(track) {
     console.log('track remove', track.getId());
-    const participantId = track.getParticipantId();
     try {
-      track.detach($(`#${participantId}${track.getType()}${track.getId()}`));
+      track.detach($(`#${track.getParticipantId()}${track.getType()}${track.getId()}`));
     } catch (e) {
       // An error is expected: https://github.com/jitsi/lib-jitsi-meet/issues/1054
       // It seems that we can safely ignore the error.
       // console.error(e);
     }
 
-    $(`#${participantId}${track.getType()}${track.getId()}`).remove();
+    $(`#${track.getParticipantId()}${track.getType()}${track.getId()}`).remove();
   }
 
   /**
@@ -210,8 +210,12 @@ class JitsiHandler {
     if (participantId && (participantId in this.remoteTracks)) {
       if (track.isMuted()) {
         $(`#jitsi-${participantId}-container > .jitsi-user-${track.getType()}`).addClass(`jitsi-user-${track.getType()}--close`);
+        $(`#${track.getParticipantId()}${track.getType()}${track.getId()}`).css('display', 'none');
       } else {
         $(`#jitsi-${participantId}-container > .jitsi-user-${track.getType()}`).removeClass(`jitsi-user-${track.getType()}--close`);
+        if (track.getType() === 'video') {
+          $(`#${track.getParticipantId()}${track.getType()}${track.getId()}`).css('display', 'block');
+        }
       }
     }
   }
@@ -407,12 +411,19 @@ class JitsiHandler {
       audioSource.connect(analyser);
       const volumes = new Uint8Array(analyser.frequencyBinCount);
       volumeCallback = () => {
+        // If the audio track is muted, return 0.
+        if (this.localTracks.filter(track => track.getType() === 'audio' && !track.isMuted()).length === 0) {
+          this.room?.setLocalParticipantProperty('volume', '0');
+          return;
+        }
+
         analyser.getByteFrequencyData(volumes);
         const averageVolume = volumes.reduce((a, b) => a + b, 0) / volumes.length;
-        volumeVisualizer.style.setProperty(
-          '--volume',
-          ((averageVolume - 20) * 100 / (analyser.maxDecibels - analyser.minDecibels)) + '%');
-        this.room?.setLocalParticipantProperty('volume', this. averageVolume.toString());
+        // parsed volume = round((normalize(original volume - noise threshold) * 100 [transform [0, 1] to [0, 100]]) / 25) [discretization]
+        let averageVolumeParsed = (Math.round(((averageVolume - 30) / (analyser.maxDecibels - analyser.minDecibels - 30) * 100) / 25));
+        averageVolumeParsed = Math.min(Math.max(averageVolumeParsed, 0), 4); // clip to [0, 4]
+        volumeVisualizer.style.setProperty('--volume', averageVolumeParsed + '%');
+        this.room?.setLocalParticipantProperty('volume', averageVolumeParsed.toString());
       };
     } catch (e) {
       console.error(e);
@@ -436,12 +447,10 @@ class JitsiHandler {
     if (propertyKey !== 'volume') {
       return;
     }
-
+    console.log(propertyValue,);
     const element = document.getElementById('volume-visualizer-' + user.getId());
     if (element != null && element.value == '') {
-      element.style.setProperty(
-        '--volume',
-        ((parseFloat(propertyValue) - 20) * 100 / (analyser.maxDecibels - analyser.minDecibels)) + '%');
+      element.style.setProperty('--volume', propertyValue + '%');
     }
   }
 }
