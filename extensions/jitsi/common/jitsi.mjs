@@ -1,6 +1,8 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
+const VOICE_INDICATOR_THRESHOLD = 1;
+
 /**
  * This class is the browser/client side of an extension.
  * One instance is created for each connected player.
@@ -96,17 +98,18 @@ class JitsiHandler {
     $('#jitsi-local').empty();
 
     // Create new local tracks
-    JitsiMeetJS.createLocalTracks({
-      devices: ['audio', isWebcam ? 'video' : 'desktop']
-    })
-    .then(this.onLocalTracks.bind(this))
-    .catch((e) => {
+    try {
+      const tracks = await JitsiMeetJS.createLocalTracks({
+        devices: ['audio', isWebcam ? 'video' : 'desktop']
+      });
+      this.onLocalTracks(tracks);
+    } catch (e) {
       if (!isWebcam) {
         // something goes wrong, switch back to video.
         this.createLocalTracks(true);
       }
       console.error(e);
-    });
+    }
   }
 
   /**
@@ -127,7 +130,7 @@ class JitsiHandler {
 
     this.localTracks = tracks;
     for (const track of tracks) {
-      const trackId = 'local' + track.getType();
+      const trackId = 'jitsi-local-track-' + track.getType();
       if (track.getType() === 'video') {
         $('#jitsi-local > .jitsi-user-video').append(`<video autoplay='1' id='${trackId}' class='jitsi-local-video' />`);
         track.attach($(`#${trackId}`)[0]);
@@ -453,7 +456,7 @@ class JitsiHandler {
 
         this.room?.setLocalParticipantProperty('volume', averageVolumeParsed.toString());
 
-        if (parseInt(averageVolumeParsed) >= 1) {
+        if (parseInt(averageVolumeParsed) >= VOICE_INDICATOR_THRESHOLD) {
           $(`#jitsi-local > .jitsi-user-audio`).addClass('active');
         } else {
           $(`#jitsi-local > .jitsi-user-audio`).removeClass('active');
