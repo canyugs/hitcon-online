@@ -49,6 +49,7 @@ class Client {
    */
   constructor(helper) {
     this.helper = helper;
+    this.overlay = undefined;
   }
 
   async gameStart() {
@@ -58,8 +59,10 @@ class Client {
   onSelfPlayerUpdate(msg) {
     const map = this.helper.getMap();
     if (typeof map === 'object') {
-     let src = map.getCell(msg.mapCoord, 'videoIframe');
-     this.overlay.updateIframe(src);
+      let src = map.getCell(msg.mapCoord, 'videoIframe');
+      if (typeof this.overlay === 'object') {
+        this.overlay.updateIframe(src);
+      }
     }
   }
 }
