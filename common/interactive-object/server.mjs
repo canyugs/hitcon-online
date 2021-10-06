@@ -271,7 +271,6 @@ class InteractiveObjectServerBaseClass {
    */
   async sf_checkPermission(playerID, kwargs) {
     const permission = await this.helper.getToken(playerID);
-    permission.scope.push('online_bulletin_editor');
     const {options} = kwargs;
     for (const [identity, nextState] of Object.entries(options)) {
       if (permission.scope.includes(identity)) {
