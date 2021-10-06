@@ -127,15 +127,15 @@ class InteractiveObjectServerBaseClass {
         const currStateStr = this.dataStore.get(playerID);
         const currState = fsm.states[currStateStr];
         if (typeof currState === 'undefined') {
-          console.warn(`'${currStateStr}' is not a valid state, the FSM may have bug`);
           this.dataStore.set(playerID, fsm.initialState);
+          console.warn(`'${currStateStr}' is not a valid state when walking FSM for ${playerID} in ${this.objectName}. Setting it to ${fsm.initialState}`);
           break;
         }
 
         const kwargs = currState.kwargs;
         const func = 'sf_' + currState.func; // 'sf_' stands for state function
         if (!(func in this)) {
-          console.error(`'${func}' is not a valid state function`);
+          console.error(`'${func}' is not a valid state function when walking FSM for ${playerID} in ${this.objectName}.`);
           this.dataStore.set(playerID, fsm.initialState);
           break;
         }
@@ -144,9 +144,13 @@ class InteractiveObjectServerBaseClass {
           nextState = await this[func](playerID, kwargs);
         } catch (e) {
           console.error(`Error on calling '${func}' with argument '${playerID}' and ${kwargs}.`);
+          console.error(e.stack);
           nextState = this.sf_exit(playerID, {next: currStateStr});
         }
 
+        if (typeof fsm.states[nextState] === 'undefined') {
+          console.warn(`Invalid state ${nextState} returned by ${currState.func} when walking FSM for ${playerID} in ${this.objectName}.`);
+        }
         this.dataStore.set(playerID, nextState);
       }
     } finally { // for release the lock
