@@ -50,32 +50,45 @@ class AuthServer {
         return ret;
     }
 
+    /**
+     * Set token into the cookie.
+     */
+    handleAuth(req, res, token) {
+        const secret = this.app.get('secret');
+        if (token) {
+            jwt.verify(token, secret, function(err, decoded) {
+                if (err) {
+                    return res.json({
+                        success: false,
+                        message: 'Failed to authenticate token.'
+                    });
+                } else {
+                    res.cookie('token', token);
+                    res.redirect('/');
+                }
+            });
+        } else {
+            return res.status(403).send({
+                success: false,
+                message: 'No token provided.'
+            });
+        }
+    }
+
     /*
     * Start the auth server to route
     * @run
     */
     run() {
         const secret = this.app.get('secret');
-        this.app.post('/auth', this.urlencodedParser, function(req, res) {
+        this.app.post('/auth', this.urlencodedParser, (req, res) => {
             var token = req.body.token || req.body.query || req.headers['x-access-token'];
-            if (token) {
-                jwt.verify(token, secret, function(err, decoded) {
-                    if (err) {
-                        return res.json({
-                            success: false,
-                            message: 'Failed to authenticate token.'
-                        });
-                    } else {
-                        res.cookie('token', token);
-                        res.redirect('/');
-                    }
-                });
-            } else {
-                return res.status(403).send({
-                    success: false,
-                    message: 'No token provided.'
-                });
-            }
+            this.handleAuth(req, res, token);
+        });
+
+        this.app.get('/auth', (req, res) => {
+            var token = req.query.token || req.headers['x-access-token'];
+            this.handleAuth(req, res, token);
         });
 
         this.app.get('/get_test_token', function(req, res) {
