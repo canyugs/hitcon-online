@@ -84,7 +84,11 @@ class GameClient {
       socket.on('callS2cAPI', (msg, callback) => {
         let p = this.extMan.onS2cAPICalled(msg);
         p.then((result) => {
-          if (result.error) {
+          if (typeof result !== 'object') {
+            console.warn(`Result of callS2cAPI('${msg.extName}', ` +
+              `'${msg.methodName}', '${msg.args}') is not an object: ` +
+              `${JSON.stringify(result)}`);
+          } else if (typeof result === 'object' && result.error) {
             console.warn(`Error on callS2cAPI('${msg.extName}', ` +
               `'${msg.methodName}', '${msg.args}'): ` +
               `${JSON.stringify(result)}`);
