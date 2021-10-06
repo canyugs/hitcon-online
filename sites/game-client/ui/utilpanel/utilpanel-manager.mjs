@@ -31,7 +31,7 @@ class UtilPanelManager {
     if (this.isCollapsed()) {
       if (this.getSelected() === 'collapse') {
         // We need to select one, so simulate a click.
-        $(`input[name="${UTILPANEL_RADIO_NAME}"]:first`).click();
+        $(`input[name="${UTILPANEL_RADIO_NAME}"]:last`).click();
       } else {
         this.uncollapse();
       }
