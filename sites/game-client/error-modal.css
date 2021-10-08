@@ -22,7 +22,8 @@
 
 #error-message {
     text-align: center;
-    font: normal normal 900 40px/40px TSTAR;
+    font: normal normal 900 40px/40px Helvetica;
+    font-family: Helvetica, Arial, sans-serif;
     letter-spacing: 0px;
     color: #000000;
     opacity: 1;
