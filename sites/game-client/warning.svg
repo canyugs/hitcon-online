@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="200" height="163" viewBox="0 0 200 163">
   <g id="Group_37" data-name="Group 37" transform="translate(-860 -307)">
     <path id="Polygon_3" data-name="Polygon 3" d="M89.771,16.672a12,12,0,0,1,20.457,0l78.56,128.052A12,12,0,0,1,178.56,163H21.44a12,12,0,0,1-10.229-18.275Z" transform="translate(860 307)" fill="#d3872f"/>
-    <text id="_" data-name="!" transform="translate(932 368)" fill="#fff" font-size="86" font-family="GenSenRoundedTW-H, GenSenRounded TW"><tspan x="-17" y="76">!</tspan></text>
+    <path id="Path_104" data-name="Path 104" d="M27.957,77.2a8.474,8.474,0,0,1-6.45-2.752,10.123,10.123,0,0,1,0-13.5,8.474,8.474,0,0,1,6.45-2.752,8.572,8.572,0,0,1,6.536,2.752,9.447,9.447,0,0,1,2.58,6.708,9.557,9.557,0,0,1-2.58,6.794A8.4,8.4,0,0,1,27.957,77.2Zm.086-24.424q-4.9,0-5.332-4.644L20.819,23.712l-.258-5.762q-.258-7.826,7.482-7.826,7.654,0,7.4,7.826l-.258,5.762L34.063,38.246l-.774,9.89Q32.945,52.78,28.043,52.78Z" transform="translate(932 368)" fill="#fff"/>
   </g>
 </svg>
