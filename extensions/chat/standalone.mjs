@@ -31,6 +31,13 @@ class Standalone {
    */
   async c2s_broadcastMessage(player, args) {
     args['msg_from'] = player.playerID;
+    if (args.type === "announcement") {
+      const permission = await this.helper.getToken(player.playerID);
+      if (!permission.scope.includes('announcement')) {
+        //console.error("announce: permission denied.");
+        return;
+      }
+    }
     await this.helper.broadcastToAllUser(args);
   }
 
