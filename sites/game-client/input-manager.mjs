@@ -1,7 +1,7 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
-const KEYSTROKE_RATE = 10; // keystroke per second
+const KEYSTROKE_RATE = 30; // keystroke per second
 
 /**
  * Input manager deals with all user input.
@@ -32,9 +32,8 @@ class InputManager {
       this.pressedKeys.delete(event.key);
     });
     setInterval(() => {
-      for (const {DOMElement, callback} of this.keydownCallbacks) {
-        // TODO: Send event to the focused element only.
-        for (const [key, code] of this.pressedKeys.entries()) {
+      for (const [key, code] of this.pressedKeys.entries()) {
+        for (const {DOMElement, callback} of this.keydownCallbacks) {
           if (this.focusedElement === DOMElement) {
             callback(new KeyboardEvent('keydown', {key, code}));
           }
