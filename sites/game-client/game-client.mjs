@@ -55,9 +55,6 @@ class GameClient {
       socket.emit('authenticate', {token: token});
       socket.on('authenticated', () => {
         console.log('Authenticated!');
-
-        // Start the browser side of all extensions.
-        this.extMan.startAllExtensionClient();
       });
       socket.on('unauthorized', (msg) => {
         console.error(`Authorization failed: ${JSON.stringify(msg.data)}`);
@@ -132,6 +129,9 @@ class GameClient {
           detail: {gameClient: this},
         },
     ));
+
+    // Start the browser side of all extensions.
+    this.extMan.startAllExtensionClient();
   }
 
   /**
