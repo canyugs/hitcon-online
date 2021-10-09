@@ -46,7 +46,7 @@ class GraphicAsset {
 
     let success = true;
     await Promise.all(arr_promise).catch((err_msg) => {
-      console.error(err_msg);
+      console.error('Failed to load assets: ', err_msg);
       success = false;
     });
     return success;

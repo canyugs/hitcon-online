@@ -30,7 +30,8 @@ class Standalone {
    * @returns string
    */
   async c2s_getPassword(player, args) {
-    console.log(player, args);
+    // TODO: Authentication for jitsi is not implemented yet.
+    console.log(`${player.playerID} and ${args} called on unimplemented c2s_getPassword()`);
     return '1234';
   }
 

@@ -29,13 +29,6 @@ import GameState from '../../common/gamelib/game-state.mjs';
 import ExtensionManager from '../../common/extlib/extension-manager.mjs';
 
 async function mainServer() {
-  /* Redis integration */
-  // TODO: Uncomment once configuration for redis is done.
-  // redisClient = redis.createClient();
-  // redisClient.on('error', (err) => {
-  //   console.error(err);
-  // });
-
   /* Create the http service */
   const app = express();
   const server = http.createServer(app);

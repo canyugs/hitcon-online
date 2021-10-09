@@ -44,7 +44,7 @@ class Client {
       let ret = await this.requestApi('/users/me', 'GET');
       return ret?.points;
     } catch (e) {
-      console.error(e);
+      console.error('Failed to get points for user', e);
       throw new Error('Failed to get the remaining points.');
     }
   }
@@ -64,7 +64,7 @@ class Client {
       this.notifyUpdatePoints(receiver);
       return ret?.message === "OK";
     } catch (e) {
-      console.error(e);
+      console.error('Failed to transfer points: ', e);
       throw new Error('Failed to transfer points.');
     }
   }

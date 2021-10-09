@@ -11,7 +11,6 @@ class UtilPanelButton {
    * @param {String} iconSrc - The icon of the button.
    */
   constructor(name, iconSrc) {
-    console.log(name);
     this.iconSrc = iconSrc;
     this.name = name;
 

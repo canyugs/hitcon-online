@@ -21,8 +21,7 @@ async function main() {
   /* Initialize Redis */
   const redisClient = redis.createClient(config.get('redis.option'));
   redisClient.on('error', (err) => {
-    console.error(err);
-    console.error('Can\'t connect to Redis, make sure that the connection info is correct.');
+    console.error('Can\'t connect to Redis, make sure that the connection info is correct: ', err);
     process.exit();
   });
 
@@ -85,8 +84,7 @@ async function main() {
 
   /* Hook error handlers */
   const handler = (message, err) => {
-    console.error(message);
-    console.error(err);
+    console.error(message, err);
 
     try {
       assetServer.kill();

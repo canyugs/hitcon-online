@@ -46,7 +46,7 @@ class Client {
         mapWatermarks
       );
     }).catch((err_msg) => {
-      console.error(err_msg);
+      console.error('Failed to initialize watermark: ', err_msg);
     });
   }
 

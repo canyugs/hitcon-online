@@ -58,7 +58,7 @@ class TerminalServer {
           let decodedToken = await jwtVerify(msg.token, config.get('secret'));
           containerId = decodedToken.containerId;
         } catch (err) {
-          console.error(err);
+          console.warn(`JWT authentication failed for ${msg.token}: `, err);
           socket.emit('error', {data: 'Invalid token.'});
           return;
         }
@@ -103,14 +103,14 @@ class TerminalServer {
       this.container2sockets[containerId] = new Set();
       this.handlers[containerId] = new ContainerHandler(call.request.imageName);
       await this.handlers[containerId].spawn();
-      console.log('create container', containerId);
+      console.log('create container: ', containerId);
 
       callback(null, {
         success: true,
         containerId: containerId
       });
     } catch (e) {
-      console.error(e);
+      console.error('create container failed: ', e);
       callback(null, {
         success: false,
         containerId: null
@@ -136,18 +136,18 @@ class TerminalServer {
         try {
           socket.disconnect(true);
         } catch (e) {
-          console.warn(e);
+          console.warn(`Failed to disconnect socket for container ${containerId}: `, e);
         }
       }
       delete this.handlers[containerId];
       delete this.container2sockets[containerId];
-      console.log('delete container', containerId);
+      console.log('delete container: ', containerId);
 
       callback(null, {
         success: true
       });
     } catch (e) {
-      console.error(e);
+      console.error(`Failed to destroy container${call.request.containerId}`, e);
       callback(null, {
         success: false
       });
@@ -180,8 +180,7 @@ class TerminalServer {
         server.start();
         console.log("The gRPC server for the terminal server is running on port " + TERMINAL_SERVER_GRPC_PORT + ".");
       } catch (err) {
-        console.error('Failed to create gRPC server.');
-        console.error(err);
+        console.error('Failed to create gRPC server: ', err);
         process.exit();
       }
     });

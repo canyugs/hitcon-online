@@ -94,15 +94,6 @@ class Standalone {
   }
 
   /**
-   * Get the user choice.
-   * @param {object} player - Player ID
-   * @param {object} arg - user choice
-   */
-  async c2s_getResultFromClient(player, arg) {
-    console.log(arg);
-  }
-
-  /**
    * Return the ejs partials for the client part of this extension.
    * @return {object} partials - An object, it could have the following:
    * inDiv - A string to the path of ejs partial for the location inDiv.

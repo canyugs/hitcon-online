@@ -51,8 +51,7 @@ class Handler {
     try {
       return await this.RPCDirectory.callRPC(this.serviceName, serviceName, methodName, ...args);
     } catch (e) {
-      console.error(`Error calling rpc function '${methodName}' of '${serviceName}'`);
-      console.error(e);
+      console.error(`Error calling rpc function '${methodName}' of '${serviceName}': `, e);
       return {'error': 'exception'};
     }
   }

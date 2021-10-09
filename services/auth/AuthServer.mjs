@@ -32,7 +32,7 @@ class AuthServer {
         try {
             ret = jwt.verify(token, this.app.get('secret'));
         } catch (err) {
-            console.error(err);
+            console.error('Failed to verify jwt in verifyToken(): ', err);
             return null;
         }
 

@@ -30,7 +30,7 @@ class ContainerHandler {
       let ret = await exec(`docker run -it -d --name ${this.containerName} --rm ${this.imageName}`);
       return !!ret.stderr;
     } catch (err) {
-      console.log(err);
+      console.error(`Failed to start container ${this.containerName} with ${this.imageName}: `, err);
     }
   }
 
@@ -79,7 +79,7 @@ class ContainerHandler {
       let ret = await exec(`docker stop ${this.containerName}`);
       return !!ret.stderr;
     } catch (err) {
-      console.log(err);
+      console.error(`Failed to stop ${this.containerName}: `, err);
     }
   }
 }

@@ -52,7 +52,6 @@ class UtilPanelManager {
    */
   getSelected() {
     let selected = $(`input[name="${UTILPANEL_RADIO_NAME}"]:checked`).val();
-    console.log('On UtilPanel change ' + selected);
 
     if (typeof selected === 'undefined') {
       selected = 'collapse';
@@ -73,8 +72,6 @@ class UtilPanelManager {
       this.uncollapse();
     }
 
-    console.log(selected);
-    console.log(this.tabs[selected]);
     if (selected !== 'collapse' && typeof this.tabs[selected] !== 'undefined') {
       // Evict the container first.
       if (this.currentTab) {

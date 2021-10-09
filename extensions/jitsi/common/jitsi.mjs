@@ -94,7 +94,7 @@ class JitsiHandler {
     try {
       await Promise.all(this.localTracks.map(track => track.dispose()));
     } catch (e) {
-      console.error(e);
+      console.error('Failed to drop current local tracks: ', e);
     }
     this.localTracks = [];
     $('#jitsi-local').empty();
@@ -106,11 +106,16 @@ class JitsiHandler {
       });
       await this.onLocalTracks(tracks);
     } catch (e) {
+      console.error('Failed to create local tracks: ', e);
       if (!isWebcam) {
         // something goes wrong, switch back to video.
-        this.createLocalTracks(true);
+        console.warning('Fall back to video');
+        try {
+          this.createLocalTracks(true);
+        } catch (e) {
+          console.error('Fall back to video failed: ', e);
+        }
       }
-      console.error(e);
     }
   }
 
@@ -479,7 +484,7 @@ class JitsiHandler {
         }
       };
     } catch (e) {
-      console.error(e);
+      console.error('Failed to setup audio volume meter: ', e);
     }
 
 
@@ -487,7 +492,7 @@ class JitsiHandler {
       try {
         volumeCallback();
       } catch (e) {
-        console.error(e);
+        console.error('Volume metering failed in volumeCallback(): ', e);
         clearInterval(this.volumeMeterIntervalId);
       }
     }, 100);

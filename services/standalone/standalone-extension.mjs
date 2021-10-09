@@ -20,13 +20,6 @@ import GameState from '../../common/gamelib/game-state.mjs';
 import ExtensionManager from '../../common/extlib/extension-manager.mjs';
 
 async function standaloneExtensionServer() {
-  /* Redis integration */
-  // TODO: Uncomment once configuration for redis is done.
-  // redisClient = redis.createClient();
-  // redisClient.on('error', (err) => {
-  //   console.error(err);
-  // });
-
   /* Create all utility classes */
   const rpcDirectory = new MultiProcessRPCDirectory();
   await rpcDirectory.asyncConstruct();
