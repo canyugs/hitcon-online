@@ -207,16 +207,18 @@ class JitsiHandler {
   }
 
   onRemoteTrackRemove(track) {
-    console.log('track remove', track.getId());
+    if (track.getParticipantId() === null) return;
+
+    const trackId = `${track.getParticipantId()}${track.getType()}${track.getId()}`;
     try {
-      track.detach($(`#${track.getParticipantId()}${track.getType()}${track.getId()}`));
+      track.detach($(`#${trackId}`));
     } catch (e) {
       // An error is expected: https://github.com/jitsi/lib-jitsi-meet/issues/1054
       // It seems that we can safely ignore the error.
       // console.error(e);
     }
 
-    $(`#${track.getParticipantId()}${track.getType()}${track.getId()}`).remove();
+    $(`#${trackId}`).remove();
   }
 
   /**
