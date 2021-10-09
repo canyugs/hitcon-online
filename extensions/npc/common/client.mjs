@@ -79,7 +79,7 @@ class SingleNPC extends InteractiveObjectClientBaseClass {
     }
 
     const interactFunction = () => {
-      helper.callC2sAPI('npc', 'startInteraction', 500, npcName);
+      helper.callC2sAPI('npc', 'startInteraction', this.helper.defaultTimeout, npcName);
     };
 
     super(helper, initialPosition, displayConfig, interactFunction);
@@ -108,8 +108,8 @@ class Client {
   async gameStart() {
     const listOfNPCs = await this.getListOfNPCs();
     for (const npcName of listOfNPCs) {
-      const initialPosition = MapCoord.fromObject(await this.helper.callC2sAPI('npc', 'getInitialPosition', 500, npcName));
-      const displayConfig = await this.helper.callC2sAPI('npc', 'getDisplayInfo', 500, npcName);
+      const initialPosition = MapCoord.fromObject(await this.helper.callC2sAPI('npc', 'getInitialPosition', this.helper.defaultTimeout, npcName));
+      const displayConfig = await this.helper.callC2sAPI('npc', 'getDisplayInfo', this.helper.defaultTimeout, npcName);
       const npc = new SingleNPC(this.helper, npcName, initialPosition, displayConfig);
       this.NPCs.set(npcName, npc);
     }
@@ -120,7 +120,7 @@ class Client {
    * @return {Array}
    */
   async getListOfNPCs() {
-    return await this.helper.callC2sAPI('npc', 'getListOfNPCs', 500);
+    return await this.helper.callC2sAPI('npc', 'getListOfNPCs', this.helper.defaultTimeout);
   }
 }
 

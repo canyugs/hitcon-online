@@ -75,10 +75,10 @@ class Client {
     this.modal = new TerminalModal(this.helper.mainUI);
     this.modal.registerCallbacks(this.setupPty.bind(this), this.cleanup.bind(this));
 
-    const listOfTerminals = await this.helper.callC2sAPI('escape-game', 'getListOfTerminals', 500);
+    const listOfTerminals = await this.helper.callC2sAPI('escape-game', 'getListOfTerminals', this.helper.defaultTimeout);
     for (const terminalId of listOfTerminals) {
-      const initialPosition = MapCoord.fromObject(await this.helper.callC2sAPI('escape-game', 'getTerminalInitialPosition', 500, terminalId));
-      const displayConfig = await this.helper.callC2sAPI('escape-game', 'getTerminalDisplayInfo', 500, terminalId);
+      const initialPosition = MapCoord.fromObject(await this.helper.callC2sAPI('escape-game', 'getTerminalInitialPosition', this.helper.defaultTimeout, terminalId));
+      const displayConfig = await this.helper.callC2sAPI('escape-game', 'getTerminalDisplayInfo', this.helper.defaultTimeout, terminalId);
       this.terminals.set(terminalId, new TerminalObject(this.helper, terminalId, initialPosition, displayConfig));
     }
 
@@ -91,7 +91,7 @@ class Client {
    * Create a new room.
    */
   async createRoom() {
-    const result = await this.helper.callC2sAPI('escape-game', 'createRoom', 5000);
+    const result = await this.helper.callC2sAPI('escape-game', 'createRoom', this.helper.defaultTimeout);
     console.log('create escape-game room', result);
     this.roomId = result;
   }
@@ -100,7 +100,7 @@ class Client {
    * Join room
    */
   async joinRoom() {
-    const result = await this.helper.callC2sAPI('escape-game', 'joinRoom', 5000, this.roomId);
+    const result = await this.helper.callC2sAPI('escape-game', 'joinRoom', this.helper.defaultTimeout, this.roomId);
     console.log('join escape-game room', result);
     this.roomId = result;
   }
@@ -193,7 +193,7 @@ class Client {
 
     const interactFunction = () => {
       console.log('terminal start interaction.');
-      helper.callC2sAPI('escape-game', 'startInteraction', 500, terminalId);
+      helper.callC2sAPI('escape-game', 'startInteraction', this.helper.defaultTimeout, terminalId);
     };
 
     super(helper, initialPosition, displayConfig, interactFunction);

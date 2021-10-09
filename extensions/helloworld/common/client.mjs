@@ -28,12 +28,12 @@ class Client {
   }
 
   async testCallServer1() {
-    const result = await this.helper.callC2sAPI('helloworld', 'trySayHello', 5000, 'client', 'server');
+    const result = await this.helper.callC2sAPI('helloworld', 'trySayHello', this.helper.defaultTimeout, 'client', 'server');
     console.log(`Server said ${JSON.stringify(result)} after we called trySayHello()`);
   }
 
   async testCallServer2() {
-    const result = await this.helper.callC2sAPI(null, 'doMultiplyAccumulate', 5000, 3, 7, 2);
+    const result = await this.helper.callC2sAPI(null, 'doMultiplyAccumulate', this.helper.defaultTimeout, 3, 7, 2);
     console.log(`doMultiplyAccumulate(3, 7, 2) = ${result}`);
   }
 }

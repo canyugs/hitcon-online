@@ -22,7 +22,7 @@ class Client {
 
   requestChangeCellset() {
     console.log('requestChangeCellset');
-    this.helper.callC2sAPI('cellsettest', 'changeCellSet', null, 5000);
+    this.helper.callC2sAPI('cellsettest', 'changeCellSet', null, this.helper.defaultTimeout);
   }
 }
 

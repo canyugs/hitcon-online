@@ -33,8 +33,8 @@ class Client {
    * This function should be called by the client whenever the game starts.
    */
   async gameStart() {
-    this.itemInfo = await this.helper.callC2sAPI('items', 'getItemInfo', 5000);
-    this.items = await this.helper.callC2sAPI('items', 'getAllItems', 5000);
+    this.itemInfo = await this.helper.callC2sAPI('items', 'getItemInfo', this.helper.defaultTimeout);
+    this.items = await this.helper.callC2sAPI('items', 'getAllItems', this.helper.defaultTimeout);
   }
 
   /*
@@ -59,7 +59,7 @@ class Client {
     }
     this.items[itemName].amount -= amount;
     /* Notify the server that a certain amount of items have been given */
-    const result = await this.helper.callC2sAPI('items', 'giveReceiveItem', 5000, toPlayerID, itemName, amount);
+    const result = await this.helper.callC2sAPI('items', 'giveReceiveItem', this.helper.defaultTimeout, toPlayerID, itemName, amount);
   }
 
   /*
@@ -95,7 +95,7 @@ class Client {
       console.log("Item does not exist");
       return;
     }
-    const result = await this.helper.callC2sAPI('items', 'useItem', 5000, itemName, amount);
+    const result = await this.helper.callC2sAPI('items', 'useItem', this.helper.defaultTimeout, itemName, amount);
   }
 
   /*
@@ -104,7 +104,7 @@ class Client {
   */
   async dropItem(itemName, amount) {
     /* Check if the player is closed to a dropped item */
-    const result = await this.helper.callC2sAPI('items', 'dropItem', 5000, this.helper.gameClient.playerInfo.mapCoord, this.helper.gameClient.playerInfo.facing, itemName, amount);
+    const result = await this.helper.callC2sAPI('items', 'dropItem', this.helper.defaultTimeout, this.helper.gameClient.playerInfo.mapCoord, this.helper.gameClient.playerInfo.facing, itemName, amount);
   }
 
   /*
@@ -114,7 +114,7 @@ class Client {
    */
   async pickupItem(itemName, amount) {
     /* Check if the player is closed to a dropped item */
-    const result = await this.helper.callC2sAPI('items', 'pickupItem', 5000, itemName, amount);
+    const result = await this.helper.callC2sAPI('items', 'pickupItem', this.helper.defaultTimeout, itemName, amount);
   }
 
   /*
@@ -127,7 +127,7 @@ class Client {
   }
 
   async disconnect() {
-    const result = await this.helper.callC2sAPI('items', 'disconnect', 5000);
+    const result = await this.helper.callC2sAPI('items', 'disconnect', this.helper.defaultTimeout);
   }
 };
 

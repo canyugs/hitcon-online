@@ -74,7 +74,7 @@ class Client {
    * @param uid User id
    */
   async notifyUpdatePoints(uid) {
-    return await this.helper.callC2sAPI('point-system', 'notifyUpdatePoints', 5000, uid);
+    return await this.helper.callC2sAPI('point-system', 'notifyUpdatePoints', this.helper.defaultTimeout, uid);
   }
 
   /**
