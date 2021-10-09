@@ -169,7 +169,7 @@ class Client {
     }
     // If we get here, there's no meeting.
     // Get the password of the meeting
-    let password = await this.helper.callC2sAPI(null, 'getPassword', 5000, {'meetingName': meetingName});
+    let password = await this.helper.callC2sAPI(null, 'getPassword', this.helper.defaultTimeout, {'meetingName': meetingName});
     if (!password) {
       password = null;
     }

@@ -42,7 +42,7 @@ class Client {
   async placeBomb(event) {
     if (event.key === keyboardMapping.place) {
       // TODO: reduce latency using the same mechanism of player moving
-      const success = await this.helper.callC2sAPI('bombman', 'placeBomb', 500, this.helper.gameClient.playerInfo.mapCoord);
+      const success = await this.helper.callC2sAPI('bombman', 'placeBomb', this.helper.defaultTimeout, this.helper.gameClient.playerInfo.mapCoord);
       if (success) {
         // TODO: update player cool down
       }

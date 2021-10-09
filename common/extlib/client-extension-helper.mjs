@@ -18,6 +18,7 @@ class ClientExtensionHelper {
     this.socket = socket;
     this.clientAPIs = {};
     this.responseTable = {};
+    this.defaultTimeout = 5000;
   }
 
   /**

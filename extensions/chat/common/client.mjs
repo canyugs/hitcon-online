@@ -53,11 +53,11 @@ class Client {
           client.handleCommand(chat_message_id.value.trim());
           // TODO(zeze-zeze): Use drop down menu to replace it
         } else if (message_to_id.value.toLowerCase() == 'nearby') {
-          await client.helper.callC2sAPI('chat', 'nearbyMessage', 5000, {'msg': chat_message_id.value});
+          await client.helper.callC2sAPI('chat', 'nearbyMessage', this.helper.defaultTimeout, {'msg': chat_message_id.value});
         } else if (message_to_id.value) {
-          await client.helper.callC2sAPI('chat', 'privateMessage', 5000, {'msg_to': message_to_id.value, 'msg': chat_message_id.value});
+          await client.helper.callC2sAPI('chat', 'privateMessage', this.helper.defaultTimeout, {'msg_to': message_to_id.value, 'msg': chat_message_id.value});
         } else {
-          await client.helper.callC2sAPI('chat', 'broadcastMessage', 5000, {'msg': chat_message_id.value});
+          await client.helper.callC2sAPI('chat', 'broadcastMessage', this.helper.defaultTimeout, {'msg': chat_message_id.value});
         }
         chat_message_id.value = '';
       }
@@ -95,7 +95,7 @@ Usage: !/<Command> <arg1> <arg2> ...
         document.getElementById('message_history').innerHTML += '<span>Invalid Coordinate</span><br>';
         this.listCommand();
       } else {
-        this.helper.callC2sAPI(null, 'teleport', 5000, mapCoord);
+        this.helper.callC2sAPI(null, 'teleport', this.helper.defaultTimeout, mapCoord);
       }
     } else if (cmd.split(' ')[0] === '!/announce') { // TODO: restrict this using permission to admin
       const msg = cmd.substring(10);
@@ -103,11 +103,11 @@ Usage: !/<Command> <arg1> <arg2> ...
         document.getElementById('message_history').innerHTML += '<span>Invalid message</span><br>';
         this.listCommand();
       } else {
-        //this.helper.callC2sAPI(null, 'announce', 5000, msg);
-        this.helper.callC2sAPI(null, 'broadcastMessage', 5000, {'msg': msg, 'timeout': 25000, 'type': 'announcement'});
+        //this.helper.callC2sAPI(null, 'announce', this.helper.defaultTimeout, msg);
+        this.helper.callC2sAPI(null, 'broadcastMessage', this.helper.defaultTimeout, {'msg': msg, 'timeout': 25000, 'type': 'announcement'});
       }
     } else {
-      const result = await Promise.resolve(this.helper.callC2sAPI(null, 'otherCommands', 5000));
+      const result = await Promise.resolve(this.helper.callC2sAPI(null, 'otherCommands', this.helper.defaultTimeout));
       if (result.state) {
         document.getElementById('message_history').innerHTML += '<span>' + this.HTMLEncode(result) + '</span><br>';
       } else {
