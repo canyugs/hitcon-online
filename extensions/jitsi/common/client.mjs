@@ -125,7 +125,12 @@ class Client {
   /**
    * Start the Jitsi Meeeting
    */
-  startMeeting(meetingName, password) {
+  async startMeeting(meetingName, password) {
+    // if this.jitsiObj is set, the previous meeting has not yet ended.
+    while (this.jitsiObj) {
+      await new Promise(r => setTimeout(r, 1000));
+    }
+
     this.jitsiObj = new JitsiHandler(meetingName, password,
       this.helper.gameClient.playerInfo.displayName);
     this.currentMeeting = meetingName;
