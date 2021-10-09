@@ -459,9 +459,9 @@ class JitsiHandler {
         this.room?.setLocalParticipantProperty('volume', averageVolumeParsed.toString());
 
         if (parseInt(averageVolumeParsed) >= VOICE_INDICATOR_THRESHOLD) {
-          $(`#jitsi-local > .jitsi-user-audio`).addClass('active');
+          $(`#jitsi-local`).addClass('speaking');
         } else {
-          $(`#jitsi-local > .jitsi-user-audio`).removeClass('active');
+          $(`#jitsi-local`).removeClass('speaking');
         }
       };
     } catch (e) {
@@ -490,9 +490,9 @@ class JitsiHandler {
     console.log('volume recieved:', user.getId(), propertyValue);
 
     if (parseInt(propertyValue) >= 1) {
-      $(`#jitsi-${user.getId()}-container > .jitsi-user-audio`).addClass('active');
+      $(`#jitsi-${user.getId()}-container`).addClass('speaking');
     } else {
-      $(`#jitsi-${user.getId()}-container > .jitsi-user-audio`).removeClass('active');
+      $(`#jitsi-${user.getId()}-container`).removeClass('speaking');
     }
   }
 }
