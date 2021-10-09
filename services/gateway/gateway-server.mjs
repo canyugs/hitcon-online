@@ -30,13 +30,6 @@ import GameState from '../../common/gamelib/game-state.mjs';
 import ExtensionManager from '../../common/extlib/extension-manager.mjs';
 
 async function mainServer() {
-  /* Redis integration */
-  // TODO: Uncomment once configuration for redis is done.
-  // redisClient = redis.createClient();
-  // redisClient.on('error', (err) => {
-  //   console.error(err);
-  // });
-
   const corsValidation = function (origin, callback) {
     // https://github.com/expressjs/cors/issues/71
     if (origin === undefined) {

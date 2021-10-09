@@ -62,8 +62,7 @@ class MultiProcessRPCDirectory extends Directory {
         server.start();
         console.log("The gRPC server for " + name + " is running on port " + port + ".");
       } catch (err) {
-        console.error('Failed to create gRPC server.');
-        console.error(err);
+        console.error('Failed to create gRPC server: ', err);
         process.exit();
       }
     });

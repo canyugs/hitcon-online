@@ -15,7 +15,6 @@ class Modal {
   constructor(mainUI, dom) {
     this.mainUI = mainUI;
     this.dom = dom;
-    console.log(this.dom);
     // Some sensible default value.
     this.width = '60%';
     this.height = '50%';

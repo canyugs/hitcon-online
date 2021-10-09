@@ -267,7 +267,7 @@ class Room {
         }
         this.terminals.set(defaultTerminal.terminalId, ret.containerId);
       } catch (e) {
-        console.error(e);
+        console.error('Failed to start container: ', e);
       }
     }
   }
