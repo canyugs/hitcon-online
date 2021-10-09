@@ -394,7 +394,7 @@ class JitsiHandler {
         track.mute();
 
         $(`#jitsi-local > .jitsi-user-${track.getType()}`).addClass(`jitsi-user-${track.getType()}--close`);
-        $(`#local${track.getType()}`).css('display', 'none');
+        $(`#jitsi-local-track-${track.getType()}`).css('display', 'none');
       }
     }
   }
@@ -410,7 +410,7 @@ class JitsiHandler {
 
         $(`#jitsi-local > .jitsi-user-${track.getType()}`).removeClass(`jitsi-user-${track.getType()}--close`);
         if (track.getType() === 'video') {
-          $(`#local${track.getType()}`).css('display', 'block');
+          $(`#jitsi-local-track-${track.getType()}`).css('display', 'block');
         }
       }
     }
