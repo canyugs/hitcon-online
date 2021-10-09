@@ -58,7 +58,6 @@ export default class RnnoiseProcessor {
      * @param {Object} wasmInterface - WebAssembly module interface that exposes rnnoise functionality.
      */
     constructor(wasmInterface) {
-        console.log("============== RNNoise init ===============");
         // Considering that we deal with dynamic allocated memory employ exception safety strong guarantee
         // i.e. in case of exception there are no side effects.
         try {

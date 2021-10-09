@@ -306,8 +306,7 @@ class JitsiHandler {
       {
         e2eping: {
           pingInterval: -1
-        },
-        createVADProcessor: createRnnoiseProcessor
+        }
       }
     );
     this.room.on(JitsiMeetJS.events.conference.TRACK_ADDED, this.onRemoteTrack.bind(this));
