@@ -1,0 +1,3 @@
+`RnnoiseProcessor.js` and `index.js` are reproduced from the [official Jitsi Meet client](https://github.com/jitsi/jitsi-meet/blob/master/react/features/stream-effects/rnnoise), published under [Apache License 2.0](https://github.com/jitsi/jitsi-meet/blob/master/LICENSE).
+
+`rnnoise-wasm.js` and `rnnoise.wasm` are reproduced from [rnnoise-wasm](https://github.com/jitsi/rnnoise-wasm), published under [Apache License 2.0](https://github.com/jitsi/rnnoise-wasm/blob/master/LICENSE).
