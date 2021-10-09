@@ -1,6 +1,8 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
+import {createRnnoiseProcessor} from './rnnoise/index.js';
+
 const VOICE_INDICATOR_THRESHOLD = 1;
 
 /**
@@ -102,7 +104,7 @@ class JitsiHandler {
       const tracks = await JitsiMeetJS.createLocalTracks({
         devices: ['audio', isWebcam ? 'video' : 'desktop']
       });
-      this.onLocalTracks(tracks);
+      await this.onLocalTracks(tracks);
     } catch (e) {
       if (!isWebcam) {
         // something goes wrong, switch back to video.
@@ -116,7 +118,7 @@ class JitsiHandler {
    * Handles new local tracks.
    * @param {JitsiTrack} tracks Array with JitsiTrack objects
    */
-  onLocalTracks(tracks) {
+  async onLocalTracks(tracks) {
     console.log("onLocalTracks", tracks);
 
     if ($('#jitsi-local').is(':empty')) {
@@ -153,6 +155,10 @@ class JitsiHandler {
         $(`#${trackId}`).css('display', 'none');
       } else {
         $(`#jitsi-local > .jitsi-user-${track.getType()}`).removeClass(`jitsi-user-${track.getType()}--close`);
+      }
+
+      if (track.getType() === 'audio') {
+        JitsiMeetJS.createTrackVADEmitter(track.getDeviceId(), 4096, await createRnnoiseProcessor());
       }
 
       if (this.isJoined) {
@@ -295,7 +301,15 @@ class JitsiHandler {
    * This is called when connection is established successfully
    */
   onConnectionSuccess() {
-    this.room = this.connection.initJitsiConference(this.meetingName.toLowerCase(), {e2eping: {pingInterval: -1}});
+    this.room = this.connection.initJitsiConference(
+      this.meetingName.toLowerCase(),
+      {
+        e2eping: {
+          pingInterval: -1
+        },
+        createVADProcessor: createRnnoiseProcessor
+      }
+    );
     this.room.on(JitsiMeetJS.events.conference.TRACK_ADDED, this.onRemoteTrack.bind(this));
     this.room.on(JitsiMeetJS.events.conference.TRACK_REMOVED, this.onRemoteTrackRemove.bind(this));
     this.room.on(
@@ -446,6 +460,7 @@ class JitsiHandler {
         // If the audio track is muted, return 0.
         if (this.localTracks.filter(track => track.getType() === 'audio' && !track.isMuted()).length === 0) {
           this.room?.setLocalParticipantProperty('volume', '0');
+          $(`#jitsi-local`).removeClass('speaking');
           return;
         }
 
