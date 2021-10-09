@@ -1,9 +1,7 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
-import {checkPlayerMove} from '/static/common/gamelib/move-check.mjs';
 import {Player, PlayerSyncMessage} from '/static/common/gamelib/player.mjs';
-import {MapCoord} from '/static/common/maplib/map.mjs';
 
 /**
  * The game client. This is in charge of interacting with the gateway service
@@ -20,12 +18,13 @@ class GameClient {
    * state.
    * @constructor
    */
-  constructor(socket, gameMap, gameState, mapRenderer, inputManager, extMan, mainUI) {
+  constructor(socket, gameMap, gameState, mapRenderer, inputManager, movementManager, extMan, mainUI) {
     this.socket = socket;
     this.gameMap = gameMap;
     this.gameState = gameState;
     this.mapRenderer = mapRenderer;
     this.inputManager = inputManager;
+    this.movementManager = movementManager;
     this.extMan = extMan;
     this.mainUI = mainUI;
     this.gameStarted = false;
@@ -128,52 +127,6 @@ class GameClient {
           detail: {gameClient: this},
         },
     ));
-  }
-
-  /**
-   * This is called when user presses a direction key.
-   * @param {string} direction - 'U', 'D', 'L', R'
-   */
-  async onDirection(direction) {
-    console.debug(`On direction ${direction}`);
-    const {x, y} = this.playerInfo.mapCoord;
-    if (direction == 'U') {
-      await this.moveTo(x, y+1, 'U');
-    } else if (direction == 'D') {
-      await this.moveTo(x, y-1, 'D');
-    } else if (direction == 'L') {
-      await this.moveTo(x-1, y, 'L');
-    } else if (direction == 'R') {
-      await this.moveTo(x+1, y, 'R');
-    }
-  }
-
-  /**
-   * Emit message to move to a location.
-   * @param {Number} x
-   * @param {Number} y
-   * @param {string} facing
-   */
-  async moveTo(x, y, facing) {
-    const msg = PlayerSyncMessage.fromObject({
-      playerID: this.playerInfo.playerID,
-      mapCoord: new MapCoord(this.playerInfo.mapCoord.mapName, x, y),
-      facing: facing,
-    });
-    if (!checkPlayerMove(this.playerInfo, msg, this.gameMap)) {
-      return;
-    }
-    this.playerInfo.lastMovingTime = Date.now();
-    this.socket.emit('playerUpdate', msg);
-  }
-
-  /**
-   * Return the GameState object. This will allow the caller to query the
-   * current state of the map.
-   * @return {GameState} gameState - The GameState object.
-   */
-  GameState() {
-    return this.gameState;
   }
 }
 

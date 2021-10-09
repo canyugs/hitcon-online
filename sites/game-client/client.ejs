@@ -139,6 +139,7 @@ absolute URL.
       import GameClient from '/static/sites/game-client/game-client.mjs';
       import MapRenderer from '/static/sites/game-client/map-renderer.mjs';
       import InputManager from '/static/sites/game-client/input-manager.mjs';
+      import MovementManager from '/static/sites/game-client/movement-manager.mjs';
       import ClientExtensionManager from '/static/common/extlib/client-extension-manager.mjs';
       import MainUI from '/static/sites/game-client/ui/main-ui.mjs';
       import MapRendererOverlay from '/static/sites/game-client/ui/map-renderer-overlay.mjs';
@@ -203,7 +204,8 @@ absolute URL.
         game.extMan = new ClientExtensionManager(game.socket, game.extensionList);
         game.mapRenderer = new MapRenderer(document.querySelector('#mapcanvas'), game.map, game.gameState);
         game.inputManager = new InputManager(game.mapRenderer);
-        game.gameClient = new GameClient(game.socket, game.map, game.gameState, game.mapRenderer, game.inputManager, game.extMan, game.mainUI);
+        game.movementManager = new MovementManager(game.socket, game.inputManager)
+        game.gameClient = new GameClient(game.socket, game.map, game.gameState, game.mapRenderer, game.inputManager, game.movementManager, game.extMan, game.mainUI);
 
         game.gameClient.initialize(game.token);
         game.mapRenderer.setGameClient(game.gameClient);
