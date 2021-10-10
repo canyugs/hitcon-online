@@ -18,3 +18,6 @@ run/small_data
 
 # other
 **/.DS_Store
+
+# map editor
+*.tiled-session
