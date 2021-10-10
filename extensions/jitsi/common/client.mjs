@@ -127,6 +127,8 @@ class Client {
    */
   async startMeeting(meetingName, password) {
     // if this.jitsiObj is set, the previous meeting has not yet ended.
+    // TODO: Probably use Promise instead.
+    // We may need to handle the case that `startMeeting` is called multiple times.
     while (this.jitsiObj) {
       await new Promise(r => setTimeout(r, 1000));
     }
