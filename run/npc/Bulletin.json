@@ -1,6 +1,6 @@
 {
   "enabled": true,
-  "initialPosition": {"mapName": "world1", "x": 15, "y": 15},
+  "initialPosition": {"mapName": "world1", "x": 16, "y": 9},
   "display": [
     {
       "zIndex": 11,

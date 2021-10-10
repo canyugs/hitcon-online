@@ -58,6 +58,7 @@ class MapRenderer {
     // 'playerImage' and 'playerName' are layers defined and used only by MapRenderer
     this.registerCustomizedLayerToDraw(LAYER_PLAYER_IMAGE.zIndex, LAYER_PLAYER_IMAGE.layerName, '_drawManyCharacterImage', this.gameState.players);
     this.registerCustomizedLayerToDraw(LAYER_PLAYER_NAME.zIndex, LAYER_PLAYER_NAME.layerName, '_drawManyCharacterName', this.gameState.players);
+    this.registerCustomizedLayerToDraw(1, 'object');
   }
 
   /**
