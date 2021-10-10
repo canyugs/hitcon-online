@@ -204,7 +204,7 @@ absolute URL.
         game.extMan = new ClientExtensionManager(game.socket, game.extensionList);
         game.mapRenderer = new MapRenderer(document.querySelector('#mapcanvas'), game.map, game.gameState);
         game.inputManager = new InputManager(game.mapRenderer);
-        game.movementManager = new MovementManager(game.socket, game.inputManager)
+        game.movementManager = new MovementManager(game.socket, game.gameState, game.inputManager)
         game.gameClient = new GameClient(game.socket, game.map, game.gameState, game.mapRenderer, game.inputManager, game.movementManager, game.extMan, game.mainUI);
 
         game.gameClient.initialize(game.token);

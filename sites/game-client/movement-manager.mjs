@@ -13,10 +13,12 @@ class MovementManager {
    * Construct a movement manager
    * @constructor
    * @param {Socket} socket - A socket.io socket.
+   * @param {GameState} gameState
    * @param {InputManager} inputManager
    */
-  constructor(socket, inputManager) {
+  constructor(socket, gameState, inputManager) {
     this.socket = socket;
+    this.gameState = gameState;
     this.inputManager = inputManager;
 
     this.gameClient = null;
@@ -29,7 +31,30 @@ class MovementManager {
         const {x, y} = this.gameClient.playerInfo.mapCoord;
         this.moveTo(x + dx, y + dy, direction);
       });
+
+      this.gameState.registerOnPlayerUpdate((msg) => {
+        const player = this.gameClient.playerInfo;
+        if (msg.playerID !== player.playerID) {
+          return;
+        }
+
+        // return if the message is outdated
+        if (msg.clientTime < this.serverTime) {
+          return;
+        }
+
+        this.serverTime = msg.clientTime + 1;
+        if (msg.updateSuccess) {
+          return;
+        }
+
+        // the update at msg.clientTime is not successful, revert it
+        player.updateFromMessage(msg);
+      });
     });
+
+    this.clientTime = 0;
+    this.serverTime = 0;
   }
 
   /**
@@ -44,11 +69,12 @@ class MovementManager {
       playerID: player.playerID,
       mapCoord: new MapCoord(player.mapCoord.mapName, x, y),
       facing: facing,
+      clientTime: this.clientTime++,
     });
     if (!checkPlayerMove(player, msg, this.gameClient.gameMap)) {
       return;
     }
-    player.lastMovingTime = Date.now();
+    player.updateFromMessage(msg);
     this.socket.emit('playerUpdate', msg);
   }
 }

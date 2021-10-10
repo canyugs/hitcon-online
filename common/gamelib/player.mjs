@@ -177,7 +177,7 @@ class Player {
  * Note that the ALL the fields in this class can be modified by user.
  */
 class PlayerSyncMessage {
-  constructor(playerID, mapCoord, facing, displayName, displayChar, removed) {
+  constructor(playerID, mapCoord, facing, displayName, displayChar, removed, clientTime, updateSuccess) {
     if (playerID === undefined) {
       console.error(`'playerID' of class 'PlayerSyncMessage' should not be undefined.`);
       return;
@@ -189,6 +189,8 @@ class PlayerSyncMessage {
     this.displayName = displayName;
     this.displayChar = displayChar;
     this.removed = removed ?? false;
+    this.clientTime = clientTime;
+    this.updateSuccess = updateSuccess; // used by server to tell client whether success or not
   }
 
   /**
@@ -204,6 +206,8 @@ class PlayerSyncMessage {
     if (this.displayName !== undefined) ret.displayName = this.displayName;
     if (this.displayChar !== undefined) ret.displayChar = this.displayChar;
     if (this.removed !== undefined) ret.removed = this.removed;
+    if (this.clientTime !== undefined) ret.clientTime = this.clientTime;
+    if (this.updateSuccess !== undefined) ret.updateSuccess = this.updateSuccess;
     return ret;
   }
 
@@ -219,6 +223,8 @@ class PlayerSyncMessage {
     if (obj.displayName !== undefined) ret.displayName = obj.displayName;
     if (obj.displayChar !== undefined) ret.displayChar = obj.displayChar;
     if (obj.removed !== undefined) ret.removed = obj.removed;
+    if (obj.clientTime !== undefined) ret.clientTime = obj.clientTime;
+    if (obj.updateSuccess !== undefined) ret.updateSuccess = obj.updateSuccess;
     return ret;
   }
 }

@@ -262,16 +262,26 @@ class GatewayService {
    * @param {PlayerSyncMessage} updateMsg - The update message.
    */
   async onPlayerUpdate(socket, updateMsg) {
+    updateMsg.updateSuccess = true;
+    const failOnPlayerUpdate = (socket) => {
+      const msg = PlayerSyncMessage.fromObject(socket.playerData);
+      msg.updateSuccess = false;
+      socket.emit('playerUpdate', msg);
+    };
+
     if (socket.playerID !== updateMsg.playerID) {
       console.error(`Player '${updateMsg.playerID}' tries to update player '${socket.playerID}'s data, which is invalid.`);
       return;
     }
 
     if (!checkPlayerMove(socket.playerData, updateMsg, this.gameMap)) {
+      failOnPlayerUpdate(socket);
       return;
     }
 
-    await this._teleportPlayerInternal(socket, updateMsg);
+    if (!(await this._teleportPlayerInternal(socket, updateMsg))) {
+      failOnPlayerUpdate(socket);
+    }
   }
 
   /**
