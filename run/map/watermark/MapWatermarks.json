@@ -8,10 +8,9 @@
     "sHeight":634,
     "sWidth":634,
     "dWidth":200,
-    "dHeight":200,
+    "dHeight":150,
     "mapCoords":[
-      {"mapName":"world1", "x":10, "y":4},
-      {"mapName":"world1", "x":3, "y":9}
+      {"mapName":"world1", "x":13, "y":7}
     ],
     "position":"topleft"
   }
