@@ -1,6 +1,16 @@
 {
     "automappingRulesFile": "",
     "commands": [
+        {
+            "arguments": "./scripts/updateConfig.mjs",
+            "command": "/usr/local/bin/node",
+            "enabled": true,
+            "name": "updateConfig",
+            "saveBeforeExecute": true,
+            "shortcut": null,
+            "showOutput": true,
+            "workingDirectory": "/Users/can/Workspace/hitcon/hitcon-online/tiled-maps"
+        }
     ],
     "extensionsPath": "extensions",
     "folders": [
