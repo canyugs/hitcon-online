@@ -108,6 +108,13 @@ class ClientExtensionManager {
     await Promise.all(p);
   }
 
+  getExtObj(extName) {
+    if (extName in this.extObjects) {
+      return this.extObjects[extName];
+    }
+    return undefined;
+  }
+
   /**
    * Start the browser side of an extension.
    * This should be called after loadExtensionClient().

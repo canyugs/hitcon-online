@@ -124,6 +124,13 @@ class ClientExtensionHelper {
   getToken() {
     return this.extMan.gameClient.token;
   }
+
+  /**
+   * Return the client extension object for the given extension name.
+   */
+  getExtObj(extName) {
+    return this.extMan.getExtObj(extName);
+  }
 };
 
 export default ClientExtensionHelper;
