@@ -288,6 +288,8 @@ class Standalone {
     } catch (e) {
       // ignore if recipient is offline
     }
+
+    return {'ok': true};
   }
 
   /**
@@ -320,6 +322,8 @@ class Standalone {
     } catch (e) {
       // ignore if player becomes offline for some reason
     }
+
+    return {'ok': true};
   }
 
   /**
@@ -390,6 +394,8 @@ class Standalone {
     this.gameMap.updateDynamicCellSet(mapCoord.mapName,
         'droppedItem' + mapCoord.mapName,
         Array.from(Object.values(this.droppedItemCell)));
+
+    return {'ok': true};
   }
 
   /**
@@ -428,6 +434,8 @@ class Standalone {
     this.gameMap.updateDynamicCellSet(mapCoord.mapName,
         'droppedItem' + itemName.toUpperCase(),
         Array.from(Object.values(this.droppedItemCell)));
+
+    return {'ok': true};
   }
 
   /**
