@@ -159,6 +159,9 @@ class ExtensionHelperBase {
    * @return {object} result - The result from the call.
    */
   async callS2sAPI(extName, methodName, ...args) {
+    if (extName === null || extName === undefined) {
+      extName = this.name;
+    }
     if (typeof extName != 'string') {
       console.error(`extName for callS2sAPI() should be a string`);
       return {'error': 'Invalid extName'};
@@ -171,6 +174,16 @@ class ExtensionHelperBase {
     const result = await this.rpcHandler.callRPC(extService, 'callS2s',
         this.name, methodName, args);
     return result;
+  }
+
+  /**
+   * Return true if the given extension is running.
+   * 
+   * @param {String} extName - The name of the extension.
+   */
+  async isExtRunning(extName) {
+    const extService = await this.dir.getExtensionServiceName(extName);
+    return (typeof extService === 'string');
   }
 
   /**
