@@ -504,6 +504,13 @@ class Standalone {
   }
 
   /**
+   * Return the item infos for all items.
+   */
+  async s2s_GetItemInfos(srcExtName) {
+    return this.itemInfo;
+  }
+
+  /**
    * Return the ejs partials for the client part of this extension.
    * @return {object} partials - An object, it could have the following:
    * inDiv - A string to the path of ejs partial for the location inDiv.
