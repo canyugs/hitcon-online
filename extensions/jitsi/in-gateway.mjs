@@ -18,6 +18,9 @@ class InGateway {
   constructor(helper) {
     void helper;
   }
+
+  async initialize() {
+  }
 }
 
 export default InGateway;
