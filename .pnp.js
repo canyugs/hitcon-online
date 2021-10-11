@@ -87,6 +87,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         "reference": "workspace:extensions/jitsi"
       },
       {
+        "name": "hitcon-online-notification",
+        "reference": "workspace:extensions/notification"
+      },
+      {
         "name": "hitcon-online-npc",
         "reference": "workspace:extensions/npc"
       },
@@ -146,6 +150,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
       ["hitcon-online-jitsi", ["workspace:extensions/jitsi"]],
       ["hitcon-online-main-server", ["workspace:services/main"]],
       ["hitcon-online-maplib", ["workspace:common/maplib"]],
+      ["hitcon-online-notification", ["workspace:extensions/notification"]],
       ["hitcon-online-npc", ["workspace:extensions/npc"]],
       ["hitcon-online-playerlist", ["workspace:extensions/playerlist"]],
       ["hitcon-online-point-system", ["workspace:extensions/point-system"]],
@@ -2518,6 +2523,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./common/maplib/",
           "packageDependencies": [
             ["hitcon-online-maplib", "workspace:common/maplib"]
+          ],
+          "linkType": "SOFT",
+        }]
+      ]],
+      ["hitcon-online-notification", [
+        ["workspace:extensions/notification", {
+          "packageLocation": "./extensions/notification/",
+          "packageDependencies": [
+            ["hitcon-online-notification", "workspace:extensions/notification"]
           ],
           "linkType": "SOFT",
         }]
