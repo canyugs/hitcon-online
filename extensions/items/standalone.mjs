@@ -431,6 +431,32 @@ class Standalone {
   }
 
   /**
+   * Give the playerID amount of item.
+   * @param String playerID - ID of the player.
+   * @param String itemName - The item name.
+   * @param Number amount - The amount to give.
+   * @return Object result - result.ok will be true if successful.
+   */
+  async s2s_AddItem(srcExtName, playerID, item, amount) {
+    const result = {};
+    result.ok = this._addItem(playerID, item, amount);
+    return result;
+  }
+
+  /**
+   * Take amount of item from playerID.
+   * @param String playerID - ID of the player.
+   * @param String itemName - The item name.
+   * @param Number amount - The amount to give.
+   * @return Object result - result.ok will be true if successful.
+   */
+  async s2s_TakeItem(srcExtName, playerID, item, amount) {
+    const result = {};
+    result.ok = this._takeItem(playerID, item, amount);
+    return result;
+  }
+
+  /**
    * Return the ejs partials for the client part of this extension.
    * @return {object} partials - An object, it could have the following:
    * inDiv - A string to the path of ejs partial for the location inDiv.
