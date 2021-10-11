@@ -92,6 +92,11 @@ class AuthServer {
         });
 
         this.app.get('/get_test_token', function(req, res) {
+            if (config.get('debug') !== true) {
+              console.warn('Trying to access /get_test_token on non-debug enviroment');
+              res.status(403).send('/get_test_token not available on non-debug enviroment');
+              return;
+            }
             function genRandomStr(l) {
               const sourceSet = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz';
               let result = '';
@@ -100,11 +105,12 @@ class AuthServer {
               }
               return result;
             }
+            const scopeStr = req.query.scope?req.query.scope:'';
             const payload = {};
             payload.iss = 'https://hitcon.org';
             payload.sub = genRandomStr(5);
             payload.iat = Math.floor(Date.now() / 1000);
-            payload.scope = ['point_system'];
+            payload.scope = scopeStr.split('|');
             const token = jwt.sign(payload, secret, {expiresIn: 60 * 60 * 24 * 365});
             res.cookie('token', token);
             res.json({
