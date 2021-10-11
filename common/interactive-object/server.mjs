@@ -312,6 +312,90 @@ class InteractiveObjectServerBaseClass {
   }
 
   /**
+   * Give the player an amount of items.
+   * @param {String} playerID
+   * @param {Object} kwargs - kwargs.amount specifies the amount of items to give.
+   *   kwargs.maxAmount specifies the maximum amount of this item the user should have. The user will be given up to kwargs.amount items until the user have kwargs.maxAmount.
+   *   kwargs.itemName - The item to give.
+   *   kwargs.next - The next state.
+   * @return {String} nextState - The next state.
+   */
+  async sf_giveItem(playerID, kwargs) {
+    let amount = kwargs.amount;
+    let maxAmount = kwargs.maxAmount;
+    let itemName = kwargs.itemName;
+
+    if (!Number.isInteger(amount)) amount = 1;
+    if (!Number.isInteger(maxAmount) || maxAmount <= 0) maxAmount = -1;
+
+    result = await this.helper.callS2sAPI('items', 'AddItem', playerID, itemName, amount, maxAmount);
+    if (result.ok !== true) {
+      console.error('items.AddItem() failed, maybe items ext is not running?')
+      return this.sf_exit(playerID, {next: this.dataStore.get(playerID)});
+    }
+
+    return kwargs.next;
+  }
+
+  /**
+   * Take amount of items from the player.
+   * @param {String} playerID
+   * @param {Object} kwargs - kwargs.amount specifies the amount the player should have and the amount to be taken.
+   *   kwargs.item specifies which item to check.
+   *   kwargs.haveItem specifies the state to go to if the player have the amount of specified items.
+   *   kwargs.noItem specifies the state to go to if the player don't have the amount of specified items.
+   * @return {String} nextState - The next state.
+   */
+  async sf_takeItem(playerID, kwargs) {
+    let amount = kwargs.amount;
+    let itemName = kwargs.itemName;
+
+    if (!Number.isInteger(amount)) amount = 1;
+
+    result = await this.helper.callS2sAPI('items', 'TakeItem', playerID, itemName, amount);
+    if (typeof result.error !== 'undefined' || typeof result.ok !== 'boolean') {
+      // Extension not running?
+      console.error('items.TakeItem() failed, maybe items ext is not running?');
+      return this.sf_exit(playerID, {next: this.dataStore.get(playerID)});
+    }
+
+    if (result.ok) {
+      return kwargs.haveItem;
+    } else {
+      return kwargs.noItem;
+    }
+  }
+
+  /**
+   * Count the amount of given item owned by the player.
+   * @param {Object} kwargs - kwargs.amount specifies the amount the player should have.
+   *   kwargs.item specifies which item to check.
+   *   kwargs.haveItem specifies the state to go to if the player have the amount of specified items.
+   *   kwargs.noItem specifies the state to go to if the player don't have the amount of specified items.
+   * @return {String} nextState - The next state.
+   * WARNING: Using this method and takeItem() together may result in time-of-check-to-time-of-use exploit. In that case, please use takeItem() only.
+   */
+  async sf_haveItem(playerID, kwargs) {
+    let amount = kwargs.amount;
+    let itemName = kwargs.itemName;
+
+    if (!Number.isInteger(amount)) amount = 1;
+
+    result = await this.helper.callS2sAPI('items', 'CountItem', playerID, itemName);
+    if (typeof result.error !== 'undefined' || !Number.isInteger(result.amount)) {
+      // Extension not running?
+      console.error('items.CountItem() failed, maybe items ext is not running?');
+      return this.sf_exit(playerID, {next: this.dataStore.get(playerID)});
+    }
+
+    if (result.amount >= amount) {
+      return kwargs.haveItem;
+    } else {
+      return kwargs.noItem;
+    }
+  }
+
+  /**
    * Just a placeholder function to provide `exit` function in configuration.
    * @param {String} playerID
    * @param {Object} kwargs - TODO
