@@ -41,6 +41,9 @@ class Standalone {
     this.droppedItemCell = {};
     this.droppedItemInfo = {};
     this.droppedItemIndex = 0;
+
+    // Used by _deferFlush() to remove duplicate flushing attempts.
+    this.flushInProgress = false;
   }
 
   /**
@@ -153,6 +156,23 @@ class Standalone {
   }
 
   /**
+   * Flush the database to disk on next tick.
+   */
+  _deferFlush() {
+    // Ignore the returning promise so it runs in the background.
+    (async () => {
+      if (this.flushInProgress === true) {
+        // Already flushing in the next tick.
+        return;
+      }
+      this.flushInProgress = true;
+      await new Promise(resolve => setImmediate(resolve));
+      this.flushInProgress = false;
+      this.helper.storeData(this.PackStoredData());
+    })();
+  }
+
+  /**
    * Returning all items owned by the user
    * @return {object} partials - An object with the following type:
    * type ItemObj = {
@@ -235,7 +255,7 @@ class Standalone {
     this.items[toPlayerID] = toPlayerItem;
 
     /* Store data into file */
-    this.helper.storeData(this.PackStoredData());
+    this._deferFlush();
 
     /* Notify the client that a certain amount of items have been given */
     try {
@@ -273,7 +293,7 @@ class Standalone {
     this.itemInstances[itemName].useItem(amount);
 
     /* Store data into file */
-    this.helper.storeData(this.PackStoredData());
+    this._deferFlush();
 
     try {
       await this.helper.callS2cAPI('items', 'onUseItem', 5000, player.playerID, itemName, amount);
@@ -345,7 +365,7 @@ class Standalone {
     this.droppedItemIndex++;
 
     /* Store data into file */
-    this.helper.storeData(this.PackStoredData());
+    this._deferFlush();
 
     /* Update cell set */
     this.gameMap.updateDynamicCellSet(mapCoord.mapName,
@@ -384,7 +404,7 @@ class Standalone {
     delete this.droppedItemInfo[droppedItemIndex];
 
     /* Store data into file */
-    this.helper.storeData(this.PackStoredData());
+    this._deferFlush();
 
     /* Update cell set */
     this.gameMap.updateDynamicCellSet(mapCoord.mapName,
