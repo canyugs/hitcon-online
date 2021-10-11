@@ -214,6 +214,19 @@ class Standalone {
   }
 
   /**
+   * Return the amount of items the player have for the specified item.
+   * This function is for internal use only.
+   * @param String playerID - ID of the player.
+   * @param String itemName - The item name.
+   * @return Number amount - The amount of items in possession.
+   */
+  _countItem(playerID, itemName) {
+    if (!(playerID in this.items)) return 0;
+    if (!(itemName in this.items[playerID])) return 0;
+    return this.items[playerID][itemName];
+  }
+
+  /**
    * Returning all items owned by the user
    * @return {object} partials - An object with the following type:
    * type ItemObj = {
@@ -461,6 +474,19 @@ class Standalone {
   async s2s_TakeItem(srcExtName, playerID, item, amount) {
     const result = {};
     result.ok = this._takeItem(playerID, item, amount);
+    return result;
+  }
+
+  /**
+   * Return the number of given item owned by the player.
+   * @param String playerID - ID of the player.
+   * @param String itemName - The item name.
+   * @return Object result - result.amount is the amount in possession.
+   */
+  async s2s_CountItem(srcExtName, playerID, item) {
+    const result = {};
+    result.amount = this._countItem(playerID, item);
+    result.ok = true;
     return result;
   }
 
