@@ -251,9 +251,9 @@ class Standalone {
    * }
    */
   async c2s_getAllDroppedItems(player) {
-    this.ensurePlayer(player.playerID);
-    const itemObj = this.items[player.playerID];
-    return itemObj;
+    // TODO
+    console.warn('Unimplemented c2s_getAllDroppedItems called');
+    return {}
   }
 
   /**
