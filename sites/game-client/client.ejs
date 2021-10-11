@@ -207,6 +207,7 @@ absolute URL.
         game.token = testToken;
 
         game.mainUI = new MainUI();
+        game.mainUI.errorModal = new ErrorModal(game.mainUI);
 
         // TODO: Change map URL to follow the config in server side.
         game.mapData = await $.ajax({url: "/static/run/map/map.json", type: "GET",});
@@ -238,8 +239,6 @@ absolute URL.
         // Initializes the UI.
         game.mapRendererOverlay = new MapRendererOverlay(game.mainUI);
         game.mapRendererOverlay.show(OverlayPosition.MAIN_VIEW);
-
-        game.mainUI.errorModal = new ErrorModal(game.mainUI);
 
         game.mainUI.createContextMenu(game.gameState, game.mapRenderer, game.gameClient);
 
