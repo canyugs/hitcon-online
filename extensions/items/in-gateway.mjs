@@ -19,8 +19,7 @@ class InGateway {
     void helper;
   }
 
-  initialize() {
-
+  async initialize() {
   }
 }
 
