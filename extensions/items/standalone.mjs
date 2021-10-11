@@ -4,6 +4,8 @@
 import assert from 'assert';
 import fs from 'fs';
 import path from 'path';
+import {fileURLToPath} from 'url';
+
 import CellSet from '../../common/maplib/cellset.mjs';
 
 /**
@@ -49,12 +51,12 @@ class Standalone {
    * 3. Create an item instance (which contains all possible functions that can be performed on the item)
    */
   async initialize() {
-    const allItemsName = await fs.promises.readdir('../extensions/items/common/itemClasses');
+    const allItemsName = await fs.promises.readdir(path.dirname(fileURLToPath(import.meta.url)) + '/common/itemClasses');
     const itemSettingJson = await fs.promises.readFile(`../extensions/items/common/config.json`);
     const itemConfig = JSON.parse(itemSettingJson).items;
     const itemBaseClasses = {};
     for (let itemTypeName of allItemsName) {
-      const itemBaseModule = await import(`../items/common/itemClasses/${itemTypeName}/${itemTypeName}.mjs`);
+      const itemBaseModule = await import(`./common/itemClasses/${itemTypeName}/${itemTypeName}.mjs`);
       const itemBaseClass = itemBaseModule.default;
       itemBaseClasses[itemTypeName] = itemBaseClass;
     }
