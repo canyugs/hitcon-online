@@ -1905,6 +1905,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"hitcon-online-notification@workspace:extensions/notification":
+  version: 0.0.0-use.local
+  resolution: "hitcon-online-notification@workspace:extensions/notification"
+  languageName: unknown
+  linkType: soft
+
 "hitcon-online-npc@workspace:extensions/npc":
   version: 0.0.0-use.local
   resolution: "hitcon-online-npc@workspace:extensions/npc"
