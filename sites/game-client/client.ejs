@@ -161,6 +161,11 @@ absolute URL.
       let game = {};
       window.game = game;
 
+      // Prepare the query parameters.
+      const urlSearchParams = new URLSearchParams(window.location.search);
+      const query = Object.fromEntries(urlSearchParams.entries());
+      window.query = query;
+
       function getTokenFromDocument() {
         try {
           const token = document.cookie
@@ -172,15 +177,32 @@ absolute URL.
         }
       }
 
+      async function getTestToken() {
+        const scopeStr = query.scope?query.scope:'';
+        let scope = scopeStr.split('|')
+          .concat(['point_system',]).filter(x => x);
+        try {
+          const testToken = await $.ajax({
+            url: ("<%= gatewayAddress %>" ? "//<%= gatewayAddress %>" : "") + "/get_test_token",
+            data: {"scope": scope.join('|')},
+            type: "GET",
+          });
+          return testToken.token;
+        } catch (e) {
+          console.log('Failed to fetch test token: ', e);
+          return '';
+        }
+      }
+
       async function gameMain(game) {
         game.io = window.io;
 
         // WARNING: The following is developer mode only.
         // Try to get a test token.
         let testToken = getTokenFromDocument();
-        if (testToken == '') {
-          testToken = await $.ajax({url: ("<%= gatewayAddress %>" ? "//<%= gatewayAddress %>" : "") + "/get_test_token", type: "GET",});
-          testToken = testToken.token;
+        if (testToken == '' || query.scope) {
+          // If we've query.scope, then we might need to update the testToken.
+          testToken = await getTestToken();
         }
         game.token = testToken;
 
