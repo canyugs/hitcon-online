@@ -2,33 +2,33 @@
 Not started
 ===========
 
-- Settings Dialog
-  - Character displayName / displayChar setting
-- XSS Sanitization Library and Refactor
-- Terminal NPC
+P1
+--
+
 - Ghost mode/jump
+- Item/Inventory extension
+- Jitsi Access Control
+- Q/A Game
+- NPC trigger proximity check
+- Location triggered NPC.
+
+P2
+--
+
+- Optimize player look-up data structure in MapRender and InteractiveObjectBase.
+- Follow functionality
 - Fix race condition in Gateway connect/disconnect handler.
 - Optimize loading when multiple users are looking for spawn point or have a timer/queue when spawn points are full.
-- Renderer
-  - Smoother movement animation with transition
-- Item/Inventory extension
-- Cancel in-flight c2s/s2c API on disconnect.
-- Optimize player look-up data structure in MapRender and InteractiveObjectBase.
+- Bomb man extension
 
 In Progress
 ===========
 
-- Chat (text) extension
-- Productionization
-- Bomb man extension
-- NPC
-  - Password/Passwordless Portal NPC
-  - Door NPC
-- Better Jitsi integration
-- Online list
-- Right click menu on character
-  - Follow functionality
-  - Private message
 - Disconnect/Error Screen/Handler
-- Command/Item for Announcement
-- Player context menu
+- In-client stress test class.
+- Frontend Profiling
+- Cancel in-flight c2s/s2c API on disconnect.
+- Settings Dialog
+  - Character displayName / displayChar setting
+- Greeting Screen (Character/displayName selection)
+- XSS Sanitization Library and Refactor
