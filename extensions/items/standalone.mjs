@@ -128,6 +128,31 @@ class Standalone {
   }
 
   /**
+   * This make sure that this.items[playerID] is available.
+   * @param String playerID - ID of the player.
+   */
+  _ensurePlayer(playerID) {
+    if (!(playerID in this.items)) {
+      /* player has not registered yet */
+      this.items[playerID] = {};
+    }
+    this._deferFlush();
+  }
+
+  /**
+   * This make sure that this.items[playerID][itemName] is available.
+   * @param String playerID - ID of the player.
+   * @param String itemName - The item name.
+   */
+  _ensurePlayerItem(playerID, itemName) {
+    this._ensurePlayer(playerID);
+    if (!(itemName in this.items[playerID])) {
+      this.items[playerID][itemName] = {amount: 0};
+    }
+    this._deferFlush();
+  }
+
+  /**
    * Returning all items owned by the user
    * @return {object} partials - An object with the following type:
    * type ItemObj = {
@@ -137,10 +162,7 @@ class Standalone {
    * }
    */
   async c2s_getAllItems(player) {
-    /* player has not registered yet */
-    if (!(player.playerID in this.items)) {
-      this.items[player.playerID] = {};
-    }
+    this._ensurePlayer(player.playerID);
     const itemObj = this.items[player.playerID];
     return itemObj;
   }
@@ -154,11 +176,8 @@ class Standalone {
    *   }
    * }
    */
-  async c2s_getAllItems(player) {
-    /* player has not registered yet */
-    if (!(player.playerID in this.items)) {
-      this.items[player.playerID] = {};
-    }
+  async c2s_getAllDroppedItems(player) {
+    this.ensurePlayer(player.playerID);
     const itemObj = this.items[player.playerID];
     return itemObj;
   }
@@ -171,10 +190,7 @@ class Standalone {
    * }
    */
   async c2s_getItem(player, itemName) {
-    /* player has not registered yet */
-    if (!(player.playerID in this.items)) {
-      this.items[player.playerID] = {};
-    }
+    this._ensurePlayer(player.playerID);
     const itemObj = this.items[player.playerID];
     if (!(itemName in itemObj)) {
       console.error('No such item');
@@ -191,12 +207,9 @@ class Standalone {
    * amount: number;
    */
   async c2s_giveReceiveItem(player, toPlayerID, itemName, amount) {
-    if (!(player.playerID in this.items)) {
-      this.items[player.playerID] = {};
-    }
-    if (!(toPlayerID in this.items)) {
-      this.items[toPlayerID] = {};
-    }
+    this._ensurePlayer(player.playerID);
+    this._ensurePlayer(toPlayerID);
+
     if (!(itemName in this.itemInfo)) {
       console.log("Item does not exist");
       return;
@@ -239,9 +252,7 @@ class Standalone {
    * amount: number;
    */
   async c2s_useItem(player, itemName, amount) {
-    if (!(player.playerID in this.items)) {
-      this.items[player.playerID] = {};
-    }
+    this._ensurePlayer(player.playerID);
     if (!(itemName in this.itemInfo) || !(itemName in this.itemInstances)) {
       console.log("Item does not exist");
       return;
@@ -278,10 +289,7 @@ class Standalone {
    * amount: number;
    */
   async c2s_dropItem(player, mapCoord, facing, itemName) {
-    /* player has not registered yet */
-    if (!(player.playerID in this.items)) {
-      this.items[player.playerID] = {};
-    }
+    this._ensurePlayer(player.playerID);
 
     let itemObj = this.items[player.playerID];
     if (!(itemName in itemObj)) {
