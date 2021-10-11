@@ -244,19 +244,15 @@ class Standalone {
   }
 
   /**
-   * Returning all items owned by the user
+   * Returning info on an item owned by the user
    * @return {object} partials - An object with the following type:
    * type Item: {
    *   amount: number;
    * }
    */
   async c2s_getItem(player, itemName) {
-    this._ensurePlayer(player.playerID);
+    this._ensurePlayerItem(player.playerID, itemName);
     const itemObj = this.items[player.playerID];
-    if (!(itemName in itemObj)) {
-      console.error('No such item');
-      return;
-    }
     return itemObj[itemName];
   }
 
@@ -272,12 +268,10 @@ class Standalone {
     this._ensurePlayer(toPlayerID);
 
     if (!(itemName in this.itemInfo)) {
-      console.log("Item does not exist");
-      return;
+      return {'error': "Item does not exist"};
     }
     if (!this.itemInfo[itemName].exchangeable) {
-      console.error('Item is not exchangeable');
-      return;
+      return {'error': 'Item is not exchangeable'};
     }
 
     if (!this._takeItem(player.playerID, itemName, amount)) {
@@ -305,12 +299,11 @@ class Standalone {
   async c2s_useItem(player, itemName, amount) {
     this._ensurePlayer(player.playerID);
     if (!(itemName in this.itemInfo) || !(itemName in this.itemInstances)) {
-      console.log("Item does not exist");
+      return {'error': "Item does not exist"};
       return;
     }
     if (!this.itemInfo[itemName].usable) {
-      console.error('Item is not usable');
-      return;
+      return {'error': 'Item is not usable'};
     }
 
     if (!this._takeItem(player.playerID, itemName, amount)) {
@@ -340,12 +333,10 @@ class Standalone {
 
     let itemObj = this.items[player.playerID];
     if (!(itemName in itemObj)) {
-      console.error('No such item');
-      return;
+      return {'error': 'No such item'};
     }
     if (!this.itemInfo[itemName].droppable) {
-      console.log("Item is not droppable");
-      return;
+      return {'error': "Item is not droppable"};
     }
     if (!this._takeItem(player.playerID, itemName, 1)) {
       return {'error': 'Insufficient amount'};
@@ -414,14 +405,12 @@ class Standalone {
     }
     const cell = this.droppedItemCell[droppedItemIndex];
     if (Math.abs(mapCoord.x - cell.x) > 1 || Math.abs(mapCoord.y - cell.y) > 1) {
-      console.error('Player too far away from dropped item');
-      return;
+      return {'error': 'Player too far away from dropped item'};
     }
     /* update amount */
     const itemName = this.droppedItemInfo[droppedItemIndex];
     if (!this.itemInfo[itemName].droppable) {
-      console.log("Item is not droppable");
-      return;
+      return {'error': "Item is not droppable"};
     }
 
     if (!this._addItem(player.playerID, itemName, 1)) {
