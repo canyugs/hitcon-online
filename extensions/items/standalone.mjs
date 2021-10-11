@@ -456,11 +456,20 @@ class Standalone {
    * @param String playerID - ID of the player.
    * @param String itemName - The item name.
    * @param Number amount - The amount to give.
+   * @param Number maxAmount - Give the player only up to maxAmount.
    * @return Object result - result.ok will be true if successful.
    */
-  async s2s_AddItem(srcExtName, playerID, item, amount) {
+  async s2s_AddItem(srcExtName, playerID, item, amount = 1, maxAmount = -1) {
+    if (Number.isInteger(maxAmount) && maxMount > 0) {
+      const curAmount = this._countItem(playerID, item);
+      if (curAmount+amount >= maxAmount) {
+        // Max exceeded, limit the amount given.
+        amount = maxAmount - curAmount;
+      }
+    }
     const result = {};
-    result.ok = this._addItem(playerID, item, amount);
+    result.ok = true;
+    if (amount >= 1) result.ok = this._addItem(playerID, item, amount);
     return result;
   }
 
@@ -470,10 +479,14 @@ class Standalone {
    * @param String itemName - The item name.
    * @param Number amount - The amount to give.
    * @return Object result - result.ok will be true if successful.
+   * result.amount will be the amount taken.
+   *
+   * Note: If the amount is insufficient, we'll not take any items.
    */
-  async s2s_TakeItem(srcExtName, playerID, item, amount) {
+  async s2s_TakeItem(srcExtName, playerID, item, amount = 1) {
     const result = {};
     result.ok = this._takeItem(playerID, item, amount);
+    result.amount = amount;
     return result;
   }
 
