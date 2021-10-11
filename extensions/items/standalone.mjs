@@ -67,8 +67,15 @@ class Standalone {
     for (let itemName in itemConfig) {
       const itemBaseClassName = itemConfig[itemName].baseClass;
       const item = new itemBaseClasses[itemBaseClassName](this.helper, itemConfig[itemName].imagePath);
+      // Description
+      let desc = itemConfig[itemName].desc;
+      desc = (typeof desc === 'string')?desc:'';
+      let visibleName = itemConfig[itemName].visibleName;
+      visibleName = (typeof desc === 'string')?visibleName:itemName;
       this.itemInfo[itemName] = {
         index: index,
+        visibleName: visibleName,
+        desc: desc,
         layer: itemConfig[itemName].layer,
         show: item.show,
         exchangeable: item.exchangeable,
