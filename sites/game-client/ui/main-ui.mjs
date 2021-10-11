@@ -33,6 +33,9 @@ const ANNOUNCEMENT_ID = 'announcement-text';
 const ANNOUNCEMENT_CONTAINER_ID = 'announcement';
 const ANNOUNCEMENT_NUM_LIMIT = 10;
 
+const DEFAULT_NOTIFICATION_TIMEOUT = 8000; // ms
+const DEFAULT_ANNOUNCEMENT_TIMEOUT = 30*1000; // ms
+
 /**
  * MainUI composes components into a window,
  * components are classified into Notification, Toolbar, Overlay and Modal.
@@ -160,9 +163,13 @@ class MainUI {
   /**
    * Show notification in notification area.
    * @param {String} msg The message want to be shown.
-   * @param {Number} timeout The duraion of showing notification, the unit is millisecond.
+   * @param {Number} timeout The duraion of showing notification, the unit is millisecond. Should be an integer, otherwise the default is used.
    */
-  showNotification(msg, timeout = 8000) {
+  showNotification(msg, timeout) {
+    if (!Number.isInteger(timeout)) {
+      timeout = DEFAULT_NOTIFICATION_TIMEOUT;
+    }
+
     // Always enqueue the incoming notification. The first element of the list
     // is on display.
     const add_ele = {msg: msg, timeout: timeout};
@@ -185,10 +192,14 @@ class MainUI {
   /**
    * Show announcement in marquee.
    * @param {String} msg The message want to be shown.
-   * @param {Number} timeout The duraion of showing notification, the unit is millisecond.
+   * @param {Number} timeout The duraion of showing notification, the unit is millisecond. Should be an integer, otherwise the default is used.
    */
-  showAnnouncement(msg, timeout = 20000) {
+  showAnnouncement(msg, timeout) {
     // TODO: Handle the close button in annoucement's UI.
+
+    if (!Number.isInteger(timeout)) {
+      timeout = DEFAULT_ANNOUNCEMENT_TIMEOUT;
+    }
 
     // Always enqueue the incoming announcement. The first element of the list
     // is on display.
