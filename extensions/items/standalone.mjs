@@ -172,6 +172,47 @@ class Standalone {
     })();
   }
 
+    /**
+   * Add an item to the given player's inventory.
+   * @param String playerID - ID of the player.
+   * @param String itemName - The item name.
+   * @param Number amount - The amount to give.
+   * @return Boolean success - Return true if the items are added.
+   */
+  _addItem(playerID, itemName, amount=1) {
+    if (!Number.isInteger(amount)) {
+      console.error('_addItem() passed amount not integer: ', amount);
+      return false;
+    }
+    _ensurePlayerItem(playerID);
+    this.items[playerID].amount += amount;
+    this._deferFlush();
+    return true;
+  }
+
+  /**
+   * Take an item from the given player's inventory.
+   * This function is for internal use only.
+   * @param String playerID - ID of the player.
+   * @param String itemName - The item name.
+   * @param Number amount - The amount to take.
+   * @return Boolean success - Return true if it was taken from the player's
+   *   inventory, false if there's not enough.
+   */
+  _takeItem(playerID, itemName, amount=1) {
+    if (!Number.isInteger(amount)) {
+      console.error('_takeItem() passed amount not integer: ', amount);
+      return false;
+    }
+    if (!(playerID in this.items)) return false;
+    if (!(itemName in this.items[playerID])) return false;
+    if (this.items[playerID][itemName].amount < amount) return false;
+
+    this.items[playerID][itemName].amount -= amount;
+    this._deferFlush();
+    return true;
+  }
+
   /**
    * Returning all items owned by the user
    * @return {object} partials - An object with the following type:
@@ -239,23 +280,13 @@ class Standalone {
       return;
     }
 
-    const fromPlayerItem = this.items[player.playerID];
-    if (!(itemName in fromPlayerItem) || fromPlayerItem[itemName].amount < amount) {
-      console.error('Insufficient quantity');
-      return;
+    if (!this._takeItem(player.playerID, itemName, amount)) {
+      return {'error': 'Insufficient quantity'};
     }
-    fromPlayerItem[itemName].amount -= amount;
-    this.items[player.playerID] = fromPlayerItem;
 
-    const toPlayerItem = this.items.get(toPlayerID);
-    if (!(itemName in toPlayerItem)) {
-      toPlayerItem[itemName] = {amount: 0};
+    if (!this._addItem(toPlayerID, itemName, amount)) {
+      console.error(`_addItem(${toPlayerID}, ${itemName}, ${amount}) failed, this should not happen.`);
     }
-    toPlayerItem[itemName] += amount;
-    this.items[toPlayerID] = toPlayerItem;
-
-    /* Store data into file */
-    this._deferFlush();
 
     /* Notify the client that a certain amount of items have been given */
     try {
@@ -282,13 +313,9 @@ class Standalone {
       return;
     }
 
-    const item = this.items[player.playerID];
-    if (!(itemName in item) || item[itemName].amount < amount) {
-      console.error('Insufficient quantity');
-      return;
+    if (!this._takeItem(player.playerID, itemName, amount)) {
+      return {'error': 'Insufficient quantity'};
     }
-    item[itemName].amount -= amount;
-    this.items[player.playerID, item];
 
     this.itemInstances[itemName].useItem(amount);
 
@@ -320,8 +347,9 @@ class Standalone {
       console.log("Item is not droppable");
       return;
     }
-    itemObj[itemName].amount -= 1;
-    this.items[player.playerID, itemObj];
+    if (!this._takeItem(player.playerID, itemName, 1)) {
+      return {'error': 'Insufficient amount'};
+    }
 
     /* update cell set */
     const mapSize = this.gameMap.getMapSize(mapCoord.mapName);
@@ -390,14 +418,15 @@ class Standalone {
       return;
     }
     /* update amount */
-    let itemObj = this.items[player.playerID];
     const itemName = this.droppedItemInfo[droppedItemIndex];
     if (!this.itemInfo[itemName].droppable) {
       console.log("Item is not droppable");
       return;
     }
-    itemObj[itemName].amount += 1;
-    this.items[player.playerID, itemObj];
+
+    if (!this._addItem(player.playerID, itemName, 1)) {
+      console.error(`_addItem(${player.playerID}, ${itemName}, 1) failed, this should not happen.`);
+    }
 
     /* remove picked up item from cell */
     delete this.droppedItemCell[droppedItemIndex];
