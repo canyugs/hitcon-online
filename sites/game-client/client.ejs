@@ -133,6 +133,7 @@ absolute URL.
     </div>
 
     <script type="module">
+      import ClientBot from '/static/sites/game-client/client-bot.mjs';
       import GameMap from '/static/common/maplib/map.mjs';
       import GraphicAsset from '/static/common/maplib/graphic-asset.mjs';
       import GameState from '/static/common/gamelib/game-state.mjs';
@@ -158,8 +159,7 @@ absolute URL.
       window.gameClass = gameClass;
 
       // Create the various essential game classes.
-      let game = {};
-      window.game = game;
+      const game = window.game = {};
 
       // Prepare the query parameters.
       const urlSearchParams = new URLSearchParams(window.location.search);
@@ -247,6 +247,10 @@ absolute URL.
             detail: {mainUI: game.mainUI},
           },
         ));
+
+        if (window.query.test === 'type1'){
+          game.clientBot = new ClientBot(game.mapRenderer);
+        }
 
         function onGameTick () {
           game.mapRenderer.draw();
