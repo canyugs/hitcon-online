@@ -104,7 +104,7 @@ Usage: !/<Command> <arg1> <arg2> ...
         this.listCommand();
       } else {
         //this.helper.callC2sAPI(null, 'announce', this.helper.defaultTimeout, msg);
-        this.helper.callC2sAPI(null, 'broadcastMessage', this.helper.defaultTimeout, {'msg': msg, 'timeout': 25000, 'type': 'announcement'});
+        this.helper.callC2sAPI(null, 'broadcastAnnouncement', this.helper.defaultTimeout, {'msg': msg, 'timeout': 25000});
       }
     } else {
       const result = await Promise.resolve(this.helper.callC2sAPI(null, 'otherCommands', this.helper.defaultTimeout));
@@ -186,7 +186,7 @@ Usage: !/<Command> <arg1> <arg2> ...
   */
   onExtensionBroadcast(args) {
     if (args.type === 'announcement') {
-      //this.mainUI.showAnnouncement(args.msg,3000); // it doesn't work
+      //this.helper.mainUI.showAnnouncement(args.msg, args.timeout); // it still doesn't work
       game.mainUI.showAnnouncement(args.msg, args.timeout);
     } else {
       args.msg_from = $('<div/>').text(args.msg_from).html();
