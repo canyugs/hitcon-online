@@ -30,15 +30,26 @@ class Standalone {
    * @param {object} args - chat information including message
    */
   async c2s_broadcastMessage(player, args) {
-    args['msg_from'] = player.playerID;
-    if (args.type === "announcement") {
-      const permission = await this.helper.getToken(player.playerID);
+    let resultArgs = {};
+    resultArgs['msg_from'] = player.playerID;
+    resultArgs['msg'] = args.msg;
+    
+    await this.helper.broadcastToAllUser(resultArgs);
+  }
+
+  async c2s_broadcastAnnouncement(player, args) {
+    const permission = await this.helper.getToken(player.playerID);
       if (!permission.scope.includes('announcement')) {
         //console.error("announce: permission denied.");
         return;
       }
-    }
-    await this.helper.broadcastToAllUser(args);
+    let resultArgs = {};
+    resultArgs['msg_from'] = player.playerID;
+    resultArgs['msg'] = args.msg;
+    resultArgs['type'] = 'announcement';
+    resultArgs['timeout'] = args.timeout;
+    
+    await this.helper.broadcastToAllUser(resultArgs);
   }
 
   /**
