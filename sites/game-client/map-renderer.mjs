@@ -276,20 +276,20 @@ class MapRenderer {
     };
     const mapSize = this.map.getMapSize(this.viewerPosition.mapName);
 
+    const outerSpaceRenderInfo = this.map.graphicAsset.getTile(...OUTER_SPACE_TILE);
     for (let mapY = firstCellMapCoordInt.y; mapY <= lastCellMapCoordInt.y; ++mapY) {
       for (let mapX = firstCellMapCoordInt.x; mapX <= lastCellMapCoordInt.x; ++mapX) {
         if (mapX < 0 || mapX >= mapSize.width || mapY < 0 || mapY >= mapSize.height) {
           // out of bound
-          const renderInfo = this.map.graphicAsset.getTile(...OUTER_SPACE_TILE);
           const canvasCoordinate = this.mapToCanvasCoordinate(new MapCoord(this.viewerPosition.mapName, mapX, mapY));
           this.ctx.drawImage(
-            renderInfo.image,
-            renderInfo.srcX,
-            renderInfo.srcY,
-            renderInfo.srcWidth,
-            renderInfo.srcHeight,
+            outerSpaceRenderInfo.image,
+            outerSpaceRenderInfo.srcX,
+            outerSpaceRenderInfo.srcY,
+            outerSpaceRenderInfo.srcWidth,
+            outerSpaceRenderInfo.srcHeight,
             canvasCoordinate.x,
-            canvasCoordinate.y - renderInfo.srcHeight,
+            canvasCoordinate.y - outerSpaceRenderInfo.srcHeight,
             MAP_CELL_SIZE,
             MAP_CELL_SIZE,
           );
