@@ -43,6 +43,7 @@
         "func": "editDialog",
         "kwargs": {
           "dialogs": "Input the new dialog",
+          "dialogVar": "_advertisement",
           "buttonText": "Submit",
           "nextState": "s4"
         }
@@ -50,7 +51,8 @@
       "s4": {
         "func": "showDialog",
         "kwargs": {
-          "dialogs": "<editable1>",
+          "dialogs": "Default Message",
+          "dialogVar": "_advertisement",
           "options": {
             "HITCON is perfect": "s5"
           }
