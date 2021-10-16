@@ -285,6 +285,14 @@ class Standalone {
   }
 
   /**
+   * Register a chat command.
+   * See this.registerCommand() for more info on cmdInfo.
+   */
+  async s2s_registerCmd(srcExt, cmdInfo) {
+    return await this.registerCommand(cmdInfo);
+  }
+
+  /**
    * Return the ejs partials for the client part of this extension.
    * @return {object} partials - An object, it could have the following:
    * inDiv - A string to the path of ejs partial for the location inDiv.
