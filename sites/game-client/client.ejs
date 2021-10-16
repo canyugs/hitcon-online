@@ -200,7 +200,7 @@ absolute URL.
         // WARNING: The following is developer mode only.
         // Try to get a test token.
         let testToken = getTokenFromDocument();
-        if (testToken == '' || query.scope) {
+        if (testToken == '' || query.scope || query.skipCookieToken) {
           // If we've query.scope, then we might need to update the testToken.
           testToken = await getTestToken();
         }
