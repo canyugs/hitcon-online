@@ -30,6 +30,7 @@ class Client {
   constructor(helper) {
     this.helper = helper;
     document.getElementById('chat_message').addEventListener('keypress', this.send_msg(this));
+    this.clientCmdsInfo = {};
   }
 
   async gameStart() {
@@ -37,6 +38,7 @@ class Client {
     this.helper.mainUI.contextMenu.addToOthersMenu('Private Chat', '/static/extensions/chat/common/chat.svg', (player) => {
       startPrivateMessage(player.playerID);
     });
+    this.clientCmdsInfo = await this.helper.callC2sAPI(null, 'getClientCmdsInfo', this.helper.defaultTimeout);
   }
 
   /**
@@ -69,13 +71,20 @@ class Client {
    * @listCommand
    */
   listCommand() {
-    document.getElementById('message_history').innerHTML += '<pre>' +
-    this.HTMLEncode(`
+    const msg = `
 Usage: !/<Command> <arg1> <arg2> ...
-  !/announce <message>        announce a message to all users
-  !/teleport <Map> <x> <y>    Teleport to the map Map at coordinate (x, y)
-  !/help                      List command usages
-    `) + '</pre>';
+${this.clientCmdsInfo.helpMsg}
+  !/help -- List command usages
+    `;
+    return this.appendRawMessage(msg);
+  }
+
+  /**
+   * Append a raw (unformatted) message to the chat box.
+   */
+  appendRawMessage(msg) {
+    document.getElementById('message_history').appendChild(
+    this.generateMessageBox('SYSTEM', msg, 'system'));
   }
 
   /**
@@ -86,34 +95,58 @@ Usage: !/<Command> <arg1> <arg2> ...
   async handleCommand(cmd) {
     if (cmd === '!/help') {
       this.listCommand();
-    } else if (cmd.split(' ')[0] === '!/teleport') {
-      const mapCoord = this.helper.gameClient.playerInfo.mapCoord;
-      mapCoord.mapName = cmd.split(' ')[1];
-      mapCoord.x = parseInt(cmd.split(' ')[2], 10);
-      mapCoord.y = parseInt(cmd.split(' ')[3], 10);
-      if (isNaN(mapCoord.x) || isNaN(mapCoord.y)) {
-        document.getElementById('message_history').innerHTML += '<span>Invalid Coordinate</span><br>';
-        this.listCommand();
-      } else {
-        this.helper.callC2sAPI(null, 'teleport', this.helper.defaultTimeout, mapCoord);
+      return;
+    }
+
+    const rawCmd = cmd.split(' ')[0].substr(2);
+    if (typeof this.clientCmdsInfo[rawCmd] === 'object' && typeof this.clientCmdsInfo[rawCmd].c2s === 'string') {
+      // Command is found.
+      return await this.handleC2sCommand(cmd, this.clientCmdsInfo[rawCmd].ext, this.clientCmdsInfo[rawCmd].c2s);
+    }
+
+    // Command not found, could be hidden command or command is s2s.
+    const result = await this.helper.callC2sAPI(null, 'otherCommands', this.helper.defaultTimeout, cmd);
+    if (result.status === 'ok') {
+      // Good, no need to tell the user.
+      if (typeof result.reply === 'string') {
+        this.appendRawMessage(result.reply);
       }
-    } else if (cmd.split(' ')[0] === '!/announce') {
-      const msg = cmd.substring(10);
-      if (msg.trim() === '') {
-        document.getElementById('message_history').innerHTML += '<span>Invalid message</span><br>';
-        this.listCommand();
-      } else {
-        //this.helper.callC2sAPI(null, 'announce', this.helper.defaultTimeout, msg);
-        this.helper.callC2sAPI(null, 'broadcastAnnouncement', this.helper.defaultTimeout, {'msg': msg, 'timeout': 25000});
-      }
+    } else if (result.status === 'c2s') {
+      return await this.handleC2sCommand(cmd, result.ext, result.c2s);
+    } else if (result.status === '404') {
+      this.appendRawMessage(`Command ${rawCmd} not found.`);
     } else {
-      const result = await Promise.resolve(this.helper.callC2sAPI(null, 'otherCommands', this.helper.defaultTimeout));
-      if (result.state) {
-        document.getElementById('message_history').innerHTML += '<span>' + this.HTMLEncode(result) + '</span><br>';
-      } else {
-        document.getElementById('message_history').innerHTML += '<span>Invalid Command</span><br>';
-        this.listCommand();
+      console.error(`Invalid response for chat command ${cmd}: `, result);
+    }
+  }
+
+  /**
+   * Handle a command that requires c2s call.
+   */
+  async handleC2sCommand(cmd, ext, c2s) {
+    const rawCmd = cmd.split(' ')[0].substr(2);
+    const result = await this.helper.callC2sAPI(ext, c2s, this.helper.defaultTimeout, cmd);
+    if (typeof result !== 'object' || typeof result.status !== 'string') {
+      this.appendRawMessage(`Command ${rawCmd} failed`);
+      console.error(`Command ${rawCmd} failed: `, result);
+      return;
+    }
+    if (result.status === 'ok') {
+      // Good.
+    } else if (result.status === 'error') {
+      if (typeof result.reply !== 'string') {
+        result.reply = 'Unknown error';
+        console.warn(`No result.reply for handleC2sCommand(${cmd}, ${ext}, ${c2s}): `, result);
       }
+      result.reply = 'Error: ' + result.reply;
+    } else if (result.status === 'noperm') {
+      result.reply = 'No permission to use command';
+    } else {
+      result.reply = 'Internal error';
+      console.warn(`Invalid result from handleC2sCommand(${cmd}, ${ext}, ${c2s}): `, result);
+    }
+    if (typeof result.reply === 'string') {
+      this.appendRawMessage(result.reply);
     }
   }
 
@@ -145,6 +178,7 @@ Usage: !/<Command> <arg1> <arg2> ...
     msgBox.querySelector('.chat-message-type').textContent = msgType;
     msgBox.querySelector('.chat-message-time').textContent = currentTime;
     msgBox.querySelector('.chat-message-body').textContent = body;
+    msgBox.querySelector('.chat-message-body').classList.add(`chat-message-body--${msgType}`);
     msgBox.querySelector('.chat-message-source').textContent = source;
     return msgBox;
   }
@@ -197,6 +231,8 @@ Usage: !/<Command> <arg1> <arg2> ...
     if (args.type === 'announcement') {
       //this.helper.mainUI.showAnnouncement(args.msg, args.timeout); // it still doesn't work
       game.mainUI.showAnnouncement(args.msg, args.timeout);
+    } else if (args.type === 'clientCmdsInfo') {
+      this.clientCmdsInfo = args.clientCmdsInfo;
     } else {
       args.msg_from = $('<div/>').text(args.msg_from).html();
       args.msg = $('<div/>').text(args.msg).html();
