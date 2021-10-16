@@ -44,11 +44,13 @@ class AssetServer {
   async staticRoutes() {
     // TODO: Restrict the visible pages.
     // Not sure if all static files are in sites
-    this.app.use('/static/sites', express.static(__dirname + '/../../sites/'));
-    this.app.use('/static/common', express.static(__dirname + '/../../common/'));
-    this.app.use('/static/run/map', express.static(__dirname + '/../../run/map'));
+    console.log(path.resolve(__dirname, '../../sites/'));
+    this.app.use('/static/sites', express.static(path.resolve(__dirname, '../../sites/')));
+    this.app.use('/static/common', express.static(path.resolve(__dirname, '../../common/')));
+    this.app.use('/static/run/map', express.static(path.resolve(process.cwd(), 'map')));
     for (const extName of this.extMan.listExtensions()) {
-      this.app.use(`/static/extensions/${extName}/common`, express.static(__dirname + `/../../extensions/${extName}/common`));
+      this.app.use(`/static/extensions/${extName}/common`,
+        express.static(path.resolve(__dirname, `../../extensions/${extName}/common`)));
     }
   }
 
@@ -74,7 +76,7 @@ class AssetServer {
     this.app.get('/client.html', (req, res) => {
       // TODO: workaround for development, in production we should fetch the unique endpoint from the config.
       this.clientParams.gatewayAddress = this.gatewayAddresses ? this.gatewayAddresses[Math.floor(Math.random() * this.gatewayAddresses.length)] : null;
-      res.render(path.resolve(__dirname + '/../../sites/game-client/client.ejs'), this.clientParams);
+      res.render(path.resolve(__dirname, '../../sites/game-client/client.ejs'), this.clientParams);
     });
   }
 
