@@ -45,7 +45,7 @@ class Client {
    * @param {client} - The pointer of this Client class
    */
   send_msg(client) {
-    return async function(evt) {
+    return async (evt) => {
       if (evt.keyCode === 13) {
         const message_to_id = document.getElementById('message_to');
         const chat_message_id = document.getElementById('chat_message');
