@@ -277,7 +277,7 @@ class InteractiveObjectServerBaseClass {
     const permission = await this.helper.getToken(playerID);
     const {options} = kwargs;
     for (const [identity, nextState] of Object.entries(options)) {
-      if (permission.scope.includes(identity)) {
+      if (permission.scp.includes(identity)) {
         return nextState;
       }
     }
