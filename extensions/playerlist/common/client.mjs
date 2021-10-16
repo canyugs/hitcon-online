@@ -52,9 +52,14 @@ class Client {
         const playerDOM = template.cloneNode(true);
         playerDOM.setAttribute('id', playerID.playerID);
         playerDOM.setAttribute('data-player-context-menu', playerID.playerID);
-        // TODO: Potential XSS hazard.
-        playerDOM.setAttribute('onclick', 'startPrivateMessage(\'' + playerID.playerID + '\')');
-        playerDOM.querySelector('.player-name').textContent = this.HTMLEncode(playerID.displayName);
+        
+        // Sanitize XSS
+        const san_playerID = filterXSS(playerID.playerID);
+        const san_displayName = filterXSS(playerID.displayName);
+
+
+        playerDOM.setAttribute('onclick', 'startPrivateMessage(\'' + san_playerID + '\')');
+        playerDOM.querySelector('.player-name').textContent = san_displayName;
         // TODO: get user role;
         playerDOM.querySelector('.player-role').textContent = 'unknown role';
         // TODO: get user picture;
@@ -65,15 +70,6 @@ class Client {
         // TODO(zeze-zeze): Use onchange callback to update playerlist instead of waiting 1 second
      });
     }, 1000);
-  }
-
-  /**
-   * Encode the html in case of XSS
-   * @HTMLEncode
-   * @param {string} str - the string being encoded
-   */
-  HTMLEncode(str) {
-    return $('<div/>').text(str).html();
   }
 }
 

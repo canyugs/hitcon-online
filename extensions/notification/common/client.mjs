@@ -28,7 +28,8 @@ class Client {
    * Note: This function returns immediately without waiting for the notification to disappear.
    */
   async s2c_showNotification(message, timeout) {
-    this.helper.mainUI.showNotification(message, timeout);
+    const san_message = filterXSS(message);
+    this.helper.mainUI.showNotification(san_message, timeout);
   }
 
   /**
@@ -40,7 +41,8 @@ class Client {
    * Note: This function returns immediately without waiting for the announcement to disappear.
    */
   async s2c_showAnnouncement(message, timeout) {
-    this.helper.mainUI.showAnnouncement(message, timeout);
+    const san_message = filterXSS(message);
+    this.helper.mainUI.showAnnouncement(san_message, timeout);
   }
 
   /**

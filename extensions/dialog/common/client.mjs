@@ -54,11 +54,14 @@ class DialogModal extends Modal {
    */
   async displayAsSingleChoice(subject, message, buttonText) {
     const result = await this._displayDialogInternal(() => {
-      this.subjectDOM.innerHTML = subject;
-      this.msgDOM.innerHTML = message;
+      // Sanitize to prevent XSS
+      const san_buttonText = filterXSS(buttonText);
+      const san_message = filterXSS(message);
 
-      // TODO: Sanitize to prevent XSS
-      this.btnContDOM.innerHTML = `<button id="dialog-btn-OK">${buttonText}</button>`;
+      this.subjectDOM.innerHTML = subject;
+      this.msgDOM.innerHTML = san_message;
+
+      this.btnContDOM.innerHTML = `<button id="dialog-btn-OK">${san_buttonText}</button>`;
       const btnOK = document.getElementById('dialog-btn-OK');
 
       // Set the visibilities right.
@@ -76,24 +79,30 @@ class DialogModal extends Modal {
    */
   async displayAsMultiChoice(subject, message, choices) {
     const result = await this._displayDialogInternal(() => {
-      this.subjectDOM.innerHTML = subject;
+      // Sanitize to prevent XSS
+      const san_message = filterXSS(message);
 
+      this.subjectDOM.innerHTML = subject;
       let choicesHTML = '<ul>';
       for (const {token, display} of choices) {
-        
-        // TODO: Sanitize to prevent XSS
-        choicesHTML += `<li data-token=${token} id="dialog-btn-${token}" `;
-        choicesHTML += `class="dialog-choice-entry">${display}</li>`;
+        // Sanitize to prevent XSS
+        const san_token = filterXSS(token);
+        const san_display = filterXSS(display);
+
+        choicesHTML += `<li data-token=${san_token} id="dialog-btn-${san_token}" `;
+        choicesHTML += `class="dialog-choice-entry">${san_display}</li>`;
       }
       choicesHTML += '</ul>';
-      this.msgDOM.innerHTML = message + '<br />' + choicesHTML;
+      this.msgDOM.innerHTML = san_message + '<br />' + choicesHTML;
 
       // Set the visibilities right.
       this.btnContDOM.classList.remove('visible');
 
       const btnList = [];
       for (const {token, display} of choices) {
-        btnList.push(document.getElementById(`dialog-btn-${token}`));
+        // Sanitize to prevent XSS
+        const san_token = filterXSS(token);
+        btnList.push(document.getElementById(`dialog-btn-${san_token}`));
       }
 
       return btnList;
@@ -108,13 +117,16 @@ class DialogModal extends Modal {
    */
   async displayAsPrompt(subject, message, buttonText) {
     const result = await this._displayDialogInternal(() => {
+      // Sanitize to prevent XSS
+      const san_buttonText = filterXSS(buttonText);
+      const san_message = filterXSS(message);
+
       this.subjectDOM.innerHTML = subject;
       const promptHtml = '<br /><input type="text" class="dialog-textinput"' +
         ' id="dialog-textinput" />';
-      this.msgDOM.innerHTML = message + promptHtml;
+      this.msgDOM.innerHTML = san_message + promptHtml;
 
-      // TODO: Sanitize to prevent XSS
-      this.btnContDOM.innerHTML = `<button id="dialog-btn-OK">${buttonText}</button>`;
+      this.btnContDOM.innerHTML = `<button id="dialog-btn-OK">${san_buttonText}</button>`;
       const btnOK = document.getElementById('dialog-btn-OK');
 
       // Set the visibilities right.
