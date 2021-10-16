@@ -15,6 +15,7 @@ function procURL(inURL) {
   let u = new URL(inURL);
   u.searchParams.set('test', 'type1');
   u.searchParams.set('skipCookieToken', 'true');
+  u.searchParams.set('disableRender', 'true');
   u.pathname = '/client.html';
   return u.href;
 }
