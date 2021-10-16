@@ -4,6 +4,9 @@
 import fs from 'fs';
 import {MapCoord} from '../maplib/map.mjs';
 import {randomShuffle, randomChoice} from '../utility/random-tool.mjs';
+
+const FSM_ERROR = '__fsm_error';
+
 /**
  * TODO
  * @param {Object} initialPosition - TODO
@@ -104,6 +107,9 @@ class InteractiveObjectServerBaseClass {
 
     // Stores whether the while loop in fsmWalk should exit.
     this._fsmWalkExit = new Map(); // key: playerID, value: true|false
+
+    // Set it as a const member so other users can access it more easily.
+    this.FSM_ERROR = FSM_ERROR;
   }
 
   /**
@@ -147,6 +153,10 @@ class InteractiveObjectServerBaseClass {
           console.error(`Error on calling '${func}' with argument '${playerID}' and ${kwargs}.`);
           console.error(e.stack);
           nextState = this.sf_exit(playerID, {next: currStateStr});
+        }
+        // Handle special error state.
+        if (nextState === this.FSM_ERROR) {
+          nextState = this.sf_exit(playerID, {next: this.dataStore.get(playerID)});
         }
 
         if (typeof fsm.states[nextState] === 'undefined') {
@@ -238,7 +248,7 @@ class InteractiveObjectServerBaseClass {
     console.warn(`Player '${playerID}' does not choose in 'showDialogWithMultichoice'. Result: ${JSON.stringify(result)}`);
 
     // If we reach here, the showDialog timeouts.
-    return this.sf_exit(playerID, {next: this.dataStore.get(playerID)});
+    return this.FSM_ERROR;
   }
 
   async sf_showDialogAndCheckKey(playerID, kwargs) {
@@ -264,7 +274,7 @@ class InteractiveObjectServerBaseClass {
       result = await this.helper.callS2cAPI(playerID, 'dialog', 'showDialogWithMultichoice', 60*1000, this.objectName, d, c);
       if (!result.token) {
         console.warn(`Player '${playerID}' does not choose in 'answerProblems'. Result: ${JSON.stringify(result)}`);
-        return this.sf_exit(playerID, {next: this.dataStore.get(playerID)});
+        return this.FSM_ERROR;
       } else if (result.token === this.problemSet[i].ans) correct += 1;
     }
     if (correct >= goalPoints) return nextState;
@@ -278,7 +288,7 @@ class InteractiveObjectServerBaseClass {
     if (result) return nextState;
     console.warn(`Player '${playerID}' cannot go to the place`);
 
-    return this.sf_exit(playerID, {next: this.dataStore.get(playerID)});
+    return this.FSM_ERROR;
   }
 
   /**
@@ -323,7 +333,7 @@ class InteractiveObjectServerBaseClass {
     console.warn(`Player '${playerID}' does not choose in 'showDialogWithMultichoice'. Result: ${JSON.stringify(result)}`);
 
     // If we reach here, the editDialog timeouts.
-    return this.sf_exit(playerID, {next: this.dataStore.get(playerID)});
+    return this.FSM_ERROR;
   }
 
   /**
@@ -346,7 +356,7 @@ class InteractiveObjectServerBaseClass {
     const result = await this.helper.callS2sAPI('items', 'AddItem', playerID, itemName, amount, maxAmount);
     if (result.ok !== true) {
       console.error('items.AddItem() failed, maybe items ext is not running?');
-      return this.sf_exit(playerID, {next: this.dataStore.get(playerID)});
+      return this.FSM_ERROR;
     }
     return kwargs.nextState;
   }
@@ -370,7 +380,7 @@ class InteractiveObjectServerBaseClass {
     if (typeof result.error !== 'undefined' || typeof result.ok !== 'boolean') {
       // Extension not running?
       console.error('items.TakeItem() failed, maybe items ext is not running?');
-      return this.sf_exit(playerID, {next: this.dataStore.get(playerID)});
+      return this.FSM_ERROR;
     }
 
     if (result.ok) {
@@ -399,7 +409,7 @@ class InteractiveObjectServerBaseClass {
     if (typeof result.error !== 'undefined' || !Number.isInteger(result.amount)) {
       // Extension not running?
       console.error('items.CountItem() failed, maybe items ext is not running?');
-      return this.sf_exit(playerID, {next: this.dataStore.get(playerID)});
+      return this.FSM_ERROR;
     }
 
     if (result.amount >= amount) {
