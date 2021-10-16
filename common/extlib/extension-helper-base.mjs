@@ -204,6 +204,16 @@ class ExtensionHelperBase {
   async broadcastCellSetUpdateToAllUser(op, mapName, cellSet) {
     await this.broadcaster.notifyPlayerCellSetChange(op, mapName, cellSet);
   }
+
+  /**
+   * Check the player's permission.
+   */
+  async checkPerm(playerID, scope) {
+    const token = await this.getToken(playerID);
+    if (!Array.isArray(token.scp)) return false;
+    if (token.scp.includes(scope)) return true;
+    return false;
+  }
 }
 
 export default ExtensionHelperBase;
