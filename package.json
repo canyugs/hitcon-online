@@ -5,6 +5,7 @@
     "sites/*",
     "services/*",
     "extensions/*",
+    "stress",
     "terminal-server"
   ],
   "devDependencies": {

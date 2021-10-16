@@ -1955,6 +1955,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"hitcon-online-stress@workspace:stress":
+  version: 0.0.0-use.local
+  resolution: "hitcon-online-stress@workspace:stress"
+  languageName: unknown
+  linkType: soft
+
 "hitcon-online-terminal-server@workspace:terminal-server":
   version: 0.0.0-use.local
   resolution: "hitcon-online-terminal-server@workspace:terminal-server"
