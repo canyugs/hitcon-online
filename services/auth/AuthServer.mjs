@@ -110,7 +110,7 @@ class AuthServer {
             payload.iss = 'https://hitcon.org';
             payload.sub = genRandomStr(5);
             payload.iat = Math.floor(Date.now() / 1000);
-            payload.scope = (scopeStr==='')?[]:scopeStr.split('|');
+            payload.scp = (scopeStr==='')?[]:scopeStr.split('|');
             const token = jwt.sign(payload, secret, {expiresIn: 60 * 60 * 24 * 365});
             res.cookie('token', token);
             res.json({
