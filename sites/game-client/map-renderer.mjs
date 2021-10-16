@@ -70,6 +70,21 @@ class MapRenderer {
   }
 
   /**
+   * Disable rendering for testing.
+   * Note that there's no way to turn it back on without refresh.
+   */
+  disableRenderForTesting() {
+    const noop = ()=>{}
+    this.ctx.drawImage = noop;
+    this.ctx.fillText = noop;
+    this.ctx.save = noop;
+    this.ctx.restore = noop;
+    // Note: The last one is a bit too extreme, if testing fails for any reason
+    // try removing the next line.
+    this.draw = noop;
+  }
+
+  /**
    * This function is a listener of "gameStart" event.
    */
   initializeViewerPosition() {
