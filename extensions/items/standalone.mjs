@@ -104,6 +104,25 @@ class Standalone {
         true);
       this.helper.gameMap.setDynamicCellSet(mapName, cellSet);
     }
+
+    // Register the chat commands.
+    try {
+      this.helper.callS2sAPI('chat', 'registerCmd', {
+        cmd: 'ListItems', ext: this.helper.name, c2s: 'cmdListItems',
+        helpMsg: '--- Show user\'s inventory'
+      });
+      this.helper.callS2sAPI('chat', 'registerCmd', {
+        cmd: 'GiveItem', ext: this.helper.name, c2s: 'cmdGiveItem',
+        helpMsg: '<player> <amount> <item> --- Give player an amount of items'
+      });
+      this.helper.callS2sAPI('chat', 'registerCmd', {
+        cmd: 'TakeItem', ext: this.helper.name, c2s: 'cmdTakeItem',
+        helpMsg: '<player> <amount> <item> --- Take an amount of items from player'
+      });
+    } catch (e) {
+      console.warn(`Failure registering chat commands for items`);
+      console.warn(e);
+    }
   }
 
   /**
@@ -540,6 +559,83 @@ class Standalone {
    */
   async s2s_GetItemInfos(srcExtName) {
     return this.itemInfo;
+  }
+
+  /**
+   * Command for listing all items.
+   */
+  async c2s_cmdListItems(player, cmd) {
+    let reply = '';
+    const itemObj = this.items[player.playerID];
+    let total = 0;
+    let count = 0;
+    for (const i in itemObj) {
+      const item = itemObj[i];
+      const info = this.itemInfo[i];
+      if (item.amount === 0) continue;
+      reply += `${item.amount}x ${info.visibleName}\n`;
+      total += item.amount;
+      count += 1;
+    }
+
+    reply += `Total: ${count} types of items, ${total} items\n`;
+    return {status: 'ok', reply: reply};
+  }
+
+  /**
+   * Command for giving item to player.
+   * Syntax:
+   * !/GiveItem <playerID> <amount> <item>
+   */
+  async c2s_cmdGiveItem(player, cmd) {
+    if (!await this.helper.checkPerm(player.playerID, 'mod')) {
+      return {status: 'noperm'};
+    }
+
+    const arr = cmd.split(' ');
+    if (arr.length != 4) {
+      return {status: 'error', reply: 'Invalid arguments'};
+    }
+    const receiver = arr[1];
+    const amount = parseInt(arr[2], 10);
+    const itemName = arr[3];
+    if (isNaN(amount) || !Number.isInteger(amount)) {
+      return {status: 'error', reply: 'Invalid amount'};
+    }
+
+    const success = this._addItem(receiver, itemName, amount);
+    if (success) {
+      return {status: 'ok', reply: 'Done'};
+    }
+    return {status: 'error', reply: 'Transfer failed'};
+  }
+
+  /**
+   * Command for taking item from player.
+   * Syntax:
+   * !/TakeItem <playerID> <amount> <item>
+   */
+  async c2s_cmdTakeItem(player, cmd) {
+    if (!await this.helper.checkPerm(player.playerID, 'mod')) {
+      return {status: 'noperm'};
+    }
+
+    const arr = cmd.split(' ');
+    if (arr.length < 4) {
+      return {status: 'error', reply: 'Invalid arguments'};
+    }
+    const sender = arr[1];
+    const amount = parseInt(arr[2], 10);
+    const itemName = arr[3];
+    if (isNaN(amount) || !Number.isInteger(amount)) {
+      return {status: 'error', reply: 'Invalid amount'};
+    }
+
+    const success = this._takeItem(sender, itemName, amount);
+    if (success) {
+      return {status: 'ok', reply: 'Done'};
+    }
+    return {status: 'error', reply: 'Transfer failed'};
   }
 
   /**
