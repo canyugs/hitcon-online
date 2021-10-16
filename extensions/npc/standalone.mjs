@@ -24,9 +24,9 @@ class Standalone {
     this.NPCs = new Map();
 
     // create individual NPC
-    fs.readdirSync('../run/npc').forEach((file) => {
+    fs.readdirSync('./npc').forEach((file) => {
       const npcName = file.slice(0, -('.json'.length));
-      const npc = new SingleNPC(helper, npcName, `../run/npc/${file}`);
+      const npc = new SingleNPC(helper, npcName, `./npc/${file}`);
       this.NPCs.set(npcName, npc);
     });
   }
