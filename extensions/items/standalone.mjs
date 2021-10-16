@@ -142,6 +142,10 @@ class Standalone {
    * @param String playerID - ID of the player.
    */
   _ensurePlayer(playerID) {
+    if (typeof playerID !== 'string') {
+      console.error('PlayerID not string in _ensurePlayer', playerID);
+      return;
+    }
     if (!(playerID in this.items)) {
       /* player has not registered yet */
       this.items[playerID] = {};
@@ -155,6 +159,10 @@ class Standalone {
    * @param String itemName - The item name.
    */
   _ensurePlayerItem(playerID, itemName) {
+    if (typeof itemName !== 'string') {
+      console.error('itemName not string in _ensurePlayerItem', itemName);
+      return;
+    }
     this._ensurePlayer(playerID);
     if (!(itemName in this.items[playerID])) {
       this.items[playerID][itemName] = {amount: 0};
@@ -179,7 +187,7 @@ class Standalone {
     })();
   }
 
-    /**
+  /**
    * Add an item to the given player's inventory.
    * @param String playerID - ID of the player.
    * @param String itemName - The item name.
@@ -191,8 +199,16 @@ class Standalone {
       console.error('_addItem() passed amount not integer: ', amount);
       return false;
     }
-    _ensurePlayerItem(playerID);
-    this.items[playerID].amount += amount;
+    if (typeof playerID !== 'string') {
+      console.error('PlayerID not string in _addItem', playerID);
+      return false;
+    }
+    if (typeof itemName !== 'string') {
+      console.error('itemName not string in _addItem', itemName);
+      return false;
+    }
+    this._ensurePlayerItem(playerID, itemName);
+    this.items[playerID][itemName].amount += amount;
     this._deferFlush();
     return true;
   }
@@ -211,6 +227,15 @@ class Standalone {
       console.error('_takeItem() passed amount not integer: ', amount);
       return false;
     }
+    if (typeof playerID !== 'string') {
+      console.error('PlayerID not string in _takeItem', playerID);
+      return false;
+    }
+    if (typeof itemName !== 'string') {
+      console.error('itemName not string in _takeItem', itemName);
+      return false;
+    }
+
     if (!(playerID in this.items)) return false;
     if (!(itemName in this.items[playerID])) return false;
     if (this.items[playerID][itemName].amount < amount) return false;
