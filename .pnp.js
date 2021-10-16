@@ -123,6 +123,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         "reference": "workspace:sites/game-client"
       },
       {
+        "name": "hitcon-online-stress",
+        "reference": "workspace:stress"
+      },
+      {
         "name": "hitcon-online-terminal-server",
         "reference": "workspace:terminal-server"
       }
@@ -156,6 +160,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
       ["hitcon-online-point-system", ["workspace:extensions/point-system"]],
       ["hitcon-online-rpc-directory", ["workspace:common/rpc-directory"]],
       ["hitcon-online-standalone-server", ["workspace:services/standalone"]],
+      ["hitcon-online-stress", ["workspace:stress"]],
       ["hitcon-online-terminal-server", ["workspace:terminal-server"]]
     ],
     "fallbackPool": [
@@ -2588,6 +2593,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["minimist", "npm:1.2.5"],
             ["redis", "npm:3.1.2"],
             ["socket.io", "npm:4.1.2"]
+          ],
+          "linkType": "SOFT",
+        }]
+      ]],
+      ["hitcon-online-stress", [
+        ["workspace:stress", {
+          "packageLocation": "./stress/",
+          "packageDependencies": [
+            ["hitcon-online-stress", "workspace:stress"]
           ],
           "linkType": "SOFT",
         }]
