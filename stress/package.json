@@ -1,4 +1,7 @@
 {
   "name": "hitcon-online-stress",
-  "version": "0.0.1"
+  "version": "0.0.1",
+  "dependencies": {
+    "puppeteer": "^10.4.0"
+  }
 }
