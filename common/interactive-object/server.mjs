@@ -91,6 +91,9 @@ class InteractiveObjectServerBaseClass {
     if (!fsmValidation(this.config.FSM)) return;
     if (!displayValidation(this.config.display)) return;
 
+    // Stores the editable dialog variables
+    this.dialogVars = {};
+
     // Stores the state of every player.
     // TODO: store the states in database (or in `/run/small_data`)
     this.dataStore = new Map(); // key: playerID, value: currentState
@@ -223,18 +226,12 @@ class InteractiveObjectServerBaseClass {
       return arr[index];
     }
 
-    const {dialogs, options} = kwargs;
-
+    const {dialogs, dialogVar, options} = kwargs;
     // prepare dialog
     let d = '';
-    if (typeof dialogs === 'string') {
-      if (this.editableDialogs && this.editableDialogs[dialogs]) {
-        d = this.editableDialogs[dialogs];
-      } else {
-        d = dialogs;
-      }
-    }
+    if (typeof dialogs === 'string') d = dialogs;
     if (Array.isArray(dialogs)) d = randomChoice(dialogs);
+    if (typeof dialogVar === 'string' && typeof this.dialogVars[dialogVar] === 'string') d = this.dialogVars[dialogVar];
 
     // prepare choice
     const c = [];
@@ -295,7 +292,7 @@ class InteractiveObjectServerBaseClass {
    * @return {String} - the next state
    */
   async sf_editDialog(playerID, kwargs) {
-    const {dialogs, buttonText, nextState} = kwargs;
+    const {dialogs, dialogVar, buttonText, nextState} = kwargs;
 
     // prepare dialog
     let d = '';
@@ -304,8 +301,8 @@ class InteractiveObjectServerBaseClass {
 
     const result = await this.helper.callS2cAPI(playerID, 'dialog', 'showDialogWithPrompt', 60*1000, this.objectName, d, buttonText);
     if (result.msg) {
-      if (this.editableDialogs) {
-        this.editableDialogs[this.config.FSM.states[nextState].kwargs.dialogs] = result.msg;
+      if (typeof dialogVar === 'string') {
+        this.dialogVars[dialogVar] = result.msg;
       }
       return nextState;
     }
