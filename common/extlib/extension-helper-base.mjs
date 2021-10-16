@@ -159,7 +159,7 @@ class ExtensionHelperBase {
    * @return {object} result - The result from the call.
    */
   async callS2sAPI(extName, methodName, ...args) {
-    if (extName === null || extName === undefined) {
+    if (extName === null || extName === undefined || extName === '') {
       extName = this.name;
     }
     if (typeof extName != 'string') {
