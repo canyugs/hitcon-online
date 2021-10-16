@@ -25,8 +25,8 @@ class MapRendererOverlay extends Overlay {
     const widthCount = Math.floor(this.dom.clientWidth / MAP_CELL_SIZE) + 1;
     const heightCount = Math.floor(this.dom.clientHeight / MAP_CELL_SIZE) + 1;
 
-    this.canvas.height = 32 * heightCount;
-    this.canvas.width = 32 * widthCount;
+    this.canvas.height = MAP_CELL_SIZE * heightCount;
+    this.canvas.width = MAP_CELL_SIZE * widthCount;
   }
 };
 
