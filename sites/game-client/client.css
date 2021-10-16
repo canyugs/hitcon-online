@@ -56,6 +56,8 @@ body {
   height: 100%;
   /* We want to make sure that 100% width/height doesn't result in overflow. */
   box-sizing: border-box;
+  /* disable overflow so that the oversized canvas can be center-aligned automatically */
+  overflow: hidden;
 }
 
 .overlay {
