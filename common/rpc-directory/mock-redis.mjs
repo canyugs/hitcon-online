@@ -46,6 +46,31 @@ class MockRedisClient {
         if (typeof cb === 'function') cb(null, 'OK');
     }
 
+    incr(k, cb) {
+      this.incr_decr_internal(k, cb, 1);
+    }
+
+    decr(k, cb) {
+      this.incr_decr_internal(k, cb, -1);
+    }
+
+    incr_decr_internal(k, cb, delta) {
+      if (k.length != 1) throw 'Invalid key for incr';
+      if (!this._data.has(k[0])) {
+        this._data.set(k[0], '0');
+      }
+      let n = 0;
+      let v = this._data.get(k[0]);
+      n = parseInt(v, 10);
+      if (!Number.isInteger(n) || isNaN(n)) {
+        console.error('incr on non integer', v);
+        throw 'ERR value is not an integer or out of range';
+      }
+      n += delta;
+      this._data.set(k[0], n.toString());
+      if (typeof cb === 'function') cb(null, n);
+    }
+
     del(keys, cb) {
         for (let key of keys) {
             this._data.delete(key);

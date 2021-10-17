@@ -72,6 +72,8 @@ class Directory {
     this.redis.hgetallAsync = promisify(this.redis.hgetall);
     this.redis.flushallAsync = promisify(this.redis.flushall);
     this.redis.scanAsync = promisify(this.redis.scan);
+    this.redis.incrAsync = promisify(this.redis.incr);
+    this.redis.decrAsync = promisify(this.redis.decr);
 
     this.redisSub = redis.createClient(config.get('redis.option'));
     this.redisSub.subscribeAsync = promisify(this.redis.subscribe);
@@ -92,6 +94,9 @@ class Directory {
     this.redis.hgetallAsync = promisify(this.redis.hgetall);
     this.redis.flushallAsync = promisify(this.redis.flushall);
     this.redis.scanAsync = promisify(this.redis.scan);
+    this.redis.incrAsync = promisify(this.redis.incr);
+    this.redis.decrAsync = promisify(this.redis.decr);
+
 
     this.redisSub = mockRedis.createClient();
     this.redisSub.subscribeAsync = promisify(this.redis.subscribe);
