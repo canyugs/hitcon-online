@@ -54,15 +54,21 @@ class Standalone {
    * 3. Create an item instance (which contains all possible functions that can be performed on the item)
    */
   async initialize() {
+    // Load the item classes.
     const allItemsName = await fs.promises.readdir(path.dirname(fileURLToPath(import.meta.url)) + '/common/itemClasses');
-    const itemSettingJson = await fs.promises.readFile(`../extensions/items/common/config.json`);
-    const itemConfig = JSON.parse(itemSettingJson).items;
     const itemBaseClasses = {};
     for (let itemTypeName of allItemsName) {
-      const itemBaseModule = await import(`./common/itemClasses/${itemTypeName}/${itemTypeName}.mjs`);
+      if (!itemTypeName.endsWith('.mjs')) {
+        continue;
+      }
+      itemTypeName = itemTypeName.substr(0, itemTypeName.length-('.mjs'.length));
+      const itemBaseModule = await import(`./common/itemClasses/${itemTypeName}.mjs`);
       const itemBaseClass = itemBaseModule.default;
       itemBaseClasses[itemTypeName] = itemBaseClass;
     }
+    // Load individual item configs.
+    const itemSettingJson = await fs.promises.readFile(`./items/config.json`);
+    const itemConfig = JSON.parse(itemSettingJson).items;
     let index = 0;
     for (let itemName in itemConfig) {
       const itemBaseClassName = itemConfig[itemName].baseClass;
