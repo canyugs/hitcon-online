@@ -96,8 +96,8 @@ class Player {
       this.mapCoord = msg.mapCoord;
     }
     if (msg.facing !== undefined) this.facing = msg.facing;
-    if (msg.displayName !== undefined) this.displayName = msg.displayName;
-    if (msg.displayChar !== undefined) this.displayChar = msg.displayChar;
+    if (msg.displayName !== undefined && Player.displayNameValidation(msg.displayName)) this.displayName = msg.displayName;
+    if (msg.displayChar !== undefined && Player.displayCharValidation(msg.displayChar)) this.displayChar = msg.displayChar;
     if (msg.removed !== undefined) this.removed = msg.removed;
     if (msg.ghostMode !== undefined) this.ghostMode = msg.ghostMode;
     return true;
@@ -174,6 +174,26 @@ class Player {
   getDataStoreKey() {
     return Player.getDataStoreKey(this.playerID);
   }
+
+  /**
+   * Check whether displayName is valid.
+   * @param {String} displayName
+   * @return {Boolean}
+   */
+  static displayNameValidation(displayName) {
+    // TODO
+    return true;
+  }
+
+  /**
+   * Check whether displayChar is valid.
+   * @param {String} displayChar
+   * @return {Boolean}
+   */
+  static displayCharValidation(displayChar) {
+    // TODO
+    return true;
+  }
 }
 
 /**
@@ -193,7 +213,7 @@ class PlayerSyncMessage {
     this.displayName = displayName;
     this.displayChar = displayChar;
     this.removed = removed ?? false;
-    this.clientTime = clientTime;
+    this.clientTime = clientTime; // a counter
     this.updateSuccess = updateSuccess; // used by server to tell client whether success or not
     this.ghostMode = ghostMode;
   }
