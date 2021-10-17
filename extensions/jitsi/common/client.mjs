@@ -166,14 +166,10 @@ class Client {
       return;
     }
     
-    // Sanitize to prevent XSS
-    const san_meetingName = filterXSS(meetingName);
-
-
     // If we get here, we're requested to join a meeting.
     if (typeof this.currentMeeting === 'string') {
       // There's an active meeting currently.
-      if (this.currentMeeting === san_meetingName) {
+      if (this.currentMeeting === meetingName) {
         // No change.
         return;
       }
@@ -181,12 +177,12 @@ class Client {
     }
     // If we get here, there's no meeting.
     // Get the password of the meeting
-    let password = await this.helper.callC2sAPI(null, 'getPassword', this.helper.defaultTimeout, {'meetingName': san_meetingName});
+    let password = await this.helper.callC2sAPI(null, 'getPassword', this.helper.defaultTimeout, {'meetingName': meetingName});
     if (!password) {
       password = null;
     }
     // Join meeting
-    this.startMeeting(san_meetingName, password);
+    this.startMeeting(meetingName, password);
   }
 
   /**
