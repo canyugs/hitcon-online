@@ -77,8 +77,8 @@ class ExtStateFuncProvider {
    */
   registerStateFunc(fnName, extName, methodName) {
     const fnObj = {};
-    fnObj.fn = async (playerID, kwargs) => {
-      return await this.helper.callS2sAPI(extName, methodName, playerID, kwargs);
+    fnObj.fn = async (playerID, kwargs, sfInfo) => {
+      return await this.helper.callS2sAPI(extName, methodName, playerID, kwargs, sfInfo);
     };
     fnObj.extName = extName;
     fnObj.methodName = methodName;
