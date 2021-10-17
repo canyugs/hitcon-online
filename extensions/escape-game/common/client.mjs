@@ -77,9 +77,8 @@ class Client {
 
     const listOfTerminals = await this.helper.callC2sAPI('escape-game', 'getListOfTerminals', this.helper.defaultTimeout);
     for (const terminalId of listOfTerminals) {
-      const initialPosition = MapCoord.fromObject(await this.helper.callC2sAPI('escape-game', 'getTerminalInitialPosition', this.helper.defaultTimeout, terminalId));
-      const displayConfig = await this.helper.callC2sAPI('escape-game', 'getTerminalDisplayInfo', this.helper.defaultTimeout, terminalId);
-      this.terminals.set(terminalId, new TerminalObject(this.helper, terminalId, initialPosition, displayConfig));
+      const clientInfo = await this.helper.callC2sAPI('escape-game', 'getTerminalClientInfo', this.helper.defaultTimeout, terminalId)
+      this.terminals.set(terminalId, new TerminalObject(this.helper, terminalId, clientInfo));
     }
 
     // For testing only.
@@ -166,11 +165,12 @@ class Client {
    * @param {MapCoord} initialPosition - Position of the terminal.
    * @param {Array} displayConfig - Display config.
    */
-  constructor(helper, terminalId, initialPosition, displayConfig) {
-    const mapCoord = initialPosition;
+  constructor(helper, terminalId, clientInfo) {
+    const mapCoord = MapCoord.fromObject(clientInfo.initialPosition);
+    clientInfo.mapCoord = mapCoord;
     const facing = 'D';
 
-    for (const cfg of displayConfig) {
+    for (const cfg of clientInfo.displayConfig) {
       if (cfg.layerName === 'terminalImage') {
         cfg.renderArgs = {
           mapCoord: mapCoord,
@@ -196,7 +196,7 @@ class Client {
       helper.callC2sAPI('escape-game', 'startInteraction', this.helper.defaultTimeout, terminalId);
     };
 
-    super(helper, initialPosition, displayConfig, interactFunction);
+    super(helper, clientInfo, interactFunction);
     this.terminalId = terminalId;
   }
 }
