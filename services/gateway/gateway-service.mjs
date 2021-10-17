@@ -281,10 +281,13 @@ class GatewayService {
 
       if (!(await this._teleportPlayerInternal(socket, updateMsg))) {
         failOnPlayerUpdate(socket);
+        return;
       }
+    } else {
+      // If the player didn't move, still update everyone.
+      // Could be name change or something else.
+      await this._broadcastPlayerUpdate(updateMsg);
     }
-
-    await this._broadcastPlayerUpdate(updateMsg);
   }
 
   /**
@@ -307,7 +310,11 @@ class GatewayService {
       }
     }
 
+    // Leave the previous location.
     await this._leaveCoord(socket.playerData.mapCoord);
+
+    // Everything seems well, update everyone on our new location.
+    await this._broadcastPlayerUpdate(msg);
     return true;
   }
 
