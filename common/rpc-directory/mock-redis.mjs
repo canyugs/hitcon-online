@@ -62,7 +62,7 @@ class MockRedisClient {
       let n = 0;
       let v = this._data.get(k[0]);
       n = parseInt(v, 10);
-      if (!Number.isInteger(n) || isNaN(n)) {
+      if (!Number.isInteger(n) || Number.isNaN(n)) {
         console.error('incr on non integer', v);
         throw 'ERR value is not an integer or out of range';
       }
@@ -130,11 +130,11 @@ class MockRedisClient {
     flushall(cb) {
         this._data.clear();
         if (typeof cb === 'function') cb(null, null);
-    } 
+    }
 
     scan(cb) {
         cb(null, [0, Array.from(this._data.keys())]);
-    } 
+    }
 }
 
 export default MockRedis;
