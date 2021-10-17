@@ -2080,6 +2080,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"hitcon-online-setting@workspace:extensions/setting":
+  version: 0.0.0-use.local
+  resolution: "hitcon-online-setting@workspace:extensions/setting"
+  languageName: unknown
+  linkType: soft
+
 "hitcon-online-standalone-server@workspace:services/standalone":
   version: 0.0.0-use.local
   resolution: "hitcon-online-standalone-server@workspace:services/standalone"

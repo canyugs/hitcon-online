@@ -28,6 +28,7 @@
     "enabled": [
       "chat",
       "dialog",
+      "setting",
       "bombman",
       "items",
       "MapWatermark",
