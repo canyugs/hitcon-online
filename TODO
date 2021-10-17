@@ -5,10 +5,8 @@ Not started
 P1
 --
 
-- Ghost mode/jump
-- Item/Inventory extension
 - Jitsi Access Control
-- Q/A Game
+- Item/Inventory extension
 - NPC trigger proximity check
 - Location triggered NPC.
 
@@ -18,7 +16,6 @@ P2
 - Optimize player look-up data structure in MapRender and InteractiveObjectBase.
 - Follow functionality
 - Fix race condition in Gateway connect/disconnect handler.
-- Optimize loading when multiple users are looking for spawn point or have a timer/queue when spawn points are full.
 - Bomb man extension
 
 In Progress
