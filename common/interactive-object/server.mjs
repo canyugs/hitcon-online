@@ -4,6 +4,7 @@
 import fs from 'fs';
 import {MapCoord} from '../maplib/map.mjs';
 import {randomShuffle, randomChoice} from '../utility/random-tool.mjs';
+import {InClassStateFuncProvider, ExtStateFuncProvider, StackStateFuncProvider} from './state-func-provider.mjs';
 
 const FSM_ERROR = '__fsm_error';
 
@@ -113,6 +114,26 @@ class InteractiveObjectServerBaseClass {
 
     // Set it as a const member so other users can access it more easily.
     this.FSM_ERROR = FSM_ERROR;
+
+    // Initialize the state function providers, so that we can access state functions from both
+    // internally and externally.
+    this.stateFuncProvider = new StackStateFuncProvider();
+    this.stateFuncProviderInClass = new InClassStateFuncProvider(this);
+    this.stateFuncProvider.addProvider(this.stateFuncProviderInClass);
+    this.stateFuncProviderExt = new ExtStateFuncProvider(helper);
+    this.stateFuncProvider.addProvider(this.stateFuncProviderExt);
+  }
+
+  /**
+   * Register an s2s func as a state func.
+   * The s2s API should have the following signature:
+   * (srcExt, playerID, kwargs)
+   * @param {String} fnName - The state function name.
+   * @param {String} extName - The s2s ext name.
+   * @param {String} methodName - The s2s method name.
+   */
+  registerExtStateFunc(fnName, extName, methodName) {
+    this.stateFuncProviderExt.registerStateFunc(fnName, extName, methodName);
   }
 
   /**
@@ -143,15 +164,15 @@ class InteractiveObjectServerBaseClass {
         }
 
         const kwargs = currState.kwargs;
-        const func = 'sf_' + currState.func; // 'sf_' stands for state function
-        if (!(func in this)) {
+        const func = this.stateFuncProvider.getStateFunc(currState.func);
+        if (!func) {
           console.error(`'${func}' is not a valid state function when walking FSM for ${playerID} in ${this.objectName}.`);
           this.dataStore.set(playerID, fsm.initialState);
           break;
         }
         let nextState = '';
         try {
-          nextState = await this[func](playerID, kwargs);
+          nextState = await func(playerID, kwargs);
         } catch (e) {
           console.error(`Error on calling '${func}' with argument '${playerID}' and ${kwargs}.`);
           console.error(e.stack);
