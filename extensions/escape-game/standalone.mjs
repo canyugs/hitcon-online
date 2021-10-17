@@ -171,30 +171,18 @@ class Standalone {
   }
 
   /**
-   * Get the display info of the terminal. (for the interactive object)
+   * Get the client side info for the terminal. (for the interactive object)
    * @param {Object} player The player object
    * @param {String} terminalId The terminal to be accessed.
-   * @return {Object}
+   * @return {Object} clientInfo
    */
-  async c2s_getTerminalDisplayInfo(player, terminalId) {
-    const terminal = this.terminalObjects.get(terminalId);
-    if (typeof terminal === 'undefined') return {};
-    return terminal.getDisplayInfo();
-  }
-
-  /**
-   * Get the initial position of the terminal. (for the interactive object)
-   * @param {Object} player The player object
-   * @param {String} terminalId The terminal to be accessed.
-   * @return {mapCoord}
-   */
-  async c2s_getTerminalInitialPosition(player, terminalId) {
+  async c2s_getTerminalClientInfo(player, terminalId) {
     const terminal = this.terminalObjects.get(terminalId);
     if (typeof terminal === 'undefined') {
       console.error(`Terminal '${terminalId}' not found.`);
       return null;
     }
-    return terminal.getInitialPosition();
+    return terminal.getClientInfo();
   }
 
   /**

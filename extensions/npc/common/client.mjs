@@ -50,14 +50,15 @@ class SingleNPC extends InteractiveObjectClientBaseClass {
    * TODO
    * @param {ClientExtensionHelper} helper - The extension helper.
    * @param {String} npcName - The name of the NPC.
-   * @param {MapCoord} initialPosition - TODO
-   * @param {Array} displayConfig - TODO
+   * @param {Object} clientInfo - The client side info for the NPC.
    */
-  constructor(helper, npcName, initialPosition, displayConfig) {
-    const mapCoord = initialPosition;
+  constructor(helper, npcName, clientInfo) {
+    const mapCoord = MapCoord.fromObject(clientInfo.initialPosition);
+    clientInfo.mapCoord = mapCoord;
     const facing = 'D';
 
-    for (const cfg of displayConfig) {
+    console.log(clientInfo.displayConfig);
+    for (const cfg of clientInfo.displayConfig) {
       if (cfg.layerName === 'npcImage') {
         cfg.renderArgs = {
           mapCoord: mapCoord,
@@ -82,7 +83,7 @@ class SingleNPC extends InteractiveObjectClientBaseClass {
       helper.callC2sAPI('npc', 'startInteraction', this.helper.defaultTimeout, npcName);
     };
 
-    super(helper, initialPosition, displayConfig, interactFunction);
+    super(helper, clientInfo, interactFunction);
     this.npcName = npcName;
   }
 }
@@ -108,9 +109,8 @@ class Client {
   async gameStart() {
     const listOfNPCs = await this.getListOfNPCs();
     for (const npcName of listOfNPCs) {
-      const initialPosition = MapCoord.fromObject(await this.helper.callC2sAPI('npc', 'getInitialPosition', this.helper.defaultTimeout, npcName));
-      const displayConfig = await this.helper.callC2sAPI('npc', 'getDisplayInfo', this.helper.defaultTimeout, npcName);
-      const npc = new SingleNPC(this.helper, npcName, initialPosition, displayConfig);
+      const clientInfo = await this.helper.callC2sAPI('npc', 'getClientInfo', this.helper.defaultTimeout, npcName);
+      const npc = new SingleNPC(this.helper, npcName, clientInfo);
       this.NPCs.set(npcName, npc);
     }
   }

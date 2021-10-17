@@ -50,27 +50,15 @@ class Standalone {
    * TODO
    * @param {Object} player - TODO
    * @param {String} npcName - TODO
-   * @return {Object}
-   */
-  async c2s_getDisplayInfo(player, npcName) {
-    const npc = this.NPCs.get(npcName);
-    if (typeof npc === 'undefined') return {};
-    return npc.getDisplayInfo();
-  }
-
-  /**
-   * TODO
-   * @param {Object} player - TODO
-   * @param {String} npcName - TODO
    * @return {mapCoord}
    */
-  async c2s_getInitialPosition(player, npcName) {
+  async c2s_getClientInfo(player, npcName) {
     const npc = this.NPCs.get(npcName);
     if (typeof npc === 'undefined') {
-      console.error(`In 'c2s_getInitialPosition': NPC '${npcName}' not found.`);
+      console.error(`In 'c2s_getClientInfo': NPC '${npcName}' not found.`);
       return null;
     }
-    return npc.getInitialPosition();
+    return npc.getClientInfo();
   }
 
   /**

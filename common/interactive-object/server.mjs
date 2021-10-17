@@ -95,6 +95,9 @@ class InteractiveObjectServerBaseClass {
     if (!fsmValidation(this.config.FSM)) return;
     if (!displayValidation(this.config.display)) return;
 
+    // Update the clientInfo.
+    this._updateClientInfoCache();
+
     // Stores the editable dialog variables
     this.dialogVars = {};
 
@@ -173,17 +176,8 @@ class InteractiveObjectServerBaseClass {
    * TODO
    * @return {Array}
    */
-  getDisplayInfo() {
+  getDisplayConfig() {
     return this.config.display;
-  }
-
-  /**
-   * TODO
-   * @param {Object} player - TODO
-   * @return {Array}
-   */
-  async c2s_getDisplayInfo(player) {
-    return this.getDisplayInfo();
   }
 
   /**
@@ -194,13 +188,17 @@ class InteractiveObjectServerBaseClass {
     return MapCoord.fromObject(this.config.initialPosition);
   }
 
+  _updateClientInfoCache() {
+    this.clientInfo = {};
+    this.clientInfo.initialPosition = this.getInitialPosition();
+    this.clientInfo.displayConfig = this.getDisplayConfig();
+  }
+
   /**
-   * TODO
-   * @param {Object} player - TODO
-   * @return {MapCoord}
+   * Return the information needed by the client side for this interactive object.
    */
-  async c2s_getInitialPosition(player) {
-    return this.getInitialPosition();
+  getClientInfo() {
+    return this.clientInfo;
   }
 
   /**

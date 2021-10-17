@@ -1,6 +1,8 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
+import {MapCoord} from '/static/common/maplib/map.mjs';
+
 /**
  * TODO: jsdoc
  */
@@ -11,16 +13,20 @@ class InteractiveObjectClientBaseClass {
    * @param {ClientExtensionHelper} helper - An extension helper object for
    * servicing various functionalities of the extension.
    * @param {MapCoord} initialPosition - TODO
-   * @param {Object} displayConfig - TODO
+   * @param {Object} clientInfo - Information regrading this interactive object
+   *   that the client side should know. It should contain:
+   *   - {MapCoord} initialPosition - NPC's initial position.
+   *   - {Object} displayConfig - Arguments for drawing this NPC.
    * @param {Function} interactFunction - The function to be called when the user tries to
    * interact with this object (on click, keydown, signal, etc.)
    */
-  constructor(helper, initialPosition, displayConfig, interactFunction) {
+  constructor(helper, clientInfo, interactFunction) {
     this.helper = helper;
-    this.mapCoord = initialPosition;
-    this.displayConfig = displayConfig;
+    this.clientInfo = clientInfo;
+    this.mapCoord = clientInfo.initialPosition;
+    this.displayConfig = clientInfo.displayConfig;
 
-    for (const conf of displayConfig) {
+    for (const conf of this.displayConfig) {
       const {zIndex, layerName, renderFunction, renderArgs} = conf;
       this.helper.mapRenderer.registerCustomizedLayerToDraw(zIndex, layerName, renderFunction, renderArgs);
     }
