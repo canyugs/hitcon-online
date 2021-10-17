@@ -8,11 +8,11 @@ const grpc = require('@grpc/grpc-js');
 const protoLoader = require('@grpc/proto-loader');
 const randomBytes = require('crypto').randomBytes;
 const path = require('path');
+const jwt = require('jsonwebtoken');
 
 import fs from 'fs';
 import {promisify} from 'util';
 import {fileURLToPath} from 'url';
-import jwt from 'jsonwebtoken';
 import InteractiveObjectServerBaseClass from '../../common/interactive-object/server.mjs';
 
 const MAX_PLAYER_PER_ROOM = 5;
