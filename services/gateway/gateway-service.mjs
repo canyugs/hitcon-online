@@ -206,7 +206,7 @@ class GatewayService {
     }
 
     // Synchronize the state.
-    const initLoc = socket.playerData.mapCoord ?? this.gameMap.getRandomSpawnPointNoStarvation();
+    const initLoc = socket.playerData.mapCoord ?? this.gameMap.getRandomSpawnPoint();
     await this._enterCoord(initLoc);
     socket.playerData.mapCoord = initLoc;
     socket.playerData.lastMovingTime = Date.now();
