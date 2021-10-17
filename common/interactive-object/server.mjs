@@ -345,7 +345,7 @@ class InteractiveObjectServerBaseClass {
 
     const result = await this.helper.callS2sAPI('items', 'AddItem', playerID, itemName, amount, maxAmount);
     if (result.ok !== true) {
-      console.error('items.AddItem() failed, maybe items ext is not running?')
+      console.error('items.AddItem() failed, maybe items ext is not running?');
       return this.sf_exit(playerID, {next: this.dataStore.get(playerID)});
     }
     return kwargs.nextState;

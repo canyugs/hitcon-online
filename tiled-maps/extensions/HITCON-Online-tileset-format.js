@@ -32,6 +32,6 @@ var customTilesetFormat = {
         file.write(JSON.stringify(m));
         file.commit();
     },
-}
+};
 
-tiled.registerTilesetFormat("hitcon-tileset", customTilesetFormat)
+tiled.registerTilesetFormat("hitcon-tileset", customTilesetFormat);

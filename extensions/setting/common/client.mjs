@@ -328,7 +328,7 @@ class Client {
     this.tab.updateDropdownOptions('chat', 'example', {
       'default': 'Default',
       'meow': 'Meow',
-    }, 'default')
+    }, 'default');
   }
 }
 

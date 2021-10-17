@@ -32,6 +32,6 @@ var customMapFormat = {
         file.write(JSON.stringify(m));
         file.commit();
     },
-}
+};
 
-tiled.registerMapFormat("hitcon-map", customMapFormat)
+tiled.registerMapFormat("hitcon-map", customMapFormat);
