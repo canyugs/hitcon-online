@@ -1,0 +1,67 @@
+{
+    "enabled": true,
+    "initialPosition": {"mapName": "world1", "x": 3, "y": 15},
+    "display": [
+      {
+        "zIndex": 11,
+        "layerName": "npcImage",
+        "renderFunction": "_drawOneCharacterImage",
+        "renderArgs": null,
+        "character": "char1"
+      },
+      {
+        "zIndex": 16,
+        "layerName": "npcName",
+        "renderFunction": "_drawOneCharacterName",
+        "renderArgs": null
+      }
+    ],
+    "FSM": {
+      "initialState": "s1",
+      "states": {
+        "s1": {
+          "func": "showDialog",
+          "kwargs": {
+            "dialogs": "Hello!\n You need to answer some problems !",
+            "options": {
+              "OK!": "s2",
+              "Bye!": "s5"
+            }
+          }
+        },
+        "s2": {
+            "func": "answerProblems",
+            "kwargs": {
+                "problems": 10,
+                "goalPoints": 7,
+                "nextState": "s3",
+                "nextStateIncorrect" : "s4"
+            }
+        },
+        "s3": {
+            "func": "giveItem",
+            "kwargs": {
+                "maxAmount": 1,
+                "itemName": "xxx",
+                "nextState": "s5"
+            }
+        },
+        "s4": {
+            "func": "showDialog",
+            "kwargs": {
+                "dialogs": "Do you want to try again? ",
+                "options": {
+                    "Yes!": "s2",
+                    "Bye!": "s5"
+                }
+            }
+          },
+        "s5": {
+          "func": "exit",
+          "kwargs": {
+            "next": "s1"
+          }
+        }
+      }
+    }
+  }
