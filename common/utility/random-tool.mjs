@@ -9,4 +9,15 @@ function randomShuffle(arr) {
     arr[j] = temp;
   }
 }
-export default randomShuffle;
+
+function randomChoice(arr) {
+  const min = 0;
+  const max = arr.length;
+  const index = Math.floor(Math.random() * (max - min) + min); // The maximum is exclusive and the minimum is inclusive
+  return arr[index];
+}
+
+export {
+  randomShuffle,
+  randomChoice,
+};

@@ -3,7 +3,7 @@
 
 import fs from 'fs';
 import {MapCoord} from '../maplib/map.mjs';
-import randomShuffle from '../utility/random-tool.mjs';
+import {randomShuffle, randomChoice} from '../utility/random-tool.mjs';
 /**
  * TODO
  * @param {Object} initialPosition - TODO
@@ -220,13 +220,6 @@ class InteractiveObjectServerBaseClass {
    * @return {String} - the next state
    */
   async sf_showDialog(playerID, kwargs) {
-    function randomChoice(arr) {
-      const min = 0;
-      const max = arr.length;
-      const index = Math.floor(Math.random() * (max - min) + min); // The maximum is exclusive and the minimum is inclusive
-      return arr[index];
-    }
-
     const {dialogs, dialogVar, options} = kwargs;
     // prepare dialog
     let d = '';

@@ -9,7 +9,7 @@
  */
 
 import CellSet from './cellset.mjs';
-import randomShuffle from '../utility/random-tool.mjs';
+import {randomChoice} from '../utility/random-tool.mjs';
 
 /*
  * The map coordinate:
@@ -253,11 +253,10 @@ class GameMap {
   }
 
   /**
-   * Get the Spawn Points from all maps without starvation.
-   * @return {mapCoord} : A random spawn point with mapCoord type
+   * Get the Spawn Points from all maps.
+   * @return {MapCoord} - A random spawn point with MapCoord type
    */
-  getRandomSpawnPointNoStarvation() {
-
+  getRandomSpawnPoint() {
     if (typeof this._spawnPointCache === 'undefined') {
       // Get all spawn points from all maps
       this._spawnPointCache = [];
@@ -265,15 +264,9 @@ class GameMap {
         const newSpawnPoints = map.getSpawnPoints();
         this._spawnPointCache = this._spawnPointCache.concat(newSpawnPoints);
       });
-      randomShuffle(this._spawnPointCache);
-      this._spawnPointCurrentIndex = 0; // prevent starvation
     }
 
-    this._spawnPointCurrentIndex += 1;
-    if (this._spawnPointCurrentIndex === this._spawnPointCache.length) {
-      this._spawnPointCurrentIndex = 0;
-    }
-    return this._spawnPointCache[this._spawnPointCurrentIndex];
+    return randomChoice(this._spawnPointCache);
   }
 }
 
