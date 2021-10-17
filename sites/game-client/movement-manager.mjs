@@ -90,7 +90,7 @@ class MovementManager {
     if (!checkPlayerMove(player, msg, this.gameClient.gameMap)) {
       return;
     }
-    player.updateFromMessage(msg);
+    player.updateFromMessage(msg); // Client-side prediction. If error occurs, this update will be reverted in this.gameState.registerOnPlayerUpdate(...).
     this.socket.emit('playerUpdate', msg);
   }
 }
