@@ -67,7 +67,7 @@ class UtilPanelManager {
     const selected = this.getSelected();
 
     if (selected === 'collapse') {
-      this.collapse()
+      this.collapse();
     } else {
       this.uncollapse();
     }

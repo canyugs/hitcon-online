@@ -310,7 +310,7 @@ class Standalone {
   async c2s_getAllDroppedItems(player) {
     // TODO
     console.warn('Unimplemented c2s_getAllDroppedItems called');
-    return {}
+    return {};
   }
 
   /**

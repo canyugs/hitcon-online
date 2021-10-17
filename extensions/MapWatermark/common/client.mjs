@@ -33,7 +33,7 @@ class Client {
         image.onload = resolve;
         image.onerror = () => {
           reject(`error on loading ${image.src}`);
-        }
+        };
         mapWatermarks[index].image = image;  
       }));
     });

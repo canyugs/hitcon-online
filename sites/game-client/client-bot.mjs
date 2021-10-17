@@ -28,9 +28,9 @@ class ClientBot {
    * @param {key} key - The keyboard event
    */
     pressKey(target, duration, key) {
-        target.dispatchEvent(new KeyboardEvent('keydown', {key: key, code: this.keyMap[key], bubbles: true}))
+        target.dispatchEvent(new KeyboardEvent('keydown', {key: key, code: this.keyMap[key], bubbles: true}));
         setTimeout(() => {
-            target.dispatchEvent(new KeyboardEvent('keyup', {key: key, code: this.keyMap[key], bubbles: true}))
+            target.dispatchEvent(new KeyboardEvent('keyup', {key: key, code: this.keyMap[key], bubbles: true}));
         }, duration);
     }
 

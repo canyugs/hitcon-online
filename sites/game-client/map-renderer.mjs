@@ -74,7 +74,7 @@ class MapRenderer {
    * Note that there's no way to turn it back on without refresh.
    */
   disableRenderForTesting() {
-    const noop = ()=>{}
+    const noop = ()=>{};
     this.ctx.drawImage = noop;
     this.ctx.fillText = noop;
     this.ctx.save = noop;
