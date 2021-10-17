@@ -288,7 +288,9 @@ class Client {
   initSetting() {
     this.tab.addSection('general', '一般設定', 0);
     this.tab.addSubsection('general', 'account', '帳號設定', 0);
-    this.tab.addTextInput('account', 'nickname', '暱稱', 'Eevee', (value) => {
+
+    const nickname = this.helper.gameClient.playerInfo.displayName;
+    this.tab.addTextInput('account', 'nickname', '暱稱', nickname, (value) => {
       const player = this.helper.gameClient.playerInfo;
       const msg = PlayerSyncMessage.fromObject({
         playerID: player.playerID,
@@ -305,6 +307,7 @@ class Client {
       'facetime': 'FaceTime',
       'obs': 'OBS Virtual Camera',
     }, 'obs');
+
     this.tab.addDropdown('device', 'audio', '音訊輸入', (value) => {
       console.log('device audio', value);
     }, 10);
