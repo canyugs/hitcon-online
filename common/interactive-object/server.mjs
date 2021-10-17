@@ -115,6 +115,9 @@ class InteractiveObjectServerBaseClass {
     // Set it as a const member so other users can access it more easily.
     this.FSM_ERROR = FSM_ERROR;
 
+    // Update the infoForStateFunc.
+    this._updateInfoForStateFunc();
+
     // Initialize the state function providers, so that we can access state functions from both
     // internally and externally.
     this.stateFuncProvider = new StackStateFuncProvider();
@@ -127,13 +130,22 @@ class InteractiveObjectServerBaseClass {
   /**
    * Register an s2s func as a state func.
    * The s2s API should have the following signature:
-   * (srcExt, playerID, kwargs)
+   * (srcExt, playerID, kwargs, sfInfo)
    * @param {String} fnName - The state function name.
    * @param {String} extName - The s2s ext name.
    * @param {String} methodName - The s2s method name.
    */
   registerExtStateFunc(fnName, extName, methodName) {
     this.stateFuncProviderExt.registerStateFunc(fnName, extName, methodName);
+  }
+
+  /**
+   * Update the internal infoForStateFunc, an object passed to
+   * state function for their information.
+   */
+  _updateInfoForStateFunc() {
+    this.infoForStateFunc = {};
+    this.infoForStateFunc.objectName = this.objectName;
   }
 
   /**
@@ -172,7 +184,7 @@ class InteractiveObjectServerBaseClass {
         }
         let nextState = '';
         try {
-          nextState = await func(playerID, kwargs);
+          nextState = await func(playerID, kwargs, this.infoForStateFunc);
         } catch (e) {
           console.error(`Error on calling '${func}' with argument '${playerID}' and ${kwargs}.`);
           console.error(e.stack);
@@ -248,7 +260,7 @@ class InteractiveObjectServerBaseClass {
    * @param {Object} kwargs - TODO
    * @return {String} - the next state
    */
-  async sf_showDialog(playerID, kwargs) {
+  async sf_showDialog(playerID, kwargs, sfInfo) {
     const {dialogs, dialogVar, options} = kwargs;
     // prepare dialog
     let d = '';
@@ -262,7 +274,7 @@ class InteractiveObjectServerBaseClass {
       c.push({token: nextState, display: message});
     }
 
-    const result = await this.helper.callS2cAPI(playerID, 'dialog', 'showDialogWithMultichoice', 60*1000, this.objectName, d, c);
+    const result = await this.helper.callS2cAPI(playerID, 'dialog', 'showDialogWithMultichoice', 60*1000, sfInfo.objectName, d, c);
     if (result.token) return result.token;
     console.warn(`Player '${playerID}' does not choose in 'showDialogWithMultichoice'. Result: ${JSON.stringify(result)}`);
 
@@ -270,17 +282,17 @@ class InteractiveObjectServerBaseClass {
     return this.FSM_ERROR;
   }
 
-  async sf_showDialogAndCheckKey(playerID, kwargs) {
+  async sf_showDialogAndCheckKey(playerID, kwargs, sfInfo) {
     const {nextState, nextStateIncorrect, dialog, key} = kwargs;
     const res = await this.helper.callS2cAPI(playerID, 'dialog',
-    'showDialogWithPrompt', 60*1000, this.objectName, dialog);
+    'showDialogWithPrompt', 60*1000, sfInfo.objectName, dialog);
     if (res.msg === key) return nextState;
 
     //The key is wrong,
     return nextStateIncorrect;
   }
 
-  async sf_answerProblems(playerID, kwargs) {
+  async sf_answerProblems(playerID, kwargs, sfInfo) {
     const {problems, goalPoints, nextState, nextStateIncorrect} = kwargs;
     randomShuffle(this.problemSet);
     let result, correct = 0, d = '';
@@ -300,7 +312,7 @@ class InteractiveObjectServerBaseClass {
     return nextStateIncorrect;
   }
 
-  async sf_teleport(playerID, kwargs) {
+  async sf_teleport(playerID, kwargs, sfInfo) {
     const {mapCoord, nextState} = kwargs;
     const result = await this.helper.teleport(playerID, mapCoord);
 
@@ -316,7 +328,7 @@ class InteractiveObjectServerBaseClass {
    * @param {Object} kwargs - TODO
    * @return {String} - the next state
    */
-  async sf_checkPermission(playerID, kwargs) {
+  async sf_checkPermission(playerID, kwargs, sfInfo) {
     const permission = await this.helper.getToken(playerID);
     const {options} = kwargs;
     for (const [identity, nextState] of Object.entries(options)) {
@@ -334,7 +346,7 @@ class InteractiveObjectServerBaseClass {
    * @param {Object} kwargs - TODO
    * @return {String} - the next state
    */
-  async sf_editDialog(playerID, kwargs) {
+  async sf_editDialog(playerID, kwargs, sfInfo) {
     const {dialogs, dialogVar, buttonText, nextState} = kwargs;
 
     // prepare dialog
@@ -364,7 +376,7 @@ class InteractiveObjectServerBaseClass {
    *   kwargs.next - The next state.
    * @return {String} nextState - The next state.
    */
-  async sf_giveItem(playerID, kwargs) {
+  async sf_giveItem(playerID, kwargs, sfInfo) {
     let amount = kwargs.amount;
     let maxAmount = kwargs.maxAmount;
     let itemName = kwargs.itemName;
@@ -389,7 +401,7 @@ class InteractiveObjectServerBaseClass {
    *   kwargs.noItem specifies the state to go to if the player don't have the amount of specified items.
    * @return {String} nextState - The next state.
    */
-  async sf_takeItem(playerID, kwargs) {
+  async sf_takeItem(playerID, kwargs, sfInfo) {
     let amount = kwargs.amount;
     let itemName = kwargs.itemName;
 
@@ -418,7 +430,7 @@ class InteractiveObjectServerBaseClass {
    * @return {String} nextState - The next state.
    * WARNING: Using this method and takeItem() together may result in time-of-check-to-time-of-use exploit. In that case, please use takeItem() only.
    */
-  async sf_haveItem(playerID, kwargs) {
+  async sf_haveItem(playerID, kwargs, sfInfo) {
     let amount = kwargs.amount;
     let itemName = kwargs.itemName;
 
@@ -444,7 +456,7 @@ class InteractiveObjectServerBaseClass {
    * @param {Object} kwargs - TODO
    * @return {String} - the next state
    */
-  async sf_exit(playerID, kwargs) {
+  async sf_exit(playerID, kwargs, sfInfo) {
     this._fsmWalkExit.set(playerID, true);
     if (kwargs && kwargs.next) return kwargs.next;
     return this.config.FSM.initialState;
