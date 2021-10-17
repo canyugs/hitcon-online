@@ -166,20 +166,23 @@ class MainUI {
    * @param {Number} timeout The duraion of showing notification, the unit is millisecond. Should be an integer, otherwise the default is used.
    */
   showNotification(msg, timeout) {
+    // Sanitize to prevent XSS
+    const san_msg = filterXSS(msg);
+
     if (!Number.isInteger(timeout)) {
       timeout = DEFAULT_NOTIFICATION_TIMEOUT;
     }
 
     // Always enqueue the incoming notification. The first element of the list
     // is on display.
-    const add_ele = {msg: msg, timeout: timeout};
+    const add_ele = {msg: san_msg, timeout: timeout};
     this._notificationList.push(add_ele);
 
     // Start the notification
     if (this._notificationList.length <= 1) {
       // Nothing was on display at the moment, we can display it directly.
       this.notificationContDom.classList.remove('notification--inactive');
-      this._setNotificationText(msg, timeout);
+      this._setNotificationText(san_msg, timeout);
       setTimeout(() =>{
         this.updateNotification();
       }, timeout);
@@ -197,20 +200,23 @@ class MainUI {
   showAnnouncement(msg, timeout) {
     // TODO: Handle the close button in annoucement's UI.
 
+    // Sanitize to prevent XSS
+    const san_msg = filterXSS(msg);
+
     if (!Number.isInteger(timeout)) {
       timeout = DEFAULT_ANNOUNCEMENT_TIMEOUT;
     }
 
     // Always enqueue the incoming announcement. The first element of the list
     // is on display.
-    const add_ele = {msg: msg, timeout: timeout};
+    const add_ele = {msg: san_msg, timeout: timeout};
     this._announcementList.push(add_ele);
 
     // Start the notification
     if (this._announcementList.length <= 1) {
       // Nothing was on display at the moment, we can display it directly.
       this.announcementContDom.classList.remove('announcement--inactive');
-      this._setAnnouncementMarquee(msg);
+      this._setAnnouncementMarquee(san_msg);
       setTimeout(() =>{
         this.updateAnnouncement();
       }, timeout);
