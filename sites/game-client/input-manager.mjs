@@ -18,7 +18,9 @@ class InputManager {
     this.mapRender = mapRender;
     this.canvas = this.mapRender.getCanvas();
     this.clickCallbacks = []; // each element is a {DOMElement, callback} object
-    this.keydownCallbacks = []; // each element is a {DOMElement, callback} object
+    this.keydownEveryTickCallbacks = []; // each element is a {DOMElement, callback} object
+    this.keydownOnceCallbacks = []; // each element is a {DOMElement, callback} object
+    this.keyupCallbacks = []; // each element is a {DOMElement, callback} object
 
     // TODO: Better way of maintaining focused element.
     this.focusedElement = document.activeElement;
@@ -27,13 +29,23 @@ class InputManager {
     this.pressedKeys = new Map(); // key: event.key, value: event.code
     document.addEventListener('keydown', (event) => {
       this.pressedKeys.set(event.key, event.code);
+      for (const {DOMElement, callback} of this.keydownOnceCallbacks) {
+        if (this.focusedElement === DOMElement) {
+          callback(event);
+        }
+      }
     });
     document.addEventListener('keyup', (event) => {
       this.pressedKeys.delete(event.key);
+      for (const {DOMElement, callback} of this.keyupCallbacks) {
+        if (this.focusedElement === DOMElement) {
+          callback(event);
+        }
+      }
     });
     setInterval(() => {
       for (const [key, code] of this.pressedKeys.entries()) {
-        for (const {DOMElement, callback} of this.keydownCallbacks) {
+        for (const {DOMElement, callback} of this.keydownEveryTickCallbacks) {
           if (this.focusedElement === DOMElement) {
             callback(new KeyboardEvent('keydown', {key, code}));
           }
@@ -95,11 +107,32 @@ class InputManager {
 
   /**
    * Register a callback function on keydown.
+   * The callback will be triggered every tick.
    * @param {Element} DOMElement
    * @param {Function} callback - Takes an keydown event as argument.
    */
-  registerKeydown(DOMElement, callback) {
-    this.keydownCallbacks.push({DOMElement, callback});
+  registerKeydownEveryTick(DOMElement, callback) {
+    this.keydownEveryTickCallbacks.push({DOMElement, callback});
+  }
+
+  /**
+   * Register a callback function on keydown.
+   * The call back will be called when the key is pressed, not on every tick.
+   * @param {Element} DOMElement
+   * @param {Function} callback - Takes an keydown event as argument.
+   */
+  registerKeydownOnce(DOMElement, callback) {
+    this.keydownOnceCallbacks.push({DOMElement, callback});
+  }
+
+  /**
+   * Register a callback function on keyup.
+   * The call back will be called when the key is released.
+   * @param {Element} DOMElement
+   * @param {Function} callback - Takes an keydown event as argument.
+   */
+  registerKeyup(DOMElement, callback) {
+    this.keyupCallbacks.push({DOMElement, callback});
   }
 
   /**
@@ -107,7 +140,7 @@ class InputManager {
    * @param {Function} callback - Takes the movement direction as argument.
    */
   registerMapMove(callback) {
-    this.registerKeydown(this.canvas, (event) => {
+    this.registerKeydownEveryTick(this.canvas, (event) => {
       let direction;
       switch (event.key) {
         case 'w':

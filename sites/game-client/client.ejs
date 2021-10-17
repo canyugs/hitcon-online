@@ -230,7 +230,7 @@ absolute URL.
           game.mapRenderer.disableRenderForTesting();
         }
         game.inputManager = new InputManager(game.mapRenderer);
-        game.movementManager = new MovementManager(game.socket, game.gameState, game.inputManager)
+        game.movementManager = new MovementManager(game.socket, game.gameState, game.inputManager, game.mapRenderer);
         game.gameClient = new GameClient(game.socket, game.map, game.gameState, game.mapRenderer, game.inputManager, game.movementManager, game.extMan, game.mainUI);
 
         game.gameClient.initialize(game.token);

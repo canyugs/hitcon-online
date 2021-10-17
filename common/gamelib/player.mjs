@@ -27,6 +27,7 @@ class Player {
       'mapCoord',
       'facing',
       'lastMovingTime',
+      'ghostMode',
     ];
 
     this.playerID = playerID;
@@ -35,6 +36,7 @@ class Player {
     this.mapCoord = undefined; // TODO: Set it to a spawn point specified by map.json.
     this.facing = 'D';
     this.lastMovingTime = undefined;
+    this.ghostMode = false;
   }
 
   /**
@@ -72,6 +74,7 @@ class Player {
       displayChar: this.displayChar,
       facing: retFacing,
       displayName: this.displayName,
+      ghostMode: this.ghostMode,
     };
   }
 
@@ -96,6 +99,7 @@ class Player {
     if (msg.displayName !== undefined) this.displayName = msg.displayName;
     if (msg.displayChar !== undefined) this.displayChar = msg.displayChar;
     if (msg.removed !== undefined) this.removed = msg.removed;
+    if (msg.ghostMode !== undefined) this.ghostMode = msg.ghostMode;
     return true;
   }
 
@@ -177,7 +181,7 @@ class Player {
  * Note that the ALL the fields in this class can be modified by user.
  */
 class PlayerSyncMessage {
-  constructor(playerID, mapCoord, facing, displayName, displayChar, removed, clientTime, updateSuccess) {
+  constructor(playerID, mapCoord, facing, displayName, displayChar, removed, clientTime, updateSuccess, ghostMode) {
     if (playerID === undefined) {
       console.error(`'playerID' of class 'PlayerSyncMessage' should not be undefined.`);
       return;
@@ -191,6 +195,7 @@ class PlayerSyncMessage {
     this.removed = removed ?? false;
     this.clientTime = clientTime;
     this.updateSuccess = updateSuccess; // used by server to tell client whether success or not
+    this.ghostMode = ghostMode;
   }
 
   /**
@@ -208,6 +213,7 @@ class PlayerSyncMessage {
     if (this.removed !== undefined) ret.removed = this.removed;
     if (this.clientTime !== undefined) ret.clientTime = this.clientTime;
     if (this.updateSuccess !== undefined) ret.updateSuccess = this.updateSuccess;
+    if (this.ghostMode !== undefined) ret.ghostMode = this.ghostMode;
     return ret;
   }
 
@@ -225,6 +231,7 @@ class PlayerSyncMessage {
     if (obj.removed !== undefined) ret.removed = obj.removed;
     if (obj.clientTime !== undefined) ret.clientTime = obj.clientTime;
     if (obj.updateSuccess !== undefined) ret.updateSuccess = obj.updateSuccess;
+    if (obj.ghostMode !== undefined) ret.ghostMode = obj.ghostMode;
     return ret;
   }
 }

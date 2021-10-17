@@ -15,11 +15,13 @@ class MovementManager {
    * @param {Socket} socket - A socket.io socket.
    * @param {GameState} gameState
    * @param {InputManager} inputManager
+   * @param {MapRenderer} mapRenderer
    */
-  constructor(socket, gameState, inputManager) {
+  constructor(socket, gameState, inputManager, mapRenderer) {
     this.socket = socket;
     this.gameState = gameState;
     this.inputManager = inputManager;
+    this.mapRenderer = mapRenderer;
 
     this.gameClient = null;
     window.addEventListener('dataReady', (event) => {
@@ -29,7 +31,19 @@ class MovementManager {
         const dx = {'U': 0, 'D': 0, 'L': -1, 'R': 1}[direction];
         const dy = {'U': 1, 'D': -1, 'L': 0, 'R': 0}[direction];
         const {x, y} = this.gameClient.playerInfo.mapCoord;
-        this.moveTo(x + dx, y + dy, direction);
+        this.moveTo(x + dx, y + dy, direction, inputManager.pressedKeys.has('g'));
+      });
+
+      // ghost mode
+      this.inputManager.registerKeydownOnce(mapRenderer.canvas, (event) => {
+        if (event.key !== 'g') return;
+        const {mapCoord: {x, y}, facing} = this.gameClient.playerInfo;
+        this.moveTo(x, y, facing, true);
+      });
+      this.inputManager.registerKeyup(mapRenderer.canvas, (event) => {
+        if (event.key !== 'g') return;
+        const {mapCoord: {x, y}, facing} = this.gameClient.playerInfo;
+        this.moveTo(x, y, facing, false);
       });
 
       this.gameState.registerOnPlayerUpdate((msg) => {
@@ -62,14 +76,16 @@ class MovementManager {
    * @param {Number} x
    * @param {Number} y
    * @param {String} facing
+   * @param {Boolean} ghostMode
    */
-  moveTo(x, y, facing) {
+  moveTo(x, y, facing, ghostMode) {
     const player = this.gameClient.playerInfo;
     const msg = PlayerSyncMessage.fromObject({
       playerID: player.playerID,
       mapCoord: new MapCoord(player.mapCoord.mapName, x, y),
       facing: facing,
       clientTime: this.clientTime++,
+      ghostMode: ghostMode,
     });
     if (!checkPlayerMove(player, msg, this.gameClient.gameMap)) {
       return;

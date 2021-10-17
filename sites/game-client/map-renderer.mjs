@@ -330,7 +330,7 @@ class MapRenderer {
    * would be called to get the information for drawing.
    */
   _drawOneCharacterImage(player) {
-    const {mapCoord, displayChar, facing} = player.getDrawInfo();
+    const {mapCoord, displayChar, facing, ghostMode} = player.getDrawInfo();
     const canvasCoordinate = this.mapToCanvasCoordinate(mapCoord);
     const topLeftCanvasCoord = {x: canvasCoordinate.x, y: canvasCoordinate.y - MAP_CELL_SIZE};
     // check if this player is out of viewport
@@ -342,6 +342,10 @@ class MapRenderer {
     }
     const renderInfo = this.map.graphicAsset.getCharacter(displayChar,
         facing);
+    const oldOpacity = this.ctx.globalAlpha;
+    if (ghostMode) {
+      this.ctx.globalAlpha = 0.4;
+    }
     this.ctx.drawImage(
         renderInfo.image,
         renderInfo.srcX,
@@ -353,6 +357,7 @@ class MapRenderer {
         MAP_CELL_SIZE,
         MAP_CELL_SIZE,
     );
+    this.ctx.globalAlpha = oldOpacity;
   }
 
   /**

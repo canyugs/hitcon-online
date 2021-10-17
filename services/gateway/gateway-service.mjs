@@ -206,13 +206,11 @@ class GatewayService {
     }
 
     // Synchronize the state.
-    let initLoc = socket.playerData.mapCoord ?? this.gameMap.getRandomSpawnPointNoStarvation();
-    while (true) {
-      if (await this._occupyCoord(initLoc, playerID)) break;
-      initLoc = this.gameMap.getRandomSpawnPointNoStarvation();
-    }
+    const initLoc = socket.playerData.mapCoord ?? this.gameMap.getRandomSpawnPointNoStarvation();
+    await this._enterCoord(initLoc);
     socket.playerData.mapCoord = initLoc;
     socket.playerData.lastMovingTime = Date.now();
+    socket.playerData.ghostMode = false;
 
     const firstLocation = PlayerSyncMessage.fromObject(socket.playerData);
     await this._broadcastPlayerUpdate(firstLocation);
@@ -248,7 +246,7 @@ class GatewayService {
     await this._broadcastPlayerUpdate(lastLocation);
 
     // release grid after disconnection
-    await this._clearOccupy(socket.playerData.mapCoord, playerID);
+    await this._leaveCoord(socket.playerData.mapCoord);
 
     // Try to unregister the player.
     await this.rpcHandler.unregisterPlayer(playerID);
@@ -287,26 +285,32 @@ class GatewayService {
   /**
    * Teleport the player to the specified map coordinate (without any checking).
    * This is an internal function that requires the socket.
+   * If `ghostMode` is specified in msg, this function will not fail.
    * @param {Socket} socket - TODO
    * @param {PlayerSyncMessage} msg - TODO
+   * @param {Boolean} - success or not
    */
   async _teleportPlayerInternal(socket, msg) {
-    // try occupy grid
-    const ret = await this._occupyCoord(msg.mapCoord, msg.playerID);
-    // grid has been occupied
-    if (!ret) {
-      // Can't move, target is already occupied.
-      return false;
+    const ret = await this._enterCoord(msg.mapCoord);
+
+    // If the player was in ghost mode, ignore the occupation check.
+    if (!socket.playerData.ghostMode) {
+      // If the player moves in normal mode, check the occupation.
+      if (!msg.ghostMode && !ret) {
+        await this._leaveCoord(msg.mapCoord);
+        return false;
+      }
     }
 
-    //release old grid
-    await this._clearOccupy(socket.playerData.mapCoord, msg.playerID);
+    // release old grid
+    await this._leaveCoord(socket.playerData.mapCoord);
     await this._broadcastPlayerUpdate(msg);
     return true;
   }
 
   /**
    * Teleport the player to the specified map coordinate (without any checking).
+   * This function can be called by extension or trusted external code.
    */
   async teleportPlayer(playerID, mapCoord, facing) {
     if (!(playerID in this.socks)) {
@@ -336,42 +340,22 @@ class GatewayService {
   }
 
   /**
-   * Mark the cell specified by mapCoord as occupied by playerID.
-   * Note: This is atomic.
-   * @return {Boolean} success - Return true if the cell is marked
-   * successfully, false if it's occupied.
+   * Move a player into the target map coordinate.
+   * Return true if the map coordinate was not occupied by any player.
+   * @param {MapCoord} mapCoord
+   * @return {Boolean}
    */
-  async _occupyCoord(mapCoord, playerID) {
-    let ret = await this.dir.getRedis().setAsync(
-      [mapCoord.toRedisKey(), playerID, 'NX']);
-    if (ret === 'OK') {
-      return true;
-    }
-    console.assert(ret === null, `Invalid reply from redis for _occupyCoord: ${ret}`);
-    return false;
+  async _enterCoord(mapCoord) {
+    const ret = await this.dir.getRedis().incrAsync([mapCoord.toRedisKey()]);
+    return ret === 1;
   }
 
   /**
-   * Clear the cell specified by mapCoord.
-   * If playerID is not undefined or null, then verify that it was occupied.
+   * Clear a player's occupation record of the mapCoord.
+   * @param {MapCoord} mapCoord
    */
-  async _clearOccupy(mapCoord, playerID) {
-    if (playerID) {
-      // Do the check
-      const getRet = await this.dir.getRedis().getAsync(
-        [mapCoord.toRedisKey()]);
-      if (getRet !== playerID) {
-        console.error(
-          `Cell ${mapCoord} is not occupied by ${playerID}, it's ${getRet}`);
-        return false;
-      }
-    }
-    const ret = await this.dir.getRedis().delAsync([mapCoord.toRedisKey()]);
-    if (ret === 1) {
-      return true;
-    }
-    console.error(`Failed to clear cell ${mapCoord}, redis: ${ret}`);
-    return false;
+  async _leaveCoord(mapCoord) {
+    await this.dir.getRedis().decrAsync([mapCoord.toRedisKey()]);
   }
 }
 
