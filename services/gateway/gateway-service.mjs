@@ -272,14 +272,19 @@ class GatewayService {
       return;
     }
 
-    if (!checkPlayerMove(socket.playerData, updateMsg, this.gameMap)) {
-      failOnPlayerUpdate(socket);
-      return;
+    // if the player moves
+    if (updateMsg.mapCoord !== undefined) {
+      if (!checkPlayerMove(socket.playerData, updateMsg, this.gameMap)) {
+        failOnPlayerUpdate(socket);
+        return;
+      }
+
+      if (!(await this._teleportPlayerInternal(socket, updateMsg))) {
+        failOnPlayerUpdate(socket);
+      }
     }
 
-    if (!(await this._teleportPlayerInternal(socket, updateMsg))) {
-      failOnPlayerUpdate(socket);
-    }
+    await this._broadcastPlayerUpdate(updateMsg);
   }
 
   /**
@@ -302,9 +307,7 @@ class GatewayService {
       }
     }
 
-    // release old grid
     await this._leaveCoord(socket.playerData.mapCoord);
-    await this._broadcastPlayerUpdate(msg);
     return true;
   }
 
