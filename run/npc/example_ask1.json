@@ -1,6 +1,6 @@
 {
     "enabled": true,
-    "initialPosition": {"mapName": "world1", "x": 3, "y": 15},
+    "initialPosition": {"mapName": "world1", "x": 4, "y": 13},
     "display": [
       {
         "zIndex": 11,
@@ -32,8 +32,8 @@
         "s2": {
             "func": "answerProblems",
             "kwargs": {
-                "problems": 10,
-                "goalPoints": 7,
+                "problems": 2,
+                "goalPoints": 2,
                 "nextState": "s3",
                 "nextStateIncorrect" : "s4"
             }
