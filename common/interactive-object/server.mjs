@@ -3,7 +3,7 @@
 
 import fs from 'fs';
 import {MapCoord} from '../maplib/map.mjs';
-
+import randomShuffle from '../utility/random-tool.mjs';
 /**
  * TODO
  * @param {Object} initialPosition - TODO
@@ -78,6 +78,7 @@ class InteractiveObjectServerBaseClass {
     this.config = JSON.parse(fs.readFileSync(configFilePath));
     if (!this.config.enabled) return;
     this.objectName = objectName;
+    this.problemSet = JSON.parse(fs.readFileSync('items/problems.json'));
 
     // input sanitization
     for (const attr of ['initialPosition', 'display', 'FSM']) {
@@ -257,6 +258,26 @@ class InteractiveObjectServerBaseClass {
     return nextStateIncorrect;
   }
 
+  async sf_answerProblems(playerID, kwargs) {
+    const {problems, goalPoints, nextState, nextStateIncorrect} = kwargs;
+    randomShuffle(this.problemSet);
+    let result, correct = 0, d = '';
+    for (let i = 0; i < problems; i++) {
+      const c = [];
+      d = this.problemSet[i].dialogs;
+      for (const option of this.problemSet[i].options) {
+        c.push({token: option[0], display: option});
+      }
+      result = await this.helper.callS2cAPI(playerID, 'dialog', 'showDialogWithMultichoice', 60*1000, this.objectName, d, c);
+      if (!result.token) {
+        console.warn(`Player '${playerID}' does not choose in 'answerProblems'. Result: ${JSON.stringify(result)}`);
+        return this.sf_exit(playerID, {next: this.dataStore.get(playerID)});
+      } else if (result.token === this.problemSet[i].ans) correct += 1;
+    }
+    if (correct >= goalPoints) return nextState;
+    return nextStateIncorrect;
+  }
+
   async sf_teleport(playerID, kwargs) {
     const {mapCoord, nextState} = kwargs;
     const result = await this.helper.teleport(playerID, mapCoord);
@@ -329,13 +350,12 @@ class InteractiveObjectServerBaseClass {
     if (!Number.isInteger(amount)) amount = 1;
     if (!Number.isInteger(maxAmount) || maxAmount <= 0) maxAmount = -1;
 
-    result = await this.helper.callS2sAPI('items', 'AddItem', playerID, itemName, amount, maxAmount);
+    const result = await this.helper.callS2sAPI('items', 'AddItem', playerID, itemName, amount, maxAmount);
     if (result.ok !== true) {
       console.error('items.AddItem() failed, maybe items ext is not running?')
       return this.sf_exit(playerID, {next: this.dataStore.get(playerID)});
     }
-
-    return kwargs.next;
+    return kwargs.nextState;
   }
 
   /**

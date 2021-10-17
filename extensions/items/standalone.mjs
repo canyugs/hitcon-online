@@ -191,7 +191,7 @@ class Standalone {
       console.error('_addItem() passed amount not integer: ', amount);
       return false;
     }
-    _ensurePlayerItem(playerID);
+    this._ensurePlayerItem(playerID);
     this.items[playerID].amount += amount;
     this._deferFlush();
     return true;
@@ -467,7 +467,7 @@ class Standalone {
    * @return Object result - result.ok will be true if successful.
    */
   async s2s_AddItem(srcExtName, playerID, item, amount = 1, maxAmount = -1) {
-    if (Number.isInteger(maxAmount) && maxMount > 0) {
+    if (Number.isInteger(maxAmount) && maxAmount > 0) {
       const curAmount = this._countItem(playerID, item);
       if (curAmount+amount >= maxAmount) {
         // Max exceeded, limit the amount given.
