@@ -188,11 +188,11 @@ class InteractiveObjectServerBaseClass {
         } catch (e) {
           console.error(`Error on calling '${func}' with argument '${playerID}' and ${kwargs}.`);
           console.error(e.stack);
-          nextState = this.sf_exit(playerID, {next: currStateStr});
+          nextState = await this.sf_exit(playerID, {next: currStateStr});
         }
         // Handle special error state.
         if (nextState === this.FSM_ERROR) {
-          nextState = this.sf_exit(playerID, {next: this.dataStore.get(playerID)});
+          nextState = await this.sf_exit(playerID, {next: this.dataStore.get(playerID)});
         }
 
         if (typeof fsm.states[nextState] === 'undefined') {
