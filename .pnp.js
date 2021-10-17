@@ -103,6 +103,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         "reference": "workspace:extensions/point-system"
       },
       {
+        "name": "hitcon-online-setting",
+        "reference": "workspace:extensions/setting"
+      },
+      {
         "name": "hitcon-online-asset-server",
         "reference": "workspace:services/assets"
       },
@@ -159,6 +163,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
       ["hitcon-online-playerlist", ["workspace:extensions/playerlist"]],
       ["hitcon-online-point-system", ["workspace:extensions/point-system"]],
       ["hitcon-online-rpc-directory", ["workspace:common/rpc-directory"]],
+      ["hitcon-online-setting", ["workspace:extensions/setting"]],
       ["hitcon-online-standalone-server", ["workspace:services/standalone"]],
       ["hitcon-online-stress", ["workspace:stress"]],
       ["hitcon-online-terminal-server", ["workspace:terminal-server"]]
@@ -2734,6 +2739,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@grpc/proto-loader", "npm:0.6.4"],
             ["config", "npm:3.3.6"],
             ["redis", "npm:3.1.2"]
+          ],
+          "linkType": "SOFT",
+        }]
+      ]],
+      ["hitcon-online-setting", [
+        ["workspace:extensions/setting", {
+          "packageLocation": "./extensions/setting/",
+          "packageDependencies": [
+            ["hitcon-online-setting", "workspace:extensions/setting"]
           ],
           "linkType": "SOFT",
         }]

@@ -1,0 +1,60 @@
+<style type="text/css">
+  #setting-main {
+    max-height: calc(100vh - 360px);
+    overflow: scroll;
+  }
+  .setting-section {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .setting-subsection {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .setting-section-title {
+    font-size: 20px;
+    font-weight: bold;
+    margin-top: 14px;
+    margin-bottom: 18px;
+  }
+
+  .setting-section-title::after {
+    display: block;
+    content: "";
+    border-top: 1.5px solid white;
+    margin-top: 6px;
+  }
+
+  .setting-subsection-title {
+    font-weight: bold;
+  }
+
+  .setting-item {
+    margin: 12px 0;
+  }
+
+  .setting-item-input {
+    float: right;
+  }
+
+  .setting-action-button {
+    margin: 1em;
+    height: 3em;
+    width: 6em;
+  }
+
+  /* Setting button should be the third on the right */
+  #utilpanel-button-setting {
+    order: 0;
+  }
+</style>
+
+<div class="setting-overlay" id="setting-overlay">
+  <div class="utilpanel-viewer" id="setting-main"></div>
+  <div class="utilpanel-actions">
+    <button class="setting-action-button" id="setting-reset">Reset</button>
+    <button class="setting-action-button" id="setting-save">Save</button>
+  </div>
+</div>
