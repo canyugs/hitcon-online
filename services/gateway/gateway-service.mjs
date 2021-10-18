@@ -283,11 +283,11 @@ class GatewayService {
         failOnPlayerUpdate(socket);
         return;
       }
-    } else {
-      // If the player didn't move, still update everyone.
-      // Could be name change or something else.
-      await this._broadcastPlayerUpdate(updateMsg);
     }
+
+    // If the player didn't move, still update everyone.
+    // Could be name change or something else.
+    await this._broadcastPlayerUpdate(updateMsg);
   }
 
   /**
