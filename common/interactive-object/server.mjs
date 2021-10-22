@@ -147,15 +147,6 @@ class InteractiveObjectServerBaseClass {
     // not using await so as to prevent timeout in the client side
     this.fsmExecutor.fsmWalk(playerID);
   }
-
-  /**
-   * TODO
-   * @param {Object} player - TODO
-   */
-  async c2s_startInteraction(player) {
-    // not using await so as to prevent timeout in the client side
-    this.startInteraction(player.playerID);
-  }
 }
 
 // Set it as part of the class so other classes can access it.
