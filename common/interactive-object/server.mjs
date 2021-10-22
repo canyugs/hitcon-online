@@ -255,34 +255,6 @@ class InteractiveObjectServerBaseClass {
     this.startInteraction(player.playerID);
   }
 
-  /**
-   * Show an overlay in client browser.
-   * @param {String} playerID
-   * @param {Object} kwargs - TODO
-   * @return {String} - the next state
-   */
-  async sf_showDialog(playerID, kwargs, sfInfo) {
-    const {dialogs, dialogVar, options} = kwargs;
-    // prepare dialog
-    let d = '';
-    if (typeof dialogs === 'string') d = dialogs;
-    if (Array.isArray(dialogs)) d = randomChoice(dialogs);
-    if (typeof dialogVar === 'string' && typeof this.dialogVars[dialogVar] === 'string') d = this.dialogVars[dialogVar];
-
-    // prepare choice
-    const c = [];
-    for (const [message, nextState] of Object.entries(options)) {
-      c.push({token: nextState, display: message});
-    }
-
-    const result = await this.helper.callS2cAPI(playerID, 'dialog', 'showDialogWithMultichoice', 60*1000, sfInfo.objectName, d, c);
-    if (result.token) return result.token;
-    console.warn(`Player '${playerID}' does not choose in 'showDialogWithMultichoice'. Result: ${JSON.stringify(result)}`);
-
-    // If we reach here, the showDialog timeouts.
-    return FSM_ERROR;
-  }
-
   async sf_showDialogAndCheckKey(playerID, kwargs, sfInfo) {
     const {nextState, nextStateIncorrect, dialog, key} = kwargs;
     const res = await this.helper.callS2cAPI(playerID, 'dialog',
