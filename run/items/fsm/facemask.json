@@ -1,0 +1,22 @@
+{
+  "FSM": {
+    "initialState": "s1",
+    "states": {
+      "s1": {
+        "func": "showDialog",
+        "kwargs": {
+          "dialogs": "Hello world!",
+          "options": {
+            "OK!": "s2"
+          }
+        }
+      },
+      "s2": {
+        "func": "exit",
+        "kwargs": {
+          "next": "s1"
+        }
+      }
+    }
+  }
+}
