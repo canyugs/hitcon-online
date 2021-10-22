@@ -79,6 +79,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         "reference": "workspace:extensions/iframe"
       },
       {
+        "name": "hitcon-online-iobj-lib",
+        "reference": "workspace:extensions/iobj-lib"
+      },
+      {
         "name": "hitcon-online-items",
         "reference": "workspace:extensions/items"
       },
@@ -154,6 +158,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
       ["hitcon-online-helloworld", ["workspace:extensions/helloworld"]],
       ["hitcon-online-iframe", ["workspace:extensions/iframe"]],
       ["hitcon-online-interactive-object", ["workspace:common/interactive-object"]],
+      ["hitcon-online-iobj-lib", ["workspace:extensions/iobj-lib"]],
       ["hitcon-online-items", ["workspace:extensions/items"]],
       ["hitcon-online-jitsi", ["workspace:extensions/jitsi"]],
       ["hitcon-online-main-server", ["workspace:services/main"]],
@@ -2647,6 +2652,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./common/interactive-object/",
           "packageDependencies": [
             ["hitcon-online-interactive-object", "workspace:common/interactive-object"]
+          ],
+          "linkType": "SOFT",
+        }]
+      ]],
+      ["hitcon-online-iobj-lib", [
+        ["workspace:extensions/iobj-lib", {
+          "packageLocation": "./extensions/iobj-lib/",
+          "packageDependencies": [
+            ["hitcon-online-iobj-lib", "workspace:extensions/iobj-lib"]
           ],
           "linkType": "SOFT",
         }]

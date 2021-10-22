@@ -2012,6 +2012,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"hitcon-online-iobj-lib@workspace:extensions/iobj-lib":
+  version: 0.0.0-use.local
+  resolution: "hitcon-online-iobj-lib@workspace:extensions/iobj-lib"
+  languageName: unknown
+  linkType: soft
+
 "hitcon-online-items@workspace:extensions/items":
   version: 0.0.0-use.local
   resolution: "hitcon-online-items@workspace:extensions/items"

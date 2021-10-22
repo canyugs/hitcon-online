@@ -1,0 +1,9 @@
+{
+  "name": "hitcon-online-iobj-lib",
+  "version": "0.0.1",
+  "description": "Part of HITCON Online. This package provide state functions for use in interactive objects.",
+  "exports": {
+    "standalone": "./standalone.mjs",
+    "in-gateway": "./in-gateway.mjs"
+  }
+}
