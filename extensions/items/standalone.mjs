@@ -225,7 +225,7 @@ class Standalone {
    * @param Number amount - The amount to give.
    * @return Boolean success - Return true if the items are added.
    */
-  _addItem(playerID, itemName, amount=1) {
+  _addItem(playerID, itemName, amount=1, hideNotification) {
     if (!Number.isInteger(amount)) {
       console.error('_addItem() passed amount not integer: ', amount);
       return false;
@@ -238,9 +238,23 @@ class Standalone {
       console.error('itemName not string in _addItem', itemName);
       return false;
     }
+    if (!(itemName in this.itemInfo)) {
+      console.error(`Invalid itemName '${itemName}'`);
+      return false;
+    }
     this._ensurePlayerItem(playerID, itemName);
     this.items[playerID][itemName].amount += amount;
     this._deferFlush();
+
+    if (!hideNotification && amount > 0) {
+      try {
+        // No await because we don't need to wait for the client side.
+        this.helper.callS2cAPI(playerID, 'notification', 'showNotification', 5000, `You've received ${amount} x ${this.itemInfo[itemName].visibleName}`);
+      } catch (e) {
+        console.warn(`User ${playerID} may not be online, failed to notify _addItem()`, e.stack);
+      }
+    }
+
     return true;
   }
 
@@ -253,7 +267,7 @@ class Standalone {
    * @return Boolean success - Return true if it was taken from the player's
    *   inventory, false if there's not enough.
    */
-  _takeItem(playerID, itemName, amount=1) {
+  _takeItem(playerID, itemName, amount=1, hideNotification) {
     if (!Number.isInteger(amount)) {
       console.error('_takeItem() passed amount not integer: ', amount);
       return false;
@@ -266,6 +280,10 @@ class Standalone {
       console.error('itemName not string in _takeItem', itemName);
       return false;
     }
+    if (!(itemName in this.itemInfo)) {
+      console.error(`Invalid itemName '${itemName}'`);
+      return false;
+    }
 
     if (!(playerID in this.items)) return false;
     if (!(itemName in this.items[playerID])) return false;
@@ -273,6 +291,16 @@ class Standalone {
 
     this.items[playerID][itemName].amount -= amount;
     this._deferFlush();
+
+    if (!hideNotification && amount > 0) {
+      try {
+        // No await because we don't need to wait for the client side.
+        this.helper.callS2cAPI(playerID, 'notification', 'showNotification', 5000, `You've lost ${amount} x ${this.itemInfo[itemName].visibleName}`);
+      } catch (e) {
+        console.warn(`User ${playerID} may not be online, failed to notify _takeItem()`, e.stack);
+      }
+    }
+
     return true;
   }
 
