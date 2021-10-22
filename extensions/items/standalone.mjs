@@ -149,6 +149,10 @@ class Standalone {
         cmd: 'TakeItem', ext: this.helper.name, c2s: 'cmdTakeItem',
         helpMsg: '<player> <amount> <item> --- Take an amount of items from player'
       });
+      this.helper.callS2sAPI('chat', 'registerCmd', {
+        cmd: 'UseItem', ext: this.helper.name, c2s: 'cmdUseItem',
+        helpMsg: '<item> -- Use the item'
+      });
     } catch (e) {
       console.warn(`Failure registering chat commands for items`);
       console.warn(e);
@@ -414,23 +418,16 @@ class Standalone {
     return {'ok': true};
   }
 
-  /**
-   * Use an item once.
-   * @return {object} partials - An object with the following type:
-   * itemName: string;
-   * amount: number;
-   */
-  async c2s_useItem(player, itemName, amount) {
-    this._ensurePlayer(player.playerID);
+  async _useItem(playerID, itemName, amount) {
+    this._ensurePlayer(playerID);
     if (!(itemName in this.itemInfo) || !(itemName in this.itemInstances)) {
       return {'error': "Item does not exist"};
-      return;
     }
     if (!this.itemInfo[itemName].usable) {
       return {'error': 'Item is not usable'};
     }
 
-    if (!this._takeItem(player.playerID, itemName, amount)) {
+    if (!this._takeItem(playerID, itemName, amount)) {
       return {'error': 'Insufficient quantity'};
     }
 
@@ -446,6 +443,16 @@ class Standalone {
     }
 
     return {'ok': true};
+  }
+
+  /**
+   * Use an item once.
+   * @return {object} partials - An object with the following type:
+   * itemName: string;
+   * amount: number;
+   */
+  async c2s_useItem(player, itemName, amount) {
+    return await this._useItem(player.playerID, itemName, amount);
   }
 
   /**
@@ -694,6 +701,20 @@ class Standalone {
       return {status: 'ok', reply: 'Done'};
     }
     return {status: 'error', reply: 'Transfer failed'};
+  }
+
+  /**
+   * Command for using the item.
+   */
+  async c2s_cmdUseItem(player, cmd) {
+    const arr = cmd.split(' ');
+    if (arr.length < 2) {
+      return {status: 'error', reply: 'Invalid arguments'};
+    }
+    const itemName = arr[1];
+    // No await to prevent client from timeout.
+    this._useItem(player.playerID, itemName, 1);
+    return {status: 'ok', reply: 'Using item...'};
   }
 
   // ============= Interactive Object related =============
