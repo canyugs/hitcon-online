@@ -36,6 +36,7 @@ class Standalone {
    */
   async initialize() {
     await this.helper.callS2sAPI('iobj-lib', 'reqRegister');
+    await this.helper.callS2sAPI('items', 'reqRegister');
   }
 
   /**
