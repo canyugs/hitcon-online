@@ -138,6 +138,64 @@ class Standalone {
     if (correct >= goalPoints) return nextState;
     return nextStateIncorrect;
   }
+
+  /**
+   * Teleport the player to the target location.
+   */
+  async s2s_sf_teleport(srcExt, playerID, kwargs, sfInfo) {
+    const {mapCoord, nextState} = kwargs;
+    const result = await this.helper.teleport(playerID, mapCoord);
+
+    if (result) return nextState;
+    console.warn(`Player '${playerID}' cannot go to the place`);
+
+    return FSM_ERROR;
+  }
+
+  /**
+   * Check permission by JWT token and go to corresponding state
+   * @param {String} playerID
+   * @param {Object} kwargs - TODO
+   * @return {String} - the next state
+   */
+  async s2s_sf_checkPermission(srcExt, playerID, kwargs, sfInfo) {
+    const permission = await this.helper.getToken(playerID);
+    const {options} = kwargs;
+    for (const [identity, nextState] of Object.entries(options)) {
+      if (permission.scp.includes(identity)) {
+        return nextState;
+      }
+    }
+    // No identity match and return default next state
+    return options['default'];
+  }
+
+  /**
+   * Show an input prompt for user to edit the content of dialog.
+   * @param {String} playerID
+   * @param {Object} kwargs - TODO
+   * @return {String} - the next state
+   */
+  async s2s_sf_editDialog(srcExt, playerID, kwargs, sfInfo) {
+    const {dialogs, dialogVar, buttonText, nextState} = kwargs;
+
+    // prepare dialog
+    let d = '';
+    if (typeof dialogs === 'string') d = dialogs;
+    if (Array.isArray(dialogs)) d = randomChoice(dialogs);
+
+    const result = await this.helper.callS2cAPI(playerID, 'dialog', 'showDialogWithPrompt', 60*1000, this.objectName, d, buttonText);
+    if (result.msg) {
+      if (typeof dialogVar === 'string') {
+        this.dialogVars[dialogVar] = result.msg;
+      }
+      return nextState;
+    }
+    console.warn(`Player '${playerID}' does not choose in 'showDialogWithMultichoice'. Result: ${JSON.stringify(result)}`);
+
+    // If we reach here, the editDialog timeouts.
+    return FSM_ERROR;
+  }
 }
 
 export default Standalone;
