@@ -57,7 +57,7 @@ class FSMExecutor {
    */
   _updateInfoForStateFunc() {
     this.infoForStateFunc = {};
-    this.infoForStateFunc.objectName = this.objectName;
+    this.infoForStateFunc.name = this.executorName;
   }
 
   /**
