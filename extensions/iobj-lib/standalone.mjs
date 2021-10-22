@@ -116,6 +116,10 @@ class Standalone {
    */
   async s2s_sf_answerProblems(srcExt, playerID, kwargs, sfInfo) {
     const {problems, goalPoints, nextState, nextStateIncorrect} = kwargs;
+    if (!Number.isInteger(problems)) {
+      console.error('Invalid number of problems: ', problems);
+      return FSM_ERROR;
+    }
     let problemSet = JSON.parse(fs.readFileSync('items/problems.json'));
     randomShuffle(problemSet);
     let result, correct = 0, d = '';
