@@ -77,23 +77,29 @@ class Standalone {
     const itemConfig = JSON.parse(itemSettingJson).items;
     let index = 0;
     for (let itemName in itemConfig) {
-      const itemBaseClassName = itemConfig[itemName].baseClass;
-      const item = new itemBaseClasses[itemBaseClassName](this.helper, itemConfig[itemName].imagePath);
-      // Description
+      // Gather available info.
       let desc = itemConfig[itemName].desc;
       desc = (typeof desc === 'string')?desc:'';
       let visibleName = itemConfig[itemName].visibleName;
       visibleName = (typeof desc === 'string')?visibleName:itemName;
-      this.itemInfo[itemName] = {
+      const itemInfoObj = {
         index: index,
         visibleName: visibleName,
+        name: itemName,
         desc: desc,
         layer: itemConfig[itemName].layer,
-        show: item.show,
-        exchangeable: item.exchangeable,
-        droppable: item.droppable,
-        usable: item.usable
       };
+
+      // Create the item class.
+      const itemBaseClassName = itemConfig[itemName].baseClass;
+      const item = new itemBaseClasses[itemBaseClassName](this.helper, itemConfig[itemName].imagePath, itemInfoObj);
+      itemInfoObj.show = item.show;
+      itemInfoObj.exchangeable = item.exchangeable;
+      itemInfoObj.droppable = item.droppable;
+      itemInfoObj.usable = item.usable;
+
+      // Description
+      this.itemInfo[itemName] = itemInfoObj;
       this.itemInstances[itemName] = item;
       index++;
     }

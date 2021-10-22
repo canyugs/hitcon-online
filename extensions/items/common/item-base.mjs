@@ -8,9 +8,10 @@ class ItemBase {
   /**
    * Create the item.
    */
-  constructor(helper, imagePath) {
+  constructor(helper, imagePath, info) {
     this.helper = helper;
     this.imagePath = imagePath;
+    this.info = info;
   }
 
   async getImage() {
@@ -18,7 +19,7 @@ class ItemBase {
   }
 
   async useItem(amount) {
-    console.warn(`No action specified in item.`);
+    console.warn(`No action specified in item ${this.info.name}.`);
   }
 }
 
