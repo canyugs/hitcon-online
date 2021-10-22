@@ -157,6 +157,10 @@ class Standalone {
       console.warn(`Failure registering chat commands for items`);
       console.warn(e);
     }
+
+    // Make sure we've the various state functions.
+    await this.helper.callS2sAPI('iobj-lib', 'reqRegister');
+    await this.helper.callS2sAPI('items', 'reqRegister');
   }
 
   /**
@@ -821,6 +825,16 @@ class Standalone {
       return kwargs.haveItem;
     } else {
       return kwargs.noItem;
+    }
+  }
+
+  /**
+   * Allow other ext to add state func.
+   */
+  async s2s_registerStateFunc(srcExt, fnName, extName, methodName) {
+    for (const itemName in this.itemInstances) {
+      const v = this.itemInstances[itemName];
+      v.registerExtStateFunc(fnName, extName, methodName);
     }
   }
 }
