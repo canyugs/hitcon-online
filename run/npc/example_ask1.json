@@ -42,7 +42,7 @@
             "func": "giveItem",
             "kwargs": {
                 "maxAmount": 1,
-                "itemName": "xxx",
+                "itemName": "facemask",
                 "nextState": "s5"
             }
         },
