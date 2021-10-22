@@ -113,7 +113,7 @@ class InteractiveObjectServerBaseClass {
     this._fsmWalkExit = new Map(); // key: playerID, value: true|false
 
     // Set it as a const member so other users can access it more easily.
-    this.FSM_ERROR = FSM_ERROR;
+    FSM_ERROR = FSM_ERROR;
 
     // Update the infoForStateFunc.
     this._updateInfoForStateFunc();
@@ -191,7 +191,7 @@ class InteractiveObjectServerBaseClass {
           nextState = await this.sf_exit(playerID, {next: currStateStr});
         }
         // Handle special error state.
-        if (nextState === this.FSM_ERROR) {
+        if (nextState === FSM_ERROR) {
           nextState = await this.sf_exit(playerID, {next: this.dataStore.get(playerID)});
         }
 
@@ -279,7 +279,7 @@ class InteractiveObjectServerBaseClass {
     console.warn(`Player '${playerID}' does not choose in 'showDialogWithMultichoice'. Result: ${JSON.stringify(result)}`);
 
     // If we reach here, the showDialog timeouts.
-    return this.FSM_ERROR;
+    return FSM_ERROR;
   }
 
   async sf_showDialogAndCheckKey(playerID, kwargs, sfInfo) {
@@ -305,7 +305,7 @@ class InteractiveObjectServerBaseClass {
       result = await this.helper.callS2cAPI(playerID, 'dialog', 'showDialogWithMultichoice', 60*1000, this.objectName, d, c);
       if (!result.token) {
         console.warn(`Player '${playerID}' does not choose in 'answerProblems'. Result: ${JSON.stringify(result)}`);
-        return this.FSM_ERROR;
+        return FSM_ERROR;
       } else if (result.token === this.problemSet[i].ans) correct += 1;
     }
     if (correct >= goalPoints) return nextState;
@@ -319,7 +319,7 @@ class InteractiveObjectServerBaseClass {
     if (result) return nextState;
     console.warn(`Player '${playerID}' cannot go to the place`);
 
-    return this.FSM_ERROR;
+    return FSM_ERROR;
   }
 
   /**
@@ -364,7 +364,7 @@ class InteractiveObjectServerBaseClass {
     console.warn(`Player '${playerID}' does not choose in 'showDialogWithMultichoice'. Result: ${JSON.stringify(result)}`);
 
     // If we reach here, the editDialog timeouts.
-    return this.FSM_ERROR;
+    return FSM_ERROR;
   }
 
   /**
@@ -387,7 +387,7 @@ class InteractiveObjectServerBaseClass {
     const result = await this.helper.callS2sAPI('items', 'AddItem', playerID, itemName, amount, maxAmount);
     if (result.ok !== true) {
       console.error('items.AddItem() failed, maybe items ext is not running?');
-      return this.FSM_ERROR;
+      return FSM_ERROR;
     }
     return kwargs.nextState;
   }
@@ -411,7 +411,7 @@ class InteractiveObjectServerBaseClass {
     if (typeof result.error !== 'undefined' || typeof result.ok !== 'boolean') {
       // Extension not running?
       console.error('items.TakeItem() failed, maybe items ext is not running?');
-      return this.FSM_ERROR;
+      return FSM_ERROR;
     }
 
     if (result.ok) {
@@ -440,7 +440,7 @@ class InteractiveObjectServerBaseClass {
     if (typeof result.error !== 'undefined' || !Number.isInteger(result.amount)) {
       // Extension not running?
       console.error('items.CountItem() failed, maybe items ext is not running?');
-      return this.FSM_ERROR;
+      return FSM_ERROR;
     }
 
     if (result.amount >= amount) {
@@ -462,6 +462,9 @@ class InteractiveObjectServerBaseClass {
     return this.config.FSM.initialState;
   }
 }
+
+// Set it as part of the class so other classes can access it.
+InteractiveObjectServerBaseClass.FSM_ERROR = FSM_ERROR;
 
 export default InteractiveObjectServerBaseClass;
 
