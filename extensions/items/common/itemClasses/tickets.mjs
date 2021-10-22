@@ -4,8 +4,8 @@
 import ItemBase from '../item-base.mjs';
 
 class Tickets extends ItemBase {
-  constructor(helper, imagePath, info) {
-    super(helper, imagePath, info);
+  constructor(helper, imagePath, info, fsm) {
+    super(helper, imagePath, info, fsm);
 
     this.show = false;
     this.exchangeable = true;
@@ -13,7 +13,7 @@ class Tickets extends ItemBase {
     this.droppable = true;
   }
 
-  async useItem(amount) {
+  async useItem(playerID, amount) {
     console.log('Ticket used!');
   }
 }

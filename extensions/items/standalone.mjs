@@ -90,9 +90,21 @@ class Standalone {
         layer: itemConfig[itemName].layer,
       };
 
+      // Load FSM if any.
+      let fsmFilename = itemConfig[itemName].fsm;
+      if (fsmFilename === true) {
+        // true means that the default fsm path is used.
+        fsmFilename = `${itemName}.json`;
+      }
+      let fsmObj = null;
+      if (typeof fsmFilename === 'string') {
+        const fsmJson = await fs.promises.readFile(`./items/fsm/${fsmFilename}`);
+        fsmObj = JSON.parse(fsmJson).FSM;
+      }
+
       // Create the item class.
       const itemBaseClassName = itemConfig[itemName].baseClass;
-      const item = new itemBaseClasses[itemBaseClassName](this.helper, itemConfig[itemName].imagePath, itemInfoObj);
+      const item = new itemBaseClasses[itemBaseClassName](this.helper, itemConfig[itemName].imagePath, itemInfoObj, fsmObj);
       itemInfoObj.show = item.show;
       itemInfoObj.exchangeable = item.exchangeable;
       itemInfoObj.droppable = item.droppable;
@@ -422,7 +434,7 @@ class Standalone {
       return {'error': 'Insufficient quantity'};
     }
 
-    this.itemInstances[itemName].useItem(amount);
+    this.itemInstances[itemName].useItem(playerID, amount);
 
     /* Store data into file */
     this._deferFlush();
