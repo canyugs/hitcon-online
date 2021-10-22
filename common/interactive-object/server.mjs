@@ -182,8 +182,12 @@ class InteractiveObjectServerBaseClass {
         let nextState = '';
         try {
           nextState = await func(playerID, kwargs, this.infoForStateFunc);
+          if (typeof nextState !== 'string') {
+            console.error('Invalid nextState returned', nextState);
+            throw 'Invalid nextState returned';
+          }
         } catch (e) {
-          console.error(`Error on calling '${func}' with argument '${playerID}' and ${kwargs}.`);
+          console.error(`Error on calling '${currState.func}', aka '${func}' with argument: `, playerID, kwargs);
           console.error(e.stack);
           nextState = await this.sf_exit(playerID, {next: currStateStr});
         }
