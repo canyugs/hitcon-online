@@ -1,19 +1,16 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
-class Tickets {
+import ItemBase from '../item-base.mjs';
 
+class Tickets extends ItemBase {
   constructor(helper, imagePath) {
-    this.helper = helper;
-    this.imagePath = imagePath;
+    super(helper, imagePath);
+
     this.show = false;
     this.exchangeable = true;
     this.usable = true;
     this.droppable = true;
-  }
-
-  async getImage() {
-    return this.imagePath;
   }
 
   async useItem(amount) {
