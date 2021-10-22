@@ -23,15 +23,6 @@ class Standalone {
   async initialize() {
   }
 
-  /**
-   * Return the ejs partials for the client part of this extension.
-   * @return {object} partials - An object, it could have the following:
-   * inDiv - A string to the path of ejs partial for the location inDiv.
-   */
-  static getPartials() {
-    return {inDiv: 'in-div.ejs'};
-  }
-
   async c2s_trySayHello(player, src, dst) {
     console.log(`Player ${player.playerID} asked to try say hello, from ${src} to ${dst}`);
     const res = await this.helper.callS2cAPI(player.playerID, 'helloworld', 'Hello', 4000, 'The Server');

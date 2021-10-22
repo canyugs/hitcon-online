@@ -87,15 +87,6 @@ class Standalone {
         console.error(`invalid \`this.state\`, value = ${this.state}`);
     }
   }
-
-  /**
-   * Return the ejs partials for the client part of this extension.
-   * @return {object} partials - An object, it could have the following:
-   * inDiv - A string to the path of ejs partial for the location inDiv.
-   */
-  static getPartials() {
-    return {inDiv: 'in-div.ejs'};
-  }
 }
 
 export default Standalone;
