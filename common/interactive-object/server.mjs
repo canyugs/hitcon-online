@@ -82,7 +82,6 @@ class InteractiveObjectServerBaseClass {
     this.config = JSON.parse(fs.readFileSync(configFilePath));
     if (!this.config.enabled) return;
     this.objectName = objectName;
-    this.problemSet = JSON.parse(fs.readFileSync('items/problems.json'));
 
     // input sanitization
     for (const attr of ['initialPosition', 'display', 'FSM']) {
@@ -255,35 +254,7 @@ class InteractiveObjectServerBaseClass {
     this.startInteraction(player.playerID);
   }
 
-  async sf_showDialogAndCheckKey(playerID, kwargs, sfInfo) {
-    const {nextState, nextStateIncorrect, dialog, key} = kwargs;
-    const res = await this.helper.callS2cAPI(playerID, 'dialog',
-    'showDialogWithPrompt', 60*1000, sfInfo.objectName, dialog);
-    if (res.msg === key) return nextState;
 
-    //The key is wrong,
-    return nextStateIncorrect;
-  }
-
-  async sf_answerProblems(playerID, kwargs, sfInfo) {
-    const {problems, goalPoints, nextState, nextStateIncorrect} = kwargs;
-    randomShuffle(this.problemSet);
-    let result, correct = 0, d = '';
-    for (let i = 0; i < problems; i++) {
-      const c = [];
-      d = this.problemSet[i].dialogs;
-      for (const option of this.problemSet[i].options) {
-        c.push({token: option[0], display: option});
-      }
-      result = await this.helper.callS2cAPI(playerID, 'dialog', 'showDialogWithMultichoice', 60*1000, this.objectName, d, c);
-      if (!result.token) {
-        console.warn(`Player '${playerID}' does not choose in 'answerProblems'. Result: ${JSON.stringify(result)}`);
-        return FSM_ERROR;
-      } else if (result.token === this.problemSet[i].ans) correct += 1;
-    }
-    if (correct >= goalPoints) return nextState;
-    return nextStateIncorrect;
-  }
 
   async sf_teleport(playerID, kwargs, sfInfo) {
     const {mapCoord, nextState} = kwargs;

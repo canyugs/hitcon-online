@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 import assert from 'assert';
+import fs from 'fs';
 
 import {randomShuffle, randomChoice} from '../../common/utility/random-tool.mjs';
 import InteractiveObjectServerBaseClass from '../../common/interactive-object/server.mjs';
@@ -93,6 +94,45 @@ class Standalone {
 
     // If we reach here, the showDialog timeouts.
     return FSM_ERROR;
+  }
+
+  /**
+   * Show an open-ended dialog and check if the entered value is
+   * the same as the result.
+   */
+  async s2s_sf_showDialogAndCheckKey(srcExt, playerID, kwargs, sfInfo) {
+    const {nextState, nextStateIncorrect, dialog, key} = kwargs;
+    const res = await this.helper.callS2cAPI(playerID, 'dialog',
+    'showDialogWithPrompt', 60*1000, sfInfo.objectName, dialog);
+    if (res.msg === key) return nextState;
+
+    //The key is wrong,
+    return nextStateIncorrect;
+  }
+
+  /**
+   * Randomly draw from a set of problems, and move to the correct state
+   * only when the player correctly answers goalPoints of them.
+   */
+  async s2s_sf_answerProblems(srcExt, playerID, kwargs, sfInfo) {
+    const {problems, goalPoints, nextState, nextStateIncorrect} = kwargs;
+    let problemSet = JSON.parse(fs.readFileSync('items/problems.json'));
+    randomShuffle(problemSet);
+    let result, correct = 0, d = '';
+    for (let i = 0; i < problems; i++) {
+      const c = [];
+      d = problemSet[i].dialogs;
+      for (const option of problemSet[i].options) {
+        c.push({token: option[0], display: option});
+      }
+      result = await this.helper.callS2cAPI(playerID, 'dialog', 'showDialogWithMultichoice', 60*1000, this.objectName, d, c);
+      if (!result.token) {
+        console.warn(`Player '${playerID}' does not choose in 'answerProblems'. Result: ${JSON.stringify(result)}`);
+        return FSM_ERROR;
+      } else if (result.token === problemSet[i].ans) correct += 1;
+    }
+    if (correct >= goalPoints) return nextState;
+    return nextStateIncorrect;
   }
 }
 
