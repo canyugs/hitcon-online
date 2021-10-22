@@ -28,15 +28,6 @@ class Standalone {
   }
 
   /**
-   * Return the ejs partials for the client part of this extension.
-   * @return {object} partials - An object, it could have the following:
-   * inDiv - A string to the path of ejs partial for the location inDiv.
-   */
-  static getPartials() {
-    return {inDiv: 'in-div.ejs'};
-  }
-
-  /**
    * Notify other users to update the points.
    * @param {Player} player - player information
    * @param {string} uid - The user to be notified.

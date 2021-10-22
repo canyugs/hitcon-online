@@ -208,7 +208,17 @@ class ExtensionManager {
     for (const name of names) {
       // Load the classes if they are not loaded.
       await this.ensureClass(name);
-      let p = this.ext[name].standaloneClass.getPartials();
+      let p = {inDiv: 'in-div.ejs'};
+      if (typeof this.ext[name].standaloneClass.getPartials === 'undefined') {
+        // Not defined, use the default.
+      } else {
+        try {
+          let p = this.ext[name].standaloneClass.getPartials();
+        } catch (e) {
+          console.error(`Unable to get partials for ${name}`, e.stack);
+          // Use the default again.
+        }
+      }
       for (const loc in p) {
         if (!(loc in result)) {
           result[loc] = [];

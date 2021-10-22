@@ -47,15 +47,6 @@ class Standalone {
   }
 
   /**
-   * Return the ejs partials for the client part of this extension.
-   * @return {object} partials - An object, it could have the following:
-   * inDiv - A string to the path of ejs partial for the location inDiv.
-   */
-  static getPartials() {
-    return {inDiv: 'in-div.ejs'};
-  }
-
-  /**
    * Client tries to place a bomb at mapCoord.
    * The server returns true on success.
    * @param {Object} player - (TODO: needs docs)

@@ -34,15 +34,6 @@ class Standalone {
     console.log(`${player.playerID} and ${args} called on unimplemented c2s_getPassword()`);
     return '1234';
   }
-
-  /**
-   * Return the ejs partials for the client part of this extension.
-   * @return {object} partials - An object, it could have the following:
-   * inDiv - A string to the path of ejs partial for the location inDiv.
-   */
-  static getPartials() {
-    return {inDiv: 'in-div.ejs'};
-  }
 }
 
 export default Standalone;
