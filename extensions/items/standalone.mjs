@@ -314,7 +314,7 @@ class Standalone {
   _countItem(playerID, itemName) {
     if (!(playerID in this.items)) return 0;
     if (!(itemName in this.items[playerID])) return 0;
-    return this.items[playerID][itemName];
+    return this.items[playerID][itemName].amount;
   }
 
   /**
@@ -742,7 +742,7 @@ class Standalone {
 
     if (!Number.isInteger(amount)) amount = 1;
 
-    result = await this.helper.callS2sAPI('items', 'TakeItem', playerID, itemName, amount);
+    const result = await this.helper.callS2sAPI('items', 'TakeItem', playerID, itemName, amount);
     if (typeof result.error !== 'undefined' || typeof result.ok !== 'boolean') {
       // Extension not running?
       console.error('items.TakeItem() failed, maybe items ext is not running?');
@@ -771,7 +771,7 @@ class Standalone {
 
     if (!Number.isInteger(amount)) amount = 1;
 
-    result = await this.helper.callS2sAPI('items', 'CountItem', playerID, itemName);
+    const result = await this.helper.callS2sAPI('items', 'CountItem', playerID, itemName);
     if (typeof result.error !== 'undefined' || !Number.isInteger(result.amount)) {
       // Extension not running?
       console.error('items.CountItem() failed, maybe items ext is not running?');
