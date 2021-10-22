@@ -4,8 +4,8 @@
 import ItemBase from '../item-base.mjs';
 
 class Tickets extends ItemBase {
-  constructor(helper, imagePath) {
-    super(helper, imagePath);
+  constructor(helper, imagePath, info) {
+    super(helper, imagePath, info);
 
     this.show = false;
     this.exchangeable = true;

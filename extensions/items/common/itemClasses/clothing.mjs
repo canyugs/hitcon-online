@@ -7,8 +7,8 @@ class Clothing extends ItemBase {
   /**
    * @param {ExtensionHelper} helper - An extension helper object for servicing
    */
-  constructor(helper, imagePath) {
-    super(helper, imagePath);
+  constructor(helper, imagePath, info) {
+    super(helper, imagePath, info);
 
     this.show = true;
     this.exchangeable = false;
