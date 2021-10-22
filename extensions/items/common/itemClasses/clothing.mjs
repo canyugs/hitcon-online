@@ -7,8 +7,8 @@ class Clothing extends ItemBase {
   /**
    * @param {ExtensionHelper} helper - An extension helper object for servicing
    */
-  constructor(helper, imagePath, info) {
-    super(helper, imagePath, info);
+  constructor(helper, imagePath, info, fsm) {
+    super(helper, imagePath, info, fsm);
 
     this.show = true;
     this.exchangeable = false;
@@ -16,7 +16,8 @@ class Clothing extends ItemBase {
     this.droppable = true;
   }
 
-  async useItem(amount) {
+  async useItem(playerID, amount) {
+    await this.useItemFSM(playerID, amount);
     console.log('Mask worn!');
   }
 }
