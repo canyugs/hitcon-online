@@ -6,7 +6,8 @@
             "baseClass": "clothing",
             "visibleName": "Face Mask",
             "desc": "Just a face mask, best weapon against virus",
-            "imagePath":  "./items/clothing/facemask.jpg"
+            "imagePath":  "./items/clothing/facemask.jpg",
+            "fsm": true
         },
         "sunglasses":
         {
