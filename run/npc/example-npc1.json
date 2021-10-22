@@ -22,23 +22,70 @@
       "s1": {
         "func": "showDialog",
         "kwargs": {
-          "dialogs": "Hello!\nNice to meet you!",
+          "dialogs": "Hello!\nNice to meet you!\nWhat do you want to do?",
           "options": {
-            "How are you?": "s2",
-            "Bye!": "s3"
+            "I want to join": "j1",
+            "I want a face mask": "f1",
+            "I don't want my face mask": "t1",
+            "Bye~": "d"
           }
         }
       },
-      "s2": {
+      "j1": {
+        "func": "haveItem", "kwargs": {
+          "amount": "1",
+          "itemName": "facemask",
+          "haveItem": "j3",
+          "noItem": "j2"
+        }
+      },
+      "j2": {
+        "func": "showDialog", "kwargs": {
+          "dialogs": "Sorry, you don't have a facemask",
+          "options": {"OK": "d"}
+        }
+      },
+      "j3": {
+          "func": "showDialog", "kwargs": {
+          "dialogs": "Great, you've a facemask",
+          "options": {"OK": "d"}
+        }
+      },
+      "f1": {
+        "func": "giveItem", "kwargs": {
+          "amount": "1",
+          "maxAmount": "1",
+          "itemName": "facemask",
+          "nextState": "d"
+        }
+      },
+      "t1": {
+        "func": "takeItem", "kwargs": {
+          "amount": "1",
+          "itemName": "facemask",
+          "haveItem": "t2",
+          "noItem": "t3"
+        }
+      },
+      "t2": {
         "func": "showDialog",
         "kwargs": {
-          "dialogs": ["I'm fine thank you!", "Not so well ...", "Fantastic!"],
+          "dialogs": "We've taken your face mask",
           "options": {
-            "Bye!": "s3"
+            "OK": "d"
           }
         }
       },
-      "s3": {
+      "t3": {
+        "func": "showDialog",
+        "kwargs": {
+          "dialogs": "You don't have any facemask",
+          "options": {
+            "OK": "d"
+          }
+        }
+      },
+      "d": {
         "func": "exit",
         "kwargs": {
           "next": "s1"
