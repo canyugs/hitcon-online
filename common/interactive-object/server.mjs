@@ -112,9 +112,6 @@ class InteractiveObjectServerBaseClass {
     // Stores whether the while loop in fsmWalk should exit.
     this._fsmWalkExit = new Map(); // key: playerID, value: true|false
 
-    // Set it as a const member so other users can access it more easily.
-    FSM_ERROR = FSM_ERROR;
-
     // Update the infoForStateFunc.
     this._updateInfoForStateFunc();
 
