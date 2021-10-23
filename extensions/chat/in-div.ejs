@@ -35,9 +35,16 @@
   }
 
   #message_history {
+    max-height: 50vh;
     overflow: auto;
     line-height: 20px;
-    max-height: 50vh;
+    display: flex;
+    flex-direction: column-reverse;
+    /*
+    Column reverse is used so that scrollbar will follow new messages.
+    Note that this may cause problem in older browsers (disappearing
+    scrollbar).
+    */
   }
 
   .chat-message-to {

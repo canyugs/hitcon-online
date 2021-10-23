@@ -83,7 +83,7 @@ ${this.clientCmdsInfo.helpMsg}
    * Append a raw (unformatted) message to the chat box.
    */
   appendRawMessage(msg) {
-    document.getElementById('message_history').appendChild(
+    document.getElementById('message_history').prepend(
     this.generateMessageBox('SYSTEM', msg, 'system'));
   }
 
@@ -189,7 +189,7 @@ ${this.clientCmdsInfo.helpMsg}
    * @param {object} args - Information of the nearby message including msg_from and msg
    */
   s2c_getNearbyMessage(args) {
-    document.getElementById('message_history').appendChild(
+    document.getElementById('message_history').prepend(
     this.generateMessageBox(this.HTMLEncode(args.msg_from), this.HTMLEncode(args.msg), 'nearby'));
   }
 
@@ -208,7 +208,7 @@ ${this.clientCmdsInfo.helpMsg}
    * @param {object} args - Information of the private message
    */
   s2c_getPrivateMessage(args) {
-    document.getElementById('message_history').appendChild(
+    document.getElementById('message_history').prepend(
     this.generateMessageBox(this.HTMLEncode(args.msg_from), this.HTMLEncode(args.msg), 'private-message'));
   }
 
@@ -218,7 +218,7 @@ ${this.clientCmdsInfo.helpMsg}
    * @param {object} args - Information of the private message
    */
   s2c_sendedPrivateMessage(args) {
-    document.getElementById('message_history').appendChild(
+    document.getElementById('message_history').prepend(
     this.generateMessageBox(this.HTMLEncode(args.msg_to), this.HTMLEncode(args.msg), 'private-message'));
   }
 
