@@ -283,11 +283,11 @@ class GatewayService {
         failOnPlayerUpdate(socket);
         return;
       }
+    } else {
+      // If the player didn't move, still update everyone.
+      // Could be name change or something else.
+      await this._broadcastPlayerUpdate(updateMsg);
     }
-
-    // If the player didn't move, still update everyone.
-    // Could be name change or something else.
-    await this._broadcastPlayerUpdate(updateMsg);
   }
 
   /**
@@ -296,7 +296,7 @@ class GatewayService {
    * If `ghostMode` is specified in msg, this function will not fail.
    * @param {Socket} socket - TODO
    * @param {PlayerSyncMessage} msg - TODO
-   * @param {Boolean} - success or not
+   * @return {Boolean} - success or not
    */
   async _teleportPlayerInternal(socket, msg) {
     const ret = await this._enterCoord(msg.mapCoord);
@@ -314,6 +314,7 @@ class GatewayService {
     await this._leaveCoord(socket.playerData.mapCoord);
 
     // Everything seems well, update everyone on our new location.
+    await this._broadcastPlayerUpdate(msg);
     return true;
   }
 
