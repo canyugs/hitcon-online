@@ -131,6 +131,37 @@ class ClientExtensionHelper {
   getExtObj(extName) {
     return this.extMan.getExtObj(extName);
   }
+
+  /**
+   * Return the current player ID.
+   * undefined if the game have not started yet.
+   */
+  getSelfPlayerID() {
+    if (typeof this.gameClient !== 'object') {
+      console.warn('Querying player ID before game started');
+      console.trace();
+      return undefined;
+    }
+    return this.gameClient.getSelfPlayerID();
+  }
+
+  /**
+   * Get a player's current location.
+   * Return undefined if not found, otherwise, return the MapCoord.
+   */
+  async getPlayerLocation(playerID) {
+    if (typeof this.gameState !== 'object') {
+      console.warn(`Query location of player ${playerID} before game started`);
+      console.trace();
+      return undefined;
+    }
+
+    const p = this.gameState.getPlayer(playerID);
+    if (p === null) {
+      return undefined;
+    }
+    return p.mapCoord;
+  }
 };
 
 export default ClientExtensionHelper;

@@ -214,6 +214,18 @@ class ExtensionHelperBase {
     if (token.scp.includes(scope)) return true;
     return false;
   }
+
+  /**
+   * Get the player's current location. (As perceived by this extension).
+   * Return undefined if not found, otherwise, return the MapCoord.
+   */
+  async getPlayerLocation(playerID) {
+    const p = this.gameState.getPlayer(playerID);
+    if (p === null) {
+      return undefined;
+    }
+    return p.mapCoord;
+  }
 }
 
 export default ExtensionHelperBase;
