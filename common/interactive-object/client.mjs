@@ -25,6 +25,9 @@ class InteractiveObjectClientBaseClass {
     this.clientInfo = clientInfo;
     this.mapCoord = clientInfo.initialPosition;
     this.displayConfig = clientInfo.displayConfig;
+    this.interactFunction = interactFunction;
+    this.objectName = clientInfo.objectName;
+    this.distanceLimit = clientInfo.distanceLimit;
 
     for (const conf of this.displayConfig) {
       const {zIndex, layerName, renderFunction, renderArgs} = conf;
@@ -42,13 +45,43 @@ class InteractiveObjectClientBaseClass {
       const {x, y} = this.mapCoord;
       if (!(x <= cx && cx < x+1 && y <= cy && cy < y+1)) return;
 
-      // TODO: check whether the player can interact with this object (e.g. too far to interact)
-      // const playerPosition = this.helper.gameClient.playerData.mapCoord;
-      // if (distance(clickedMapCoord, playerPosition) >= ???) return;
-      interactFunction();
+      this.onInteract();
     });
 
     // TODO: interact on keydown
+  }
+
+  /**
+   * Return the interactive object's MapCoord.
+   */
+  getPosition() {
+    // Interactive objects can't move, for now.
+    return this.mapCoord;
+  }
+
+  /**
+   * Called when player wants to interact.
+   */
+  async onInteract() {
+    const playerID = this.helper.getSelfPlayerID();
+    if (typeof playerID !== 'string') {
+      console.warn(`Attempting to interact with ${this.clientInfo.name} before game start`);
+      console.trace();
+      return;
+    }
+    const loc = await this.helper.getPlayerLocation(playerID);
+    if (typeof loc !== 'object') {
+      console.warn('Unable to fetch self location: ', loc);
+      return;
+    }
+
+    if (Number.isInteger(this.distanceLimit) && loc.distanceTo1(this.getPosition()) > this.distanceLimit) {
+      console.warn(`Player ${playerID} is interacting with ${this.objectName} from too far away`);
+      // Notify the user.
+      this.helper.mainUI.showNotification('You need to come closer to interact');
+      //return false;
+    }
+    this.interactFunction();
   }
 }
 
