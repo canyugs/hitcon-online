@@ -12,8 +12,9 @@ class Clothing extends ItemBase {
 
     this.show = true;
     this.exchangeable = false;
-    this.usable = true;
+    this.usable = false;
     this.droppable = true;
+    this.consumable = false;
   }
 
   async useItem(playerID, amount) {

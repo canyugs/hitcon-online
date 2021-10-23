@@ -109,6 +109,7 @@ class Standalone {
       itemInfoObj.exchangeable = item.exchangeable;
       itemInfoObj.droppable = item.droppable;
       itemInfoObj.usable = item.usable;
+      itemInfoObj.consumable = item.consumable;
 
       // Description
       this.itemInfo[itemName] = itemInfoObj;
@@ -483,8 +484,10 @@ class Standalone {
       return {'error': 'Item is not usable'};
     }
 
-    if (!this._takeItem(playerID, itemName, amount)) {
-      return {'error': 'Insufficient quantity'};
+    if (this.itemInfo[itemName].consumable) {
+      if (!this._takeItem(playerID, itemName, amount)) {
+        return {'error': 'Insufficient quantity'};
+      }
     }
 
     this.itemInstances[itemName].useItem(playerID, amount);
