@@ -1,6 +1,7 @@
 {
   "enabled": true,
   "initialPosition": {"mapName": "world1", "x": 5, "y": 15},
+  "distanceLimit": 2,
   "display": [
     {
       "zIndex": 11,

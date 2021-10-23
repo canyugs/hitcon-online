@@ -85,6 +85,14 @@ class InteractiveObjectServerBaseClass {
     if (typeof this.config.visibleName === 'string') {
       this.visibleName = this.config.visibleName;
     }
+    this.distanceLimit = this.config.distanceLimit;
+    if (!Number.isInteger(this.distanceLimit)) {
+      // Set to undefined to disable distance limit.
+      if (typeof this.distanceLimit !== 'undefined' && this.distanceLimit !== null) {
+        console.warn(`${this.objectName} have invalid distance limit: `, this.distanceLimit);
+      }
+      this.distanceLimit = undefined;
+    }
 
     // input sanitization
     for (const attr of ['initialPosition', 'display', 'FSM']) {
@@ -137,6 +145,8 @@ class InteractiveObjectServerBaseClass {
     this.clientInfo.initialPosition = this.getInitialPosition();
     this.clientInfo.displayConfig = this.getDisplayConfig();
     this.clientInfo.visibleName = this.visibleName;
+    this.clientInfo.objectName = this.objectName;
+    this.clientInfo.distanceLimit = this.distanceLimit;
   }
 
   /**
@@ -147,11 +157,29 @@ class InteractiveObjectServerBaseClass {
   }
 
   /**
+   * Return the interactive object's MapCoord.
+   */
+  getPosition() {
+    // Interactive objects can't move, for now.
+    return this.getInitialPosition();
+  }
+
+  /**
    * TODO
    * @param {String} playerID - TODO
    */
   async startInteraction(playerID) {
     // TODO: check whether the player can interact with this object (e.g. too far to interact)
+    const loc = await this.helper.getPlayerLocation(playerID);
+    if (typeof loc === 'undefined') {
+      console.warn(`Player ${playerID} is nowhere to be found when trying to interact with ${this.objectName}`);
+      return false;
+    }
+    if (Number.isInteger(this.distanceLimit) && loc.distanceTo1(this.getPosition()) > this.distanceLimit) {
+      console.warn(`Player ${playerID} is interacting with ${this.objectName} from too far away`);
+      return false;
+    }
+
     console.log(`[NPC] Player '${playerID}' interacts with NPC '${this.objectName}'`);
     // not using await so as to prevent timeout in the client side
     this.fsmExecutor.fsmWalk(playerID);
