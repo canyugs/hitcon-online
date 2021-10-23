@@ -51,6 +51,10 @@ class InteractiveObjectClientBaseClass {
       });
     } else {
       this.helper.gameState.registerOnPlayerUpdate((msg) => {
+        if (msg.ghostMode === true) {
+          // Ignore ghost mode updates.
+          return;
+        }
         const p = this.helper.getSelfPlayerID();
         if (typeof p !== 'string') {
           console.warn('Game not started when player update triggered', msg);
