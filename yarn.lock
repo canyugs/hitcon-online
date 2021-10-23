@@ -2044,6 +2044,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"hitcon-online-map-portal@workspace:extensions/map-portal":
+  version: 0.0.0-use.local
+  resolution: "hitcon-online-map-portal@workspace:extensions/map-portal"
+  languageName: unknown
+  linkType: soft
+
 "hitcon-online-maplib@workspace:common/maplib":
   version: 0.0.0-use.local
   resolution: "hitcon-online-maplib@workspace:common/maplib"
