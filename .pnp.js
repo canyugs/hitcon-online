@@ -91,6 +91,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         "reference": "workspace:extensions/jitsi"
       },
       {
+        "name": "hitcon-online-map-portal",
+        "reference": "workspace:extensions/map-portal"
+      },
+      {
         "name": "hitcon-online-notification",
         "reference": "workspace:extensions/notification"
       },
@@ -162,6 +166,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
       ["hitcon-online-items", ["workspace:extensions/items"]],
       ["hitcon-online-jitsi", ["workspace:extensions/jitsi"]],
       ["hitcon-online-main-server", ["workspace:services/main"]],
+      ["hitcon-online-map-portal", ["workspace:extensions/map-portal"]],
       ["hitcon-online-maplib", ["workspace:common/maplib"]],
       ["hitcon-online-notification", ["workspace:extensions/notification"]],
       ["hitcon-online-npc", ["workspace:extensions/npc"]],
@@ -2695,6 +2700,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["minimist", "npm:1.2.5"],
             ["redis", "npm:3.1.2"],
             ["socket.io", "npm:4.1.2"]
+          ],
+          "linkType": "SOFT",
+        }]
+      ]],
+      ["hitcon-online-map-portal", [
+        ["workspace:extensions/map-portal", {
+          "packageLocation": "./extensions/map-portal/",
+          "packageDependencies": [
+            ["hitcon-online-map-portal", "workspace:extensions/map-portal"]
           ],
           "linkType": "SOFT",
         }]

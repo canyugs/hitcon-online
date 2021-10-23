@@ -1,0 +1,9 @@
+{
+  "name": "hitcon-online-map-portal",
+  "version": "0.0.1",
+  "description": "Part of HITCON Online. This package provide the ability to specify portal in the map instead of adding NPCs.",
+  "exports": {
+    "standalone": "./standalone.mjs",
+    "in-gateway": "./in-gateway.mjs"
+  }
+}
