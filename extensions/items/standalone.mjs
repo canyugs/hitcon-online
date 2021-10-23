@@ -346,6 +346,56 @@ class Standalone {
   }
 
   /**
+   * Atomically exchange all items in src for items in dst.
+   * If any item is insufficient in src, the transaction will abort.
+   * Example:
+   * _exchangeItems('xxx', {'hydrogen': 2, 'oxygen': 1}, {'water': 1})
+   */
+  _exchangeItems(playerID, src, dst) {
+    // NOTE: This function MUST NOT be async so it's atomic.
+    if (typeof src !== 'object' || typeof dst !== 'object') {
+      console.error(`src/dst not object in _exchangeItems`, src, dst);
+      return false;
+    }
+    const checkEle = (k, v) => {
+      if (!Number.isInteger(v) || v <= 0) {
+        console.error(`src/dst value not positive integer in _exchangeItems`, v, src, dst);
+        return false;
+      }
+      if (typeof k !== 'string' || !(k in this.itemInfo)) {
+        console.error(`src/dst key not a vaild item name`, k, src, dst);
+        return false;
+      }
+      return true;
+    };
+    for (const k in src) {
+      if (!checkEle(k, src[k])) return false;
+    }
+    for (const k in dst) {
+      if (!checkEle(k, dst[k])) return false;
+    }
+    for (const k in src) {
+      if (this._countItem(playerID, k) < src[k]) {
+        // Not enough items.
+        return false;
+      }
+    }
+    for (const k in src) {
+      const ret = this._takeItem(playerID, k, src[k]);
+      if (!ret) {
+        console.error(`Weird race condition in items._exchangeItems`);
+      }
+    }
+    for (const k in dst) {
+      const ret = this._addItem(playerID, k, dst[k]);
+      if (!ret) {
+        console.error(`Impossible failure of items._addItem in items._exchangeItems`);
+      }
+    }
+    return true;
+  }
+
+  /**
    * Returning all items owned by the user
    * @return {object} partials - An object with the following type:
    * type ItemObj = {
@@ -828,6 +878,19 @@ class Standalone {
     } else {
       return kwargs.noItem;
     }
+  }
+
+  /**
+   * See _exchangeItems()
+   */
+  async s2s_sf_exchangeItems(srcExt, playerID, kwargs, sfInfo) {
+    const {src, dst, nextState, failState} = kwargs;
+
+    const result = this._exchangeItems(playerID, src, dst);
+    if (result) {
+      return nextState;
+    }
+    return failState;
   }
 
   /**
