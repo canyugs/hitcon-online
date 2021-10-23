@@ -174,7 +174,8 @@ class DataStore {
     }
     let obj = this.opened[dataName];
     if (obj.flushActive) {
-      console.warn('Concurrent _flushDirtyData()');
+      // Concurrent _flushDirtyData()
+      // This is a normal, properly handled race condition.
       return;
     }
 
@@ -190,7 +191,8 @@ class DataStore {
       }
       if (obj.writeInProgress) {
         // Somebody else is writing.
-        console.warn('Concurrent write in _flushDirtyData()');
+        // This should not happen.
+        console.error('Concurrent write in _flushDirtyData()');
         obj.pending = true;
         break;
       }
