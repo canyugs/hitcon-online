@@ -111,6 +111,10 @@ class Standalone {
       itemInfoObj.usable = item.usable;
       itemInfoObj.consumable = item.consumable;
 
+      if (itemInfoObj.usable && (typeof fsmObj !== 'object' || fsmObj === null || typeof fsmObj.initialState !== 'string')) {
+        console.warn(`Item ${itemName} is usable but no fsm specified.`, fsmObj);
+      }
+
       // Description
       this.itemInfo[itemName] = itemInfoObj;
       this.itemInstances[itemName] = item;
@@ -478,9 +482,11 @@ class Standalone {
   async _useItem(playerID, itemName, amount) {
     this._ensurePlayer(playerID);
     if (!(itemName in this.itemInfo) || !(itemName in this.itemInstances)) {
+      console.warn(`Using non-existent item by player ${playerID}`, itemName);
       return {'error': "Item does not exist"};
     }
     if (!this.itemInfo[itemName].usable) {
+      console.warn(`Using item ${itemName} that is not usable by player ${playerID}`);
       return {'error': 'Item is not usable'};
     }
 
@@ -772,8 +778,15 @@ class Standalone {
     }
     const itemName = arr[1];
     // No await to prevent client from timeout.
-    this._useItem(player.playerID, itemName, 1);
-    return {status: 'ok', reply: 'Using item...'};
+    const result = this._useItem(player.playerID, itemName, 1);
+    if (typeof result === 'object' && result.ok === true) {
+      return {status: 'ok', reply: 'Using item...'};
+    }
+    const ret = {status: 'error'};
+    if (typeof result.error === 'string') {
+      ret.reply = result.error;
+    }
+    return ret;
   }
 
   // ============= Interactive Object related =============

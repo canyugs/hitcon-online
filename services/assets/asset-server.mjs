@@ -44,7 +44,6 @@ class AssetServer {
   async staticRoutes() {
     // TODO: Restrict the visible pages.
     // Not sure if all static files are in sites
-    console.log(path.resolve(__dirname, '../../sites/'));
     this.app.use('/static/sites', express.static(path.resolve(__dirname, '../../sites/')));
     this.app.use('/static/common', express.static(path.resolve(__dirname, '../../common/')));
     this.app.use('/static/run/map', express.static(path.resolve(process.cwd(), 'map')));

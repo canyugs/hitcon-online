@@ -29,6 +29,7 @@ class Client {
    */
   async s2c_showNotification(message, timeout) {
     this.helper.mainUI.showNotification(message, timeout);
+    return true;
   }
 
   /**
@@ -41,6 +42,7 @@ class Client {
    */
   async s2c_showAnnouncement(message, timeout) {
     this.helper.mainUI.showAnnouncement(message, timeout);
+    return true;
   }
 
   /**
