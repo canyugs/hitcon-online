@@ -314,7 +314,6 @@ class GatewayService {
     await this._leaveCoord(socket.playerData.mapCoord);
 
     // Everything seems well, update everyone on our new location.
-    await this._broadcastPlayerUpdate(msg);
     return true;
   }
 
