@@ -56,8 +56,7 @@ class FSMExecutor {
    * state function for their information.
    */
   _updateInfoForStateFunc() {
-    this.infoForStateFunc = {};
-    this.infoForStateFunc.name = this.executorName;
+    this.infoForStateFunc = {name: this.executorName};
   }
 
   /**
@@ -125,6 +124,8 @@ class FSMExecutor {
    * Just a placeholder function to provide `exit` function in configuration.
    * @param {String} playerID
    * @param {Object} kwargs - TODO
+   * @param {Object} sfInfo - An object that contains various information that the
+   *   state function might need.
    * @return {String} - the next state
    */
   async sf_exit(playerID, kwargs, sfInfo) {

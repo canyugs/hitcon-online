@@ -249,9 +249,10 @@ class Standalone {
    * @param String playerID - ID of the player.
    * @param String itemName - The item name.
    * @param Number amount - The amount to give.
+   * @param Boolean hideNotification - True if we want to suppress the notification.
    * @return Boolean success - Return true if the items are added.
    */
-  _addItem(playerID, itemName, amount=1, hideNotification) {
+  _addItem(playerID, itemName, amount=1, hideNotification=false) {
     if (!Number.isInteger(amount)) {
       console.error('_addItem() passed amount not integer: ', amount);
       return false;
@@ -290,10 +291,11 @@ class Standalone {
    * @param String playerID - ID of the player.
    * @param String itemName - The item name.
    * @param Number amount - The amount to take.
+   * @param Boolean hideNotification - True if we want to suppress the notification.
    * @return Boolean success - Return true if it was taken from the player's
    *   inventory, false if there's not enough.
    */
-  _takeItem(playerID, itemName, amount=1, hideNotification) {
+  _takeItem(playerID, itemName, amount=1, hideNotification=false) {
     if (!Number.isInteger(amount)) {
       console.error('_takeItem() passed amount not integer: ', amount);
       return false;

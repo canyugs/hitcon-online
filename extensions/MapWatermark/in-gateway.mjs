@@ -22,13 +22,13 @@ class InGateway {
   }
 
   /**
-   * Returns true if this extension have an in-gateway part.
+   * Returns true if this extension has an in-gateway part.
    * If this returns false, the constructor for InGateway will not be called.
    * Otherwise, a InGateway object is instanciated for each gateway service
    * instance launched.
-   * @return {Boolean} haveInGateway - See above.
+   * @return {Boolean} hasInGateway - See above.
    */
-  static haveInGateway() {
+  static hasInGateway() {
     return false;
   }
 }

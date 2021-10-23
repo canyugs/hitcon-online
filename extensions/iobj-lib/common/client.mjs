@@ -15,15 +15,15 @@ class Client {
    * servicing various functionalities of the extension.
    */
   constructor(helper) {
-    void helper;
+    this.helper = helper;
   }
 
   /**
-   * Returns true if this extension have a browser side part.
+   * Returns true if this extension has a browser side part.
    * If this returns false, the constructor for Client will not be called.
-   * @return {Boolean} haveClient - See above.
+   * @return {Boolean} hasClient - See above.
    */
-  static haveClient() {
+  static hasClient() {
     return false;
   }
 };
