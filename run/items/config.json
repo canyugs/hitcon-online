@@ -18,17 +18,39 @@
         },
         "room1Ticket":
         {
-            "baseClass": "tickets",
+            "baseClass": "token",
             "visibleName": "Ticket for Room 1",
             "desc": "You'll need this if you want to enter room 1",
             "imagePath":  "./items/ticket/ticket.jpg"
         },
         "room2Ticket":
         {
-            "baseClass": "tickets",
+            "baseClass": "token",
             "visibleName": "Ticket for Room 2",
             "desc": "You'll need this if you want to enter room 2",
             "imagePath": "./items/ticket/ticket.jpg"
+        },
+        "zeroday":
+        {
+            "baseClass": "token",
+            "visibleName": "Zero Day Exploit",
+            "desc": "A zero day exploit in the software",
+            "imagePath": "./items/ticket/ticket.jpg"
+        },
+        "sourcecode":
+        {
+            "baseClass": "token",
+            "visibleName": "Software Source Code",
+            "desc": "Just some software source code",
+            "imagePath": "./items/ticket/ticket.jpg"
+        },
+        "fuzzer":
+        {
+            "baseClass": "tool",
+            "visibleName": "Fuzzer",
+            "desc": "Fuzzer for software",
+            "imagePath": "./items/ticket/ticket.jpg",
+            "fsm": true
         }
     }
 }
