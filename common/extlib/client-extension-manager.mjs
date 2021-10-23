@@ -228,7 +228,7 @@ class ClientExtensionManager {
         "message": "Expected onExtensionBroadcast to be function"
       };
     }
-    await onExtBc(msg);
+    await onExtBc.call(this.extObjects[extName], msg);
   }
 
   /**
