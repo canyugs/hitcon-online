@@ -2016,6 +2016,21 @@
     "height": 20,
     "cellSets": [
       {
+        "name": "portal1",
+        "priority": 1,
+        "cells": [
+          {
+            "x": 12,
+            "y": 12,
+            "w": 2,
+            "h": 1
+          }
+        ],
+        "layers": {
+          "portal": "13_3_world1"
+        }
+      },
+      {
         "name": "bombmanArena1",
         "priority": 1,
         "cells": [
