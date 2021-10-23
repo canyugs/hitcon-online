@@ -16,7 +16,11 @@ class ItemBase {
     this.info = info;
     this.fsm = fsm;
 
-    this.fsmExecutor = new FSMExecutor(this.helper, this.fsm, `Item ${this.info.visibleName}`);
+    const sfInfo = {
+      name: `item-${this.info.name}`,
+      visibleName: `Item ${this.info.visibleName}`
+    };
+    this.fsmExecutor = new FSMExecutor(this.helper, this.fsm, sfInfo);
   }
 
   /**

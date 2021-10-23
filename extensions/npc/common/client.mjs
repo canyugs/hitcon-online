@@ -71,7 +71,7 @@ class SingleNPC extends InteractiveObjectClientBaseClass {
       } else if (cfg.layerName === 'npcName') {
         cfg.renderArgs = {
           mapCoord: mapCoord,
-          displayName: npcName,
+          displayName: clientInfo.visibleName,
           getDrawInfo() {
             return {mapCoord: this.mapCoord, displayName: this.displayName};
           },
