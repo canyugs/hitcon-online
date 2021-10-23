@@ -1,0 +1,55 @@
+{
+  "FSM": {
+    "initialState": "s1",
+    "states": {
+      "s1": {
+        "func": "haveItem", "kwargs": {
+          "amount": "1",
+          "itemName": "sourcecode",
+          "haveItem": "h1",
+          "noItem": "n1"
+        }
+      },
+      "n1": {
+        "func": "showDialog",
+        "kwargs": {
+          "dialogs": "No source code, fuzzer exits.",
+          "options": {
+            "OK": "q"
+          }
+        }
+      },
+      "h1": {
+        "func": "showDialog",
+        "kwargs": {
+          "dialogs": "Fuzz.....",
+          "options": {
+            "Continue": "h2"
+          }
+        }
+      },
+      "h2": {
+        "func": "sleep",
+        "kwargs": {
+          "delay": 2000,
+          "nextState": "h3"
+        }
+      },
+      "h3": {
+        "func": "exchangeItems",
+        "kwargs": {
+          "src": {"sourcecode": 1},
+          "dst": {"zeroday": 1},
+          "nextState": "q",
+          "failState": "q"
+        }
+      },
+      "q": {
+        "func": "exit",
+        "kwargs": {
+          "next": "s1"
+        }
+      }
+    }
+  }
+}
