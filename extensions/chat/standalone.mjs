@@ -195,6 +195,7 @@ class Standalone {
    */
   async c2s_broadcastMessage(player, args) {
     let resultArgs = {};
+    resultArgs['type'] = 'genericMsg';
     resultArgs['msg_from'] = player.playerID;
     resultArgs['msg'] = args.msg;
     

@@ -233,10 +233,11 @@ ${this.clientCmdsInfo.helpMsg}
       game.mainUI.showAnnouncement(args.msg, args.timeout);
     } else if (args.type === 'clientCmdsInfo') {
       this.clientCmdsInfo = args.clientCmdsInfo;
+    } else if (args.type === 'genericMsg') {
+      document.getElementById('message_history').prepend(
+    this.generateMessageBox(this.HTMLEncode(args.msg_from), this.HTMLEncode(args.msg), 'all'));
     } else {
-      args.msg_from = $('<div/>').text(args.msg_from).html();
-      args.msg = $('<div/>').text(args.msg).html();
-      document.getElementById('message_history').innerHTML += '<span>' + args.msg_from + ': ' + args.msg + '</span><br>';
+      console.error('Invalid chat ext broadcast message: ', args);
     }
   }
 
