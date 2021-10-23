@@ -1,0 +1,39 @@
+{
+  "enabled": true,
+  "initialPosition": {"mapName": "world1", "x": 4, "y": 14},
+  "distanceLimit": 0,
+  "interactType": "loc",
+  "display": [
+    {
+      "zIndex": 11,
+      "layerName": "npcImage",
+      "renderFunction": "_drawOneCharacterImage",
+      "renderArgs": null,
+      "character": "char1"
+    },
+    {
+      "zIndex": 16,
+      "layerName": "npcName",
+      "renderFunction": "_drawOneCharacterName",
+      "renderArgs": null
+    }
+  ],
+  "FSM": {
+    "initialState": "s1",
+    "states": {
+      "s1": {
+        "func": "teleport",
+        "kwargs": {
+          "mapCoord": {"mapName": "world1", "x": 15, "y": 14},
+          "nextState": "q"
+        }
+      },
+      "q": {
+        "func": "exit",
+        "kwargs": {
+          "next": "s1"
+        }
+      }
+    }
+  }
+}
