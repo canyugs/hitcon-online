@@ -112,7 +112,7 @@ class MapCoord {
    * @return {string}
    */
   toRedisKey() {
-    return `cell-${this.x}-${this.y}-${this.mapName}`;
+    return 'cell_' + this.toSerializedStr();
   }
 
   /**
@@ -122,6 +122,51 @@ class MapCoord {
    */
   static fromObject(obj) {
     return new MapCoord(obj.mapName, obj.x, obj.y);
+  }
+
+  /**
+   * Deserialize a string into MapCoord.
+   * It should be in the format `${x}_${y}_${mapName}`
+   * @param {String} s - The serialized string representation for the MapCoord.
+   * @return {MapCoord} - Return undefined if failure.
+   */
+  static fromSerializedStr(s) {
+    try {
+      const idx1 = s.indexOf('_');
+      if (idx1 < 0) {
+        throw `can't find first '_'`;
+      }
+      const x = parseInt(s.substr(0, idx1));
+      if (Number.isNaN(x)) {
+        throw `x is NaN`;
+      }
+      s = s.substr(idx1+1);
+
+      const idx2 = s.indexOf('_');
+      if (idx2 < 0) {
+        throw `can't find second '_'`;
+      }
+      const y = parseInt(s.substr(0, idx2));
+      if (Number.isNaN(x)) {
+        throw `x is NaN`;
+      }
+      s = s.substr(idx2+1);
+
+      return new MapCoord(s, x, y);
+    } catch (e) {
+      console.warn(`MapCoord.fromSerializedStr(${s}) failed: `, e, e.stack);
+      console.trace();
+      return undefined;
+    }
+  }
+
+  /**
+   * Serialize a MapCoord into a string.
+   * It should be in the format `${x}_${y}_${mapName}`
+   * @return {String} s - The resulting string.
+   */
+  toSerializedStr() {
+    return `${this.x}_${this.y}_${this.mapName}`;
   }
 }
 
