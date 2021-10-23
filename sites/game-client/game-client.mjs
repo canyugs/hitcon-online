@@ -132,6 +132,19 @@ class GameClient {
     // Start the browser side of all extensions.
     this.extMan.startAllExtensionClient();
   }
+
+  /**
+   * Return the current player's playerID.
+   * undefined if the game have not started yet.
+   */
+  getSelfPlayerID() {
+    if (typeof this.playerInfo !== 'object') return undefined;
+    if (typeof this.playerInfo.playerID !== 'string') {
+      console.warn('Self playerID is not string', this.playerInfo);
+      return undefined;
+    }
+    return this.playerInfo.playerID;
+  }
 }
 
 export default GameClient;
