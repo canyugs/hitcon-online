@@ -199,7 +199,8 @@ ${this.clientCmdsInfo.helpMsg}
    * @param {object} args - Information of the nearby message including msg_from and msg
    */
   s2c_getNearbyMessage(args) {
-    document.getElementById('message_history').innerHTML += '<span>Nearby Message From ' + this.HTMLEncode(args.msg_from) + ': ' + this.HTMLEncode(args.msg) + '</span><br>';
+    document.getElementById('message_history').prepend(
+    this.generateMessageBox(this.HTMLEncode(args.msg_to), this.HTMLEncode(args.msg), 'nearby'));
   }
 
   /**
