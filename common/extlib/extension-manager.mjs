@@ -213,7 +213,7 @@ class ExtensionManager {
         // Not defined, use the default.
       } else {
         try {
-          let p = this.ext[name].standaloneClass.getPartials();
+          p = this.ext[name].standaloneClass.getPartials();
         } catch (e) {
           console.error(`Unable to get partials for ${name}`, e.stack);
           // Use the default again.
