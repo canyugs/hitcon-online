@@ -93,6 +93,10 @@ class InteractiveObjectServerBaseClass {
       }
       this.distanceLimit = undefined;
     }
+    this.interactType = this.config.interactType;
+    if (this.interactType !== 'click' && this.interactType !== 'loc') {
+      this.interactType = 'click';
+    }
 
     // input sanitization
     for (const attr of ['initialPosition', 'display', 'FSM']) {
@@ -147,6 +151,7 @@ class InteractiveObjectServerBaseClass {
     this.clientInfo.visibleName = this.visibleName;
     this.clientInfo.objectName = this.objectName;
     this.clientInfo.distanceLimit = this.distanceLimit;
+    this.clientInfo.interactType = this.interactType;
   }
 
   /**
