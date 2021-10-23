@@ -81,6 +81,10 @@ class InteractiveObjectServerBaseClass {
     this.config = JSON.parse(fs.readFileSync(configFilePath));
     if (!this.config.enabled) return;
     this.objectName = objectName;
+    this.visibleName = objectName;
+    if (typeof this.config.visibleName === 'string') {
+      this.visibleName = this.config.visibleName;
+    }
 
     // input sanitization
     for (const attr of ['initialPosition', 'display', 'FSM']) {
@@ -95,7 +99,11 @@ class InteractiveObjectServerBaseClass {
     if (!displayValidation(this.config.display)) return;
 
     // Create the executor
-    this.fsmExecutor = new FSMExecutor(this.helper, this.config.FSM, `iobj ${objectName}`);
+    const sfInfo = {
+      name: `iobj-${this.objectName}`,
+      visibleName: `${this.visibleName}`
+    };
+    this.fsmExecutor = new FSMExecutor(this.helper, this.config.FSM, sfInfo);
 
     // Update the clientInfo.
     this._updateClientInfoCache();
@@ -128,6 +136,7 @@ class InteractiveObjectServerBaseClass {
     this.clientInfo = {};
     this.clientInfo.initialPosition = this.getInitialPosition();
     this.clientInfo.displayConfig = this.getDisplayConfig();
+    this.clientInfo.visibleName = this.visibleName;
   }
 
   /**

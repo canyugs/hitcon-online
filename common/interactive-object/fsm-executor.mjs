@@ -12,10 +12,19 @@ class FSMExecutor {
   /**
    * Create FSMExecutor
    */
-  constructor(helper, fsm, executorName) {
+  constructor(helper, fsm, sfInfo) {
     this.helper = helper;
     this.fsm = fsm;
-    this.executorName = executorName;
+    this.executorName = sfInfo.name;
+
+    /*
+     * Fields required in sfInfo:
+     * name {String} - The id for this executor, it should be an idenitier, preferably
+     *   with no space or fancy unicode characters.
+     * visibleName {String} - The name to show to the player. It should be fully human
+     *   readable. Can contain space or unicode characters.
+     */
+    this.infoForStateFunc = sfInfo;
 
     // Stores the state of every player.
     // TODO: store the states in database (or in `/run/small_data`)
@@ -34,9 +43,6 @@ class FSMExecutor {
     this.stateFuncProvider.addProvider(this.stateFuncProviderInClass);
     this.stateFuncProviderExt = new ExtStateFuncProvider(helper);
     this.stateFuncProvider.addProvider(this.stateFuncProviderExt);
-
-    // Update the infoForStateFunc.
-    this._updateInfoForStateFunc();
   }
 
   /**
@@ -49,14 +55,6 @@ class FSMExecutor {
    */
   registerExtStateFunc(fnName, extName, methodName) {
     this.stateFuncProviderExt.registerStateFunc(fnName, extName, methodName);
-  }
-
-  /**
-   * Update the internal infoForStateFunc, an object passed to
-   * state function for their information.
-   */
-  _updateInfoForStateFunc() {
-    this.infoForStateFunc = {name: this.executorName};
   }
 
   /**

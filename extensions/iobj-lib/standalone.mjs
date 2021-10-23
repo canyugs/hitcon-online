@@ -79,7 +79,7 @@ class Standalone {
       c.push({token: nextState, display: message});
     }
 
-    const result = await this.helper.callS2cAPI(playerID, 'dialog', 'showDialogWithMultichoice', 60*1000, sfInfo.name, d, c);
+    const result = await this.helper.callS2cAPI(playerID, 'dialog', 'showDialogWithMultichoice', 60*1000, sfInfo.visibleName, d, c);
     if (result.token) return result.token;
     console.warn(`Player '${playerID}' does not choose in 'showDialogWithMultichoice'. Result: ${JSON.stringify(result)}`);
 
@@ -94,7 +94,7 @@ class Standalone {
   async s2s_sf_showDialogAndCheckKey(srcExt, playerID, kwargs, sfInfo) {
     const {nextState, nextStateIncorrect, dialog, key} = kwargs;
     const res = await this.helper.callS2cAPI(playerID, 'dialog',
-    'showDialogWithPrompt', 60*1000, sfInfo.name, dialog);
+    'showDialogWithPrompt', 60*1000, sfInfo.visibleName, dialog);
     if (res.msg === key) return nextState;
 
     //The key is wrong,
@@ -120,7 +120,7 @@ class Standalone {
       for (const option of problemSet[i].options) {
         c.push({token: option[0], display: option});
       }
-      result = await this.helper.callS2cAPI(playerID, 'dialog', 'showDialogWithMultichoice', 60*1000, sfInfo.name, d, c);
+      result = await this.helper.callS2cAPI(playerID, 'dialog', 'showDialogWithMultichoice', 60*1000, sfInfo.visibleName, d, c);
       if (!result.token) {
         console.warn(`Player '${playerID}' does not choose in 'answerProblems'. Result: ${JSON.stringify(result)}`);
         return FSM_ERROR;
@@ -175,7 +175,7 @@ class Standalone {
     if (typeof dialogs === 'string') d = dialogs;
     if (Array.isArray(dialogs)) d = randomChoice(dialogs);
 
-    const result = await this.helper.callS2cAPI(playerID, 'dialog', 'showDialogWithPrompt', 60*1000, sfInfo.name, d, buttonText);
+    const result = await this.helper.callS2cAPI(playerID, 'dialog', 'showDialogWithPrompt', 60*1000, sfInfo.visibleName, d, buttonText);
     if (result.msg) {
       if (typeof dialogVar === 'string') {
         this.dialogVars[dialogVar] = result.msg;
