@@ -28,25 +28,44 @@ class InteractiveObjectClientBaseClass {
     this.interactFunction = interactFunction;
     this.objectName = clientInfo.objectName;
     this.distanceLimit = clientInfo.distanceLimit;
+    this.interactType = clientInfo.interactType;
 
     for (const conf of this.displayConfig) {
       const {zIndex, layerName, renderFunction, renderArgs} = conf;
       this.helper.mapRenderer.registerCustomizedLayerToDraw(zIndex, layerName, renderFunction, renderArgs);
     }
 
-    // interact on click
-    // TODO: use `class InteractiveObjectManager` to handle the callback.
-    // `InteractiveObjectManager.lookupTable` is a Map() whose key and value are coordinate and callback, respectively.
-    // In this way, there will be only one callback in InputManager and InteractiveObjectManager will find the
-    // respective callback in O(1) complexity.
-    this.helper.inputManager.registerCanvasOnClickMapCoord((clickedMapCoord) => {
-      // determine whether this object is clicked
-      const {x: cx, y: cy} = clickedMapCoord;
-      const {x, y} = this.mapCoord;
-      if (!(x <= cx && cx < x+1 && y <= cy && cy < y+1)) return;
+    if (this.interactType === 'click') {
+      // interact on click
+      // TODO: use `class InteractiveObjectManager` to handle the callback.
+      // `InteractiveObjectManager.lookupTable` is a Map() whose key and value are coordinate and callback, respectively.
+      // In this way, there will be only one callback in InputManager and InteractiveObjectManager will find the
+      // respective callback in O(1) complexity.
+      this.helper.inputManager.registerCanvasOnClickMapCoord((clickedMapCoord) => {
+        // determine whether this object is clicked
+        const {x: cx, y: cy} = clickedMapCoord;
+        const {x, y} = this.mapCoord;
+        if (!(x <= cx && cx < x+1 && y <= cy && cy < y+1)) return;
 
-      this.onInteract();
-    });
+        this.onInteract();
+      });
+    } else {
+      this.helper.gameState.registerOnPlayerUpdate((msg) => {
+        const p = this.helper.getSelfPlayerID();
+        if (typeof p !== 'string') {
+          console.warn('Game not started when player update triggered', msg);
+          return;
+        }
+        if (msg.playerID !== p) {
+          // Not the current player.
+          return;
+        }
+        if (msg.mapCoord.equalsTo(this.mapCoord)) {
+          // We hit the user.
+          this.onInteract();
+        }
+      });
+    }
 
     // TODO: interact on keydown
   }
