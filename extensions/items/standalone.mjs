@@ -122,11 +122,7 @@ class Standalone {
     }
 
     /* Load all stored data */
-    const storedData = this.helper.loadData();
-    this.items = storedData.items ?? {};
-    this.droppedItemInfo = storedData.droppedItemInfo ?? {};
-    this.droppedItemCell = storedData.droppedItemCell ?? {};
-    this.droppedItemIndex = storedData.droppedItemIndex ?? 0;
+    await this._loadFromDisk();
 
     /* Changed to one cellset per world instead of one cellset per item per world */
     /* The type of item dropped is stored in `this.droppedItemInfo` */
@@ -172,13 +168,73 @@ class Standalone {
    * This function packages all the data that need to be stored into a big object
    * This function is usually called before `this.helper.storeData`
    */
-  PackStoredData() {
+  _packStoredData() {
     return {
       items: this.items,
       droppedItemCell: this.droppedItemCell,
       droppedItemInfo: this.droppedItemInfo,
       droppedItemIndex: this.droppedItemIndex
     };
+  }
+
+  /**
+   * This function unpacks a JSON object that is created by _packStoredData() into this.
+   */
+  _unpackStoredData(data) {
+    this.items = {};
+    if (typeof data.items !== 'object') {
+      console.warn('storedData.items is not an object', data.items);
+    } else {
+      for (const u in data.items) {
+        this.items[u] = {};
+        for (const i in data.items[u]) {
+          if (!(i in this.itemInfo)) {
+            console.error(`Player ${u} have item ${i} that doesn't exist`);
+          } else {
+            this.items[u][i] = data.items[u][i];
+            if (!Number.isInteger(this.items[u][i].amount)) {
+              this.items[u][i].amount = 0;
+            }
+          }
+        }
+      }
+    }
+
+    let droppedOK = true;
+    try {
+      if (!Number.isInteger(data.droppedItemIndex)) {
+        console.warn('storedData.droppedItemIndex is not an integer: ', data.droppedItemIndex);
+        droppedOK = false;
+      }
+      if (typeof data.droppedItemCell !== 'object' || typeof data.droppedItemInfo !== 'object') {
+        console.warn('storedData.droppedItemCell or droppedItemInfo is not an object: ', data.droppedItemCell, data.droppedItemInfo);
+        droppedOK = false;
+      }
+      if (Object.keys(data.droppedItemCell).length !== Object.keys(data.droppedItemInfo).length) {
+        console.warn('storedData.droppedItemCell or droppedItemInfo have incorrect length: ', data.droppedItemIndex, data.droppedItemCell, data.droppedItemInfo);
+        droppedOK = false;
+      }
+      for (const k in data.droppedItemCell) {
+        if (!(k in data.droppedItemIndex)) {
+          console.warn('mismatched key in data.droppedItem', k, data.droppedItemCell, data.droppedItemInfo);
+          droppedOK = false;
+          break;
+        }
+        if (!Number.isInteger(k)) {
+          console.warn('storedData.droppedItem have non-integer keys', k, data.droppedItemCell, data.droppedItemInfo);
+          droppedOK = false;
+          break;
+        }
+      }
+    } catch (e) {
+      console.warn('storedData is bad: ', e);
+    } finally {
+      if (droppedOK) {
+        this.droppedItemIndex = data.droppedItemIndex;
+        this.droppedItemCell = data.droppedItemCell;
+        this.droppedItemInfo = data.droppedItemInfo;
+      }
+    }
   }
 
   /**
@@ -245,8 +301,20 @@ class Standalone {
       this.flushInProgress = true;
       await new Promise(resolve => setImmediate(resolve));
       this.flushInProgress = false;
-      this.helper.storeData(this.PackStoredData());
+      this.helper.storeData(this._packStoredData());
     })();
+  }
+
+  /**
+   * Load the database on disk back to this class.
+   */
+  async _loadFromDisk() {
+    const data = await this.helper.loadData();
+    if (Object.keys(data).length === 0) {
+      // First time loading, we don't need to do anything.
+    } else {
+      this._unpackStoredData(data);
+    }
   }
 
   /**
