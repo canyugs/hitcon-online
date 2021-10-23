@@ -187,6 +187,15 @@ class Standalone {
     // If we reach here, the editDialog timeouts.
     return FSM_ERROR;
   }
+
+  /**
+   * Simply pause the FSM execution for the given amount of time in ms.
+   */
+  async s2s_sf_sleep(srcExt, playerID, kwargs, sfInfo) {
+    const {delay, nextState} = kwargs;
+    await new Promise(resolve => setTimeout(resolve, delay));
+    return nextState;
+  }
 }
 
 export default Standalone;
