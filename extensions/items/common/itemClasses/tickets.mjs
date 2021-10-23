@@ -11,6 +11,7 @@ class Tickets extends ItemBase {
     this.exchangeable = true;
     this.usable = true;
     this.droppable = true;
+    this.consumable = true;
   }
 
   async useItem(playerID, amount) {
