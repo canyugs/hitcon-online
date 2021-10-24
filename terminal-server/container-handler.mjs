@@ -4,7 +4,7 @@
 // Boilerplate for getting require() in es module.
 import {createRequire} from 'module';
 const require = createRequire(import.meta.url);
-import pty from 'node-pty';
+const pty = require('node-pty');
 const promisify = require('util').promisify;
 const randomBytes = require('crypto').randomBytes;
 const exec = promisify(require('child_process').exec);
