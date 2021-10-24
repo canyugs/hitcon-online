@@ -1,0 +1,107 @@
+{
+  "enabled": true,
+  "initialPosition": {"mapName": "world1", "x": 7, "y": 14},
+  "distanceLimit": 2,
+  "display": [
+    {
+      "zIndex": 11,
+      "layerName": "npcImage",
+      "renderFunction": "_drawOneCharacterImage",
+      "renderArgs": null,
+      "character": "char1"
+    },
+    {
+      "zIndex": 16,
+      "layerName": "npcName",
+      "renderFunction": "_drawOneCharacterName",
+      "renderArgs": null
+    }
+  ],
+  "FSM": {
+    "initialState": "s1",
+    "states": {
+      "s1": {
+        "func": "showDialog",
+        "kwargs": {
+          "dialogs": "Hello!\nNice to meet you!\nWhat do you want to do?",
+          "options": {
+            "Flip variable A": "a1",
+            "Flip variable B": "b1",
+            "Test A^B": "t1",
+            "Bye~": "d"
+          }
+        }
+      },
+      "a1": {
+        "func": "flipBoolVar", "kwargs": {
+          "var": "@example-var-A",
+          "trueState": "a2",
+          "falseState": "a3"
+        }
+      },
+      "a2": {
+        "func": "showDialog", "kwargs": {
+          "dialogs": "A is now true",
+          "options": {"OK": "d"}
+        }
+      },
+      "a3": {
+          "func": "showDialog", "kwargs": {
+          "dialogs": "A is now false",
+          "options": {"OK": "d"}
+        }
+      },
+      "b1": {
+        "func": "flipBoolVar", "kwargs": {
+          "var": "@example-var-B",
+          "trueState": "b2",
+          "falseState": "b3"
+        }
+      },
+      "b2": {
+        "func": "showDialog", "kwargs": {
+          "dialogs": "B is now true",
+          "options": {"OK": "d"}
+        }
+      },
+      "b3": {
+          "func": "showDialog", "kwargs": {
+          "dialogs": "B is now false",
+          "options": {"OK": "d"}
+        }
+      },
+      "t1": {
+        "func": "testBooleanExpr", "kwargs": {
+          "booleanVars": ["@example-var-A", "@example-var-B"],
+          "expr": "return 1===(this['@example-var-A']^this['@example-var-B'])",
+          "trueState": "t2",
+          "falseState": "t3"
+        }
+      },
+      "t2": {
+        "func": "showDialog",
+        "kwargs": {
+          "dialogs": "Great, expression is correct, it's true.",
+          "options": {
+            "OK": "d"
+          }
+        }
+      },
+      "t3": {
+        "func": "showDialog",
+        "kwargs": {
+          "dialogs": "Sorry, expression is false.",
+          "options": {
+            "OK": "d"
+          }
+        }
+      },
+      "d": {
+        "func": "exit",
+        "kwargs": {
+          "next": "s1"
+        }
+      }
+    }
+  }
+}
