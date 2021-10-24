@@ -42,7 +42,7 @@ class Client {
   async getPoints() {
     try {
       let ret = await this.requestApi('/users/me', 'GET');
-      return ret?.points;
+      return ret?.data?.points;
     } catch (e) {
       console.error('Failed to get points for user', e);
       throw new Error('Failed to get the remaining points.');
