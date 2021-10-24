@@ -18,7 +18,7 @@ export function tilesetTransform(tileset) {
 
   const imageSrc = {
     name: tileset.name,
-    url: `/static/run/map/${name}${ext}`,
+    url: `/static/run/map/${tileset.name}${ext}`,
     gridWidth: tileset.tilewidth,
     gridHeight: tileset.tileheight,
   };
