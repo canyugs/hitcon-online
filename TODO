@@ -6,6 +6,8 @@ P1
 --
 
 - Jitsi Access Control
+- Jitsi Fullscreen
+- Iframe Fullscreen
 
 P2
 --
@@ -14,6 +16,15 @@ P2
 - Follow functionality
 - Fix race condition in Gateway connect/disconnect handler.
 - Bomb man extension
+- Fix refresh in playerlist
+- Jitsi multiuser UI layout
+- Jitsi context menu
+
+P3
+--
+
+- Jitsi Mute others
+- Jitsi Pin
 
 In Progress
 ===========
