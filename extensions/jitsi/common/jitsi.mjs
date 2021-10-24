@@ -392,7 +392,11 @@ class JitsiHandler {
     $('#jitsi-local').empty();
 
     if (this.room) {
-      await this.room.leave();
+      try {
+        await this.room.leave();
+      } catch (e) {
+        console.error(`Failed to unload jitsi room`, e, e.stack);
+      }
     }
 
     if (this.connection) {
