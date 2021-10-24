@@ -77,31 +77,9 @@ class Client {
 
     const listOfTerminals = await this.helper.callC2sAPI('escape-game', 'getListOfTerminals', this.helper.defaultTimeout);
     for (const terminalId of listOfTerminals) {
-      const clientInfo = await this.helper.callC2sAPI('escape-game', 'getTerminalClientInfo', this.helper.defaultTimeout, terminalId)
+      const clientInfo = await this.helper.callC2sAPI('escape-game', 'getTerminalClientInfo', this.helper.defaultTimeout, terminalId);
       this.terminals.set(terminalId, new TerminalObject(this.helper, terminalId, clientInfo));
     }
-
-    // For testing only.
-    await this.createRoom();
-    await this.joinRoom();
-  }
-
-  /**
-   * Create a new room.
-   */
-  async createRoom() {
-    const result = await this.helper.callC2sAPI('escape-game', 'createRoom', this.helper.defaultTimeout);
-    console.log('create escape-game room', result);
-    this.roomId = result;
-  }
-
-  /**
-   * Join room
-   */
-  async joinRoom() {
-    const result = await this.helper.callC2sAPI('escape-game', 'joinRoom', this.helper.defaultTimeout, this.roomId);
-    console.log('join escape-game room', result);
-    this.roomId = result;
   }
 
   /**

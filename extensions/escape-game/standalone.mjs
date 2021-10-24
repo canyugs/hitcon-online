@@ -19,6 +19,11 @@ import {getRunPath, getConfigPath} from '../../common/path-util/path.mjs';
 const MAX_PLAYER_PER_ROOM = 5;
 const TERMINAL_SERVER_GRPC_LOCATION = '127.0.0.1:5051';
 
+// Bring out the FSM_ERROR for easier reference.
+const FSM_ERROR = InteractiveObjectServerBaseClass.FSM_ERROR;
+const SF_PREFIX = 's2s_sf_';
+
+
 /**
  * Terminology:
  * A "terminal" is an interactive object displayed on the map, with an unique ID.
@@ -88,12 +93,12 @@ class Standalone {
 
   /**
    * Create a new room and start all terminal.
-   * @param player
+   * @param {string} playerID The player ID.
    */
-  async c2s_createRoom(player) {
+  async createRoom(playerID) {
     // Check if the player is already in a room.
-    if (this.playerToRoom.has(player.playerID)) {
-      throw new Error(`Player ${player.playerID} is already in a room.`);
+    if (this.playerToRoom.has(playerID)) {
+      throw new Error(`Player ${playerID} is already in a room.`);
     }
 
     // Create a new room
@@ -105,30 +110,30 @@ class Standalone {
 
   /**
    * Join a room.
-   * @param {Player} player The player object.
+   * @param {string} playerID The player ID.
    * @param {string} roomId The room to join, must exist.
    */
-  async c2s_joinRoom(player, roomId) {
+  async joinRoom(playerID, roomId) {
     // Check if the room exists.
     if (!this.rooms.has(roomId)) {
-      throw new Error(`Player ${player.playerID} trys to join an non-exist room ${roomId}.`);
+      throw new Error(`Player ${playerID} trys to join an non-exist room ${roomId}.`);
     }
 
     // Check if the player is already in a room.
-    if (this.playerToRoom.has(player.playerID)) {
-      throw new Error(`Player ${player.playerID} is already in a room.`);
+    if (this.playerToRoom.has(playerID)) {
+      throw new Error(`Player ${playerID} is already in a room.`);
     }
 
     // Add to the room.
-    this.playerToRoom.set(player.playerID, this.rooms.get(roomId));
-    return this.rooms.get(roomId).addPlayer(player.playerID) > 0;
+    this.playerToRoom.set(playerID, this.rooms.get(roomId));
+    return this.rooms.get(roomId).addPlayer(playerID) > 0;
   }
 
   /**
    * Destroy the room the player belongs to.
    * @param {Player} player The player object.
    */
-  async c2s_destroyRoom(player) {
+  async destroyRoom(player) {
     // Check if the room exists.
     if (!this.playerToRoom.has(player.playerID)) {
       throw new Error(`Player ${player.playerID} trys to destory an non-exist room.`);
@@ -157,6 +162,44 @@ class Standalone {
   async getAccessToken(playerID, terminalName) {
     return this.playerToRoom.get(playerID).getAccessToken(terminalName);
   }
+
+
+
+  // Interactive Object (general)
+
+  /**
+   * Register the state func with the extension given.
+   */
+  async _registerWith(ext) {
+    const propList = Object.getOwnPropertyNames(Object.getPrototypeOf(this));
+    for (const p of propList) {
+      if (typeof this[p] !== 'function') continue;
+      if (!p.startsWith(SF_PREFIX)) continue;
+      const fnName = p.substr(SF_PREFIX.length);
+      this.helper.callS2sAPI(ext, 'registerStateFunc', fnName, this.helper.name, `sf_${fnName}`);
+    }
+  }
+
+  /**
+   * Register all state func available in this extension with the given
+   * extension.
+   */
+  async s2s_reqRegister(srcExt, ext) {
+    if (!ext) ext = srcExt;
+    await this._registerWith(ext);
+  }
+
+  /**
+   * Allow other ext to add state func.
+   */
+  async s2s_registerStateFunc(srcExt, fnName, extName, methodName) {
+    this.terminalObjects.forEach((v) => {
+      v.registerExtStateFunc(fnName, extName, methodName);
+    });
+  }
+
+
+  // Terminal Interactive Object
 
   /**
    * Get the list of all terminals. (for the interactive object)
@@ -204,32 +247,46 @@ class Standalone {
   }
 
   /**
-   * Join team using an invitation code by interacting with the NPC.
+   * Show terminal object, called by the interactive object.
    */
-  async s2s_sf_showDialogAndCheckKey(srcExt, playerID, kwargs, sfInfo) {
-    const {nextState, nextStateIncorrect, dialog, key} = kwargs;
-    const res = await this.helper.callS2cAPI(playerID, 'dialog',
-    'showDialogWithPrompt', 60*1000, sfInfo.name, dialog);
-    if (res.msg === key) return nextState;
-
-    //The key is wrong,
-    return nextStateIncorrect;
-  }
-
-  /**
-   * Allow other ext to add state func.
-   */
-   async s2s_registerStateFunc(srcExt, fnName, extName, methodName) {
-    console.log(srcExt, fnName, extName, methodName);
-    this.terminalObjects.forEach((v) => {
-      v.registerExtStateFunc(fnName, extName, methodName);
-    });
-  }
-
   async s2s_sf_showTerminal(srcExt, playerID, kwargs, sfInfo) {
     const {nextState} = kwargs;
     const token = await this.getAccessToken(playerID, sfInfo.name.split(' ')[1]);
     await this.helper.callS2cAPI(playerID, 'escape-game', 'showTerminalModal', 60*1000, token);
+    return nextState;
+  }
+
+
+  // Team Manager
+
+  /**
+   * Join team using an invitation code by interacting with the NPC.
+   */
+  async s2s_sf_showDialogAndGetInvitationCode(srcExt, playerID, kwargs, sfInfo) {
+    const {nextState, nextStateCantEnter, nextStateNotFound, dialog} = kwargs;
+    const res = await this.helper.callS2cAPI(playerID, 'dialog', 'showDialogWithPrompt', 60*1000, sfInfo.name, dialog);
+
+    for (const [roomId, room] of this.rooms) {
+      if (room.invitationCode === res.msg) {
+        return this.joinRoom(playerID, roomId) ? nextState : nextStateCantEnter;
+      }
+    }
+
+    //The invitation code is wrong
+    return nextStateNotFound;
+  }
+
+  /**
+   * Create a new room by interacting with the NPC.
+   */
+  async s2s_sf_createRoom(srcExt, playerID, kwargs, sfInfo) {
+    const {nextState} = kwargs;
+
+    const roomId = await this.createRoom(playerID); // create room.
+    await this.joinRoom(playerID, roomId); // add the player to the room.
+    await this.helper.callS2cAPI(playerID, 'dialog', 'showDialog', 60*1000,
+      sfInfo.name, 'Team created, the invitation code is: ' + this.rooms.get(roomId).invitationCode);
+
     return nextState;
   }
 }
@@ -246,8 +303,9 @@ class Room {
    */
   constructor(roomId, terminalServerGrpcService, defaultTerminals) {
     this.roomId = roomId;
+    this.invitationCode = randomBytes(16).toString('hex');
     this.terminalServerGrpcService = terminalServerGrpcService;
-    this.players = [];
+    this.playerIDs = [];
     this.terminals = new Map(); // Mapping the terminal id to the container id in the terminal server.
 
     this.defaultTerminals = defaultTerminals;
@@ -255,13 +313,13 @@ class Room {
 
   /**
    * Add a new player.
-   * @param {Player} player The player.
+   * @param {string} playerID The player ID.
    */
-  addPlayer(player) {
-    if (this.players.length >= MAX_PLAYER_PER_ROOM) {
+  addPlayer(playerID) {
+    if (this.playerIDs.length >= MAX_PLAYER_PER_ROOM) {
       return false;
     }
-    return this.players.push(player);
+    return this.playerIDs.push(playerID);
   }
 
   /**
