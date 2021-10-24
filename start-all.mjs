@@ -50,13 +50,13 @@ async function main() {
   redisClient.quit();
 
   /* Start asset server */
-  const assetServer = fork('../services/assets/asset-server-launcher.mjs', {cwd: '.'});
+  const assetServer = fork('./services/assets/asset-server-launcher.mjs', {cwd: '.'});
 
   /* Start gateway service */
   const gatewayServers = {};
   const enabledGatewayServers = config.get('gatewayServers');
   for (const serverName in enabledGatewayServers) {
-    gatewayServers[serverName] = fork('../services/gateway/gateway-server.mjs', ['--service-name', serverName], {cwd: '.'});
+    gatewayServers[serverName] = fork('./services/gateway/gateway-server.mjs', ['--service-name', serverName], {cwd: '.'});
   }
 
   // Wait for all gateway services to start.
@@ -79,7 +79,7 @@ async function main() {
   const extServices = {};
   const enabledExtStandalone = config.get('ext.standalone');
   for (const ext in enabledExtStandalone) {
-    extServices[ext] = fork('../services/standalone/standalone-extension.mjs', ['--ext', ext], {cwd: '.'});
+    extServices[ext] = fork('./services/standalone/standalone-extension.mjs', ['--ext', ext], {cwd: '.'});
   }
 
   /* Hook error handlers */

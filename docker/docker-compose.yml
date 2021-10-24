@@ -6,7 +6,8 @@ services:
     environment:
       - NODE_ENV=production
     volumes:
-      - ../:/home/node/app
+      - "../:/home/node/app"
+      - "${RUN_DIR:-../run}:/home/node/app/run"
     command:  bash -c "yarn && ./run-all.sh"
     depends_on:
       - redis
@@ -19,7 +20,8 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ../:/myapp
+      - "../:/app"
+      - "${RUN_DIR:-../run}:/run"
       - ./generate-nginx-conf.sh:/docker-entrypoint.d/10-generate-nginx-conf.sh
     depends_on:
       - online

@@ -69,7 +69,7 @@ class MultiProcessRPCDirectory extends Directory {
   }
 
   /**
-   * Method for responing gRPC, should only be called by gRPC server.
+   * Method for responding gRPC, should only be called by gRPC server.
    * @param {Object} call - The request content, contains the same signature as callRPC.
    * @param {Function} callback - Callback function.
    * @param {Object} callLocalRPC - A method to call local RPC.
@@ -89,7 +89,7 @@ class MultiProcessRPCDirectory extends Directory {
    * @param {Object} args - The arguments.
    * @return {Object} result - The result of the call.
    */
-   async callRPC(callerServiceName, serviceName, methodName, ...args) {
+  async callRPC(callerServiceName, serviceName, methodName, ...args) {
     void [callerServiceName, serviceName, methodName, args];
     // local service
     if ((serviceName in this.handlers)) {
@@ -115,7 +115,7 @@ class MultiProcessRPCDirectory extends Directory {
         methodName: methodName,
         args: JSON.stringify(args)
       }, {deadline: new Date(Date.now() + 5000)});
-      return JSON.parse(ret.response);
+      return ret.response ? JSON.parse(ret.response) : null;
     }
 
     // no service found

@@ -32,7 +32,7 @@ async function standaloneExtensionServer() {
   const gameMap = new GameMap(undefined, mapJSON);
   const gameState = new GameState(gameMap);
   const broadcaster = new AllAreaBroadcaster(rpcDirectory, gameMap, gameState);
-  const extensionManager = new ExtensionManager(rpcDirectory, broadcaster, gameMap, null);
+  const extensionManager = new ExtensionManager(rpcDirectory, broadcaster, gameMap, gameState);
 
   await broadcaster.initialize();
 

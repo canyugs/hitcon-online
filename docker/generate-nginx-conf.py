@@ -2,7 +2,7 @@ from pathlib import Path
 import json
 import sys
 
-config = json.loads(Path('../run/config/production.json').read_bytes())
+config = json.loads(Path('/run/config/production.json').read_bytes())
 template = Path('./nginx-template.conf').read_text()
 
 config_loc = 'nginx.conf' if len(sys.argv) < 2 else sys.argv[1]
