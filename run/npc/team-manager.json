@@ -17,65 +17,106 @@
       }
     ],
     "FSM": {
-      "initialState": "s1",
+      "initialState": "baseState",
       "states": {
-        "s1": {
+        "baseState": {
+          "func": "checkTeamStatus",
+          "kwargs": {
+            "indivMenu": "indivMenu",
+            "teamMenu": "teamMenu"
+          }
+        },
+        "indivMenu": {
           "func": "showDialog",
           "kwargs": {
             "dialogs": "Hello!\nWant to join the escape game?",
             "options": {
-              "Yes, I want to create a new team.": "n1",
-              "Yes, I want join an existing team with the invitation code.": "j1",
-              "No, bye!": "e"
+              "Yes, I want to create a new team.": "newTeam1",
+              "Yes, I want join an existing team with the invitation code.": "joinTeam1",
+              "No, bye!": "exit"
             }
           }
         },
-        "n1": {
-            "func": "createRoom",
+        "newTeam1": {
+            "func": "createTeam",
             "kwargs": {
-              "nextState": "e"
+              "nextState": "exit"
             }
         },
-        "j1": {
-            "func": "showDialogAndGetInvitationCode",
+        "joinTeam1": {
+            "func": "joinTeamByInvitationCode",
             "kwargs": {
               "dialog": "Give me your invitation code!",
-              "nextState": "j2",
-              "nextStateCantEnter": "j3",
-              "nextStateNotFound" : "j4"
+              "nextState": "joinTeam2",
+              "nextStateCantEnter": "joinTeam3",
+              "nextStateNotFound" : "joinTeam4"
             }
         },
-        "j2": {
+        "joinTeam2": {
           "func": "showDialog",
           "kwargs": {
             "dialogs": "Joined successfully.",
             "options": {
-              "Thanks, bye!": "e"
+              "Thanks, bye!": "exit"
             }
           }
         },
-        "j3": {
+        "joinTeam3": {
           "func": "showDialog",
           "kwargs": {
             "dialogs": "Oops! Failed to join the team.",
             "options": {
-              "OK.": "e"
+              "OK.": "exit"
             }
           }
         },
-        "j4": {
+        "joinTeam4": {
           "func": "showDialog",
           "kwargs": {
             "dialogs": "The invitation code is invalid.",
             "options": {
-              "I'll check the code again.": "e"
+              "I'll check the code again.": "exit"
             }
           }
         },
-        "e": {
+        "teamMenu": {
+          "func": "showTeamMenu",
+          "kwargs": {
+            "showMembers": "showMemebers",
+            "showInvitationCode": "showInvitationCode",
+            "finalize": "finalize",
+            "quitTeam": "quitTeam",
+            "exit": "exit"
+          }
+        },
+        "showMemebers": {
+          "func": "showMembers",
+          "kwargs": {
+            "nextState": "exit"
+          }
+        },
+        "showInvitationCode": {
+          "func": "showInvitationCode",
+          "kwargs": {
+            "nextState": "exit"
+          }
+        },
+        "finalize": {
+          "func": "finalize",
+          "kwargs": {
+            "nextState": "exit"
+          }
+        },
+        "quitTeam": {
+          "func": "quitTeam",
+          "kwargs": {
+            "nextState": "exit"
+          }
+        },
+        "exit": {
           "func": "exit",
           "kwargs": {
-            "next": "s1"
+            "next": "baseState"
           }
         }
       }

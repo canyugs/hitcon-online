@@ -20,28 +20,34 @@
     }
   ],
   "FSM": {
-    "initialState": "s1",
+    "initialState": "baseState",
     "states": {
-      "s1": {
-        "func": "showDialog",
+      "baseState": {
+        "func": "checkStatus",
         "kwargs": {
-          "dialogs": "Hello!\nNice to meet you! Want to access the terminal?",
-          "options": {
-            "Yes": "s2",
-            "No. QQ": "s3"
-          }
+          "nextState": "s1",
+          "errorState": "s2"
         }
       },
-      "s2": {
+      "s1": {
         "func": "showTerminal",
         "kwargs": {
           "nextState": "s3"
         }
       },
+      "s2": {
+        "func": "showDialog",
+        "kwargs": {
+          "dialogs": "You are not in a finalized team, maybe join the team first?",
+          "options": {
+            "Bye": "s3"
+          }
+        }
+      },
       "s3": {
         "func": "exit",
         "kwargs": {
-          "next": "s1"
+          "next": "baseState"
         }
       }
     }

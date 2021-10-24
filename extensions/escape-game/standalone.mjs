@@ -16,7 +16,7 @@ import {fileURLToPath} from 'url';
 import InteractiveObjectServerBaseClass from '../../common/interactive-object/server.mjs';
 import {getRunPath, getConfigPath} from '../../common/path-util/path.mjs';
 
-const MAX_PLAYER_PER_ROOM = 5;
+const MAX_PLAYER_PER_TEAM = 5;
 const TERMINAL_SERVER_GRPC_LOCATION = '127.0.0.1:5051';
 
 // Bring out the FSM_ERROR for easier reference.
@@ -27,9 +27,9 @@ const SF_PREFIX = 's2s_sf_';
 /**
  * Terminology:
  * A "terminal" is an interactive object displayed on the map, with an unique ID.
- * A "room" contains some players, with the maximum `MAX_PLAYER_PER_ROOM`.
- * For all rooms, each terminal is assigned a "container" maintained by the terminal server.
- * In a nutshell: (terminal ID, room ID) -> container ID.
+ * A "team" contains some players, with the maximum `MAX_PLAYER_PER_TEAM`.
+ * For all teams, each terminal is assigned a "container" maintained by the terminal server.
+ * In a nutshell: (terminal ID, team ID) -> container ID.
  */
 
 /**
@@ -45,9 +45,9 @@ class Standalone {
   constructor(helper) {
     this.helper = helper;
 
-    // Rooms
-    this.rooms = new Map();
-    this.playerToRoom = new Map();
+    // Teams
+    this.teams = new Map();
+    this.playerToTeam = new Map();
 
     // Terminals
     this.terminalObjects = new Map();
@@ -57,7 +57,7 @@ class Standalone {
       this.terminalObjects.set(terminalName, terminal);
     });
 
-    // this.defaultTerminals determines the list of containers to start when the room is created.
+    // this.defaultTerminals determines the list of containers to start when the team is created.
     this.defaultTerminals = [];
     this.terminalObjects.forEach((terminalObject, terminalId) => {
       this.defaultTerminals.push({
@@ -88,69 +88,89 @@ class Standalone {
     await this.helper.callS2sAPI('iobj-lib', 'reqRegister');
     this.terminalObjects.forEach((v) => {
       v.registerExtStateFunc('showTerminal', 'escape-game', 'sf_showTerminal');
+      v.registerExtStateFunc('checkStatus', 'escape-game', 'sf_checkStatus');
     });
   }
 
   /**
-   * Create a new room and start all terminal.
+   * Create a new team and start all terminal.
    * @param {string} playerID The player ID.
    */
-  async createRoom(playerID) {
-    // Check if the player is already in a room.
-    if (this.playerToRoom.has(playerID)) {
-      throw new Error(`Player ${playerID} is already in a room.`);
+  async createTeam(playerID) {
+    // Check if the player is already in a team.
+    if (this.playerToTeam.has(playerID)) {
+      throw new Error(`Player ${playerID} is already in a team.`);
     }
 
-    // Create a new room
-    let roomId = randomBytes(32).toString('hex');
-    this.rooms.set(roomId, new Room(roomId, this.terminalServerGrpcService, this.defaultTerminals));
-    await this.rooms.get(roomId).startContainers();
-    return roomId;
+    // Create a new team
+    let teamId = randomBytes(32).toString('hex');
+    this.teams.set(teamId, new Team(teamId, this.terminalServerGrpcService, this.defaultTerminals));
+    await this.teams.get(teamId).startContainers();
+    return teamId;
   }
 
   /**
-   * Join a room.
+   * Join a team.
    * @param {string} playerID The player ID.
-   * @param {string} roomId The room to join, must exist.
+   * @param {string} teamId The team to join, must exist.
    */
-  async joinRoom(playerID, roomId) {
-    // Check if the room exists.
-    if (!this.rooms.has(roomId)) {
-      throw new Error(`Player ${playerID} trys to join an non-exist room ${roomId}.`);
+  async joinTeam(playerID, teamId) {
+    // Check if the team exists.
+    if (!this.teams.has(teamId)) {
+      throw new Error(`Player ${playerID} trys to join an non-exist team ${teamId}.`);
     }
 
-    // Check if the player is already in a room.
-    if (this.playerToRoom.has(playerID)) {
-      throw new Error(`Player ${playerID} is already in a room.`);
+    // Check if the player is already in a team.
+    if (this.playerToTeam.has(playerID)) {
+      throw new Error(`Player ${playerID} is already in a team.`);
     }
 
-    // Add to the room.
-    this.playerToRoom.set(playerID, this.rooms.get(roomId));
-    return this.rooms.get(roomId).addPlayer(playerID) > 0;
+    // Add to the team.
+    this.playerToTeam.set(playerID, this.teams.get(teamId));
+    return this.teams.get(teamId).addPlayer(playerID) > 0;
   }
 
   /**
-   * Destroy the room the player belongs to.
-   * @param {Player} player The player object.
+   * Quit the team
+   * @param {string} playerID The player id.
    */
-  async destroyRoom(player) {
-    // Check if the room exists.
-    if (!this.playerToRoom.has(player.playerID)) {
-      throw new Error(`Player ${player.playerID} trys to destory an non-exist room.`);
+  async quitTeam(playerID) {
+    // Check if the team exists.
+    if (!this.playerToTeam.has(playerID)) {
+      throw new Error(`Player ${playerID} trys to quit a non-exist team.`);
     }
 
-    const roomId = this.playerToRoom.get(player.playerID).roomId;
+    const teamId = this.playerToTeam.get(playerID).teamId;
 
-    // Clear the players in the room.
-    for (const playerId of Array.from(this.playerToRoom.keys())) {
-      if (this.playerToRoom.get(playerId).roomId === roomId) {
-        this.playerToRoom.delete(playerId);
+    this.teams.get(teamId).removePlayer(playerID);
+    this.playerToTeam.delete(playerID);
+
+    // remove team if all players quit
+    if (this.teams.get(teamId).playerIDs.length == 0) {
+      await this.destroyTeam(teamId);
+    }
+  }
+
+  /**
+   * Destroy the team.
+   * @param {string} teamId The team id.
+   */
+  async destroyTeam(teamId) {
+    // Check if the team exists.
+    if (!this.teams.has(teamId)) {
+      throw new Error(`The team ID ${teamId} doesn't exist.`);
+    }
+
+    // Clear the players in the team.
+    for (const playerId of Array.from(this.playerToTeam.keys())) {
+      if (this.playerToTeam.get(playerId).teamId === teamId) {
+        this.playerToTeam.delete(playerId);
       }
     }
 
-    // Destroy the room.
-    await this.rooms.get(roomId).destroy();
-    delete this.rooms.get(roomId);
+    // Destroy the team.
+    await this.teams.get(teamId).destroy();
+    delete this.teams.get(teamId);
   }
 
   /**
@@ -160,7 +180,7 @@ class Standalone {
    * @returns
    */
   async getAccessToken(playerID, terminalName) {
-    return this.playerToRoom.get(playerID).getAccessToken(terminalName);
+    return this.playerToTeam.get(playerID).getAccessToken(terminalName);
   }
 
 
@@ -247,6 +267,19 @@ class Standalone {
   }
 
   /**
+   * Check if the player is in a finalized team and therefore can access the game.
+   */
+  async s2s_sf_checkStatus(srcExt, playerID, kwargs, sfInfo) {
+    const {nextState, errorState} = kwargs;
+
+    if (this.playerToTeam.has(playerID) && this.playerToTeam.get(playerID).isFinalized) {
+      return nextState;
+    }
+
+    return errorState;
+  }
+
+  /**
    * Show terminal object, called by the interactive object.
    */
   async s2s_sf_showTerminal(srcExt, playerID, kwargs, sfInfo) {
@@ -259,16 +292,21 @@ class Standalone {
 
   // Team Manager
 
+  async s2s_sf_checkTeamStatus(srcExt, playerID, kwargs, sfInfo) {
+    const {indivMenu, teamMenu} = kwargs;
+    return this.playerToTeam.has(playerID) ? teamMenu : indivMenu;
+  }
+
   /**
    * Join team using an invitation code by interacting with the NPC.
    */
-  async s2s_sf_showDialogAndGetInvitationCode(srcExt, playerID, kwargs, sfInfo) {
+  async s2s_sf_joinTeamByInvitationCode(srcExt, playerID, kwargs, sfInfo) {
     const {nextState, nextStateCantEnter, nextStateNotFound, dialog} = kwargs;
     const res = await this.helper.callS2cAPI(playerID, 'dialog', 'showDialogWithPrompt', 60*1000, sfInfo.name, dialog);
 
-    for (const [roomId, room] of this.rooms) {
-      if (room.invitationCode === res.msg) {
-        return this.joinRoom(playerID, roomId) ? nextState : nextStateCantEnter;
+    for (const [teamId, team] of this.teams) {
+      if (team.invitationCode === res.msg) {
+        return this.joinTeam(playerID, teamId) ? nextState : nextStateCantEnter;
       }
     }
 
@@ -277,35 +315,144 @@ class Standalone {
   }
 
   /**
-   * Create a new room by interacting with the NPC.
+   * Create a new team by interacting with the NPC.
    */
-  async s2s_sf_createRoom(srcExt, playerID, kwargs, sfInfo) {
+  async s2s_sf_createTeam(srcExt, playerID, kwargs, sfInfo) {
     const {nextState} = kwargs;
 
-    const roomId = await this.createRoom(playerID); // create room.
-    await this.joinRoom(playerID, roomId); // add the player to the room.
+    const teamId = await this.createTeam(playerID); // create team.
+    await this.joinTeam(playerID, teamId); // add the player to the team.
     await this.helper.callS2cAPI(playerID, 'dialog', 'showDialog', 60*1000,
-      sfInfo.name, 'Team created, the invitation code is: ' + this.rooms.get(roomId).invitationCode);
+      sfInfo.name, 'Team created, the invitation code is: ' + this.teams.get(teamId).invitationCode);
+
+    return nextState;
+  }
+
+  /**
+   * Show the team menu. This will be called if the player is already in a team.
+   */
+  async s2s_sf_showTeamMenu(srcExt, playerID, kwargs, sfInfo) {
+    const {showMembers, showInvitationCode, finalize, quitTeam, exit} = kwargs;
+
+    if (!this.playerToTeam.has(playerID)) {
+      throw new Error(`The player ${playerID} isn't in any team.`);
+    }
+
+    // The team has finalized.
+    if (this.playerToTeam.get(playerID).isFinalized) {
+      return (await this.helper.callS2cAPI(playerID, 'dialog', 'showDialogWithMultichoice', 60*1000,
+        sfInfo.name, 'Team ID: ' + this.playerToTeam.get(playerID).teamId,
+        [
+          {token: showMembers, display: 'List all members.'},
+          {token: showInvitationCode, display: 'Show invitation code.'},
+          {token: quitTeam, display: 'Quit Team. You\' lose all progresses and items.'},
+          {token: exit, display: 'Bye!'}
+        ]
+      )).token;
+    }
+
+    // The team has not finalized.
+    return (await this.helper.callS2cAPI(playerID, 'dialog', 'showDialogWithMultichoice', 60*1000,
+      sfInfo.name, 'Team ID: ' + this.playerToTeam.get(playerID).teamId,
+      [
+        {token: showMembers, display: 'List all members.'},
+        {token: showInvitationCode, display: 'Show invitation code.'},
+        {token: finalize, display: 'Finalize the team and enter the game.'},
+        {token: quitTeam, display: 'Quit team.'},
+        {token: exit, display: 'Bye!'}
+      ]
+    )).token;
+  }
+
+  /**
+   * List all members in the team.
+   */
+  async s2s_sf_showMembers(srcExt, playerID, kwargs, sfInfo) {
+    const {nextState} = kwargs;
+
+    if (!this.playerToTeam.has(playerID)) {
+      throw new Error(`The player ${playerID} isn't in any team.`);
+    }
+
+    const playerList = `
+      <ul>
+        ${this.playerToTeam.get(playerID).playerIDs.map(pid => `<li>${pid}</li>`).join('')}
+      </ul>
+    `;
+    await this.helper.callS2cAPI(playerID, 'dialog', 'showDialog', 60*1000,
+      sfInfo.name, 'Team member:' + playerList);
+
+    return nextState;
+  }
+
+  /**
+   * Show the invitation code of the team.
+   */
+  async s2s_sf_showInvitationCode(srcExt, playerID, kwargs, sfInfo) {
+    const {nextState} = kwargs;
+
+    if (!this.playerToTeam.has(playerID)) {
+      throw new Error(`The player ${playerID} isn't in any team.`);
+    }
+
+    await this.helper.callS2cAPI(playerID, 'dialog', 'showDialog', 60*1000,
+      sfInfo.name, 'Invitation code: ' + this.playerToTeam.get(playerID).invitationCode);
+
+    return nextState;
+  }
+
+  /**
+   * Finalize the team. The team can't start the game if it has not finalized.
+   */
+  async s2s_sf_finalize(srcExt, playerID, kwargs, sfInfo) {
+    const {nextState} = kwargs;
+
+    if (!this.playerToTeam.has(playerID)) {
+      throw new Error(`The player ${playerID} isn't in any team.`);
+    }
+    if (this.playerToTeam.get(playerID).isFinalized) {
+      throw new Error(`The team ${this.playerToTeam.get(playerID).teamId} has already finalized.`);
+    }
+
+    this.playerToTeam.get(playerID).isFinalized = true;
+    await this.helper.callS2cAPI(playerID, 'dialog', 'showDialog', 60*1000,
+      sfInfo.name, 'Finalized');
+
+    return nextState;
+  }
+
+  /**
+   * Quit team.
+   */
+  async s2s_sf_quitTeam(srcExt, playerID, kwargs, sfInfo) {
+    const {nextState} = kwargs;
+
+    if (!this.playerToTeam.has(playerID)) {
+      throw new Error(`The player ${playerID} isn't in any team.`);
+    }
+
+    await this.quitTeam(playerID);
 
     return nextState;
   }
 }
 
 /**
- * The class to maintain the state of a room.
+ * The class to maintain the state of a team.
  */
-class Room {
+class Team {
   /**
    * Create the standalone extension service object but does not start it.
    * @constructor
-   * @param {string} roomId The identifier of the room.
+   * @param {string} teamId The identifier of the team.
    * @param {} terminalServerGrpcService The gRPC service.
    */
-  constructor(roomId, terminalServerGrpcService, defaultTerminals) {
-    this.roomId = roomId;
-    this.invitationCode = randomBytes(16).toString('hex');
+  constructor(teamId, terminalServerGrpcService, defaultTerminals) {
+    this.teamId = teamId;
+    this.invitationCode = randomBytes(8).toString('hex');
     this.terminalServerGrpcService = terminalServerGrpcService;
     this.playerIDs = [];
+    this.isFinalized = false;
     this.terminals = new Map(); // Mapping the terminal id to the container id in the terminal server.
 
     this.defaultTerminals = defaultTerminals;
@@ -316,10 +463,23 @@ class Room {
    * @param {string} playerID The player ID.
    */
   addPlayer(playerID) {
-    if (this.playerIDs.length >= MAX_PLAYER_PER_ROOM) {
+    if (this.playerIDs.length >= MAX_PLAYER_PER_TEAM || this.isFinalized) {
       return false;
     }
     return this.playerIDs.push(playerID);
+  }
+
+  /**
+   * Remove a player.
+   * TODO: should deal with the case when the team has finalized.
+   * @param {string} playerID The player ID.
+   */
+  removePlayer(playerID) {
+    if (!this.playerIDs.includes(playerID) || this.isFinalized) {
+      return false;
+    }
+    this.playerIDs = this.playerIDs.filter(pid => pid !== playerID);
+    return true;
   }
 
   /**
@@ -344,7 +504,7 @@ class Room {
   }
 
   /**
-   * Destroy the room.
+   * Destroy the team.
    */
   async destroy() {
     // Remove all containers
@@ -370,6 +530,9 @@ class Room {
    * @param {string} terminalId The identifier of the terminal.
    */
   getAccessToken(terminalId) {
+    if (!this.isFinalized) {
+      throw new Error(`Can't access terminal ${terminalId} if the team is not finalized.`);
+    }
     if (!this.terminals.has(terminalId)) {
       throw new Error(`Terminal ${terminalId} doesn't exist.`);
     }
