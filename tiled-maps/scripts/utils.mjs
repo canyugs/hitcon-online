@@ -7,6 +7,5 @@ export function readFileFromJSON(srcFile) {
 }
 
 export function writeFileToJSON(destFile, Data) {
-  const {name} = path.parse(destFile);
   fs.writeFileSync(destFile, JSON.stringify(Data, null, 2));
 }
