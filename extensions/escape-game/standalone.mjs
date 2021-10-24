@@ -14,6 +14,7 @@ import fs from 'fs';
 import {promisify} from 'util';
 import {fileURLToPath} from 'url';
 import InteractiveObjectServerBaseClass from '../../common/interactive-object/server.mjs';
+import {getRunPath, getConfigPath} from '../../common/path-util/path.mjs';
 
 const MAX_PLAYER_PER_ROOM = 5;
 const TERMINAL_SERVER_GRPC_LOCATION = '127.0.0.1:5051';
@@ -45,9 +46,9 @@ class Standalone {
 
     // Terminals
     this.terminalObjects = new Map();
-    fs.readdirSync('./terminal').forEach((file) => {
+    fs.readdirSync(getRunPath('terminal')).forEach((file) => {
       const terminalName = file.slice(0, -('.json'.length));
-      const terminal = new TerminalObject(helper, terminalName, `./terminal/${file}`);
+      const terminal = new TerminalObject(helper, terminalName, getRunPath('terminal', file));
       this.terminalObjects.set(terminalName, terminal);
     });
 

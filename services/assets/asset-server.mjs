@@ -13,6 +13,8 @@ const require = createRequire(import.meta.url);
 
 const express = require('express');
 
+import {getRunPath, getConfigPath} from '../../common/path-util/path.mjs';
+
 /**
  * Asset server serves static and dynamic assets.
  */
@@ -46,7 +48,7 @@ class AssetServer {
     // Not sure if all static files are in sites
     this.app.use('/static/sites', express.static(path.resolve(__dirname, '../../sites/')));
     this.app.use('/static/common', express.static(path.resolve(__dirname, '../../common/')));
-    this.app.use('/static/run/map', express.static(path.resolve(process.cwd(), 'map')));
+    this.app.use('/static/run/map', express.static(getRunPath('map')));
     for (const extName of this.extMan.listExtensions()) {
       this.app.use(`/static/extensions/${extName}/common`,
         express.static(path.resolve(__dirname, `../../extensions/${extName}/common`)));

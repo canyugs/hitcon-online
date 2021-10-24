@@ -5,6 +5,7 @@ import assert from 'assert';
 import fs from 'fs';
 import path from 'path';
 import {promises as fsPromises} from 'fs';
+import {getRunPath, getConfigPath} from '../../common/path-util/path.mjs';
 
 /**
  * DataStore is a class that handles storing small amount of JSON data.
@@ -38,7 +39,7 @@ class DataStore {
      */
 
     // Where to store the data files?
-    this.dataDir = 'small_data';
+    this.dataDir = getRunPath('small_data');
 
     // If set to true, we'll always automatically flush dirty cache.
     // This can only be set in the constructor.
