@@ -1,0 +1,83 @@
+{
+    "enabled": true,
+    "initialPosition": {"mapName": "world1", "x": 8, "y": 15},
+    "display": [
+      {
+        "zIndex": 11,
+        "layerName": "npcImage",
+        "renderFunction": "_drawOneCharacterImage",
+        "renderArgs": null,
+        "character": "char1"
+      },
+      {
+        "zIndex": 16,
+        "layerName": "npcName",
+        "renderFunction": "_drawOneCharacterName",
+        "renderArgs": null
+      }
+    ],
+    "FSM": {
+      "initialState": "s1",
+      "states": {
+        "s1": {
+          "func": "showDialog",
+          "kwargs": {
+            "dialogs": "Hello!\nWant to join the escape game?",
+            "options": {
+              "Yes, I want to create a new team.": "n1",
+              "Yes, I want join an existing team with the invitation code.": "j1",
+              "No, bye!": "e"
+            }
+          }
+        },
+        "n1": {
+            "func": "createRoom",
+            "kwargs": {
+              "nextState": "e"
+            }
+        },
+        "j1": {
+            "func": "showDialogAndGetInvitationCode",
+            "kwargs": {
+              "dialog": "Give me your invitation code!",
+              "nextState": "j2",
+              "nextStateCantEnter": "j3",
+              "nextStateNotFound" : "j4"
+            }
+        },
+        "j2": {
+          "func": "showDialog",
+          "kwargs": {
+            "dialogs": "Joined successfully.",
+            "options": {
+              "Thanks, bye!": "e"
+            }
+          }
+        },
+        "j3": {
+          "func": "showDialog",
+          "kwargs": {
+            "dialogs": "Oops! Failed to join the team.",
+            "options": {
+              "OK.": "e"
+            }
+          }
+        },
+        "j4": {
+          "func": "showDialog",
+          "kwargs": {
+            "dialogs": "The invitation code is invalid.",
+            "options": {
+              "I'll check the code again.": "e"
+            }
+          }
+        },
+        "e": {
+          "func": "exit",
+          "kwargs": {
+            "next": "s1"
+          }
+        }
+      }
+    }
+  }
