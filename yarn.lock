@@ -2068,6 +2068,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"hitcon-online-path-util@workspace:common/path-util":
+  version: 0.0.0-use.local
+  resolution: "hitcon-online-path-util@workspace:common/path-util"
+  languageName: unknown
+  linkType: soft
+
 "hitcon-online-playerlist@workspace:extensions/playerlist":
   version: 0.0.0-use.local
   resolution: "hitcon-online-playerlist@workspace:extensions/playerlist"
