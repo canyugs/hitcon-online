@@ -35,9 +35,7 @@
       "s2": {
         "func": "showTerminal",
         "kwargs": {
-          "options": {
-            "Bye!": "s3"
-          }
+          "nextState": "s3"
         }
       },
       "s3": {

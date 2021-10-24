@@ -80,6 +80,10 @@ class Standalone {
    * Initializes the extension.
    */
   async initialize() {
+    await this.helper.callS2sAPI('iobj-lib', 'reqRegister');
+    this.terminalObjects.forEach((v) => {
+      v.registerExtStateFunc('showTerminal', 'escape-game', 'sf_showTerminal');
+    });
   }
 
   /**
@@ -146,12 +150,11 @@ class Standalone {
 
   /**
    * Get the access token of a specific terminal.
-   * @param serviceName Which service call this.
    * @param playerID The ID of the playerID interacting with the terminal project.
    * @param terminalName The terminal to be accessed.
    * @returns
    */
-  async s2s_getAccessToken(serviceName, playerID, terminalName) {
+  async getAccessToken(playerID, terminalName) {
     return this.playerToRoom.get(playerID).getAccessToken(terminalName);
   }
 
@@ -198,6 +201,36 @@ class Standalone {
    */
   async c2s_getListOfTerminals(player) {
     return Array.from(this.terminalObjects.keys());
+  }
+
+  /**
+   * Join team using an invitation code by interacting with the NPC.
+   */
+  async s2s_sf_showDialogAndCheckKey(srcExt, playerID, kwargs, sfInfo) {
+    const {nextState, nextStateIncorrect, dialog, key} = kwargs;
+    const res = await this.helper.callS2cAPI(playerID, 'dialog',
+    'showDialogWithPrompt', 60*1000, sfInfo.name, dialog);
+    if (res.msg === key) return nextState;
+
+    //The key is wrong,
+    return nextStateIncorrect;
+  }
+
+  /**
+   * Allow other ext to add state func.
+   */
+   async s2s_registerStateFunc(srcExt, fnName, extName, methodName) {
+    console.log(srcExt, fnName, extName, methodName);
+    this.terminalObjects.forEach((v) => {
+      v.registerExtStateFunc(fnName, extName, methodName);
+    });
+  }
+
+  async s2s_sf_showTerminal(srcExt, playerID, kwargs, sfInfo) {
+    const {nextState} = kwargs;
+    const token = await this.getAccessToken(playerID, sfInfo.name.split(' ')[1]);
+    await this.helper.callS2cAPI(playerID, 'escape-game', 'showTerminalModal', 60*1000, token);
+    return nextState;
   }
 }
 
@@ -292,11 +325,6 @@ class Room {
  * Terminal as an Interactive Object.
  */
 class TerminalObject extends InteractiveObjectServerBaseClass {
-  async sf_showTerminal(playerID, kwargs) {
-    const token = await this.helper.callS2sAPI('escape-game', 'getAccessToken', playerID, this.objectName);
-    await this.helper.callS2cAPI(playerID, 'escape-game', 'showTerminalModal', 60*1000, token);
-    return this.sf_exit(playerID, {});
-  }
 }
 
 export default Standalone;
