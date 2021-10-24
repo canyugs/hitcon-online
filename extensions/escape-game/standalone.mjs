@@ -126,8 +126,21 @@ class Standalone {
     }
 
     // Add to the team.
-    this.playerToTeam.set(playerID, this.teams.get(teamId));
-    return this.teams.get(teamId).addPlayer(playerID) > 0;
+    const ret = this.teams.get(teamId).addPlayer(playerID) > 0;
+
+    if (ret) {
+      this.playerToTeam.set(playerID, this.teams.get(teamId));
+
+      // Notify other team members.
+      const displayName = this.helper.gameState.getPlayer(playerID).displayName;
+      for (const pid of this.teams.get(teamId).playerIDs) {
+        if (pid !== playerID) {
+          this.helper.callS2cAPI(pid, 'notification', 'showNotification', 5000, `${displayName} has join the team.`);
+        }
+      }
+    }
+
+    return ret;
   }
 
   /**
@@ -142,13 +155,25 @@ class Standalone {
 
     const teamId = this.playerToTeam.get(playerID).teamId;
 
-    this.teams.get(teamId).removePlayer(playerID);
-    this.playerToTeam.delete(playerID);
+    const ret = this.teams.get(teamId).removePlayer(playerID);
+
+    if (ret) {
+      this.playerToTeam.delete(playerID);
+
+      // Notify other team members.
+      const displayName = this.helper.gameState.getPlayer(playerID).displayName;
+      console.log(this.teams.get(teamId).playerIDs);
+      for (const pid of this.teams.get(teamId).playerIDs) {
+        this.helper.callS2cAPI(pid, 'notification', 'showNotification', 5000, `${displayName} has left the team.`);
+      }
+    }
 
     // remove team if all players quit
     if (this.teams.get(teamId).playerIDs.length == 0) {
       await this.destroyTeam(teamId);
     }
+
+    return ret;
   }
 
   /**
@@ -171,6 +196,29 @@ class Standalone {
     // Destroy the team.
     await this.teams.get(teamId).destroy();
     delete this.teams.get(teamId);
+  }
+
+  /**
+   * Finalize a team
+   * @param {string} playerID The player id.
+   * @param {string} teamId The team id.
+   */
+   async finalizeTeam(playerID, teamId) {
+    // Check if the team exists.
+    if (!this.teams.has(teamId)) {
+      throw new Error(`The team ID ${teamId} doesn't exist.`);
+    }
+
+    this.teams.get(teamId).isFinalized = true;
+
+    // Notify other team members.
+    const displayName = this.helper.gameState.getPlayer(playerID).displayName;
+    for (const pid of this.playerToTeam.get(playerID).playerIDs) {
+      if (pid !== playerID) {
+        this.helper.callS2cAPI(pid, 'notification', 'showNotification', 5000, `Your team has been finalized by ${displayName}`);
+      }
+    }
+
   }
 
   /**
@@ -414,7 +462,8 @@ class Standalone {
       throw new Error(`The team ${this.playerToTeam.get(playerID).teamId} has already finalized.`);
     }
 
-    this.playerToTeam.get(playerID).isFinalized = true;
+    this.finalizeTeam(playerID, this.playerToTeam.get(playerID).teamId);
+
     await this.helper.callS2cAPI(playerID, 'dialog', 'showDialog', 60*1000,
       sfInfo.name, 'Finalized');
 
@@ -432,7 +481,6 @@ class Standalone {
     }
 
     await this.quitTeam(playerID);
-
     return nextState;
   }
 }
