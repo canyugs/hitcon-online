@@ -49,6 +49,7 @@ class AssetServer {
     this.app.use('/static/sites', express.static(path.resolve(__dirname, '../../sites/')));
     this.app.use('/static/common', express.static(path.resolve(__dirname, '../../common/')));
     this.app.use('/static/run/map', express.static(getRunPath('map')));
+    this.app.use('/static/run/hosted', express.static(getRunPath('hosted')));
     for (const extName of this.extMan.listExtensions()) {
       this.app.use(`/static/extensions/${extName}/common`,
         express.static(path.resolve(__dirname, `../../extensions/${extName}/common`)));
