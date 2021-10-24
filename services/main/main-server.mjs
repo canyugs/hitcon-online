@@ -30,6 +30,8 @@ import ExtensionManager from '../../common/extlib/extension-manager.mjs';
 import {getRunPath, getConfigPath} from '../../common/path-util/path.mjs';
 
 async function mainServer() {
+  console.log('Running from: ', getRunPath());
+
   /* Create the http service */
   const app = express();
   const server = http.createServer(app);

@@ -4,7 +4,7 @@
 import path from 'path';
 
 function getConfigPath() {
-  if (typeof process.env.NODE_CONFIG_DIR === 'string') {
+  if (typeof process.env.NODE_CONFIG_DIR === 'string' && process.env.NODE_CONFIG_DIR !== '') {
     return path.resolve(process.env.NODE_CONFIG_DIR);
   }
   return path.resolve(process.cwd(), 'config');
