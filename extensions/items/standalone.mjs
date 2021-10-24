@@ -8,6 +8,7 @@ import {fileURLToPath} from 'url';
 
 import CellSet from '../../common/maplib/cellset.mjs';
 import InteractiveObjectServerBaseClass from '../../common/interactive-object/server.mjs';
+import {getRunPath, getConfigPath} from '../../common/path-util/path.mjs';
 
 // Bring out the FSM_ERROR for easier reference.
 const FSM_ERROR = InteractiveObjectServerBaseClass.FSM_ERROR;
@@ -73,7 +74,7 @@ class Standalone {
       itemBaseClasses[itemTypeName] = itemBaseClass;
     }
     // Load individual item configs.
-    const itemSettingJson = await fs.promises.readFile(`./items/config.json`);
+    const itemSettingJson = await fs.promises.readFile(getRunPath('items', 'config.json'));
     const itemConfig = JSON.parse(itemSettingJson).items;
     let index = 0;
     for (let itemName in itemConfig) {
@@ -98,7 +99,7 @@ class Standalone {
       }
       let fsmObj = null;
       if (typeof fsmFilename === 'string') {
-        const fsmJson = await fs.promises.readFile(`./items/fsm/${fsmFilename}`);
+        const fsmJson = await fs.promises.readFile(getRunPath('items', 'fsm', fsmFilename));
         fsmObj = JSON.parse(fsmJson).FSM;
       }
 

@@ -3,6 +3,7 @@
 
 import fs from 'fs';
 import InteractiveObjectServerBaseClass from '../../common/interactive-object/server.mjs';
+import {getRunPath, getConfigPath} from '../../common/path-util/path.mjs';
 
 /**
  * TODO: jsdoc
@@ -24,9 +25,9 @@ class Standalone {
     this.NPCs = new Map();
 
     // create individual NPC
-    fs.readdirSync('./npc').forEach((file) => {
+    fs.readdirSync(getRunPath('npc')).forEach((file) => {
       const npcName = file.slice(0, -('.json'.length));
-      const npc = new SingleNPC(helper, npcName, `./npc/${file}`);
+      const npc = new SingleNPC(helper, npcName, getRunPath('npc', file));
       this.NPCs.set(npcName, npc);
     });
   }
