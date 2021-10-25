@@ -1,0 +1,220 @@
+1,基本,資安知識,下列何者「不」屬於程式弱點可能的利用方式？,"A. 暴力破解（Bruce Force）
+B. 緩衝區溢位（Buffer Overflow）
+C. 社交工程（Social Engineering）
+D. SQL 資料隱碼攻擊（SQL Injection）",C,,,,
+2,基本,指令,請問 cat ~/.bash_history 指令，是要執行下列何種功能？,"A. 列出使用者曾經下過的指令
+B. 列出系統使用者
+C. 列出系統目錄
+D. 列出系統內的檔案",A,,,,
+3,基本,資安知識,請問 ==、= 為下列何種編碼方式之結尾特徵?,"A. URL Encode
+B. Base64 Encode
+C. ROT13 Encode
+D. A1Z26 Encode",B,https://en.wikipedia.org/wiki/Base64,,,
+4,基本,資安知識,請問下列檔案格式哪一個不能被解壓縮 ?,"A. epub
+B. apk
+C. tar
+D. yml",D,"https://zh.wikipedia.org/wiki/EPUB
+https://zh.wikipedia.org/wiki/APK
+https://zh.wikipedia.org/wiki/TAR
+https://zh.wikipedia.org/wiki/YAML",,,
+5,基本,密碼學,關於「對稱式加密」與「非對稱式加密」的敘述何者不正確?,"A. 對稱式加密是使用同一把Key加解密
+B. 非對稱式加密可用於數位簽章(Digital Signature)使用
+C. 對稱式加密與非對稱式加密的效率差不多
+D. 非對稱式加密使用自己的私鑰加密文件",C,,,,
+6,基本,資安知識,瀏覽網站時，若網站表示為https代表什麼意思？,"A. 表示無法前往該網站
+B. 通訊過程使用SSL/TLS 進行加密
+C. 表示網路中斷
+D. 表示此網路具有付款機制",B,,,,
+7,基本,資安知識,下方針對強密碼的敘述何者正確?,"A. 用個人資訊作為密碼
+B. 具有順序或重複的字元
+C. 使用大小寫字母、數字和符號組合而成的長密碼
+D. 使用數字或符號的僅外觀類似替換",C,,,,
+8,基本,資安知識,下列針對資訊安全的敘述何者有誤?,"A. 不任意安裝/開啟來路不明的程式
+B. 應定期提醒與對員工做教育訓練
+C. 定期備份電腦中重要的資料
+D. 將密碼貼在電腦旁以方便當入",D,,,,
+9,基本,資安知識,下列何者並非電腦病毒的特性?,"A. 比對性
+B. 寄居性
+C. 傳染性
+D. 針對性",A,,,,
+10,基本,資安知識,社交工程(social engineering)是一種利用何種特性所展開的攻擊手法？,"A. 工程設計的缺失
+B. 作業系統的漏洞
+C. 人性的弱點
+D. 通訊協定的弱點",C,,,,
+11,基本,hitcon,請問 HITCON 2021 是第幾屆呢？,"A. 11
+B. 13
+C. 17
+D. 19",C,參考官網的回顧過去,,,
+12,基本,hitcon,HITCON 在西元幾年成立的?,"A. 2004
+B. 2005
+C. 2006
+D. 2007",B,https://hacker.org.tw/zh/about.html,,,
+13,基本,hitcon,自 2012 以後，HITCON 幾乎每年都有主題，但在西元哪一年時反而不設立年度主題？,"A. 2013
+B. 2014
+C. 2015
+D. 2016",D,https://hacker.org.tw/zh/conference.html,,,
+14,基本,hitcon,HITCON 於西元幾年首度開放免費議程?,"A. 2021
+B. 2020
+C. 2019
+D. 2018",B,https://hitcon.kktix.cc/events/hitcon-2020,,,
+15,基本,hitcon,下列哪一項不在HITCON計畫中?,"A. HITCON Community Subsidy
+B. HITCON CTF
+C. HITCON DEFENSE
+D. HITCON Stay Home",D,,,,
+1,簡易,密碼學,下列哪個並非是加密標準?,"A. IDEA
+B. TEA
+C. RIPEMD
+D. RC5",C,https://zh.wikipedia.org/wiki/散列函數#目前常見的雜湊演算法,,,
+2,簡易,web,資安中有一技術是攻擊者透過修改網址中的參數，導致網頁吐出原本不該出現的資訊。請問上述該手法被稱為？,"A. IP Injection
+B. Security Injection
+C. Database Injection
+D. SQL Injection",D,,,,
+3,簡易,密碼學,hitcon 這個字串經過如下演算法後產出為aGl0Y29u ，請問該字串是哪種編碼/加密方式？  ,"A. ROT13
+B. ROT47
+C. Base64
+D. 3DES",C,,,,
+4,簡易,密碼學,下列何者為非對稱式加密?,"A. RSA
+B. 3DES
+C.Blowfish
+D. AES",A,,,,
+5,簡易,資安知識,請問以下選項中何者不是 OWASP 2021 前三名 ?,"A. Broken Access Control
+B. Server-Side Request Forgery
+C. Cryptographic Failures
+D. Injection",B,https://www.owasptopten.org/the-release-of-the-owasp-top-10-2021,,,
+6,簡易,網路,關於SYN flood中使用者與伺服器端的敘述，何者不正確?,"A. 使用者端透過傳送SYN同步（synchronize）資訊到伺服器要求建立連線
+B. 伺服器透過響應使用者端SYN-ACK以抄收（acknowledge）請求。
+C. 使用者端答應ACK，連線隨之建立。
+D. 使用者端不回傳ACK。",C,https://zh.wikipedia.org/wiki/SYN_flood,,,
+7,簡易,網路,下列以下方法何者無法防禦DDoS攻擊?,"A. 縮短SYN半連接的time out時間
+B. 加強防火牆的通行規則，限制異常IP位址發出的請求
+C. 設定路由器之SYN數據包流量速率
+D. 每隔一段時間就重新啟動伺服器",D,https://www.gaia.net/tc/news_detail/2/52/ddos-ddos,,,
+8,簡易,密碼學,請問下列選項中，哪一種存取控制的方式不存在?,"A. Dictionary Based Access Control
+B. Role Based Access Control
+C. Mandatory Access Control
+D. Attribute Based Access Control",A,https://en.wikipedia.org/wiki/Access_control,,,
+9,簡易,密碼學,「用於檢測或驗證目標訊息在運算或傳輸的過程中是否有被修改」，此敘述是屬於下列哪一個選項?,"A. Digital signature algorithm
+B. Message authentication code
+C. Initialization Vector
+D. Advanced Encryption Standard",B,,,,
+10,簡易,密碼學,下列何者非AES 密鑰大小?,"A. 128
+B. 192
+C. 256
+D. 512",D,https://en.wikipedia.org/wiki/Advanced_Encryption_Standard,,,
+11,簡易,密碼學,針對橢圓曲線密碼學下列何者有誤?,"A. 速度較其他非對稱式加密來的快
+B. 曲線與基點是需要被公開的
+C. 私鑰可以計算公鑰
+D. 可以使用他人的公鑰製作數位簽章",D,,,,
+12,簡易,密碼學,請問維吉尼亞密碼可以用哪一個工具來解?,"A. Wireshark
+B. xortools
+C. Pwntools
+D. IDA",B,,,,
+13,簡易,Pwn,Format String 攻擊會發生在哪個函數?,"A. atoi
+B. read
+C. printf
+D. gets",C,,,,
+14,簡易,滲透測試,哪個是針對 WordPress 的滲透工具?,"A. wpscan
+B. nikto
+C. metasploit
+D. nmap",A,,,,
+15,簡易,Pwn,Buffer Overlfow 會發生在下列哪個記憶體區段,"A. Stack
+B. Heap
+C. .data Section
+D. 以上皆是",D,,,,
+16,簡易,防禦,下列哪個不是藍隊的工具,"A. Cobalt Strike
+B. yara
+C. ETW
+D. 以上皆不是藍隊工具",A,,,,
+17,簡易,IoT,針對CoAP(The Constrained Application Protocol)協定，下列何者為非?,"A. 基於REST網路架構設計而成
+B. 主要針對低耗能的網路
+C. 支援GET/PUT/POST/DELETE的請求方式
+D. 使用切割封包的方式達到節省資料傳遞",D,,,,
+18,簡易,Web,curl example.com 會對 example.com 用什麼方法(Method)請求?,"A. GET
+B. POST
+C. PUT
+D. DELETE",A,,,,
+19,簡易,防禦,下列何者無法被正則表達式 ^[a-z0-9_]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$ 偵測?,"A. haha@gmail.com
+B. ha_ha@Gm_AiL.COM
+C. ha_Ha@gmail.com
+D. _haha@g-m-a-I_L.c-om",C,,,,
+20,簡易,密碼學,下列何者 Hash 的 hex 長度為 32 Bytes?,"A. sha256
+B. md5
+C. sha512
+D. panama",B,,,,
+1,普通,Pwn,下列哪項防護機制是主要防範 Return to libc 造成的安全問題，此機制會使每次執行 Stack、Heap、library 位址隨機化。,"A:Data Execution Prevention, DEP
+B:Address space layout randomization, ASLR
+C:Position-Independent Executable, PIE
+D:RELocation Read Only, RELRO",B,https://zh.wikipedia.org/wiki/Return-to-libc%E6%94%BB%E5%87%BB,,,
+2,普通,網路,"下列何者「不」是 TCP/IP 連線劫持（Session Hijacking）攻擊成功的
+必要前提？","A:取得要劫持連線的 TCP 序號（Sequence Number）
+B:入侵受害主機並奪取執行權限
+C:與受害主機可建立網路連線
+D:偽裝成受害主機，發送特定 TCP 序號的封包",B,,,,
+3,普通,時事,在 AI 發展快速的時代，各路大神各顯神通努力將相關技術引入其中，請問在 black hat 2021 中 TEAMT5 提出了怎樣的概念來檢測駐紮在記憶體中的惡意程式呢?~,"A. 利用 CNN 影像辨識概念搭配 Mem2Img function 對記憶體檢測是否有惡意程式
+B. 利用 Log exception 的資料點分析來對 Memory 的異常使用做偵測
+C. 利用 LSTM 針對記憶體資料做使用分析來辨檢測記憶體是否有惡意程式運行
+D. 怎麼可能有 AI 技術已經成功了啦~",A,https://i.blackhat.com/asia-21/Friday-Handouts/as-21-Tseng-Mem2Img-Memory-Resident-Malware-Detection-via-Convolution-Neural-Network.pdf,,,
+4,普通,資安知識,檢查被攻擊的紀錄時，發現駭客下載了網站上的.git檔案，請問駭客主要是想要達成什麼目的？,"A. 查看網站的github看製作者是誰，如果不認識就可以進行進一步的攻擊
+B. 抓取網站git資訊，還原網站的原始碼
+C. 看網站的使用者是否有使用mac book，太有錢不好攻擊
+D. 下載別人的後門軟體，不用自己寫一個",B,https://iosentrix.com/blog/git-source-code-disclosure-vulnerability/,,,
+5,普通,防禦,下列哪一項攻擊無法藉由過濾輸入參數來防禦？,"A. SQL injection
+B. Cross site scripting
+C. Command injection
+D. Directory listing",D,,,,
+6,普通,Web,下列何者無法有效預防 CSRF (Cross-site request forgery) ?,"A. 對 request 進行 referer 檢查
+B. 增加驗證碼機制
+C. 透過 POST、DELETE、UPDATE method 發送請求
+D. requsest 帶入 CSRF token",C,,,,
+7,普通,資安知識,"美國國家安全局 NSA 的永恆之藍（EternalBlue）漏洞利用程式，其主要是利用下列何者？
+","A. 零時差攻擊
+B. Windows SMB 漏洞
+C. Shellshock
+D. 貴賓犬漏洞",B,,,,
+8,普通,程式語言,請問下列何種語言不會自動強制進行邊界檢查？,"A. C#
+B. Java
+C. Python
+D. C",D,https://zh.m.wikipedia.org/wiki/缓冲区溢出,,,「…因駭客在Unix的核心發現通過緩衝區溢位可以獲得系統的最高等級權限，而成為攻擊手段之一。也有人發現相同的問題也會出現在Windows作業系統上，以致其成為駭客最為常用的攻擊手段，蠕蟲病毒利用作業系統高危漏洞進行的破壞與大規模傳播均是利用此技術。比較知名的蠕蟲病毒衝擊波蠕蟲，就基於Windows作業系統的緩衝區溢位漏洞。」（擷取自 緩衝區溢位 維基百科）在處理字串，使用陣列時，若是沒有邊界檢查的機制，則很有可能會埋下很大的資安隱患。請問下列何種語言不會自動強制進行邊界檢查？
+9,普通,其他（請直接填寫類別）,"下列何者為net use \target\ipc$ """" /u:""""命令的用途?","A. 用來進行null session的連結
+B. 用來刪除ipc連線
+C. 用來檢視有多少使用者
+D. 用來連線到u槽",A,,,,
+10,普通,資安知識,下列何者為Smurf攻擊?,"A. 不斷的發送大量且偽造的來源位址TCP封包
+B. 不斷的發送大量且偽造的來源位址ICMP封包
+C. 不斷的發送大量的TCP連線
+D. 不斷的地發送大量且偽造的目的位址UDP封包",B,,,,
+11,普通,IoT,針對無線通訊安全標準WPA(Wi-Fi Protected Access)敘述何者有誤?,"A. 是802.11i標準技術的其中一部份
+B. 一種有線網路加密的標準
+C. 為IEEE所發布之標準
+D. 透過Pre-shared key方式加密",A,,,,
+12,普通,Pwn,下列何者是 gets() 函數造成 Buffer Overflow 的原因?,"A. 函數會在讀入的字串後面 Padding 其他字元
+B. 函數會把之前過的字串疊加
+C. 函數沒有限制使用者輸入的字元數
+D. 函數會從環境變數中額外取得字串",C,,,,
+13,普通,Pwn,下列何者是 Heap 的攻擊 House of Orange 名稱的由來?,"A. 攻擊的原理像是在剝橘子一般一片一片攻擊程式的記憶體區段
+B. 此攻擊為著名駭客 Orange 所發明
+C. House of Orange 原本是 HITCON CTF 題目，當時出題者們以隊員的名字當作題目名稱
+D. 出題者出題當時很想吃橘子",C,,,,
+14,普通,時事,Windows 11 正式版本於 2021 年幾月發行?,"A. 7 月
+B. 8 月
+C. 9 月
+D. 10 月",D,,,,
+15,普通,Pwn,在 x64 有漏洞的程式中寫入 Shellcode 之後，要控制哪個暫存器以執行 Shellcode?,"A. RAX
+B. RCX
+C. RIP
+D. RDI",C,,,,
+1,難,時事,六、七月份微軟公布的一遠端程式碼執行（RCE）漏洞  PrintNightmare。攻擊者可利用此弱點以 SYSTEM 權限執行任意程式碼。請問是何者服務發生問題？,"A:Windows Print Spooler
+B:Visual Studio Code
+C:Windows DNS Server
+D:Microsoft Exchange Server",A,https://msrc.microsoft.com/update-guide/vulnerability/CVE-2021-34527,,,
+2,難,Pwn,在 2.23 與 2.27 版本的 libc 利用 double free 漏洞有什麼差別?,"A. 2.23 版本的 libc 中，fastbin 不需要注意前後相鄰的 chunk 是不是同一塊
+B. 2.27 版本的 libc 中，fastbin 不需要注意前後相鄰的 chunk 是不是同一塊
+C. 2.23 版本的 libc 中，Tcache 不需要注意前後相鄰的 chunk 是不是同一塊
+D. 2.27 版本的 libc 中，Tcache 不需要注意前後相鄰的 chunk 是不是同一塊",D,,,,
+3,難,Pwn,下列有關 unlink 機制的敘述何者正確?,"A. 要滿足檢查機制 P->bk->fd = P
+B. 要滿足檢查機制 P->fd->bk = P
+C. 在 unlink 之後會發生 P->bk->fd = P->fd
+D. 以上皆是",D,,,,
+4,難,Pwn,Windows Shellcode 與 Linux Shellcode 差別為何?,"A. Windows Shellcode 不能用在程式漏洞拿 shell (cmd)
+B. Windows Shellcode 無法直接呼叫 system call
+C. ",,,,,
