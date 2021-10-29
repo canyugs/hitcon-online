@@ -7,11 +7,11 @@
   "gatewayServers": {
     "gatewayService5010": {
       "httpAddress": "127.0.0.1:5010",
-      "grpcAddress": "127.0.0.1:5030"
+      "grpcAddress": "127.0.0.1:5040"
     },
     "gatewayService5011": {
       "httpAddress": "127.0.0.1:5011",
-      "grpcAddress": "127.0.0.1:5031"
+      "grpcAddress": "127.0.0.1:5041"
     }
   },
   "map": [
@@ -44,16 +44,16 @@
     ],
     "standalone": {
       "chat": "127.0.0.1:5020",
-      "playerlist": "127.0.0.1:5021",
-      "bombman": "127.0.0.1:5022",
-      "items": "127.0.0.1:5023",
-      "npc": "127.0.0.1:5024",
-      "dialog": "127.0.0.1:5025",
-      "setting": "127.0.0.1:5026",
-      "iobj-lib": "127.0.0.1:5027",
-      "map-portal": "127.0.0.1:5028",
-      "MapWatermark": "127.0.0.1:5029",
-      "notification": "127.0.0.1:5030",
+      "dialog": "127.0.0.1:5021",
+      "setting": "127.0.0.1:5022",
+      "bombman": "127.0.0.1:5023",
+      "iobj-lib": "127.0.0.1:5024",
+      "items": "127.0.0.1:5025",
+      "map-portal": "127.0.0.1:5026",
+      "MapWatermark": "127.0.0.1:5027",
+      "notification": "127.0.0.1:5028",
+      "npc": "127.0.0.1:5029",
+      "playerlist": "127.0.0.1:5030",
       "iframe": "127.0.0.1:5031"
     }
   },
