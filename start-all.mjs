@@ -10,6 +10,43 @@ const redis = require('redis');
 const promisify = require('util').promisify;
 const config = require('config');
 const fork = require('child_process').fork;
+const {Transform} = require('stream');
+
+// https://stackoverflow.com/a/45126242
+const prepender = (prefix) => {
+  const prefixBuffer = Buffer.from(prefix);
+  return new Transform({
+    transform(chunk, encoding, done) {
+      this._rest = this._rest && this._rest.length ?
+        Buffer.concat([this._rest, chunk]) :
+        chunk;
+
+      let index;
+
+      // As long as we keep finding newlines, keep making slices of the buffer and push them to the
+      // readable side of the transform stream
+      while ((index = this._rest.indexOf('\n')) !== -1) {
+        // The `end` parameter is non-inclusive, so increase it to include the newline we found
+        const line = this._rest.slice(0, ++index);
+        // `start` is inclusive, but we are already one char ahead of the newline -> all good
+        this._rest = this._rest.slice(index);
+        // We have a single line here! Prepend the string we want
+        this.push(Buffer.concat([prefixBuffer, line]));
+      }
+
+      return void done();
+    },
+
+    // Called before the end of the input so we can handle any remaining
+    // data that we have saved
+    flush(done) {
+      // If we have any remaining data in the cache, send it out
+      if (this._rest && this._rest.length) {
+        return void done(null, Buffer.concat([prefixBuffer, this._rest]));
+      }
+    },
+  });
+};
 
 async function main() {
   /* start-all.mjs should only be used in multi-process mode */
@@ -50,13 +87,17 @@ async function main() {
   redisClient.quit();
 
   /* Start asset server */
-  const assetServer = fork('./services/assets/asset-server-launcher.mjs', {cwd: '.'});
+  const assetServer = fork('./services/assets/asset-server-launcher.mjs', {cwd: '.', stdio: 'pipe'});
+  assetServer.stdout.pipe(prepender(`[Asset Server] `)).pipe(process.stdout);
+  assetServer.stderr.pipe(prepender(`[Asset Server] `)).pipe(process.stderr);
 
   /* Start gateway service */
   const gatewayServers = {};
   const enabledGatewayServers = config.get('gatewayServers');
   for (const serverName in enabledGatewayServers) {
-    gatewayServers[serverName] = fork('./services/gateway/gateway-server.mjs', ['--service-name', serverName], {cwd: '.'});
+    gatewayServers[serverName] = fork('./services/gateway/gateway-server.mjs', ['--service-name', serverName], {cwd: '.', stdio: 'pipe'});
+    gatewayServers[serverName].stdout.pipe(prepender(`[Gateway ${serverName}] `)).pipe(process.stdout);
+    gatewayServers[serverName].stderr.pipe(prepender(`[Gateway ${serverName}] `)).pipe(process.stderr);
   }
 
   // Wait for all gateway services to start.
@@ -79,7 +120,9 @@ async function main() {
   const extServices = {};
   const enabledExtStandalone = config.get('ext.standalone');
   for (const ext in enabledExtStandalone) {
-    extServices[ext] = fork('./services/standalone/standalone-extension.mjs', ['--ext', ext], {cwd: '.'});
+    extServices[ext] = fork('./services/standalone/standalone-extension.mjs', ['--ext', ext], {cwd: '.', stdio: 'pipe'});
+    extServices[ext].stdout.pipe(prepender(`[Extension ${ext}] `)).pipe(process.stdout);
+    extServices[ext].stderr.pipe(prepender(`[Extension ${ext}] `)).pipe(process.stderr);
   }
 
   /* Hook error handlers */
