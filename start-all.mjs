@@ -101,20 +101,18 @@ async function main() {
   }
 
   // Wait for all gateway services to start.
-  const promises = Object.entries(gatewayServers).map((entry) => {
+  const gatewayPromises = Object.entries(gatewayServers).map((entry) => {
     const [name, server] = entry;
     return new Promise((resolve, reject) => {
       server.on('message', (msg) => {
-        if (msg !== 'started') return;
-        console.log(`${name} has started successfully.`);
-        resolve(msg);
+        if (msg === 'started') resolve(msg);
       });
       setTimeout(() => {
         reject(new Error(`Failed to start "${name}" server successfully in 10 seconds.`));
       }, 10 * 1000);
     });
   });
-  await Promise.all(promises);
+  await Promise.all(gatewayPromises);
 
   /* Start standalone extension services */
   const extServices = {};
@@ -123,6 +121,25 @@ async function main() {
     extServices[ext] = fork('./services/standalone/standalone-extension.mjs', ['--ext', ext], {cwd: '.', stdio: 'pipe'});
     extServices[ext].stdout.pipe(prepender(`[Extension ${ext}] `)).pipe(process.stdout);
     extServices[ext].stderr.pipe(prepender(`[Extension ${ext}] `)).pipe(process.stderr);
+  }
+
+  // Wait for all standalone extension services to be ready.
+  const standalonePromises = Object.entries(extServices).map((entry) => {
+    const [name, server] = entry;
+    return new Promise((resolve, reject) => {
+      server.on('message', (msg) => {
+        if (msg === 'ready') resolve(msg);
+      });
+      setTimeout(() => {
+        reject(new Error(`Failed to start "${name}" extension successfully in 10 seconds.`));
+      }, 10 * 1000);
+    });
+  });
+  await Promise.all(standalonePromises);
+
+  // Notify that the extension can start.
+  for (const ext in enabledExtStandalone) {
+    extServices[ext].send('start');
   }
 
   /* Hook error handlers */
