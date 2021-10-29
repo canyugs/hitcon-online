@@ -43,6 +43,15 @@ async function standaloneExtensionServer() {
   const extName = argv.ext;
   await extensionManager.ensureClass('blank');
   await extensionManager.createExtensionService(extName);
+  process.send('ready'); // notify start-all that the standalone extension service is ready to start.
+
+  // wait for the start-all to signal that the extension can start.
+  await new Promise(resolve =>
+    process.on('message', async (msg) => {
+      if (msg === 'start') resolve();
+    })
+  );
+
   await extensionManager.startExtensionService(extName);
 }
 
