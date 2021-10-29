@@ -190,7 +190,7 @@ class GatewayService {
     socket.on('callC2sAPI', (msg, callback) => {
       const p = this.extMan.onC2sCalled(msg, socket.playerID);
       p.then((msg) => {
-        if (typeof msg === 'object' && 'error' in msg && typeof msg.error === 'string') {
+        if (typeof msg === 'object' && msg !== null && 'error' in msg && typeof msg.error === 'string') {
           console.error(`c2s call error: ${msg.error}`);
         }
         callback(msg);
