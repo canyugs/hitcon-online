@@ -31,10 +31,10 @@ class Player {
     ];
 
     this.playerID = playerID;
-    this.displayName = playerID;
-    this.displayChar = 'char1';
+    this.displayName = undefined;
+    this.displayChar = undefined;
     this.mapCoord = undefined; // TODO: Set it to a spawn point specified by map.json.
-    this.facing = 'D';
+    this.facing = undefined;
     this.lastMovingTime = undefined;
     this.ghostMode = false;
   }
@@ -92,7 +92,7 @@ class Player {
       if (this.mapCoord !== undefined && !msg.mapCoord.equalsTo(this.mapCoord)) {
         this.lastMovingTime = Date.now();
       }
-      this._previousMapCoord = (this.mapCoord ?? msg.mapCoord); // for smoothly move the player
+      this._previousMapCoord = (this.mapCoord ?? msg.mapCoord); // for smooth moving of the player
       this.mapCoord = msg.mapCoord;
     }
     if (msg.facing !== undefined) this.facing = msg.facing;

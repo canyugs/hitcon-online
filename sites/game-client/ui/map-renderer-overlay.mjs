@@ -19,9 +19,8 @@ class MapRendererOverlay extends Overlay {
 
   /**
    * The callback function of window resize and game start.
-   * @param {UIEvent} event
    */
-  onResize(event) {
+  onResize() {
     const widthCount = Math.floor(this.dom.clientWidth / MAP_CELL_SIZE) + 1;
     const heightCount = Math.floor(this.dom.clientHeight / MAP_CELL_SIZE) + 1;
 

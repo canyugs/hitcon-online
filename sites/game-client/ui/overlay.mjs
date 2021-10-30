@@ -74,6 +74,7 @@ class Overlay {
     if (!ret) return ret;
     this.position = position;
     this.isOpen = true;
+    this.onResize();
 
     this.onPostShow();
     return ret;
@@ -152,7 +153,7 @@ class Overlay {
    * This method can be implemented in the derived class if the derived class
    * wishes to handle this event.
    */
-  onResize(evt) {}
+  onResize() {}
 
 };
 

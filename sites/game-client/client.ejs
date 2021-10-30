@@ -204,6 +204,8 @@ absolute URL.
 
         game.mainUI = new MainUI();
         game.mainUI.errorModal = new ErrorModal(game.mainUI);
+        game.mapRendererOverlay = new MapRendererOverlay(game.mainUI);
+        // game.avatarSelectionOverlay = new ???;
 
         // TODO: Change map URL to follow the config in server side.
         game.mapData = await $.ajax({url: "/static/run/map/map.json", type: "GET",});
@@ -235,9 +237,10 @@ absolute URL.
         await game.extMan.initialize(game.map, game.gameState, game.gameClient, game.inputManager, game.mapRenderer, game.mainUI);
         await game.extMan.loadAllExtensionClient();
 
-        // Initializes the UI.
-        game.mapRendererOverlay = new MapRendererOverlay(game.mainUI);
-        game.mapRendererOverlay.show(OverlayPosition.MAIN_VIEW);
+        // TODO: avatar selection overlay
+        // below code should be contained in the logic of avatar selection
+        game.socket.emit('avatarSelect', {displayName: 'player', displayChar: 'char1'});
+        // game.avatarSelectionOverlay.show(OverlayPosition.MAIN_VIEW);
 
         game.mainUI.createContextMenu(game.gameState, game.mapRenderer, game.gameClient);
 
