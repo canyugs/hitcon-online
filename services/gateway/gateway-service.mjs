@@ -170,24 +170,6 @@ class GatewayService {
     socket.playerData = await this.dir.getPlayerData(playerID);
     socket.playerID = playerID;
 
-    // Register all events.
-    socket.on('playerUpdate', (msg) => {
-      this.onPlayerUpdate(socket, PlayerSyncMessage.fromObject(msg));
-      // onPlayerUpdate is async, so returns immediately.
-    });
-    socket.on('callC2sAPI', (msg, callback) => {
-      const p = this.extMan.onC2sCalled(msg, socket.playerID);
-      p.then((msg) => {
-        if (typeof msg === 'object' && 'error' in msg && typeof msg.error === 'string') {
-          console.error(`c2s call error: ${msg.error}`);
-        }
-        callback(msg);
-      }, (reason) => {
-        console.error(`c2s call exception: ${reason}`);
-        // Full exception detailed NOT provided for security reason.
-        callback({'error': 'exception'});
-      });
-    });
     socket.on('disconnect', (reason) => {
       this.onDisconnect(socket, reason);
       // onDisconnect is async, so returns immediately.
@@ -205,20 +187,48 @@ class GatewayService {
       console.log(`Player ${playerID} connected.`);
     }
 
+    socket.on('callC2sAPI', (msg, callback) => {
+      const p = this.extMan.onC2sCalled(msg, socket.playerID);
+      p.then((msg) => {
+        if (typeof msg === 'object' && 'error' in msg && typeof msg.error === 'string') {
+          console.error(`c2s call error: ${msg.error}`);
+        }
+        callback(msg);
+      }, (reason) => {
+        console.error(`c2s call exception: ${reason}`);
+        // Full exception detailed NOT provided for security reason.
+        callback({'error': 'exception'});
+      });
+    });
+
     // Synchronize the state.
     const initLoc = socket.playerData.mapCoord ?? this.gameMap.getRandomSpawnPoint();
     await this._enterCoord(initLoc);
     socket.playerData.mapCoord = initLoc;
+    socket.playerData.facing = 'D';
     socket.playerData.lastMovingTime = Date.now();
     socket.playerData.ghostMode = false;
+
+    // Register all events.
+    socket.on('playerUpdate', (msg) => {
+      this.onPlayerUpdate(socket, PlayerSyncMessage.fromObject(msg));
+      // onPlayerUpdate is async, so returns immediately.
+    });
 
     const firstLocation = PlayerSyncMessage.fromObject(socket.playerData);
     await this._broadcastPlayerUpdate(firstLocation);
     this.broadcaster.sendStateTransfer(socket);
 
-    // Emit the gameStart event.
-    const startPack = {playerData: socket.playerData};
-    socket.emit('gameStart', startPack);
+    // notify the client to start the game after his/her avatar is selected
+    socket.on('avatarSelect', (msg) => {
+      // initialize the appearance of player
+      socket.playerData.displayName = msg.displayName;
+      socket.playerData.displayChar = msg.displayChar;
+
+      // Emit the gameStart event.
+      const startPack = {playerData: socket.playerData};
+      socket.emit('gameStart', startPack);
+    });
   }
 
   /**

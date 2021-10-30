@@ -1,6 +1,7 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
+import OverlayPosition from '/static/sites/game-client/ui/overlay-position.mjs';
 import {Player, PlayerSyncMessage} from '/static/common/gamelib/player.mjs';
 
 /**
@@ -58,7 +59,7 @@ class GameClient {
       socket.on('unauthorized', (msg) => {
         console.error(`Authorization failed: ${JSON.stringify(msg.data)}`);
         this.mainUI.errorModal.displayError("Authorization failed.", "Please refresh to reconnect.");
-        this.onDisconnect();
+        this.onDisconnect(); //????????? not implemented ????????????
       });
       socket.on('gameStart', (msg) => {
         this.onStartup(msg);
@@ -128,6 +129,8 @@ class GameClient {
           detail: {gameClient: this},
         },
     ));
+
+    game.mapRendererOverlay.show(OverlayPosition.MAIN_VIEW);
 
     // Start the browser side of all extensions.
     this.extMan.startAllExtensionClient();
