@@ -2,8 +2,10 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 import {MAP_CELL_SIZE} from '../map-renderer.mjs';
+import Player from '../../../common/gamelib/player.mjs';
 
 const DOM_ID = 'avatar-selection-div';
+const DISPLAY_NAME_MAX_LEN = Player.PLAYER_DISPLAY_NAME_MAX_LENGTH;
 
 /**
  * The logic of avatar selection page.
@@ -82,7 +84,16 @@ class AvatarSelectionPage {
   submit() {
     // TODO
     const displayName = this.DOM.querySelector('input[name="display-name"]').value;
-    this.socket.emit('avatarSelect', {displayName, displayChar: this.selectedAvatar[0]});
+    if (displayName.length > DISPLAY_NAME_MAX_LEN || displayName.length <= 0) {
+      alert(`Name should be non-empty and no longer than ${DISPLAY_NAME_MAX_LEN}`);
+      return;
+    }
+    const displayChar = this.selectedAvatar[0];
+    if (displayChar === null) {
+      alert('Please select a character');
+      return;
+    }
+    this.socket.emit('avatarSelect', {displayName, displayChar: displayChar});
   }
 
   /**

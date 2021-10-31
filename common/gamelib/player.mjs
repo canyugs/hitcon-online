@@ -265,7 +265,10 @@ class PlayerSyncMessage {
   }
 }
 
+Player.PLAYER_DISPLAY_NAME_MAX_LENGTH = PLAYER_DISPLAY_NAME_MAX_LENGTH;
+
 export default Player;
+
 export {
   Player,
   PlayerSyncMessage,
