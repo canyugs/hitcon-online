@@ -97,11 +97,13 @@ class GameClient {
     });
     socket.on("disconnect", (reason) => {
       if (reason !== "io client disconnect") {
-        this.mainUI.errorModal.displayError(reason, "Please refresh to reconnect.");
+        if (!this.mainUI.errorModal.isActive()) {
+          this.mainUI.errorModal.displayError(reason, "Please refresh to reconnect.");
+        }
       }
     });
     socket.on("kicked", (reason) => {
-      game.errorModal.displayError(reason, "Please refresh to reconnect.");
+      this.mainUI.errorModal.displayError(reason, "Please refresh to reconnect.");
     });
   }
 
