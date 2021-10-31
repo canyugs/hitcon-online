@@ -13,8 +13,8 @@ class GraphicAsset {
    * config. It's format is at the end of this file.
    */
   constructor(assetConfig) {
-    this.asset_manager = assetConfig;
-    if (!this.asset_manager) {
+    this.config = assetConfig;
+    if (!this.config) {
       throw 'No asset config supplied for new GraphicAsset()';
     }
     this.images_arr = [];
@@ -28,7 +28,7 @@ class GraphicAsset {
   async loadAssets() {
     const arr_promise = [];
     const this_ = this;
-    for (const img of this.asset_manager.images) {
+    for (const img of this.config.images) {
       arr_promise.push(new Promise((resolve, reject) => {
         const image = new Image();
         image.assetName = img.name;
@@ -58,8 +58,8 @@ class GraphicAsset {
    * @return {HTMLImageElement} element - The image
    */
   getImage(getname) {
-    for (let i = 0; i < this.asset_manager.images.length; i++) {
-      if (this.asset_manager.images[i].name === getname) {
+    for (let i = 0; i < this.config.images.length; i++) {
+      if (this.config.images[i].name === getname) {
         console.assert(this.images_arr[i].assetName === getname);
         return this.images_arr[i];
       }
@@ -84,12 +84,12 @@ class GraphicAsset {
    */
   getTile(layer, tile) {
     const info = {};
-    info.imageRef = this.asset_manager.layerMap[layer][tile][0];
+    info.imageRef = this.config.layerMap[layer][tile][0];
     info.image = this.getImage(info.imageRef);
     info.srcWidth = info.image.assetGridWidth;
     info.srcHeight = info.image.assetGridHeight;
-    info.srcX = this.asset_manager.layerMap[layer][tile][1] * info.srcWidth;
-    info.srcY = this.asset_manager.layerMap[layer][tile][2] * info.srcHeight;
+    info.srcX = this.config.layerMap[layer][tile][1] * info.srcWidth;
+    info.srcY = this.config.layerMap[layer][tile][2] * info.srcHeight;
     return info;
   }
 
@@ -101,7 +101,7 @@ class GraphicAsset {
    */
   getCharacter(char, facing) {
     const info = {};
-    const charObj = this.asset_manager.characters[char][facing];
+    const charObj = this.config.characters[char][facing];
     info.imageRef = charObj[0];
     info.image = this.getImage(info.imageRef);
     info.srcWidth = info.image.assetGridWidth;

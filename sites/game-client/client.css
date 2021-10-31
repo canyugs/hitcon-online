@@ -15,6 +15,11 @@ body {
   width: 100vw;
 }
 
+.hoverable:hover {
+  cursor: pointer;
+  filter: brightness(120%);
+}
+
 .container-center {
   display: flex;
   justify-content: center;
@@ -42,6 +47,28 @@ body {
   height: 100vh;
   box-sizing: border-box;
   z-index: 100;
+}
+
+/* TODO */
+#avatar-selection-div #avatar-preview-container {
+  height: 300px;
+  max-width: 50%;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+/* TODO */
+#avatar-selection-div .single-avatar-container {
+  box-sizing: border-box;
+  border: 2px solid gray;
+  border-radius: 20%;
+  padding: 3px;
+  margin: 3px;
+}
+
+/* TODO */
+#avatar-selection-div .avatar-selected {
+  background-color: #666;
 }
 
 #staging-div {

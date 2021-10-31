@@ -7,8 +7,176 @@
       "gridHeight": 32
     },
     {
+      "name": "char0img",
+      "url": "/static/run/map/chars/su2 Student male 06.png",
+      "gridWidth": 32,
+      "gridHeight": 32
+    },
+    {
       "name": "char1img",
-      "url": "/static/run/map/su1_Student_male_01.png",
+      "url": "/static/run/map/chars/su2 Student male 10.png",
+      "gridWidth": 32,
+      "gridHeight": 32
+    },
+    {
+      "name": "char2img",
+      "url": "/static/run/map/chars/su2 Student fmale 01.png",
+      "gridWidth": 32,
+      "gridHeight": 32
+    },
+    {
+      "name": "char3img",
+      "url": "/static/run/map/chars/pipo-xmaschara02.png",
+      "gridWidth": 32,
+      "gridHeight": 32
+    },
+    {
+      "name": "char4img",
+      "url": "/static/run/map/chars/Cat 01-3.png",
+      "gridWidth": 32,
+      "gridHeight": 32
+    },
+    {
+      "name": "char5img",
+      "url": "/static/run/map/chars/Enemy 09-1.png",
+      "gridWidth": 32,
+      "gridHeight": 32
+    },
+    {
+      "name": "char6img",
+      "url": "/static/run/map/chars/Dog-01-2r.png",
+      "gridWidth": 32,
+      "gridHeight": 32
+    },
+    {
+      "name": "char7img",
+      "url": "/static/run/map/chars/su2 Student male 01.png",
+      "gridWidth": 32,
+      "gridHeight": 32
+    },
+    {
+      "name": "char8img",
+      "url": "/static/run/map/chars/Enemy 10-1.png",
+      "gridWidth": 32,
+      "gridHeight": 32
+    },
+    {
+      "name": "char9img",
+      "url": "/static/run/map/chars/Headmaster fmale.png",
+      "gridWidth": 32,
+      "gridHeight": 32
+    },
+    {
+      "name": "char10img",
+      "url": "/static/run/map/chars/su2 Student male 05.png",
+      "gridWidth": 32,
+      "gridHeight": 32
+    },
+    {
+      "name": "char11img",
+      "url": "/static/run/map/chars/Teacher male 02.png",
+      "gridWidth": 32,
+      "gridHeight": 32
+    },
+    {
+      "name": "char12img",
+      "url": "/static/run/map/chars/Cat 01-2.png",
+      "gridWidth": 32,
+      "gridHeight": 32
+    },
+    {
+      "name": "char13img",
+      "url": "/static/run/map/chars/Enemy 02-1.png",
+      "gridWidth": 32,
+      "gridHeight": 32
+    },
+    {
+      "name": "char14img",
+      "url": "/static/run/map/chars/su2 Student fmale 03.png",
+      "gridWidth": 32,
+      "gridHeight": 32
+    },
+    {
+      "name": "char15img",
+      "url": "/static/run/map/chars/su2 Student fmale 04.png",
+      "gridWidth": 32,
+      "gridHeight": 32
+    },
+    {
+      "name": "char16img",
+      "url": "/static/run/map/chars/Dog 01-3.png",
+      "gridWidth": 32,
+      "gridHeight": 32
+    },
+    {
+      "name": "char17img",
+      "url": "/static/run/map/chars/Teacher fmale 02.png",
+      "gridWidth": 32,
+      "gridHeight": 32
+    },
+    {
+      "name": "char18img",
+      "url": "/static/run/map/chars/Cat 01-1.png",
+      "gridWidth": 32,
+      "gridHeight": 32
+    },
+    {
+      "name": "char19img",
+      "url": "/static/run/map/chars/Enemy 15-2.png",
+      "gridWidth": 32,
+      "gridHeight": 32
+    },
+    {
+      "name": "char20img",
+      "url": "/static/run/map/chars/Dog 01-1.png",
+      "gridWidth": 32,
+      "gridHeight": 32
+    },
+    {
+      "name": "char21img",
+      "url": "/static/run/map/chars/Teacher male 01.png",
+      "gridWidth": 32,
+      "gridHeight": 32
+    },
+    {
+      "name": "char22img",
+      "url": "/static/run/map/chars/su2 Student fmale 02.png",
+      "gridWidth": 32,
+      "gridHeight": 32
+    },
+    {
+      "name": "char23img",
+      "url": "/static/run/map/chars/pipo-xmaschara04.png",
+      "gridWidth": 32,
+      "gridHeight": 32
+    },
+    {
+      "name": "char24img",
+      "url": "/static/run/map/chars/su2 Student fmale 15.png",
+      "gridWidth": 32,
+      "gridHeight": 32
+    },
+    {
+      "name": "char25img",
+      "url": "/static/run/map/chars/su2 Student male 07.png",
+      "gridWidth": 32,
+      "gridHeight": 32
+    },
+    {
+      "name": "char26img",
+      "url": "/static/run/map/chars/su2 Student fmale 12.png",
+      "gridWidth": 32,
+      "gridHeight": 32
+    },
+    {
+      "name": "char27img",
+      "url": "/static/run/map/chars/pipo-xmaschara05.png",
+      "gridWidth": 32,
+      "gridHeight": 32
+    },
+    {
+      "name": "char28img",
+      "url": "/static/run/map/chars/Teacher fmale 01.png",
       "gridWidth": 32,
       "gridHeight": 32
     }
@@ -17154,6 +17322,68 @@
     }
   },
   "characters": {
+    "char0": {
+      "D": [
+        "char0img",
+        1,
+        0
+      ],
+      "DR": [
+        "char0img",
+        0,
+        0
+      ],
+      "DL": [
+        "char0img",
+        2,
+        0
+      ],
+      "L": [
+        "char0img",
+        1,
+        1
+      ],
+      "LR": [
+        "char0img",
+        0,
+        1
+      ],
+      "LL": [
+        "char0img",
+        2,
+        1
+      ],
+      "R": [
+        "char0img",
+        1,
+        2
+      ],
+      "RR": [
+        "char0img",
+        0,
+        2
+      ],
+      "RL": [
+        "char0img",
+        2,
+        2
+      ],
+      "U": [
+        "char0img",
+        1,
+        3
+      ],
+      "UR": [
+        "char0img",
+        0,
+        3
+      ],
+      "UL": [
+        "char0img",
+        2,
+        3
+      ]
+    },
     "char1": {
       "D": [
         "char1img",
@@ -17212,6 +17442,1680 @@
       ],
       "UL": [
         "char1img",
+        2,
+        3
+      ]
+    },
+    "char2": {
+      "D": [
+        "char2img",
+        1,
+        0
+      ],
+      "DR": [
+        "char2img",
+        0,
+        0
+      ],
+      "DL": [
+        "char2img",
+        2,
+        0
+      ],
+      "L": [
+        "char2img",
+        1,
+        1
+      ],
+      "LR": [
+        "char2img",
+        0,
+        1
+      ],
+      "LL": [
+        "char2img",
+        2,
+        1
+      ],
+      "R": [
+        "char2img",
+        1,
+        2
+      ],
+      "RR": [
+        "char2img",
+        0,
+        2
+      ],
+      "RL": [
+        "char2img",
+        2,
+        2
+      ],
+      "U": [
+        "char2img",
+        1,
+        3
+      ],
+      "UR": [
+        "char2img",
+        0,
+        3
+      ],
+      "UL": [
+        "char2img",
+        2,
+        3
+      ]
+    },
+    "char3": {
+      "D": [
+        "char3img",
+        1,
+        0
+      ],
+      "DR": [
+        "char3img",
+        0,
+        0
+      ],
+      "DL": [
+        "char3img",
+        2,
+        0
+      ],
+      "L": [
+        "char3img",
+        1,
+        1
+      ],
+      "LR": [
+        "char3img",
+        0,
+        1
+      ],
+      "LL": [
+        "char3img",
+        2,
+        1
+      ],
+      "R": [
+        "char3img",
+        1,
+        2
+      ],
+      "RR": [
+        "char3img",
+        0,
+        2
+      ],
+      "RL": [
+        "char3img",
+        2,
+        2
+      ],
+      "U": [
+        "char3img",
+        1,
+        3
+      ],
+      "UR": [
+        "char3img",
+        0,
+        3
+      ],
+      "UL": [
+        "char3img",
+        2,
+        3
+      ]
+    },
+    "char4": {
+      "D": [
+        "char4img",
+        1,
+        0
+      ],
+      "DR": [
+        "char4img",
+        0,
+        0
+      ],
+      "DL": [
+        "char4img",
+        2,
+        0
+      ],
+      "L": [
+        "char4img",
+        1,
+        1
+      ],
+      "LR": [
+        "char4img",
+        0,
+        1
+      ],
+      "LL": [
+        "char4img",
+        2,
+        1
+      ],
+      "R": [
+        "char4img",
+        1,
+        2
+      ],
+      "RR": [
+        "char4img",
+        0,
+        2
+      ],
+      "RL": [
+        "char4img",
+        2,
+        2
+      ],
+      "U": [
+        "char4img",
+        1,
+        3
+      ],
+      "UR": [
+        "char4img",
+        0,
+        3
+      ],
+      "UL": [
+        "char4img",
+        2,
+        3
+      ]
+    },
+    "char5": {
+      "D": [
+        "char5img",
+        1,
+        0
+      ],
+      "DR": [
+        "char5img",
+        0,
+        0
+      ],
+      "DL": [
+        "char5img",
+        2,
+        0
+      ],
+      "L": [
+        "char5img",
+        1,
+        1
+      ],
+      "LR": [
+        "char5img",
+        0,
+        1
+      ],
+      "LL": [
+        "char5img",
+        2,
+        1
+      ],
+      "R": [
+        "char5img",
+        1,
+        2
+      ],
+      "RR": [
+        "char5img",
+        0,
+        2
+      ],
+      "RL": [
+        "char5img",
+        2,
+        2
+      ],
+      "U": [
+        "char5img",
+        1,
+        3
+      ],
+      "UR": [
+        "char5img",
+        0,
+        3
+      ],
+      "UL": [
+        "char5img",
+        2,
+        3
+      ]
+    },
+    "char6": {
+      "D": [
+        "char6img",
+        1,
+        0
+      ],
+      "DR": [
+        "char6img",
+        0,
+        0
+      ],
+      "DL": [
+        "char6img",
+        2,
+        0
+      ],
+      "L": [
+        "char6img",
+        1,
+        1
+      ],
+      "LR": [
+        "char6img",
+        0,
+        1
+      ],
+      "LL": [
+        "char6img",
+        2,
+        1
+      ],
+      "R": [
+        "char6img",
+        1,
+        2
+      ],
+      "RR": [
+        "char6img",
+        0,
+        2
+      ],
+      "RL": [
+        "char6img",
+        2,
+        2
+      ],
+      "U": [
+        "char6img",
+        1,
+        3
+      ],
+      "UR": [
+        "char6img",
+        0,
+        3
+      ],
+      "UL": [
+        "char6img",
+        2,
+        3
+      ]
+    },
+    "char7": {
+      "D": [
+        "char7img",
+        1,
+        0
+      ],
+      "DR": [
+        "char7img",
+        0,
+        0
+      ],
+      "DL": [
+        "char7img",
+        2,
+        0
+      ],
+      "L": [
+        "char7img",
+        1,
+        1
+      ],
+      "LR": [
+        "char7img",
+        0,
+        1
+      ],
+      "LL": [
+        "char7img",
+        2,
+        1
+      ],
+      "R": [
+        "char7img",
+        1,
+        2
+      ],
+      "RR": [
+        "char7img",
+        0,
+        2
+      ],
+      "RL": [
+        "char7img",
+        2,
+        2
+      ],
+      "U": [
+        "char7img",
+        1,
+        3
+      ],
+      "UR": [
+        "char7img",
+        0,
+        3
+      ],
+      "UL": [
+        "char7img",
+        2,
+        3
+      ]
+    },
+    "char8": {
+      "D": [
+        "char8img",
+        1,
+        0
+      ],
+      "DR": [
+        "char8img",
+        0,
+        0
+      ],
+      "DL": [
+        "char8img",
+        2,
+        0
+      ],
+      "L": [
+        "char8img",
+        1,
+        1
+      ],
+      "LR": [
+        "char8img",
+        0,
+        1
+      ],
+      "LL": [
+        "char8img",
+        2,
+        1
+      ],
+      "R": [
+        "char8img",
+        1,
+        2
+      ],
+      "RR": [
+        "char8img",
+        0,
+        2
+      ],
+      "RL": [
+        "char8img",
+        2,
+        2
+      ],
+      "U": [
+        "char8img",
+        1,
+        3
+      ],
+      "UR": [
+        "char8img",
+        0,
+        3
+      ],
+      "UL": [
+        "char8img",
+        2,
+        3
+      ]
+    },
+    "char9": {
+      "D": [
+        "char9img",
+        1,
+        0
+      ],
+      "DR": [
+        "char9img",
+        0,
+        0
+      ],
+      "DL": [
+        "char9img",
+        2,
+        0
+      ],
+      "L": [
+        "char9img",
+        1,
+        1
+      ],
+      "LR": [
+        "char9img",
+        0,
+        1
+      ],
+      "LL": [
+        "char9img",
+        2,
+        1
+      ],
+      "R": [
+        "char9img",
+        1,
+        2
+      ],
+      "RR": [
+        "char9img",
+        0,
+        2
+      ],
+      "RL": [
+        "char9img",
+        2,
+        2
+      ],
+      "U": [
+        "char9img",
+        1,
+        3
+      ],
+      "UR": [
+        "char9img",
+        0,
+        3
+      ],
+      "UL": [
+        "char9img",
+        2,
+        3
+      ]
+    },
+    "char10": {
+      "D": [
+        "char10img",
+        1,
+        0
+      ],
+      "DR": [
+        "char10img",
+        0,
+        0
+      ],
+      "DL": [
+        "char10img",
+        2,
+        0
+      ],
+      "L": [
+        "char10img",
+        1,
+        1
+      ],
+      "LR": [
+        "char10img",
+        0,
+        1
+      ],
+      "LL": [
+        "char10img",
+        2,
+        1
+      ],
+      "R": [
+        "char10img",
+        1,
+        2
+      ],
+      "RR": [
+        "char10img",
+        0,
+        2
+      ],
+      "RL": [
+        "char10img",
+        2,
+        2
+      ],
+      "U": [
+        "char10img",
+        1,
+        3
+      ],
+      "UR": [
+        "char10img",
+        0,
+        3
+      ],
+      "UL": [
+        "char10img",
+        2,
+        3
+      ]
+    },
+    "char11": {
+      "D": [
+        "char11img",
+        1,
+        0
+      ],
+      "DR": [
+        "char11img",
+        0,
+        0
+      ],
+      "DL": [
+        "char11img",
+        2,
+        0
+      ],
+      "L": [
+        "char11img",
+        1,
+        1
+      ],
+      "LR": [
+        "char11img",
+        0,
+        1
+      ],
+      "LL": [
+        "char11img",
+        2,
+        1
+      ],
+      "R": [
+        "char11img",
+        1,
+        2
+      ],
+      "RR": [
+        "char11img",
+        0,
+        2
+      ],
+      "RL": [
+        "char11img",
+        2,
+        2
+      ],
+      "U": [
+        "char11img",
+        1,
+        3
+      ],
+      "UR": [
+        "char11img",
+        0,
+        3
+      ],
+      "UL": [
+        "char11img",
+        2,
+        3
+      ]
+    },
+    "char12": {
+      "D": [
+        "char12img",
+        1,
+        0
+      ],
+      "DR": [
+        "char12img",
+        0,
+        0
+      ],
+      "DL": [
+        "char12img",
+        2,
+        0
+      ],
+      "L": [
+        "char12img",
+        1,
+        1
+      ],
+      "LR": [
+        "char12img",
+        0,
+        1
+      ],
+      "LL": [
+        "char12img",
+        2,
+        1
+      ],
+      "R": [
+        "char12img",
+        1,
+        2
+      ],
+      "RR": [
+        "char12img",
+        0,
+        2
+      ],
+      "RL": [
+        "char12img",
+        2,
+        2
+      ],
+      "U": [
+        "char12img",
+        1,
+        3
+      ],
+      "UR": [
+        "char12img",
+        0,
+        3
+      ],
+      "UL": [
+        "char12img",
+        2,
+        3
+      ]
+    },
+    "char13": {
+      "D": [
+        "char13img",
+        1,
+        0
+      ],
+      "DR": [
+        "char13img",
+        0,
+        0
+      ],
+      "DL": [
+        "char13img",
+        2,
+        0
+      ],
+      "L": [
+        "char13img",
+        1,
+        1
+      ],
+      "LR": [
+        "char13img",
+        0,
+        1
+      ],
+      "LL": [
+        "char13img",
+        2,
+        1
+      ],
+      "R": [
+        "char13img",
+        1,
+        2
+      ],
+      "RR": [
+        "char13img",
+        0,
+        2
+      ],
+      "RL": [
+        "char13img",
+        2,
+        2
+      ],
+      "U": [
+        "char13img",
+        1,
+        3
+      ],
+      "UR": [
+        "char13img",
+        0,
+        3
+      ],
+      "UL": [
+        "char13img",
+        2,
+        3
+      ]
+    },
+    "char14": {
+      "D": [
+        "char14img",
+        1,
+        0
+      ],
+      "DR": [
+        "char14img",
+        0,
+        0
+      ],
+      "DL": [
+        "char14img",
+        2,
+        0
+      ],
+      "L": [
+        "char14img",
+        1,
+        1
+      ],
+      "LR": [
+        "char14img",
+        0,
+        1
+      ],
+      "LL": [
+        "char14img",
+        2,
+        1
+      ],
+      "R": [
+        "char14img",
+        1,
+        2
+      ],
+      "RR": [
+        "char14img",
+        0,
+        2
+      ],
+      "RL": [
+        "char14img",
+        2,
+        2
+      ],
+      "U": [
+        "char14img",
+        1,
+        3
+      ],
+      "UR": [
+        "char14img",
+        0,
+        3
+      ],
+      "UL": [
+        "char14img",
+        2,
+        3
+      ]
+    },
+    "char15": {
+      "D": [
+        "char15img",
+        1,
+        0
+      ],
+      "DR": [
+        "char15img",
+        0,
+        0
+      ],
+      "DL": [
+        "char15img",
+        2,
+        0
+      ],
+      "L": [
+        "char15img",
+        1,
+        1
+      ],
+      "LR": [
+        "char15img",
+        0,
+        1
+      ],
+      "LL": [
+        "char15img",
+        2,
+        1
+      ],
+      "R": [
+        "char15img",
+        1,
+        2
+      ],
+      "RR": [
+        "char15img",
+        0,
+        2
+      ],
+      "RL": [
+        "char15img",
+        2,
+        2
+      ],
+      "U": [
+        "char15img",
+        1,
+        3
+      ],
+      "UR": [
+        "char15img",
+        0,
+        3
+      ],
+      "UL": [
+        "char15img",
+        2,
+        3
+      ]
+    },
+    "char16": {
+      "D": [
+        "char16img",
+        1,
+        0
+      ],
+      "DR": [
+        "char16img",
+        0,
+        0
+      ],
+      "DL": [
+        "char16img",
+        2,
+        0
+      ],
+      "L": [
+        "char16img",
+        1,
+        1
+      ],
+      "LR": [
+        "char16img",
+        0,
+        1
+      ],
+      "LL": [
+        "char16img",
+        2,
+        1
+      ],
+      "R": [
+        "char16img",
+        1,
+        2
+      ],
+      "RR": [
+        "char16img",
+        0,
+        2
+      ],
+      "RL": [
+        "char16img",
+        2,
+        2
+      ],
+      "U": [
+        "char16img",
+        1,
+        3
+      ],
+      "UR": [
+        "char16img",
+        0,
+        3
+      ],
+      "UL": [
+        "char16img",
+        2,
+        3
+      ]
+    },
+    "char17": {
+      "D": [
+        "char17img",
+        1,
+        0
+      ],
+      "DR": [
+        "char17img",
+        0,
+        0
+      ],
+      "DL": [
+        "char17img",
+        2,
+        0
+      ],
+      "L": [
+        "char17img",
+        1,
+        1
+      ],
+      "LR": [
+        "char17img",
+        0,
+        1
+      ],
+      "LL": [
+        "char17img",
+        2,
+        1
+      ],
+      "R": [
+        "char17img",
+        1,
+        2
+      ],
+      "RR": [
+        "char17img",
+        0,
+        2
+      ],
+      "RL": [
+        "char17img",
+        2,
+        2
+      ],
+      "U": [
+        "char17img",
+        1,
+        3
+      ],
+      "UR": [
+        "char17img",
+        0,
+        3
+      ],
+      "UL": [
+        "char17img",
+        2,
+        3
+      ]
+    },
+    "char18": {
+      "D": [
+        "char18img",
+        1,
+        0
+      ],
+      "DR": [
+        "char18img",
+        0,
+        0
+      ],
+      "DL": [
+        "char18img",
+        2,
+        0
+      ],
+      "L": [
+        "char18img",
+        1,
+        1
+      ],
+      "LR": [
+        "char18img",
+        0,
+        1
+      ],
+      "LL": [
+        "char18img",
+        2,
+        1
+      ],
+      "R": [
+        "char18img",
+        1,
+        2
+      ],
+      "RR": [
+        "char18img",
+        0,
+        2
+      ],
+      "RL": [
+        "char18img",
+        2,
+        2
+      ],
+      "U": [
+        "char18img",
+        1,
+        3
+      ],
+      "UR": [
+        "char18img",
+        0,
+        3
+      ],
+      "UL": [
+        "char18img",
+        2,
+        3
+      ]
+    },
+    "char19": {
+      "D": [
+        "char19img",
+        1,
+        0
+      ],
+      "DR": [
+        "char19img",
+        0,
+        0
+      ],
+      "DL": [
+        "char19img",
+        2,
+        0
+      ],
+      "L": [
+        "char19img",
+        1,
+        1
+      ],
+      "LR": [
+        "char19img",
+        0,
+        1
+      ],
+      "LL": [
+        "char19img",
+        2,
+        1
+      ],
+      "R": [
+        "char19img",
+        1,
+        2
+      ],
+      "RR": [
+        "char19img",
+        0,
+        2
+      ],
+      "RL": [
+        "char19img",
+        2,
+        2
+      ],
+      "U": [
+        "char19img",
+        1,
+        3
+      ],
+      "UR": [
+        "char19img",
+        0,
+        3
+      ],
+      "UL": [
+        "char19img",
+        2,
+        3
+      ]
+    },
+    "char20": {
+      "D": [
+        "char20img",
+        1,
+        0
+      ],
+      "DR": [
+        "char20img",
+        0,
+        0
+      ],
+      "DL": [
+        "char20img",
+        2,
+        0
+      ],
+      "L": [
+        "char20img",
+        1,
+        1
+      ],
+      "LR": [
+        "char20img",
+        0,
+        1
+      ],
+      "LL": [
+        "char20img",
+        2,
+        1
+      ],
+      "R": [
+        "char20img",
+        1,
+        2
+      ],
+      "RR": [
+        "char20img",
+        0,
+        2
+      ],
+      "RL": [
+        "char20img",
+        2,
+        2
+      ],
+      "U": [
+        "char20img",
+        1,
+        3
+      ],
+      "UR": [
+        "char20img",
+        0,
+        3
+      ],
+      "UL": [
+        "char20img",
+        2,
+        3
+      ]
+    },
+    "char21": {
+      "D": [
+        "char21img",
+        1,
+        0
+      ],
+      "DR": [
+        "char21img",
+        0,
+        0
+      ],
+      "DL": [
+        "char21img",
+        2,
+        0
+      ],
+      "L": [
+        "char21img",
+        1,
+        1
+      ],
+      "LR": [
+        "char21img",
+        0,
+        1
+      ],
+      "LL": [
+        "char21img",
+        2,
+        1
+      ],
+      "R": [
+        "char21img",
+        1,
+        2
+      ],
+      "RR": [
+        "char21img",
+        0,
+        2
+      ],
+      "RL": [
+        "char21img",
+        2,
+        2
+      ],
+      "U": [
+        "char21img",
+        1,
+        3
+      ],
+      "UR": [
+        "char21img",
+        0,
+        3
+      ],
+      "UL": [
+        "char21img",
+        2,
+        3
+      ]
+    },
+    "char22": {
+      "D": [
+        "char22img",
+        1,
+        0
+      ],
+      "DR": [
+        "char22img",
+        0,
+        0
+      ],
+      "DL": [
+        "char22img",
+        2,
+        0
+      ],
+      "L": [
+        "char22img",
+        1,
+        1
+      ],
+      "LR": [
+        "char22img",
+        0,
+        1
+      ],
+      "LL": [
+        "char22img",
+        2,
+        1
+      ],
+      "R": [
+        "char22img",
+        1,
+        2
+      ],
+      "RR": [
+        "char22img",
+        0,
+        2
+      ],
+      "RL": [
+        "char22img",
+        2,
+        2
+      ],
+      "U": [
+        "char22img",
+        1,
+        3
+      ],
+      "UR": [
+        "char22img",
+        0,
+        3
+      ],
+      "UL": [
+        "char22img",
+        2,
+        3
+      ]
+    },
+    "char23": {
+      "D": [
+        "char23img",
+        1,
+        0
+      ],
+      "DR": [
+        "char23img",
+        0,
+        0
+      ],
+      "DL": [
+        "char23img",
+        2,
+        0
+      ],
+      "L": [
+        "char23img",
+        1,
+        1
+      ],
+      "LR": [
+        "char23img",
+        0,
+        1
+      ],
+      "LL": [
+        "char23img",
+        2,
+        1
+      ],
+      "R": [
+        "char23img",
+        1,
+        2
+      ],
+      "RR": [
+        "char23img",
+        0,
+        2
+      ],
+      "RL": [
+        "char23img",
+        2,
+        2
+      ],
+      "U": [
+        "char23img",
+        1,
+        3
+      ],
+      "UR": [
+        "char23img",
+        0,
+        3
+      ],
+      "UL": [
+        "char23img",
+        2,
+        3
+      ]
+    },
+    "char24": {
+      "D": [
+        "char24img",
+        1,
+        0
+      ],
+      "DR": [
+        "char24img",
+        0,
+        0
+      ],
+      "DL": [
+        "char24img",
+        2,
+        0
+      ],
+      "L": [
+        "char24img",
+        1,
+        1
+      ],
+      "LR": [
+        "char24img",
+        0,
+        1
+      ],
+      "LL": [
+        "char24img",
+        2,
+        1
+      ],
+      "R": [
+        "char24img",
+        1,
+        2
+      ],
+      "RR": [
+        "char24img",
+        0,
+        2
+      ],
+      "RL": [
+        "char24img",
+        2,
+        2
+      ],
+      "U": [
+        "char24img",
+        1,
+        3
+      ],
+      "UR": [
+        "char24img",
+        0,
+        3
+      ],
+      "UL": [
+        "char24img",
+        2,
+        3
+      ]
+    },
+    "char25": {
+      "D": [
+        "char25img",
+        1,
+        0
+      ],
+      "DR": [
+        "char25img",
+        0,
+        0
+      ],
+      "DL": [
+        "char25img",
+        2,
+        0
+      ],
+      "L": [
+        "char25img",
+        1,
+        1
+      ],
+      "LR": [
+        "char25img",
+        0,
+        1
+      ],
+      "LL": [
+        "char25img",
+        2,
+        1
+      ],
+      "R": [
+        "char25img",
+        1,
+        2
+      ],
+      "RR": [
+        "char25img",
+        0,
+        2
+      ],
+      "RL": [
+        "char25img",
+        2,
+        2
+      ],
+      "U": [
+        "char25img",
+        1,
+        3
+      ],
+      "UR": [
+        "char25img",
+        0,
+        3
+      ],
+      "UL": [
+        "char25img",
+        2,
+        3
+      ]
+    },
+    "char26": {
+      "D": [
+        "char26img",
+        1,
+        0
+      ],
+      "DR": [
+        "char26img",
+        0,
+        0
+      ],
+      "DL": [
+        "char26img",
+        2,
+        0
+      ],
+      "L": [
+        "char26img",
+        1,
+        1
+      ],
+      "LR": [
+        "char26img",
+        0,
+        1
+      ],
+      "LL": [
+        "char26img",
+        2,
+        1
+      ],
+      "R": [
+        "char26img",
+        1,
+        2
+      ],
+      "RR": [
+        "char26img",
+        0,
+        2
+      ],
+      "RL": [
+        "char26img",
+        2,
+        2
+      ],
+      "U": [
+        "char26img",
+        1,
+        3
+      ],
+      "UR": [
+        "char26img",
+        0,
+        3
+      ],
+      "UL": [
+        "char26img",
+        2,
+        3
+      ]
+    },
+    "char27": {
+      "D": [
+        "char27img",
+        1,
+        0
+      ],
+      "DR": [
+        "char27img",
+        0,
+        0
+      ],
+      "DL": [
+        "char27img",
+        2,
+        0
+      ],
+      "L": [
+        "char27img",
+        1,
+        1
+      ],
+      "LR": [
+        "char27img",
+        0,
+        1
+      ],
+      "LL": [
+        "char27img",
+        2,
+        1
+      ],
+      "R": [
+        "char27img",
+        1,
+        2
+      ],
+      "RR": [
+        "char27img",
+        0,
+        2
+      ],
+      "RL": [
+        "char27img",
+        2,
+        2
+      ],
+      "U": [
+        "char27img",
+        1,
+        3
+      ],
+      "UR": [
+        "char27img",
+        0,
+        3
+      ],
+      "UL": [
+        "char27img",
+        2,
+        3
+      ]
+    },
+    "char28": {
+      "D": [
+        "char28img",
+        1,
+        0
+      ],
+      "DR": [
+        "char28img",
+        0,
+        0
+      ],
+      "DL": [
+        "char28img",
+        2,
+        0
+      ],
+      "L": [
+        "char28img",
+        1,
+        1
+      ],
+      "LR": [
+        "char28img",
+        0,
+        1
+      ],
+      "LL": [
+        "char28img",
+        2,
+        1
+      ],
+      "R": [
+        "char28img",
+        1,
+        2
+      ],
+      "RR": [
+        "char28img",
+        0,
+        2
+      ],
+      "RL": [
+        "char28img",
+        2,
+        2
+      ],
+      "U": [
+        "char28img",
+        1,
+        3
+      ],
+      "UR": [
+        "char28img",
+        0,
+        3
+      ],
+      "UL": [
+        "char28img",
         2,
         3
       ]
