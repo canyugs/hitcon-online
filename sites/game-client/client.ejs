@@ -22,8 +22,9 @@ absolute URL.
   </head>
   <body>
     <div id="rootdiv" class="container-center">
-      <div id="avatar-selection-div" style="background-color: aquamarine;">
-        <div>
+      <div id="avatar-selection-div" style="background-color: aquamarine;" class="container-center">
+        <div class="container-center">
+          <div id="avatar-preview-container" class="container-center"></div>
           <label>Display Name: <input type="text" name="display-name"></label>
           <button name="submit">Join HITCON Online!</button>
         </div>
@@ -234,7 +235,7 @@ absolute URL.
         if (window.query.disableRender) {
           game.mapRenderer.disableRenderForTesting();
         }
-        game.avatarSelectionPage = new AvatarSelectionPage(game.socket);
+        game.avatarSelectionPage = new AvatarSelectionPage(game.socket, game.graphicAsset);
         game.inputManager = new InputManager(game.mapRenderer);
         game.movementManager = new MovementManager(game.socket, game.gameState, game.inputManager, game.mapRenderer);
         game.gameClient = new GameClient(game.socket, game.map, game.gameState, game.mapRenderer, game.inputManager, game.movementManager, game.extMan, game.mainUI, game.avatarSelectionPage);
