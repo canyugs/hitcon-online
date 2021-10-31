@@ -16,6 +16,7 @@ import MultiProcessRPCDirectory from
 
 /* Import all utility classes */
 import GameMap from '../../common/maplib/map.mjs';
+import GraphicAsset from '../../common/maplib/graphic-asset.mjs';
 import GameState from '../../common/gamelib/game-state.mjs';
 import ExtensionManager from '../../common/extlib/extension-manager.mjs';
 import {getRunPath, getConfigPath} from '../../common/path-util/path.mjs';
@@ -27,9 +28,12 @@ async function standaloneExtensionServer() {
   // Load the map.
   const mapList = config.get("map");
   const rawMapJSON = fs.readFileSync(getRunPath(mapList[0]));
+  const rawAssetJSON = fs.readFileSync(getRunPath('map', 'assets.json'));
   const mapJSON = JSON.parse(rawMapJSON);
-  // We do not have GraphicAsset on the server side.
-  const gameMap = new GameMap(undefined, mapJSON);
+  const assetJSON = JSON.parse(rawAssetJSON);
+  // We do not load the graphic asset on the server side.
+  const graphicAsset = new GraphicAsset(assetJSON);
+  const gameMap = new GameMap(graphicAsset, mapJSON);
   const gameState = new GameState(gameMap);
   const broadcaster = new AllAreaBroadcaster(rpcDirectory, gameMap, gameState);
   const extensionManager = new ExtensionManager(rpcDirectory, broadcaster, gameMap, gameState);
