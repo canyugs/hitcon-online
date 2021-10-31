@@ -196,6 +196,78 @@ class Standalone {
     await new Promise(resolve => setTimeout(resolve, delay));
     return nextState;
   }
+
+  /**
+   * Flip the given variable, assuming it's boolean.
+   */
+  async s2s_sf_flipBoolVar(srcExt, playerID, kwargs, sfInfo) {
+    const varName = kwargs['var'];
+    const {trueState, falseState} = kwargs;
+    let varVal = await this.helper.varUtils.readVar(varName, playerID, sfInfo.name);
+    if (typeof varVal !== "string") {
+      console.warn(`Failed to read var '${varName}', assuming it's 0: `, varVal);
+      varVal = "0";
+    }
+    if (varVal === "0") {
+      varVal = "1";
+    } else if (varVal === "1") {
+      varVal = "0";
+    } else {
+      console.warn(`Invalid varVal '${varVal}' for '${varName}', assuming it's 0`);
+      varVal = "1";
+    }
+    const success = await this.helper.varUtils.writeVar(varName, playerID, sfInfo.name, varVal);
+    if (success !== true) {
+      console.error(`Failed to write var '${varName}' with varUtil: `, success);
+      return FSM_ERROR;
+    }
+
+    if (varVal === "1") {
+      return trueState;
+    } else if (varVal === "0") {
+      return falseState;
+    }
+
+    console.error('This should not happen in s2s_sf_flipBoolVar');
+    return FSM_ERROR;
+  }
+
+  async s2s_sf_testBooleanExpr(srcExt, playerID, kwargs, sfInfo) {
+    const {booleanVars, expr, trueState, falseState} = kwargs;
+    let thisObj = {};
+    for (const varName of booleanVars) {
+      let varVal = await this.helper.varUtils.readVar(varName, playerID, sfInfo.name);
+      if (typeof varVal !== "string") {
+        console.warn(`Failed to read var '${varName}', assuming it's 0: `, varVal);
+        varVal = "0";
+      }
+      if (varVal === "0") {
+        varVal = false;
+      } else if (varVal === "1") {
+        varVal = true;
+      } else {
+        console.warn(`Invalid boolean varVal '${varVal}' for '${varName}', assuming it's 0`);
+        varVal = false;
+      }
+      thisObj[varName] = varVal;
+    }
+    let retVal = undefined;
+    try {
+      const f = new Function(expr);
+      retVal = f.call(thisObj);
+    } catch (e) {
+      console.error(`Invalid function '${expr}' in s2s_sf_testBooleanExpr: `, e, e.stack);
+      return FSM_ERROR;
+    }
+    if (typeof retVal !== 'boolean') {
+      console.error(`Function '${expr}' did not return boolean: `, retVal);
+      return FSM_ERROR;
+    }
+    if (retVal === true) {
+      return trueState;
+    }
+    return falseState;
+  }
 }
 
 export default Standalone;
