@@ -57,7 +57,6 @@ class SingleNPC extends InteractiveObjectClientBaseClass {
     clientInfo.mapCoord = mapCoord;
     const facing = 'D';
 
-    console.log(clientInfo.displayConfig);
     for (const cfg of clientInfo.displayConfig) {
       if (cfg.layerName === 'npcImage') {
         cfg.renderArgs = {
