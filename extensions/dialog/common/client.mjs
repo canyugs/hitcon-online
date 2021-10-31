@@ -28,19 +28,21 @@ class DialogModal extends Modal {
 
     let triggered = false;
     const p = new Promise((resolve, reject) => {
-      for (const btn of btnList) {
-        const f = (btn) => {
-          // Extra layer of closure so we can pass btn in.
-          return () => {
-            if (!triggered) {
-              triggered = true;
-              this.hide();
-              resolve(btn);
-            }
-            return true;
+      for (const btns of btnList) {
+        for (const btn of btns) {
+          const f = (btn) => {
+            // Extra layer of closure so we can pass btn in.
+            return () => {
+              if (!triggered) {
+                triggered = true;
+                this.hide();
+                resolve(btn);
+              }
+              return true;
+            };
           };
-        };
-        btn.addEventListener('click', f(btn) );
+          btn.addEventListener('click', f(btn) );
+        }
       }
     });
 
@@ -89,8 +91,8 @@ class DialogModal extends Modal {
         const san_token = filterXSS(token);
         const san_display = filterXSS(display);
 
-        choicesHTML += `<li data-token=${san_token} id="dialog-btn-${san_token}" `;
-        choicesHTML += `class="dialog-choice-entry">${san_display}</li>`;
+        choicesHTML += `<li data-token=${san_token} `;
+        choicesHTML += `class="dialog-choice-entry dialog-btn-${san_token}-click">${san_display}</li>`;
       }
       choicesHTML += '</ul>';
       this.msgDOM.innerHTML = san_message + '<br />' + choicesHTML;
@@ -102,7 +104,7 @@ class DialogModal extends Modal {
       for (const {token, display} of choices) {
         // Sanitize to prevent XSS
         const san_token = filterXSS(token);
-        btnList.push(document.getElementById(`dialog-btn-${san_token}`));
+        btnList.push(document.getElementsByClassName(`dialog-btn-${san_token}-click`));
       }
 
       return btnList;
