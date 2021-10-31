@@ -26,6 +26,10 @@ class Standalone {
 
     // create individual NPC
     fs.readdirSync(getRunPath('npc')).forEach((file) => {
+      if (!file.toLowerCase().endsWith('.json')) {
+        console.warn('Ignoring NPC file: ', file);
+        return;
+      }
       const npcName = file.slice(0, -('.json'.length));
       const npc = new SingleNPC(helper, npcName, getRunPath('npc', file));
       this.NPCs.set(npcName, npc);
