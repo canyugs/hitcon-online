@@ -58,6 +58,9 @@ class GatewayService {
     this.rpcHandler.registerRPC('getToken', async (serviceName, playerID) => {
       return await this.handleGetToken(playerID);
     });
+    this.rpcHandler.registerRPC('kickPlayer', async (serviceName, playerID, reason) => {
+      return await this.kickPlayer(playerID, reason);
+    });
     this.servers = [];
     await this.extMan.createAllInGateway(this.rpcHandler, this);
     await this.extMan.startAllInGateway();
@@ -140,6 +143,33 @@ class GatewayService {
     });
   }
 
+  /**
+   * Kick a player that might not be in this gateway server.
+   */
+  async kickRemotePlayer(playerID, reason) {
+    const playerService = await this.dir.getPlayerGatewayService(playerID);
+    if (typeof playerService === 'string') {
+      return await this.rpcHandler.callRPC(playerService, 'kickPlayer',
+        playerID, reason);
+    }
+    console.warn('Failed to kick player, no service: ', playerID);
+    return false;
+  }
+
+  /**
+   * Kick the given player with the given reason.
+   */
+  async kickPlayer(playerID, reason) {
+    if (typeof playerID !== 'string' || !(playerID in this.socks)) {
+      console.error("Can't kick player: ", playerID);
+      return false;
+    }
+    return await this.notifyKicked(this.socks[playerID], reason);
+  }
+
+  /**
+   * Notify a player that the player have been kicked.
+   */
   async notifyKicked(socket, reason) {
     socket.emit('kicked', reason);
     await new Promise((r) => setTimeout(r, 5000));
