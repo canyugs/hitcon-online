@@ -46,7 +46,7 @@ body {
   width: 100vw;
   height: 100vh;
   box-sizing: border-box;
-  z-index: 100;
+  z-index: 90; /* less than error-modal */
 }
 
 /* TODO */
