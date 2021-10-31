@@ -231,6 +231,27 @@ class Standalone {
     return this.playerToTeam.get(playerID).getAccessToken(terminalName);
   }
 
+  /**
+   * Query the team status of a player.
+   * @param {string} extName The caller.
+   * @param {string} playerID The player ID.
+   */
+  async s2s_queryPlayerStatus(extName, playerID) {
+    console.log(playerID, this.playerToTeam);
+    const playerStatus = {};
+    if (!this.playerToTeam.has(playerID)) {
+      playerStatus.hasTeam = false;
+      return playerStatus;
+    }
+
+    playerStatus.hasTeam = true;
+    playerStatus.teamId = this.playerToTeam.get(playerID).teamId;
+    playerStatus.invitationCode = this.playerToTeam.get(playerID).invitationCode;
+    playerStatus.playerIDs = this.playerToTeam.get(playerID).playerIDs;
+    playerStatus.isFinalized = this.playerToTeam.get(playerID).isFinalized;
+
+    return playerStatus;
+  }
 
 
   // Interactive Object (general)
