@@ -92,7 +92,7 @@ class DialogModal extends Modal {
         const san_display = filterXSS(display);
 
         choicesHTML += `<li data-token=${san_token} `;
-        choicesHTML += `class="dialog-choice-entry dialog-btn-${san_token}-click">${san_display}</li>`;
+        choicesHTML += `class="dialog-choice-entry dialog-btn-${san_token}">${san_display}</li>`;
       }
       choicesHTML += '</ul>';
       this.msgDOM.innerHTML = san_message + '<br />' + choicesHTML;
@@ -104,7 +104,7 @@ class DialogModal extends Modal {
       for (const {token, display} of choices) {
         // Sanitize to prevent XSS
         const san_token = filterXSS(token);
-        btnList.push(document.getElementsByClassName(`dialog-btn-${san_token}-click`));
+        btnList.push(document.getElementsByClassName(`dialog-btn-${san_token}`));
       }
 
       return btnList;
@@ -128,8 +128,8 @@ class DialogModal extends Modal {
         ' id="dialog-textinput" />';
       this.msgDOM.innerHTML = san_message + promptHtml;
 
-      this.btnContDOM.innerHTML = `<button id="dialog-btn-OK">${san_buttonText}</button>`;
-      const btnOK = document.getElementById('dialog-btn-OK');
+      this.btnContDOM.innerHTML = `<button class="dialog-btn-OK">${san_buttonText}</button>`;
+      const btnOK = document.getElementsByClassName('dialog-btn-OK');
 
       // Set the visibilities right.
       this.btnContDOM.classList.add('visible');
