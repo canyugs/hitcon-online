@@ -10,6 +10,7 @@ import {PLAYER_MOVE_TIME_INTERVAL} from './move-check.mjs';
  */
 
 const PLAYER_MOVE_ANIMATION_FRAME_RATE = 100; // ms per frame
+const PLAYER_DISPLAY_NAME_MAX_LENGTH = 14;
 
 /**
  * The player class.
@@ -31,12 +32,20 @@ class Player {
     ];
 
     this.playerID = playerID;
-    this.displayName = undefined;
+    this._displayName = undefined;
     this.displayChar = undefined;
     this.mapCoord = undefined; // TODO: Set it to a spawn point specified by map.json.
     this.facing = undefined;
     this.lastMovingTime = undefined;
     this.ghostMode = false;
+  }
+
+  get displayName() {
+    return this._displayName;
+  }
+
+  set displayName(newName) {
+    this._displayName = newName.substr(0, PLAYER_DISPLAY_NAME_MAX_LENGTH);
   }
 
   /**

@@ -219,7 +219,7 @@ class GatewayService {
     socket.on('avatarSelect', async (msg) => {
       // initialize the appearance of player
       socket.playerData.displayName = msg.displayName;
-      socket.playerData.displayChar = msg.displayChar;
+      socket.playerData.displayChar = msg.displayChar; // TODO (important): check valid or not
 
       const firstLocation = PlayerSyncMessage.fromObject(socket.playerData);
       await this._broadcastPlayerUpdate(firstLocation);

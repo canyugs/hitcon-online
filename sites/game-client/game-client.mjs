@@ -60,7 +60,7 @@ class GameClient {
       socket.on('unauthorized', (msg) => {
         console.error(`Authorization failed: ${JSON.stringify(msg.data)}`);
         this.mainUI.errorModal.displayError("Authorization failed.", "Please refresh to reconnect.");
-        this.onDisconnect(); //????????? not implemented ????????????
+        this.onDisconnect();
       });
       socket.on('gameStart', (msg) => {
         this.onStartup(msg);
