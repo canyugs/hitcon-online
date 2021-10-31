@@ -2688,7 +2688,8 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         ["workspace:extensions/jitsi", {
           "packageLocation": "./extensions/jitsi/",
           "packageDependencies": [
-            ["hitcon-online-jitsi", "workspace:extensions/jitsi"]
+            ["hitcon-online-jitsi", "workspace:extensions/jitsi"],
+            ["config", "npm:3.3.6"]
           ],
           "linkType": "SOFT",
         }]

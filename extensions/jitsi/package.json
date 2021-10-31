@@ -4,5 +4,8 @@
   "exports": {
     "standalone": "./standalone.mjs",
     "in-gateway": "./in-gateway.mjs"
+  },
+  "dependencies": {
+    "config": "^3.3.6"
   }
 }

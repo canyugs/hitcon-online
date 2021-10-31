@@ -44,6 +44,10 @@
     "standalone": {
     }
   },
+  "jitsi": {
+    "hmacSecret": "secret",
+    "prefix": "hitcon"
+  },
   "publicAddress": null,
   "movingRequestThreshold": 100
 }
