@@ -263,9 +263,15 @@ class GatewayService {
     socket.on('avatarSelect', async (msg) => {
       // initialize the appearance of player
       socket.playerData.displayName = msg.displayName;
-      socket.playerData.displayChar = msg.displayChar; // TODO (important): check valid or not
+      socket.playerData.displayChar = msg.displayChar;
 
       const firstLocation = PlayerSyncMessage.fromObject(socket.playerData);
+      if (!firstLocation.check(this.gameMap.graphicAsset)) {
+        // Kick player for invalid avatar args.
+        await this.notifyKicked(socket, 'Invalid avatarSelect args');
+        return;
+      }
+
       await this._broadcastPlayerUpdate(firstLocation);
       this.broadcaster.sendStateTransfer(socket);
 

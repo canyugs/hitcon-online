@@ -247,6 +247,21 @@ class PlayerSyncMessage {
   }
 
   /**
+   * Check that the displayName and displayChar is correct.
+   */
+  check(graphicAsset) {
+    if (typeof this.displayName !== 'string' || this.displayName.length <= 0 || this.displayName.length > PLAYER_DISPLAY_NAME_MAX_LENGTH) {
+      console.warn('Got invalid displayName: ', this.displayName, this);
+      return false;
+    }
+    if (typeof this.displayChar !== 'string' || !graphicAsset.haveCharacter(this.displayChar)) {
+      console.warn('Got invalid displayChar: ', this.displayChar, this);
+      return false;
+    }
+    return true;
+  }
+
+  /**
    * Deserialize a JSON object into Player.
    * @param {Object} obj - TODO
    * @return {Player}
