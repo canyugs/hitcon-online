@@ -23,6 +23,7 @@
   width: 320px;
   height: 100vh;
   border-radius: 0;
+  box-sizing: border-box;
 }
 
 .utilpanel-tabs {
