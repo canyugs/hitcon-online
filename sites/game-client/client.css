@@ -97,7 +97,6 @@ body {
 }
 
 .overlay {
-  background-color: Ivory;
   position: absolute;
   opacity: 85%;
   z-index: 5;
