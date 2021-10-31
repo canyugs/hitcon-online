@@ -1,1 +1,96 @@
-<div id='item-list'></div>
+<style>
+#item-modal {
+  background-color: white;
+  border-radius: 10px;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.item-inv-text {
+  font-size: 2em;
+  padding: 0.5em;
+}
+
+#item-modal-close-btn {
+  font-size: xx-large;
+  position: absolute;
+  right: 3%;
+}
+
+.item-modal-divider {
+  border: 1.5px solid black;
+  width: 95%;
+}
+
+.item-container {
+  overflow-y: scroll;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 10;
+  margin: 2.5%;
+}
+
+.item-divider {
+  border-left: 3px solid black;
+}
+
+.item-obj {
+  display: flex;
+  flex-direction: row;
+  margin: 0.3em;
+  margin-right: 2.5%;
+  padding: 0.5em;
+  border-radius: 1em;
+  border: .2em solid grey;
+  box-shadow: 5px 5px 5px grey;
+}
+
+.item-block {
+  flex-grow: 10;
+  padding-left: 0.5em;
+}
+
+.item-block-name {
+  font-weight: bold;
+  font-size: larger;
+}
+
+.item-use-block {
+  display: flex;
+}
+
+.item-use-button {
+  display: none;
+  font-size: x-large;
+  margin: auto;
+  margin-right: 0.3em;
+}
+
+.item-block--usable .item-use-button {
+  display: block;
+}
+
+</style>
+
+<div id="item-modal">
+  <div class="item-inv-text">Inventory <button id="item-modal-close-btn">X</button></div>
+  <hr class="item-modal-divider" />
+  <div class="item-container" id="item-container">
+  </div>
+</div>
+
+<div class="item-obj" id="item-obj-template">
+      <div class="item-icon">
+        <span style="font-size: 3em; padding: .5em">?</span>
+      </div>
+      <div class="item-divider"></div>
+      <div class="item-block">
+        <div class="item-block-name-holder"><span class="item-block-name">Item Name</span> x <span class="item-block-count">1</span></div>
+        <div class="item-block-descr">Item Description</div>
+      </div>
+      <div class="item-use-block">
+        <button class="item-use-button">Use</button>
+      </div>
+</div>
