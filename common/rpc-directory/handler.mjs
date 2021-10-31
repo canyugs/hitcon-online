@@ -104,6 +104,28 @@ class Handler {
     return await this.RPCDirectory.unregisterPlayer(
         playerID, this.serviceName);
   }
+
+  /**
+   * Set a global hash table var in redis.
+   * @return {boolean} success - True if successful.
+   */
+  async redisHSet(key, field, value) {
+    const res = await this.RPCDirectory.getRedis().hsetAsync([key, field, value]);
+    return res === 1 || res === 0;
+  }
+
+  /**
+   * Get a global hash table var in redis.
+   * @return {string} result - The result (string) is successful. undefined
+   *   if failed.
+   */
+  async redisHGet(key, field) {
+    const res = await this.RPCDirectory.getRedis().hgetAsync([key, field]);
+    if (typeof res !== 'string') {
+      return undefined;
+    }
+    return res;
+  }
 }
 
 export default Handler;
