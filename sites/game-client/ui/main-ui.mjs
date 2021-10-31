@@ -369,6 +369,11 @@ class MainUI {
     if (this.overlays.has(position)) {
       if (!this.overlays.get(position).hide()) return false;
     }
+    // If we're in any overlay, clear it out as well.
+    if (overlay.isOpen) {
+      console.info(`Clearing overflay in position to show it else where: `, overlay.position, position);
+      this._clearOverlay(overlay.position, overlay);
+    }
 
     this.overlays.set(position, overlay);
     const container = this.overlayDom[position];
