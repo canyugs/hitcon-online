@@ -40,6 +40,10 @@ class Standalone {
       return;
     }
     const loc = msg.mapCoord;
+    if (typeof loc === 'undefined') {
+      // No location? Just skip.
+      return;
+    }
     let cellVal = null;
     try {
       cellVal = this.helper.gameMap.getCell(loc, 'portal');
