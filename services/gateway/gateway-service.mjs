@@ -215,15 +215,15 @@ class GatewayService {
       // onPlayerUpdate is async, so returns immediately.
     });
 
-    const firstLocation = PlayerSyncMessage.fromObject(socket.playerData);
-    await this._broadcastPlayerUpdate(firstLocation);
-    this.broadcaster.sendStateTransfer(socket);
-
     // notify the client to start the game after his/her avatar is selected
-    socket.on('avatarSelect', (msg) => {
+    socket.on('avatarSelect', async (msg) => {
       // initialize the appearance of player
       socket.playerData.displayName = msg.displayName;
       socket.playerData.displayChar = msg.displayChar;
+
+      const firstLocation = PlayerSyncMessage.fromObject(socket.playerData);
+      await this._broadcastPlayerUpdate(firstLocation);
+      this.broadcaster.sendStateTransfer(socket);
 
       // Emit the gameStart event.
       const startPack = {playerData: socket.playerData};

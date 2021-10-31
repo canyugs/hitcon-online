@@ -34,6 +34,16 @@ body {
   box-sizing: content-box;
 }
 
+#avatar-selection-div {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 100vw;
+  height: 100vh;
+  box-sizing: border-box;
+  z-index: 100;
+}
+
 #staging-div {
   opacity: 20%;
   background-color: red;
@@ -51,7 +61,6 @@ body {
 }
 
 #map-render-overlay {
-  border: 2px solid;
   width: 100%;
   height: 100%;
   /* We want to make sure that 100% width/height doesn't result in overflow. */

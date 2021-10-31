@@ -22,6 +22,13 @@ absolute URL.
   </head>
   <body>
     <div id="rootdiv" class="container-center">
+      <div id="avatar-selection-div" style="background-color: aquamarine;">
+        <div>
+          <label>Display Name: <input type="text" name="display-name"></label>
+          <button name="submit">Join HITCON Online!</button>
+        </div>
+      </div>
+
       <div id="staging-div">
         <!--
         This div is for stuff that's not yet being displayed.
@@ -140,6 +147,7 @@ absolute URL.
       import ClientExtensionManager from '/static/common/extlib/client-extension-manager.mjs';
       import MainUI from '/static/sites/game-client/ui/main-ui.mjs';
       import MapRendererOverlay from '/static/sites/game-client/ui/map-renderer-overlay.mjs';
+      import AvatarSelectionPage from '/static/sites/game-client/ui/avatar-selection.mjs';
       import OverlayPosition from '/static/sites/game-client/ui/overlay-position.mjs';
       import ErrorModal from '/static/sites/game-client/ui/error-modal.mjs';
 
@@ -205,7 +213,6 @@ absolute URL.
         game.mainUI = new MainUI();
         game.mainUI.errorModal = new ErrorModal(game.mainUI);
         game.mapRendererOverlay = new MapRendererOverlay(game.mainUI);
-        // game.avatarSelectionOverlay = new ???;
 
         // TODO: Change map URL to follow the config in server side.
         game.mapData = await $.ajax({url: "/static/run/map/map.json", type: "GET",});
@@ -227,20 +234,16 @@ absolute URL.
         if (window.query.disableRender) {
           game.mapRenderer.disableRenderForTesting();
         }
+        game.avatarSelectionPage = new AvatarSelectionPage(game.socket);
         game.inputManager = new InputManager(game.mapRenderer);
         game.movementManager = new MovementManager(game.socket, game.gameState, game.inputManager, game.mapRenderer);
-        game.gameClient = new GameClient(game.socket, game.map, game.gameState, game.mapRenderer, game.inputManager, game.movementManager, game.extMan, game.mainUI);
+        game.gameClient = new GameClient(game.socket, game.map, game.gameState, game.mapRenderer, game.inputManager, game.movementManager, game.extMan, game.mainUI, game.avatarSelectionPage);
 
         game.gameClient.initialize(game.token);
         game.mapRenderer.setGameClient(game.gameClient);
 
         await game.extMan.initialize(game.map, game.gameState, game.gameClient, game.inputManager, game.mapRenderer, game.mainUI);
         await game.extMan.loadAllExtensionClient();
-
-        // TODO: avatar selection overlay
-        // below code should be contained in the logic of avatar selection
-        game.socket.emit('avatarSelect', {displayName: 'player', displayChar: 'char1'});
-        // game.avatarSelectionOverlay.show(OverlayPosition.MAIN_VIEW);
 
         game.mainUI.createContextMenu(game.gameState, game.mapRenderer, game.gameClient);
 

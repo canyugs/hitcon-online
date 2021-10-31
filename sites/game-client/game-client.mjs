@@ -19,7 +19,7 @@ class GameClient {
    * @param {ClientExtensionManager} extMan
    * @constructor
    */
-  constructor(socket, gameMap, gameState, mapRenderer, inputManager, movementManager, extMan, mainUI) {
+  constructor(socket, gameMap, gameState, mapRenderer, inputManager, movementManager, extMan, mainUI, avatarSelectionPage) {
     this.socket = socket;
     this.gameMap = gameMap;
     this.gameState = gameState;
@@ -28,6 +28,7 @@ class GameClient {
     this.movementManager = movementManager;
     this.extMan = extMan;
     this.mainUI = mainUI;
+    this.avatarSelectionPage = avatarSelectionPage;
     this.gameStarted = false;
     // playerInfo stores information regarding the current player.
     this.playerInfo = undefined;
@@ -131,6 +132,7 @@ class GameClient {
     ));
 
     game.mapRendererOverlay.show(OverlayPosition.MAIN_VIEW);
+    this.avatarSelectionPage.hide();
 
     // Start the browser side of all extensions.
     this.extMan.startAllExtensionClient();
