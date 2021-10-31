@@ -37,6 +37,7 @@
       "notification",
       "npc",
       "playerlist",
+      "escape-game",
       "iframe"
     ],
     "standalone": {
