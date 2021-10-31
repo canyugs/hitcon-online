@@ -82,6 +82,11 @@ class MainUI {
       this.rootdivDom.classList.remove('focus-mode');
       this.focusOverlay.show(this.focusPos);
       this.mapRendererOverlay.show(OverlayPosition.MAIN_VIEW);
+      console.log(this.exitCallback);
+      if (this.exitCallback instanceof Function) {
+        this.exitCallback();
+      }
+      this.exitCallback = () => {};
     };
   }
 
@@ -259,9 +264,10 @@ class MainUI {
     this.rootdivDom.appendChild(dom);
   }
 
-  enterFocusMode(focusOverlay, focusPos) {
+  enterFocusMode(focusOverlay, focusPos, exitCallback) {
     this.focusOverlay = focusOverlay;
     this.focusPos = focusPos;
+    this.exitCallback = exitCallback;
 
     this.rootdivDom.classList.add('focus-mode');
     this.focusOverlay.show(OverlayPosition.MAIN_VIEW);

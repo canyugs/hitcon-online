@@ -3,6 +3,8 @@
 
 import JitsiHandler from './jitsi.mjs';
 import ToolbarButton from '/static/sites/game-client/ui/toolbar-button.mjs';
+import Overlay from '/static/sites/game-client/ui/overlay.mjs';
+import OverlayPosition from '/static/sites/game-client/ui/overlay-position.mjs';
 
 const JITSI_DIV = 'jitsi-container';
 
@@ -25,6 +27,25 @@ class JitsiContainer {
     $('#jitsi-remote-container').html('');
   }
 };
+
+class JitsiOverlay extends Overlay {
+  constructor(mainUI) {
+    const dom = document.getElementById('jitsi-fullscreen-overlay');
+    super(mainUI, dom);
+    this.hide();
+
+    const self = this;
+    $('#jitsi-remote-container').on('click', '.jitsi-user-container', function() {
+      const focusedParticipantId = $(this).attr('data-id');
+      $(this).find('video').eq(0).appendTo('#jitsi-fullscreen-overlay');
+      self.show(OverlayPosition.LEFT_BOTTOM);
+      mainUI.enterFocusMode(self, OverlayPosition.LEFT_BOTTOM, () => {
+        $('#jitsi-fullscreen-overlay > video').appendTo(`#jitsi-${focusedParticipantId}-container > .jitsi-user-video`);
+        self.hide();
+      });
+    });
+  }
+}
 
 
 /**
@@ -54,6 +75,8 @@ class Client {
   async gameStart() {
     this.container = new JitsiContainer(this.helper.mainUI);
     this.container.hide();
+
+    this.overlay = new JitsiOverlay(this.helper.mainUI);
 
     // Microphone button
     this.microphoneButton = new ToolbarButton('/static/extensions/jitsi/common/icons/microphone-off.svg', false);

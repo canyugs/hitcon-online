@@ -154,7 +154,7 @@ body {
   position: absolute;
   bottom: 50px;
   right: 50px;
-  z-index: 1;
+  z-index: 100;
 }
 
 #rootdiv:not(.focus-mode) #exit-focus {
