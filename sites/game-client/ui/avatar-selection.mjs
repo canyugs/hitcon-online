@@ -66,7 +66,6 @@ class AvatarSelectionPage {
    * @param {DOMElement} ele
    */
   setSelectedAvatar(displayChar, ele) {
-    console.log('click');
     if (this.selectedAvatar[1] !== null) {
       this.selectedAvatar[1].classList.remove('avatar-selected');
     }
