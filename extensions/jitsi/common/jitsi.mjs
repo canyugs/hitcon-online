@@ -3,7 +3,10 @@
 
 import {createRnnoiseProcessor} from './rnnoise/index.js';
 
-const VOICE_INDICATOR_THRESHOLD = 1;
+const VOICE_INDICATOR_THRESHOLD = 3;
+
+// contstant for exponential smoothing
+const ALPHA = 0.0205;
 
 /**
  * This class is the browser/client side of an extension.
@@ -17,6 +20,8 @@ class JitsiHandler {
     this.remoteTracks = {};
     this.volumeMeters = {};
     this.participantsInfo = {};
+    this.participantSounds = {};
+    this.participantSmoothedSounds = {};
     this.isJoined = false;
     this.room = null;
     this.isWebcam = true; // Is webcam or screen sharing.
@@ -45,6 +50,10 @@ class JitsiHandler {
     this.disconnectBinded = this.disconnect.bind(this);
     this.onConnectionFailedBinded = this.onConnectionFailed.bind(this);
     this.onConnectionSuccessBinded = this.onConnectionSuccess.bind(this);
+
+    /* Sort the jitsi screens periodically */
+    this.updateSmoothedSoundInterval = setInterval(this.updateSmoothedSound.bind(this), 100);
+    this.sortScreensInterval = setInterval(this.sortScreens.bind(this), 2500);
 
     /* Establish connection */
     this.connect();
@@ -190,7 +199,7 @@ class JitsiHandler {
 
     if ($(`#jitsi-${participantId}-container`).length === 0) {
       $('#jitsi-remote-container').append(`
-        <div class='jitsi-user-container active' id='jitsi-${participantId}-container'>
+        <div class='jitsi-user-container active' id='jitsi-${participantId}-container' data-id='${participantId}'>
           <div class='jitsi-user-loading'></div>
           <div class='jitsi-user-video'></div>
           <div class='jitsi-user-audio'></div>
@@ -291,6 +300,9 @@ class JitsiHandler {
     }
 
     $(`#jitsi-${id}-container`).remove();
+    delete this.participantsInfo[id];
+    delete this.participantSounds[id];
+    delete this.participantSmoothedSounds[id];
   }
 
   /**
@@ -322,6 +334,8 @@ class JitsiHandler {
     this.room.on(JitsiMeetJS.events.conference.USER_JOINED, (id, user) => {
       console.log('user joined: ', id, user._displayName);
       this.participantsInfo[id] = user;
+      this.participantSounds[id] = 0;
+      this.participantSmoothedSounds[id] = 0;
       this.remoteTracks[id] = [];
     });
     this.room.on(JitsiMeetJS.events.conference.USER_LEFT, this.onUserLeft.bind(this));
@@ -390,6 +404,9 @@ class JitsiHandler {
     // We can safely remove all DOMs at this point.
     $('#jitsi-remote-container').empty();
     $('#jitsi-local').empty();
+
+    clearInterval(this.updateSmoothedSoundInterval);
+    clearInterval(this.sortScreensInterval);
 
     if (this.room) {
       try {
@@ -475,9 +492,9 @@ class JitsiHandler {
         analyser.getByteFrequencyData(volumes);
         const averageVolume = volumes.reduce((a, b) => a + b, 0) / volumes.length;
 
-        // parsed volume = round((normalize(original volume - noise threshold) * 100 [transform [0, 1] to [0, 100]]) / 25) [discretization]
-        let averageVolumeParsed = (Math.round(((averageVolume - 30) / (analyser.maxDecibels - analyser.minDecibels - 30) * 100) / 25));
-        averageVolumeParsed = Math.min(Math.max(averageVolumeParsed, 0), 4); // clip to [0, 4]
+        // parsed volume = round((normalize(original volume - noise threshold) * 100 [transform [0, 1] to [0, 100]]) / 10) [discretization]
+        let averageVolumeParsed = (Math.round(((averageVolume - 30) / (analyser.maxDecibels - analyser.minDecibels - 30) * 100) / 10));
+        averageVolumeParsed = Math.min(Math.max(averageVolumeParsed, 0), 10); // clip to [0, 10]
 
         this.room?.setLocalParticipantProperty('volume', averageVolumeParsed.toString());
 
@@ -510,13 +527,34 @@ class JitsiHandler {
       return;
     }
 
-    console.log('volume recieved:', user.getId(), propertyValue);
+    const newVolume = parseInt(propertyValue);
 
-    if (parseInt(propertyValue) >= 1) {
+    this.participantSounds[user.getId()] = newVolume;
+    if (newVolume >= 1) {
       $(`#jitsi-${user.getId()}-container`).addClass('speaking');
     } else {
       $(`#jitsi-${user.getId()}-container`).removeClass('speaking');
     }
+  }
+
+  /**
+   * Update the smoothed soundness.
+   */
+  updateSmoothedSound() {
+    for (const id in this.participantSounds) {
+      this.participantSmoothedSounds[id] = ALPHA * this.participantSounds[id] + (1 - ALPHA) * this.participantSmoothedSounds[id];
+    }
+  }
+
+  /**
+   * Sort the Jitsi screen based on the exponentially smoothed soundness.
+   */
+  sortScreens() {
+    $('#jitsi-remote-container > .jitsi-user-container').sort((a, b) => {
+      const aid = $(a).attr('data-id');
+      const bid = $(b).attr('data-id');
+      return this.participantSmoothedSounds[bid] - this.participantSmoothedSounds[aid];
+    }).appendTo('#jitsi-remote-container');
   }
 }
 export default JitsiHandler;
