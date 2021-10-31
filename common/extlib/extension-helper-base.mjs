@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 import assert from 'assert';
+import VarUtils from '../../common/interactive-object/var-utils.mjs';
 
 /**
  * This is the base class for ExtensionHelper.
@@ -31,6 +32,7 @@ class ExtensionHelperBase {
     this.broadcaster = broadcaster;
     this.gameMap = gameMap;
     this.gameState = gameState;
+    this.varUtils = new VarUtils(this);
   }
 
   /**
