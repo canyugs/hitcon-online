@@ -13,7 +13,7 @@ const ALPHA = 0.0205;
  * One instance is created for each connected player.
  */
 class JitsiHandler {
-  constructor(meetingName, password, userName) {
+  constructor(meetingName, password, userName, getDevices, setSettingDeviceOptions) {
     this.connection = null;
     this.isVideo = true;
     this.localTracks = [];
@@ -28,6 +28,8 @@ class JitsiHandler {
     this.meetingName = meetingName;
     this.password = password;
     this.userName = userName;
+    this.getDevices = getDevices;
+    this.setSettingDeviceOptions = setSettingDeviceOptions;
 
     this.options = {
       hosts: {
@@ -46,10 +48,12 @@ class JitsiHandler {
     $(window).bind('unload', this.unload.bind(this));
 
     /* Bind functions */
-    this.onDeviceListChangedBinded = this.onDeviceListChanged.bind(this);
     this.disconnectBinded = this.disconnect.bind(this);
     this.onConnectionFailedBinded = this.onConnectionFailed.bind(this);
     this.onConnectionSuccessBinded = this.onConnectionSuccess.bind(this);
+    this.updateDeviceListBinded = () => {
+      JitsiHandler.updateDeviceList(this.setSettingDeviceOptions);
+    };
 
     /* Sort the jitsi screens periodically */
     this.updateSmoothedSoundInterval = setInterval(this.updateSmoothedSound.bind(this), 100);
@@ -81,7 +85,7 @@ class JitsiHandler {
 
     JitsiMeetJS.mediaDevices.addEventListener(
         JitsiMeetJS.events.mediaDevices.DEVICE_LIST_CHANGED,
-        this.onDeviceListChangedBinded);
+        this.updateDeviceListBinded);
 
     this.connection.connect();
 
@@ -90,41 +94,43 @@ class JitsiHandler {
 
   /**
    * Create local track. This method would drop all current local tracks.
-   * @param isWebcam Whether the video stream should be the webcam or desktop sharing.
    */
-  async createLocalTracks(isWebcam = true) {
-    if (!isWebcam && !JitsiMeetJS.isDesktopSharingEnabled()) {
+  async createLocalTracks() {
+    if (!this.isWebcam && !JitsiMeetJS.isDesktopSharingEnabled()) {
       alert('Screen sharing is not enabled.');
     }
-
-    this.isWebcam = isWebcam;
 
     // Drop the current local tracks.
     try {
       await Promise.all(this.localTracks.map(track => track.dispose()));
+      console.log(this.room.getLocalTracks());
     } catch (e) {
       console.error('Failed to drop current local tracks: ', e);
     }
+
     this.localTracks = [];
     $('#jitsi-local').empty();
 
     // Create new local tracks
     try {
       const tracks = await JitsiMeetJS.createLocalTracks({
-        devices: ['audio', isWebcam ? 'video' : 'desktop']
+        devices: ['audio', this.isWebcam ? 'video' : 'desktop'],
+        cameraDeviceId: this.getDevices('video'),
+        micDeviceId: this.getDevices('audio')
       });
       await this.onLocalTracks(tracks);
     } catch (e) {
       console.error('Failed to create local tracks: ', e);
-      if (!isWebcam) {
-        // something goes wrong, switch back to video.
-        console.warning('Fall back to video');
-        try {
-          this.createLocalTracks(true);
-        } catch (e) {
-          console.error('Fall back to video failed: ', e);
-        }
-      }
+      // if (!this.isWebcam) {
+      //   // something goes wrong, switch back to video.
+      //   console.warning('Fall back to video');
+      //   try {
+      //     this.isWebcam = true;
+      //     this.createLocalTracks();
+      //   } catch (e) {
+      //     console.error('Fall back to video failed: ', e);
+      //   }
+      // }
     }
   }
 
@@ -196,6 +202,7 @@ class JitsiHandler {
     }
     this.remoteTracks[participantId].push(track);
     const trackId = participantId + track.getType() + track.getId();
+    console.log('onRemoteTrack', trackId);
 
     if ($(`#jitsi-${participantId}-container`).length === 0) {
       $('#jitsi-remote-container').append(`
@@ -230,6 +237,7 @@ class JitsiHandler {
     if (track.getParticipantId() === null) return;
 
     const trackId = `${track.getParticipantId()}${track.getType()}${track.getId()}`;
+    console.log('onRemoteTrackRemove', trackId);
     try {
       track.detach($(`#${trackId}`));
     } catch (e) {
@@ -369,10 +377,23 @@ class JitsiHandler {
   }
 
   /**
-   * This is called when the connection fail.
+   * Update the list of media.
    */
-  onDeviceListChanged(devices) {
-    console.info('current devices', devices);
+  static updateDeviceList(setSettingDeviceOptions) {
+    if (!JitsiMeetJS.mediaDevices.isDeviceListAvailable() || !JitsiMeetJS.mediaDevices.isDeviceChangeAvailable('input')) {
+      console.error('cannot change input', JitsiMeetJS.mediaDevices.isDeviceListAvailable(), JitsiMeetJS.mediaDevices.isDeviceChangeAvailable('input'));
+      return;
+    }
+
+    for (const deviceType of ['video', 'audio']) {
+      JitsiMeetJS.mediaDevices.enumerateDevices((devices) => {
+        const deviceList = devices
+          .filter(m => m.kind === deviceType + 'input')
+          .reduce((obj, item) => Object.assign(obj, {[item.deviceId]: item.label}), {});
+        console.log(devices, deviceList);
+        setSettingDeviceOptions(deviceType, deviceList);
+      });
+    }
   }
 
   /**
@@ -422,7 +443,7 @@ class JitsiHandler {
 
     JitsiMeetJS.mediaDevices.removeEventListener(
         JitsiMeetJS.events.mediaDevices.DEVICE_LIST_CHANGED,
-        this.onDeviceListChangedBinded);
+        this.updateDeviceListBinded);
   }
 
   /**
