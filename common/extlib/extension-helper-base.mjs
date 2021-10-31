@@ -130,13 +130,13 @@ class ExtensionHelperBase {
   /**
    * @param {String} playerID - The ID of the player to call.
    * @param {MapCoord} mapCoord - including map, x, y.
-   * @param {object} args - The arguments.
+   * @param {Boolean} allowOverlap - Whether to allow overlap at destination.
    * @return {object} result - The result from the call.
    */
-  async teleport(playerID, mapCoord, ...args) {
+  async teleport(playerID, mapCoord, allowOverlap=false) {
     const playerService = await this.dir.getPlayerGatewayService(playerID);
     const result = await this.rpcHandler.callRPC(playerService, 'teleport',
-        playerID, mapCoord, 'D');
+        playerID, mapCoord, 'D', allowOverlap);
     return result;
   }
 
