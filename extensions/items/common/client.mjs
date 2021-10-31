@@ -7,13 +7,24 @@
  */
 
 import Modal from '/static/sites/game-client/ui/modal.mjs';
+import ToolbarButton from '/static/sites/game-client/ui/toolbar-button.mjs';
 
 const ITEM_DIV = 'item-modal';
 
 class ItemModal extends Modal {
-  constructor(mainUI) {
+  constructor(mainUI, client) {
     const dom = document.getElementById(ITEM_DIV);
     super(mainUI, dom);
+    this.client = client;
+    $("#item-modal-close-btn").click(() => {
+      this.hide();
+    });
+  }
+
+  onPostShow() {
+    this.setSize('80vw', '80vh');
+    this.setPosition('10vw', '10vh');
+    this.client.resetItemModal();
   }
 }
 
@@ -35,6 +46,13 @@ class Client {
   async gameStart() {
     this.itemInfo = await this.helper.callC2sAPI('items', 'getItemInfo', this.helper.defaultTimeout);
     this.items = await this.helper.callC2sAPI('items', 'getAllItems', this.helper.defaultTimeout);
+    this.modal = new ItemModal(this.helper.mainUI, this);
+    this.inventoryButton = new ToolbarButton('/static/extensions/items/common/icons/inventory.svg', false);
+    this.inventoryButton.registerDom(document.getElementById('items-inventory-btn'));
+    this.inventoryButton.registerOnClick(() => {
+      this.modal.show();
+    });
+    this.inventoryButton.show();
   }
 
   /*
@@ -128,6 +146,41 @@ class Client {
 
   async disconnect() {
     const result = await this.helper.callC2sAPI('items', 'disconnect', this.helper.defaultTimeout);
+  }
+
+  /**
+   * Fill the item modal with the current items.
+   */
+  async resetItemModal() {
+    document.getElementById('item-container').innerHTML = '';
+    const items = await this.helper.callC2sAPI('items', 'getAllItems', 5000);
+    for (const itemName in items) {
+      console.log(itemName, items[itemName]);
+      let amount = 0;
+      this.generateItemBlock(itemName, items[itemName].amount);
+    }
+  }
+
+  /**
+   * Generate styled dom for item
+   */
+  generateItemBlock(itemName, count) {
+    const info = this.itemInfo[itemName];
+    const itemBlock = document.getElementById('item-obj-template').cloneNode(true);
+    itemBlock.querySelector('.item-block-name').textContent = info.visibleName;
+    itemBlock.querySelector('.item-block-count').textContent = count;
+    itemBlock.querySelector('.item-block-descr').textContent = info.desc;
+    itemBlock.querySelector('.item-use-button').onclick = () => {
+      this.modal.hide();
+      this.useItem(itemName);
+    };
+    if (info.usable) {
+      itemBlock.classList.add('item-block--usable');
+    } else {
+      itemBlock.classList.remove('item-block--usable');
+    }
+    document.getElementById('item-container').append(itemBlock);
+    return itemBlock;
   }
 };
 
