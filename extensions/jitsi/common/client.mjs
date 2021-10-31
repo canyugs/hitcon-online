@@ -46,6 +46,9 @@ class Client {
     this.isMicrophoneOn = false;
     this.isCameraOn = false;
     this.isScreenSharingOn = false;
+
+    this.audioDevice = null;
+    this.videoDevice = null;
   }
 
   async gameStart() {
@@ -103,7 +106,8 @@ class Client {
         this.cameraButton.show();
 
         if (this.jitsiObj) {
-          this.jitsiObj.createLocalTracks(true);
+          this.jitsiObj.isWebcam = true;
+          this.jitsiObj.createLocalTracks();
         }
       } else {
         this.screenButton.changeIcon('/static/extensions/jitsi/common/icons/screen-on.svg');
@@ -115,11 +119,32 @@ class Client {
         this.cameraButton.changeIcon('/static/extensions/jitsi/common/icons/camera-off.svg');
 
         if (this.jitsiObj) {
-          this.jitsiObj.createLocalTracks(false);
+          this.jitsiObj.isWebcam = false;
+          this.jitsiObj.createLocalTracks();
         }
       }
     });
     this.screenButton.show();
+
+    /* Audio and video input setting */
+    this.settingTab = this.helper.getExtObj('setting')?.tab;
+    this.settingTab.addSubsection('general', 'device', '裝置設定', 10);
+    this.settingTab.addDropdown('device', 'video', '影像輸入', (value) => {
+      console.log('device video', value);
+      if (this.videoDevice !== value && this.jitsiObj) {
+        //this.jitsiObj.createLocalTracks();
+      }
+      this.videoDevice = value;
+    }, 0);
+    this.settingTab.addDropdown('device', 'audio', '音訊輸入', (value) => {
+      console.log('device audio', value);
+      if (this.audioDevice !== value && this.jitsiObj) {
+        this.jitsiObj.createLocalTracks();
+      }
+      this.audioDevice = value;
+    }, 10);
+
+    JitsiHandler.updateDeviceList(this.setSettingDeviceOptions.bind(this));
   }
 
   /**
@@ -134,7 +159,7 @@ class Client {
     }
 
     this.jitsiObj = new JitsiHandler(meetingName, password,
-      this.helper.gameClient.playerInfo.displayName);
+      this.helper.gameClient.playerInfo.displayName, this.getDevices, this.setSettingDeviceOptions.bind(this));
     this.currentMeeting = meetingName;
     this.container.show();
 
@@ -165,7 +190,7 @@ class Client {
       this.stopMeeting();
       return;
     }
-    
+
     // If we get here, we're requested to join a meeting.
     if (typeof this.currentMeeting === 'string') {
       // There's an active meeting currently.
@@ -195,6 +220,22 @@ class Client {
       let m = map.getCell(msg.mapCoord, 'jitsi');
       this.updateMeeting(m);
     }
+  }
+
+  /*
+   * Audio and video input setting
+   */
+  getDevices(type) {
+    if (type === 'video') return this.videoDevice;
+    if (type === 'audio') return this.audioDevice;
+    return undefined;
+  }
+
+  /**
+   *
+   */
+  setSettingDeviceOptions(deviceType, deviceList, currentDevice) {
+    this.settingTab.updateDropdownOptions('device', deviceType, deviceList, currentDevice);
   }
 };
 

@@ -299,24 +299,6 @@ class Client {
       this.helper.gameClient.socket.emit('playerUpdate', msg);
     }, 0);
 
-    this.tab.addSubsection('general', 'device', '裝置設定', 10);
-    this.tab.addDropdown('device', 'video', '影像輸入', (value) => {
-      console.log('device video', value);
-    }, 0);
-    this.tab.updateDropdownOptions('device', 'video', {
-      'facetime': 'FaceTime',
-      'obs': 'OBS Virtual Camera',
-    }, 'obs');
-
-    this.tab.addDropdown('device', 'audio', '音訊輸入', (value) => {
-      console.log('device audio', value);
-    }, 10);
-    this.tab.updateDropdownOptions('device', 'audio', {
-      'builtin': 'Built-in Microphone',
-      'headphone': 'External Headphone',
-      'bluetooth': 'Bluetooth device',
-    }, 'builtin');
-
     this.tab.addSwitch('general', 'data_collect', '去識別化資料蒐集', true, (value) => {
       console.log('general data', value);
     }, 50);
