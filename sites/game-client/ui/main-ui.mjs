@@ -76,6 +76,13 @@ class MainUI {
     this.utilPanelManager = new UtilPanelManager(this);
     this._notificationList = new Array();
     this._announcementList = new Array();
+
+    const exitFocus = document.getElementById('exit-focus');
+    exitFocus.onclick = () => {
+      this.rootdivDom.classList.remove('focus-mode');
+      this.focusOverlay.show(this.focusPos);
+      this.mapRendererOverlay.show(OverlayPosition.MAIN_VIEW);
+    };
   }
 
   /**
@@ -250,6 +257,14 @@ class MainUI {
    */
   addCustomDOM(dom) {
     this.rootdivDom.appendChild(dom);
+  }
+
+  enterFocusMode(focusOverlay, focusPos) {
+    this.focusOverlay = focusOverlay;
+    this.focusPos = focusPos;
+
+    this.rootdivDom.classList.add('focus-mode');
+    this.focusOverlay.show(OverlayPosition.MAIN_VIEW);
   }
 
   // ========== Internal Methods ============

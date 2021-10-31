@@ -1,3 +1,19 @@
+<style>
+  #iframe-overlay {
+    height: 100%;
+  }
+
+  #iframe-overlay iframe {
+    height: 100%;
+    width: 100%;
+  }
+
+  #rootdiv.focus-mode #iframe-expand {
+    display: none;
+  }
+</style>
+
 <div id="iframe-overlay">
   <iframe src="" allowfullscreen></iframe>
+  <button id="iframe-expand">Fullscreen</button>
 </div>

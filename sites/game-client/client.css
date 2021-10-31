@@ -145,6 +145,22 @@ body {
   z-index: 1;
 }
 
+#rootdiv.focus-mode #main-view {
+  left: 320px;
+  width: calc(100vw - 320px);
+}
+
+#exit-focus {
+  position: absolute;
+  bottom: 50px;
+  right: 50px;
+  z-index: 1;
+}
+
+#rootdiv:not(.focus-mode) #exit-focus {
+  display: none;
+}
+
 .modal-background {
   position: absolute;
   background-color: Grey;

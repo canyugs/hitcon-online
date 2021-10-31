@@ -11,6 +11,11 @@ class IframeOverlay extends Overlay {
     this.iframe = dom.querySelector('iframe');
     this.hide();
     this.lastSrc = null;
+
+    const expandBtn  = document.getElementById('iframe-expand');
+    expandBtn.onclick = () => {
+      mainUI.enterFocusMode(this, OverlayPosition.LEFT_BOTTOM);
+    };
   }
 
   updateIframe(src) {
