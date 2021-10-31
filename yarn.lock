@@ -2027,6 +2027,8 @@ __metadata:
 "hitcon-online-jitsi@workspace:extensions/jitsi":
   version: 0.0.0-use.local
   resolution: "hitcon-online-jitsi@workspace:extensions/jitsi"
+  dependencies:
+    config: ^3.3.6
   languageName: unknown
   linkType: soft
 

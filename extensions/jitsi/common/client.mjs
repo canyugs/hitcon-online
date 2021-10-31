@@ -183,7 +183,7 @@ class Client {
   /**
    * Start the Jitsi Meeeting
    */
-  async startMeeting(meetingName, password) {
+  async startMeeting(meetingName, realMeetingName, password) {
     // if this.jitsiObj is set, the previous meeting has not yet ended.
     // TODO: Probably use Promise instead.
     // We may need to handle the case that `startMeeting` is called multiple times.
@@ -191,7 +191,7 @@ class Client {
       await new Promise(r => setTimeout(r, 1000));
     }
 
-    this.jitsiObj = new JitsiHandler(meetingName, password,
+    this.jitsiObj = new JitsiHandler(realMeetingName, password,
       this.helper.gameClient.playerInfo.displayName, this.getDevices, this.setSettingDeviceOptions.bind(this));
     this.currentMeeting = meetingName;
     this.container.show();
@@ -235,12 +235,24 @@ class Client {
     }
     // If we get here, there's no meeting.
     // Get the password of the meeting
-    let password = await this.helper.callC2sAPI(null, 'getPassword', this.helper.defaultTimeout, {'meetingName': meetingName});
+    let obj = await this.helper.callC2sAPI(null, 'getPassword', this.helper.defaultTimeout, {'meetingName': meetingName});
+    if (obj.error) {
+      console.error('Failed to updateMeeting, getPassword: ', obj);
+      return;
+    }
+
+    let password = obj.password;
     if (!password) {
       password = null;
     }
+    let realMeetingName = obj.meetingName;
+    if (!realMeetingName) {
+      console.warn('Got invalid meeting name from getPassword(): ', realMeetingName, meetingName);
+      realMeetingName = meetingName;
+    }
+
     // Join meeting
-    this.startMeeting(meetingName, password);
+    this.startMeeting(meetingName, realMeetingName, password);
   }
 
   /**
