@@ -21,3 +21,6 @@ run/small_data
 
 # map editor
 *.tiled-session
+
+# nginx config
+/run/nginx.conf
