@@ -108,6 +108,11 @@ class ClientExtensionManager {
     await Promise.all(p);
   }
 
+  /**
+   * Retrieve the extension object for the given extension.
+   * @param {String} extName - The name of extension.
+   * @return {Object} extObj - The extension object.
+   */
   getExtObj(extName) {
     if (extName in this.extObjects) {
       return this.extObjects[extName];
