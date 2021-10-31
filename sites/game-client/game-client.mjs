@@ -53,7 +53,7 @@ class GameClient {
     this.token = token;
     let socket = this.socket;
     socket.on('connect', () => {
-      socket.emit('authenticate', {token: token});
+      socket.emit('authenticate', {token: token, kickIfConnected: true});
       socket.on('authenticated', () => {
         console.log('Authenticated!');
       });
