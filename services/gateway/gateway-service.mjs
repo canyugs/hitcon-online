@@ -138,7 +138,8 @@ class GatewayService {
         }
         socket.emit('authenticated', {});
         socket.decoded_token = verified;
-        this.addSocket(socket);
+        const kickIfConnected = (msg.kickIfConnected === true);
+        this.addSocket(socket, kickIfConnected);
       });
     });
   }
@@ -182,7 +183,7 @@ class GatewayService {
    * socket.decoded_token.uid should be populated and is the User ID.
    * @param {Socket} socket - The socket.io socket of the authorized user.
    */
-  async addSocket(socket) {
+  async addSocket(socket, kickIfConnected) {
     // This socket is authenticated, we are good to handle more events from it.
 
     const playerID = socket.decoded_token.sub;
@@ -191,9 +192,22 @@ class GatewayService {
     let ret = await this.rpcHandler.registerPlayer(playerID);
     if (!ret) {
       // Player already connected.
-      console.warn(`Player ${playerID} already connected`);
-      await this.notifyKicked(socket, 'Duplicate connection');
-      return;
+      if (!kickIfConnected) {
+        await this.notifyKicked(socket, 'Duplicate connection');
+        console.warn(`Player ${playerID} already connected and kickIfConnected=false`);
+        return;
+      }
+
+      // Try kick player.
+      await this.kickRemotePlayer(playerID);
+      // Try again in 0.5s.
+      await new Promise(resolve => setTimeout(resolve, 500));
+      ret = await this.rpcHandler.registerPlayer(playerID);
+      if (!ret) {
+        await this.notifyKicked(socket, 'Duplicate connection');
+        console.warn(`Player ${playerID} already connected but retry still failed`);
+        return;
+      }
     }
 
     // Load the player data.
