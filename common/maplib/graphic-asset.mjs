@@ -110,6 +110,22 @@ class GraphicAsset {
     info.srcY = charObj[2] * info.srcHeight;
     return info;
   }
+
+  /**
+   * Return if we have a particular character.
+   */
+  haveCharacter(char) {
+    if (typeof char !== 'string') {
+      return false;
+    }
+    if (!(char in this.config.characters)) {
+      return false;
+    }
+    if (!('D' in this.config.characters[char])) {
+      return false;
+    }
+    return true;
+  }
 }
 
 export default GraphicAsset;
