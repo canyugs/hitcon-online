@@ -52,17 +52,15 @@
 
 
 .user-action {
-  width: 39px;
-  height: 39px;
   background: #0658B7 0% 0% no-repeat padding-box;
   box-shadow: 0px 1px 3px #1A34525A;
   border-radius: 6px;
   margin-right: 17px;
+  padding: 2px;
 }
 
 .user-action > img {
   width: 28px;
   height: 28px;
   display:block;
-  margin:auto;
 }
