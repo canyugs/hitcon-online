@@ -135,7 +135,11 @@ class Standalone {
    */
   async s2s_sf_teleport(srcExt, playerID, kwargs, sfInfo) {
     const {mapCoord, nextState} = kwargs;
-    const result = await this.helper.teleport(playerID, mapCoord);
+    let allowOverlap = kwargs.allowOverlap;
+    if (allowOverlap !== false) {
+      allowOverlap = true;
+    }
+    const result = await this.helper.teleport(playerID, mapCoord, allowOverlap);
 
     if (result) return nextState;
     console.warn(`Player '${playerID}' cannot go to the place`);

@@ -281,7 +281,7 @@ class Standalone {
       return {status: 'error', reply: 'Invalid coordinate'};
     }
 
-    await this.helper.teleport(player.playerID, mapCoord);
+    await this.helper.teleport(player.playerID, mapCoord, true);
     return {status: 'ok'};
   }
 

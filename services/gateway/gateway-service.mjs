@@ -52,8 +52,8 @@ class GatewayService {
     this.extMan.setRpcHandlerFromGateway(this.rpcHandler);
     await this.rpcHandler.registerAsGateway();
     this.rpcHandler.registerRPC('callS2c', this.callS2c.bind(this));
-    this.rpcHandler.registerRPC('teleport', async (serviceName, playerID, mapCoord, facing) => {
-      return await this.teleportPlayer(playerID, MapCoord.fromObject(mapCoord), facing);
+    this.rpcHandler.registerRPC('teleport', async (serviceName, playerID, mapCoord, facing, allowOverlap) => {
+      return await this.teleportPlayer(playerID, MapCoord.fromObject(mapCoord), facing, allowOverlap);
     });
     this.rpcHandler.registerRPC('getToken', async (serviceName, playerID) => {
       return await this.handleGetToken(playerID);
@@ -339,7 +339,7 @@ class GatewayService {
         return;
       }
 
-      if (!(await this._teleportPlayerInternal(socket, updateMsg))) {
+      if (!(await this._teleportPlayerInternal(socket, updateMsg, false))) {
         failOnPlayerUpdate(socket);
         return;
       }
@@ -356,13 +356,14 @@ class GatewayService {
    * If `ghostMode` is specified in msg, this function will not fail.
    * @param {Socket} socket - TODO
    * @param {PlayerSyncMessage} msg - TODO
+   * @param {Boolean} allowOverlap - If true, disable occupation check.
    * @return {Boolean} - success or not
    */
-  async _teleportPlayerInternal(socket, msg) {
+  async _teleportPlayerInternal(socket, msg, allowOverlap=false) {
     const ret = await this._enterCoord(msg.mapCoord);
 
     // If the player was in ghost mode, ignore the occupation check.
-    if (!socket.playerData.ghostMode) {
+    if (!(socket.playerData.ghostMode || allowOverlap)) {
       // If the player moves in normal mode, check the occupation.
       if (!msg.ghostMode && !ret) {
         await this._leaveCoord(msg.mapCoord);
@@ -382,16 +383,19 @@ class GatewayService {
    * Teleport the player to the specified map coordinate (without any checking).
    * This function can be called by extension or trusted external code.
    */
-  async teleportPlayer(playerID, mapCoord, facing) {
+  async teleportPlayer(playerID, mapCoord, facing, allowOverlap) {
     if (!(playerID in this.socks)) {
       console.error(`Can't teleport ${playerID} who is not on our server.`);
       return false;
+    }
+    if (allowOverlap !== true) {
+      allowOverlap = false;
     }
     const socket = this.socks[playerID];
     const msg = PlayerSyncMessage.fromObject(this.socks[playerID].playerData);
     msg.facing = facing;
     msg.mapCoord = mapCoord;
-    return this._teleportPlayerInternal(socket, msg);
+    return this._teleportPlayerInternal(socket, msg, allowOverlap);
   }
 
   /**

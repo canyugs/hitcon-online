@@ -66,7 +66,7 @@ class Standalone {
       // Not target, no need to teleport.
       return;
     }
-    await this.helper.teleport(msg.playerID, target);
+    await this.helper.teleport(msg.playerID, target, true);
   }
 
   /**
