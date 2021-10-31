@@ -16,6 +16,15 @@
   z-index: 10; /* TODO tmp style, make utilpanel visible */
 }
 
+#rootdiv.focus-mode .utilpanel {
+  top: 0;
+  left: 0;
+  opacity: 1;
+  width: 320px;
+  height: 100vh;
+  border-radius: 0;
+}
+
 .utilpanel-tabs {
   display: flex;
   justify-content: center;

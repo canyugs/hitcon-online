@@ -86,6 +86,7 @@ absolute URL.
       <div id="overlay-right" class="overlay overlay--inactive"></div>
       <div id="overlay-centertop" class="overlay overlay--inactive"></div>
       <div id="main-view"></div>
+      <button id="exit-focus">Exit Fullscreen</button>
       <!-- used to block out the rest of the stuffs when model is visible -->
       <div id="modal-background" class="modal-background"></div>
       <div id="modal-container" class="modal-container"></div>
@@ -214,6 +215,7 @@ absolute URL.
         game.mainUI = new MainUI();
         game.mainUI.errorModal = new ErrorModal(game.mainUI);
         game.mapRendererOverlay = new MapRendererOverlay(game.mainUI);
+        game.mainUI.mapRendererOverlay = game.mapRendererOverlay;
 
         // TODO: Change map URL to follow the config in server side.
         game.mapData = await $.ajax({url: "/static/run/map/map.json", type: "GET",});
