@@ -58,6 +58,9 @@ class AvatarSelectionPage {
       newAvatar.addEventListener('click', this.setSelectedAvatar.bind(this, charName, newAvatar));
       container.appendChild(newAvatar);
     }
+
+    // select random one by default
+    container.children[Math.floor(Math.random() * container.children.length)].click();
   }
 
   /**
