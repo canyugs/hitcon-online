@@ -1,15 +1,29 @@
 <style>
   #iframe-overlay {
     height: 100%;
+    display: flex;
+    background-color: black;
   }
 
   #iframe-overlay iframe {
-    height: 100%;
     width: 100%;
+  }
+
+  #rootdiv.focus-mode #iframe-overlay iframe {
+    aspect-ratio: auto 16 / 9;
+    box-sizing: border-box;
+    border: 0;
+    margin: auto;
   }
 
   #rootdiv.focus-mode #iframe-expand {
     display: none;
+  }
+
+  #iframe-expand {
+    position: absolute;
+    top: 0;
+    right: 0;
   }
 </style>
 
