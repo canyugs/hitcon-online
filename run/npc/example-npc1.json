@@ -28,6 +28,7 @@
             "I want to join": "j1",
             "I want a face mask": "f1",
             "I don't want my face mask": "t1",
+            "I want a fuzzer": "u1",
             "Bye~": "d"
           }
         }
@@ -57,6 +58,14 @@
           "amount": "1",
           "maxAmount": "1",
           "itemName": "facemask",
+          "nextState": "d"
+        }
+      },
+      "u1": {
+        "func": "giveItem", "kwargs": {
+          "amount": "1",
+          "maxAmount": "1",
+          "itemName": "fuzzer",
           "nextState": "d"
         }
       },
