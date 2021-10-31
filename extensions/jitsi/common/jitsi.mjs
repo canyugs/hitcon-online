@@ -202,7 +202,6 @@ class JitsiHandler {
     }
     this.remoteTracks[participantId].push(track);
     const trackId = participantId + track.getType() + track.getId();
-    console.log('onRemoteTrack', trackId);
 
     if ($(`#jitsi-${participantId}-container`).length === 0) {
       $('#jitsi-remote-container').append(`
@@ -237,7 +236,6 @@ class JitsiHandler {
     if (track.getParticipantId() === null) return;
 
     const trackId = `${track.getParticipantId()}${track.getType()}${track.getId()}`;
-    console.log('onRemoteTrackRemove', trackId);
     try {
       track.detach($(`#${trackId}`));
     } catch (e) {
