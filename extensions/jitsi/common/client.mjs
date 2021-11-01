@@ -28,7 +28,15 @@ class JitsiContainer {
   }
 };
 
-class JitsiOverlay extends Overlay {
+/**
+ * This is a temporary overlay to put the Jitsi into fullscreen.
+ */
+class JitsiFullscreenOverlay extends Overlay {
+  /**
+   * Create the overlay, and add an event listener to put the Jitsi video into fullscreen when clicked.
+   * @constructor
+   * @param mainUI - main UI
+   */
   constructor(mainUI) {
     const dom = document.getElementById('jitsi-fullscreen-overlay');
     super(mainUI, dom);
@@ -76,7 +84,7 @@ class Client {
     this.container = new JitsiContainer(this.helper.mainUI);
     this.container.hide();
 
-    this.overlay = new JitsiOverlay(this.helper.mainUI);
+    this.overlay = new JitsiFullscreenOverlay(this.helper.mainUI);
 
     // Microphone button
     this.microphoneButton = new ToolbarButton('/static/extensions/jitsi/common/icons/microphone-off.svg', false);
@@ -155,7 +163,7 @@ class Client {
     this.settingTab.addDropdown('device', 'video', '影像輸入', (value) => {
       console.log('device video', value);
       if (this.videoDevice !== value && this.jitsiObj) {
-        //this.jitsiObj.createLocalTracks();
+        this.jitsiObj.createLocalTracks();
       }
       this.videoDevice = value;
     }, 0);
