@@ -5,7 +5,7 @@ import {createRnnoiseProcessor} from './rnnoise/index.js';
 
 const VOICE_INDICATOR_THRESHOLD = 3;
 
-// contstant for exponential smoothing
+// constant for exponential smoothing, deltaT = 0.1s, fc = 1/30 Hz
 const ALPHA = 0.0205;
 
 /**
