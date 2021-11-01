@@ -64,8 +64,8 @@ class DialogModal extends Modal {
       this.subjectDOM.innerHTML = subject;
       this.msgDOM.innerHTML = san_message;
 
-      this.btnContDOM.innerHTML = `<button id="dialog-btn-OK">${san_buttonText}</button>`;
-      const btnOK = document.getElementById('dialog-btn-OK');
+      this.btnContDOM.innerHTML = `<button class="dialog-btn-OK">${san_buttonText}</button>`;
+      const btnOK = document.getElementsByClassName('dialog-btn-OK');
 
       // Set the visibilities right.
       this.btnContDOM.classList.add('visible');
