@@ -23,7 +23,7 @@
           "func": "checkTeamStatus",
           "kwargs": {
             "indivMenu": "indivMenu",
-            "teamMenu": "teamMenu"
+            "teamMenu": "team1"
           }
         },
         "indivMenu": {
@@ -77,6 +77,33 @@
             "options": {
               "I'll check the code again.": "exit"
             }
+          }
+        },
+        "team1": {
+          "func": "showDialog",
+          "kwargs": {
+            "dialogs": "What do you want to do?",
+            "options": {
+              "Show team menu": "teamMenu",
+              "Teleport the team": "teleportTeam",
+              "Give team facemask": "giveItemTeam"
+            }
+          }
+        },
+        "teleportTeam": {
+          "func": "teamTeleport",
+          "kwargs": {
+            "mapCoord": {"mapName": "world1", "x": 10, "y": 15},
+            "nextState": "exit"
+          }
+        },
+        "giveItemTeam": {
+          "func": "teamGiveItem",
+          "kwargs": {
+            "maxAmount": 1,
+            "itemName": "facemask",
+            "nextState": "exit",
+            "errorState": "exit"
           }
         },
         "teamMenu": {
