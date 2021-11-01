@@ -40,7 +40,8 @@
       "notification",
       "npc",
       "playerlist",
-      "iframe"
+      "iframe",
+      "escape-room"
     ],
     "standalone": {
       "chat": "127.0.0.1:5020",
@@ -54,7 +55,8 @@
       "notification": "127.0.0.1:5028",
       "npc": "127.0.0.1:5029",
       "playerlist": "127.0.0.1:5030",
-      "iframe": "127.0.0.1:5031"
+      "iframe": "127.0.0.1:5031",
+      "escape-room": "127.0.0.1:5032"
     }
   },
   "publicAddress": "online.hitcon.org",
