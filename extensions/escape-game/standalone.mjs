@@ -562,6 +562,83 @@ class Standalone {
       return FSM_ERROR;
     }
   }
+
+  /**
+   * Teleport the entire team.
+   */
+  async s2s_sf_teamTeleport(srcExt, playerID, kwargs, sfInfo) {
+    const {mapCoord, nextState} = kwargs;
+
+    if (!this.playerToTeam.has(playerID)) {
+      console.error('Failure to teleport team for player, no team: ', playerID);
+      return FSM_ERROR;
+    }
+    const team = this.playerToTeam.get(playerID);
+
+    // Teleport everyone in the team.
+    let plist = [];
+    for (const pid of team.playerIDs) {
+      const p = this.helper.teleport(pid, mapCoord, true);
+      // true because we always allow overlap with teleportTeam or it won't work.
+      plist.push(p);
+    }
+
+    // Wait for the result and check if any failed.
+    const rlist = await Promise.all(plist);
+    let result = true;
+    for (let i = 0; i < rlist.length; i++) {
+      if (!rlist[i]) {
+        console.warn('Failed to teleport player: ', team.playerIDs[i], team.playerIDs);
+        result = false;
+      }
+    }
+    if (result) {
+      return nextState;
+    }
+    return FSM_ERROR;
+  }
+
+  /**
+   * Give an item to the entire team.
+   */
+  async s2s_sf_teamGiveItem(srcExt, playerID, kwargs, sfInfo) {
+    const {nextState, errorState} = kwargs;
+    let {amount, maxAmount, itemName} = kwargs;
+    if (!Number.isInteger(amount)) amount = 1;
+    if (!Number.isInteger(maxAmount) || maxAmount <= 0) maxAmount = -1;
+
+    // Check if we've a team.
+    if (!this.playerToTeam.has(playerID)) {
+      console.error('Failure to give item to team for player, no team: ', playerID);
+      return errorState;
+    }
+    const team = this.playerToTeam.get(playerID);
+    if (!team.isFinalized) {
+      console.error('Failure to give item to team for player, team not finalized: ', playerID, team);
+      return errorState;
+    }
+
+    // Give items to everyone.
+    let plist = [];
+    for (const pid of team.playerIDs) {
+      const p = this.helper.callS2sAPI('items', 'AddItem', pid, itemName, amount, maxAmount);
+      plist.push(p);
+    }
+
+    // Wait for the result and check if any failed.
+    const rlist = await Promise.all(plist);
+    let result = true;
+    for (let i = 0; i < rlist.length; i++) {
+      if (rlist[i].ok !== true) {
+        console.warn('Failed to give items to player: ', rlist[i], team.playerIDs[i], team.playerIDs);
+        result = false;
+      }
+    }
+    if (result) {
+      return nextState;
+    }
+    return errorState;
+  }
 }
 
 /**
