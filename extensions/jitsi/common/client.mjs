@@ -159,21 +159,23 @@ class Client {
 
     /* Audio and video input setting */
     this.settingTab = this.helper.getExtObj('setting')?.tab;
-    this.settingTab.addSubsection('general', 'device', '裝置設定', 10);
-    this.settingTab.addDropdown('device', 'video', '影像輸入', (value) => {
-      console.log('device video', value);
-      if (this.videoDevice !== value && this.jitsiObj) {
-        this.jitsiObj.createLocalTracks();
-      }
-      this.videoDevice = value;
-    }, 0);
-    this.settingTab.addDropdown('device', 'audio', '音訊輸入', (value) => {
-      console.log('device audio', value);
-      if (this.audioDevice !== value && this.jitsiObj) {
-        this.jitsiObj.createLocalTracks();
-      }
-      this.audioDevice = value;
-    }, 10);
+    if (this.settingTab) {
+      this.settingTab.addSubsection('general', 'device', '裝置設定', 10);
+      this.settingTab.addDropdown('device', 'video', '影像輸入', (value) => {
+        console.log('device video', value);
+        if (this.videoDevice !== value && this.jitsiObj) {
+          this.jitsiObj.createLocalTracks();
+        }
+        this.videoDevice = value;
+      }, 0);
+      this.settingTab.addDropdown('device', 'audio', '音訊輸入', (value) => {
+        console.log('device audio', value);
+        if (this.audioDevice !== value && this.jitsiObj) {
+          this.jitsiObj.createLocalTracks();
+        }
+        this.audioDevice = value;
+      }, 10);
+    }
 
     JitsiHandler.updateDeviceList(this.setSettingDeviceOptions.bind(this));
   }
@@ -266,7 +268,9 @@ class Client {
    *
    */
   setSettingDeviceOptions(deviceType, deviceList, currentDevice) {
-    this.settingTab.updateDropdownOptions('device', deviceType, deviceList, currentDevice);
+    if (this.settingTab) {
+      this.settingTab.updateDropdownOptions('device', deviceType, deviceList, currentDevice);
+    }
   }
 };
 

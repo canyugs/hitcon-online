@@ -103,7 +103,6 @@ class JitsiHandler {
     // Drop the current local tracks.
     try {
       await Promise.all(this.localTracks.map(track => track.dispose()));
-      console.log(this.room.getLocalTracks());
     } catch (e) {
       console.error('Failed to drop current local tracks: ', e);
     }
