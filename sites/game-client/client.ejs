@@ -35,7 +35,8 @@ absolute URL.
         This div is for stuff that's not yet being displayed.
         It is currently semi-transparent for debugging purpose.
         -->
-        <div id="map-render-overlay" class="container-center">
+        <div id="maprender-overlay">
+          <canvas id="backgroundcanvas"></canvas>
           <canvas id="mapcanvas"></canvas>
         </div>
         <div id="error-modal">
@@ -236,7 +237,7 @@ absolute URL.
         game.socket = game.io(game.socketURL, {reconnection: false});
 
         game.extMan = new ClientExtensionManager(game.socket, game.extensionList);
-        game.mapRenderer = new MapRenderer(document.querySelector('#mapcanvas'), game.map, game.gameState);
+        game.mapRenderer = new MapRenderer(document.querySelector('#mapcanvas'), document.querySelector('#backgroundcanvas'), game.map, game.gameState);
         if (window.query.disableRender) {
           game.mapRenderer.disableRenderForTesting();
         }
