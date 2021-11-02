@@ -100,10 +100,14 @@ body {
 }
 
 #mapcanvas {
-  z-index: 2;
+  z-index: 3;
 }
 
 #backgroundcanvas {
+  z-index: 2;
+}
+
+#outofboundcanvas {
   z-index: 1;
 }
 

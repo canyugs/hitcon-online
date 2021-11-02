@@ -31,17 +31,20 @@ class MapRenderer {
    * Create a new MapRender.
    * @param {Canvas} foregroundCanvas - The canvas to draw onto.
    * @param {Canvas} backgroundCanvas - The background canvas.
+   * @param {Canvas} outOfBoundCanvas - The canvas to draw out-of-bound tile.
    * @param {GameMap} map - The map object to retrieve the map information.
    * @param {GameState} gameState - The game state.
    */
-  constructor(foregroundCanvas, backgroundCanvas, map, gameState) {
+  constructor(foregroundCanvas, backgroundCanvas, outOfBoundCanvas, map, gameState) {
     this.canvas = foregroundCanvas;
     this.backgroundCanvas = backgroundCanvas;
+    this.outOfBoundCanvas = outOfBoundCanvas;
     this.map = map;
     this.gameState = gameState;
     this.gameClient = null; // will be initialized in this.setGameClient()
     this.ctx = foregroundCanvas.getContext('2d');
     this.backgroundCtx = backgroundCanvas.getContext('2d');
+    this.outOfBoundCtx = outOfBoundCanvas.getContext('2d');
 
     /**
      * viewerPosition is the **map coordinate** of the center of canvas.
@@ -215,6 +218,40 @@ class MapRenderer {
   }
 
   /**
+   * Render the out-of-bound tiles.
+   */
+  generateOutOfBoundBackground() {
+    const newWidth = this.canvas.width + MAP_CELL_SIZE;
+    const newHeight = this.canvas.height + MAP_CELL_SIZE;
+    if (this.outOfBoundCanvas.width === newWidth && this.outOfBoundCanvas.height === newHeight) {
+      return;
+    }
+
+    // update canvas size
+    // note that the size should be larger to provide the margin of translation
+    this.outOfBoundCanvas.width = newWidth;
+    this.outOfBoundCanvas.height = newHeight;
+
+    // draw
+    const outerSpaceRenderInfo = this.map.graphicAsset.getTile(...OUTER_SPACE_TILE);
+    for (let y = 0; y < this.outOfBoundCanvas.height; y += MAP_CELL_SIZE) {
+      for (let x = 0; x < this.outOfBoundCanvas.width; x += MAP_CELL_SIZE) {
+        this.outOfBoundCtx.drawImage(
+            outerSpaceRenderInfo.image,
+            outerSpaceRenderInfo.srcX,
+            outerSpaceRenderInfo.srcY,
+            outerSpaceRenderInfo.srcWidth,
+            outerSpaceRenderInfo.srcHeight,
+            x,
+            y,
+            MAP_CELL_SIZE,
+            MAP_CELL_SIZE,
+        );
+      }
+    }
+  }
+
+  /**
    * Render the background map to background canvas.
    * This function is not reentrant (guarded by the if-else at the entry of the function).
    */
@@ -280,6 +317,36 @@ class MapRenderer {
    * Use CSS transform to improve performance.
    * reference: https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Optimizing_canvas#scaling_canvas_using_css_transforms
    */
+  translateOutOfBoundBackground() {
+    if (this._previousViewerPosition === undefined) {
+      this._previousViewerPosition = new MapCoord('', NaN, NaN);
+    }
+
+    if (this._previousViewerPosition.equalsTo(this.viewerPosition)) {
+      return;
+    }
+
+    function decimalPartWithin01(num) {
+      if (num >= 0) {
+        return num % 1;
+      }
+      return (num + Math.floor(-num) + 1) % 1;
+    }
+
+    // Note that the size of this canvas is slightly larger than it should be.
+    // Therefore, translation within 1 MAP_CELL_SIZE should be safe.
+    const {x: mapX, y: mapY} = this.canvasToMapCoordinate(0, 0);
+    const translateX = -Math.floor(decimalPartWithin01(mapX) * MAP_CELL_SIZE);
+    const translateY = -Math.floor(decimalPartWithin01(this.outOfBoundCanvas.height - mapY) * MAP_CELL_SIZE);
+    this.outOfBoundCanvas.style.transform = `translate(${translateX}px, ${translateY}px)`;
+
+    this._previousViewerPosition = MapCoord.fromObject(this.viewerPosition);
+  }
+
+  /**
+   * Use CSS transform to improve performance.
+   * reference: https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Optimizing_canvas#scaling_canvas_using_css_transforms
+   */
   translateBackground() {
     if (this._translateBackgroundPreviousX === undefined) {
       this._translateBackgroundPreviousX = Infinity;
@@ -294,8 +361,6 @@ class MapRenderer {
     const translateX = -Math.floor(mapX * MAP_CELL_SIZE);
     const translateY = -Math.floor(this.backgroundCanvas.height - (mapY * MAP_CELL_SIZE));
     this.backgroundCanvas.style.transform = `translate(${translateX}px, ${translateY}px)`;
-
-    // TODO: translate out of bound background
 
     this._translateBackgroundPreviousX = mapX;
     this._translateBackgroundPreviousY = mapY;
@@ -312,6 +377,8 @@ class MapRenderer {
     this.updateViewerPosition();
 
     // draw background
+    this.generateOutOfBoundBackground();
+    this.translateOutOfBoundBackground();
     this.generateBackground();
     this.translateBackground();
 
