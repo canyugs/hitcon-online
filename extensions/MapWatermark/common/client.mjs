@@ -34,16 +34,16 @@ class Client {
         image.onerror = () => {
           reject(`error on loading ${image.src}`);
         };
-        mapWatermarks[index].image = image;  
+        mapWatermarks[index].image = image;
       }));
     });
 
     await Promise.all(arr_promise).then(() => {
-      this.helper.mapRenderer.registerCustomizedLayerToDraw(
-        LAYER_MAPWATERMARK.zIndex, 
-        LAYER_MAPWATERMARK.layerName, 
-        '_drawWatermark', 
-        mapWatermarks
+      this.helper.mapRenderer.registerCustomizedLayerToDrawBackground(
+          LAYER_MAPWATERMARK.zIndex,
+          LAYER_MAPWATERMARK.layerName,
+          '_drawWatermark',
+          mapWatermarks,
       );
     }).catch((err_msg) => {
       console.error('Failed to initialize watermark: ', err_msg);
