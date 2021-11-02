@@ -8,6 +8,7 @@ const fontStyle = '12px serif';
 
 const LAYER_PLAYER_IMAGE = {zIndex: 10, layerName: 'playerImage'};
 const LAYER_PLAYER_NAME = {zIndex: 15, layerName: 'playerName'};
+const LAYER_OBJECT = {zIndex: 1, layerName: 'object'};
 
 const OUTER_SPACE_TILE = ['ground', 'H']; // the parameters of GraphicAsset.getTile()
 
@@ -60,11 +61,19 @@ class MapRenderer {
      * Refer to `this.registerCustomizedLayerToDraw()` for more details.
      */
     this.customizedLayers = [];
+    /**
+     * @member {Array} customizedBackgroundLayers - Customized layer that needs to be rendered to background canvas.
+     * Refer to `this.registerCustomizedLayerToDrawBackground()` for more details.
+     */
+    this.customizedBackgroundLayers = [];
 
     // 'playerImage' and 'playerName' are layers defined and used only by MapRenderer
     this.registerCustomizedLayerToDraw(LAYER_PLAYER_IMAGE.zIndex, LAYER_PLAYER_IMAGE.layerName, '_drawManyCharacterImage', this.gameState.players);
     this.registerCustomizedLayerToDraw(LAYER_PLAYER_NAME.zIndex, LAYER_PLAYER_NAME.layerName, '_drawManyCharacterName', this.gameState.players);
-    this.registerCustomizedLayerToDraw(1, 'object'); // TODO: registerCustomizedLayerToDraw(background=true);
+
+    // other background layers
+    this.registerCustomizedLayerToDrawBackground(-100000, 'ground');
+    this.registerCustomizedLayerToDrawBackground(LAYER_OBJECT.zIndex, LAYER_OBJECT.layerName);
   }
 
   /**
@@ -218,6 +227,19 @@ class MapRenderer {
   }
 
   /**
+   * Similar to registerCustomizedLayerToDraw but draws to background canvas.
+   * @param {Number} zIndex - Should be an integer. Refer to the definition of 'z-index' in CSS.
+   * @param {String} layerName - The layer to be drawn.
+   * @param {String} renderFunction - Optional. The rendering function used to render this layer.
+   * @param {any} renderArgs - Optional. The optional argument if renderFunction requires one.
+   */
+  registerCustomizedLayerToDrawBackground(zIndex, layerName, renderFunction, renderArgs) {
+    // TODO: use binary search and Array.prototype.splice() to improve performance
+    this.customizedBackgroundLayers.push([zIndex, layerName, renderFunction, renderArgs]);
+    this.customizedBackgroundLayers.sort((a, b) => a[0] - b[0]);
+  }
+
+  /**
    * Render the out-of-bound tiles.
    */
   generateOutOfBoundBackground() {
@@ -275,37 +297,36 @@ class MapRenderer {
     this.backgroundCanvas.height = mapSize.height * MAP_CELL_SIZE;
 
     // draw background
-    // TODO: other layers that will not be changed
-    for (let mapY = 0; mapY < mapSize.height; ++mapY) {
-      for (let mapX = 0; mapX < mapSize.width; ++mapX) {
-        const renderInfo = this.map.getCellRenderInfo(new MapCoord(mapName, mapX, mapY), 'ground');
-        if (renderInfo === null) continue;
-
-        const canvasX = mapX * MAP_CELL_SIZE;
-        const canvasY = this.backgroundCanvas.height - renderInfo.srcHeight - mapY * MAP_CELL_SIZE;
-        this.backgroundCtx.drawImage(
-            renderInfo.image,
-            renderInfo.srcX,
-            renderInfo.srcY,
-            renderInfo.srcWidth,
-            renderInfo.srcHeight,
-            canvasX,
-            canvasY,
-            MAP_CELL_SIZE,
-            MAP_CELL_SIZE,
-        );
-      }
-
-      // avoid blocking the event loop
-      await new Promise((resolve) => {
-        setTimeout(resolve, 0);
-      });
-    }
-
-    // draw watermarks
-    for (const [, , renderFunction, renderArgs] of this.customizedLayers) {
+    for (const [, layerName, renderFunction, renderArgs] of this.customizedBackgroundLayers) {
       if (renderFunction === '_drawWatermark') {
         this._drawWatermark(renderArgs);
+      } else {
+        // draw layer
+        for (let mapY = 0; mapY < mapSize.height; ++mapY) {
+          for (let mapX = 0; mapX < mapSize.width; ++mapX) {
+            const renderInfo = this.map.getCellRenderInfo(new MapCoord(mapName, mapX, mapY), layerName);
+            if (renderInfo === null) continue;
+
+            const canvasX = mapX * MAP_CELL_SIZE;
+            const canvasY = this.backgroundCanvas.height - renderInfo.srcHeight - mapY * MAP_CELL_SIZE;
+            this.backgroundCtx.drawImage(
+                renderInfo.image,
+                renderInfo.srcX,
+                renderInfo.srcY,
+                renderInfo.srcWidth,
+                renderInfo.srcHeight,
+                canvasX,
+                canvasY,
+                MAP_CELL_SIZE,
+                MAP_CELL_SIZE,
+            );
+          }
+
+          // avoid blocking the event loop
+          await new Promise((resolve) => {
+            setTimeout(resolve, 0);
+          });
+        }
       }
     }
 
