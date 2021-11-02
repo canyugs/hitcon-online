@@ -29,7 +29,8 @@ class DialogModal extends Modal {
     let triggered = false;
     const p = new Promise((resolve, reject) => {
       for (const btns of btnList) {
-        for (const btn of btns) {
+        const btns_ = HTMLCollection.prototype.isPrototypeOf(btns) ? btns : [btns];
+        for (const btn of btns_) {
           const f = (btn) => {
             // Extra layer of closure so we can pass btn in.
             return () => {
