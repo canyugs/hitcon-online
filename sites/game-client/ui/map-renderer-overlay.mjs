@@ -4,7 +4,7 @@
 import {MAP_CELL_SIZE} from '/static/sites/game-client/map-renderer.mjs';
 import Overlay from './overlay.mjs';
 
-const MAP_RENDERER_DIV = 'map-render-overlay';
+const MAP_RENDERER_DIV = 'maprender-overlay';
 
 class MapRendererOverlay extends Overlay {
   /**

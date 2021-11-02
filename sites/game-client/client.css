@@ -35,10 +35,6 @@ body {
   z-index: -10;
 }
 
-#mapcanvas {
-  box-sizing: content-box;
-}
-
 #avatar-selection-div {
   position: absolute;
   top: 0px;
@@ -87,13 +83,28 @@ body {
   overflow: auto;
 }
 
-#map-render-overlay {
+#maprender-overlay {
   width: 100%;
   height: 100%;
   /* We want to make sure that 100% width/height doesn't result in overflow. */
   box-sizing: border-box;
   /* disable overflow so that the oversized canvas can be center-aligned automatically */
   overflow: hidden;
+  position: relative;
+}
+
+#maprender-overlay canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+#mapcanvas {
+  z-index: 2;
+}
+
+#backgroundcanvas {
+  z-index: 1;
 }
 
 .overlay {

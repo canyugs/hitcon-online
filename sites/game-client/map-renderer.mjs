@@ -29,16 +29,19 @@ const OUTER_SPACE_TILE = ['ground', 'H']; // the parameters of GraphicAsset.getT
 class MapRenderer {
   /**
    * Create a new MapRender.
-   * @param {Canvas} canvas - The canvas to draw onto.
+   * @param {Canvas} foregroundCanvas - The canvas to draw onto.
+   * @param {Canvas} backgroundCanvas - The background canvas.
    * @param {GameMap} map - The map object to retrieve the map information.
    * @param {GameState} gameState - The game state.
    */
-  constructor(canvas, map, gameState) {
-    this.canvas = canvas;
+  constructor(foregroundCanvas, backgroundCanvas, map, gameState) {
+    this.canvas = foregroundCanvas;
+    this.backgroundCanvas = backgroundCanvas;
     this.map = map;
     this.gameState = gameState;
     this.gameClient = null; // will be initialized in this.setGameClient()
-    this.ctx = canvas.getContext('2d');
+    this.ctx = foregroundCanvas.getContext('2d');
+    this.backgroundCtx = backgroundCanvas.getContext('2d');
 
     /**
      * viewerPosition is the **map coordinate** of the center of canvas.
@@ -58,7 +61,7 @@ class MapRenderer {
     // 'playerImage' and 'playerName' are layers defined and used only by MapRenderer
     this.registerCustomizedLayerToDraw(LAYER_PLAYER_IMAGE.zIndex, LAYER_PLAYER_IMAGE.layerName, '_drawManyCharacterImage', this.gameState.players);
     this.registerCustomizedLayerToDraw(LAYER_PLAYER_NAME.zIndex, LAYER_PLAYER_NAME.layerName, '_drawManyCharacterName', this.gameState.players);
-    this.registerCustomizedLayerToDraw(1, 'object');
+    this.registerCustomizedLayerToDraw(1, 'object'); // TODO: registerCustomizedLayerToDraw(background=true);
   }
 
   /**
@@ -212,6 +215,93 @@ class MapRenderer {
   }
 
   /**
+   * Render the background map to background canvas.
+   * This function is not reentrant (guarded by the if-else at the entry of the function).
+   */
+  async generateBackground() {
+    // There should be at most one thread doing this job in client's browser.
+    if (this._generateBackgroundLock !== undefined) {
+      return;
+    }
+    this._generateBackgroundLock = true;
+
+    // If the current map is not changed, no need to rerender.
+    const mapName = this.viewerPosition.mapName;
+    if (this._currentBackgroundMapName === mapName) {
+      this._generateBackgroundLock = undefined;
+      return;
+    }
+
+    // set canvas size
+    const mapSize = this.map.getMapSize(mapName);
+    this.backgroundCanvas.width = mapSize.width * MAP_CELL_SIZE;
+    this.backgroundCanvas.height = mapSize.height * MAP_CELL_SIZE;
+
+    // draw background
+    // TODO: other layers that will not be changed
+    for (let mapY = 0; mapY < mapSize.height; ++mapY) {
+      for (let mapX = 0; mapX < mapSize.width; ++mapX) {
+        const renderInfo = this.map.getCellRenderInfo(new MapCoord(mapName, mapX, mapY), 'ground');
+        if (renderInfo === null) continue;
+
+        const canvasX = mapX * MAP_CELL_SIZE;
+        const canvasY = this.backgroundCanvas.height - renderInfo.srcHeight - mapY * MAP_CELL_SIZE;
+        this.backgroundCtx.drawImage(
+            renderInfo.image,
+            renderInfo.srcX,
+            renderInfo.srcY,
+            renderInfo.srcWidth,
+            renderInfo.srcHeight,
+            canvasX,
+            canvasY,
+            MAP_CELL_SIZE,
+            MAP_CELL_SIZE,
+        );
+      }
+
+      // avoid blocking the event loop
+      await new Promise((resolve) => {
+        setTimeout(resolve, 0);
+      });
+    }
+
+    // draw watermarks
+    for (const [, , renderFunction, renderArgs] of this.customizedLayers) {
+      if (renderFunction === '_drawWatermark') {
+        this._drawWatermark(renderArgs);
+      }
+    }
+
+    this._currentBackgroundMapName = mapName;
+    this._generateBackgroundLock = undefined;
+  }
+
+  /**
+   * Use CSS transform to improve performance.
+   * reference: https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Optimizing_canvas#scaling_canvas_using_css_transforms
+   */
+  translateBackground() {
+    if (this._translateBackgroundPreviousX === undefined) {
+      this._translateBackgroundPreviousX = Infinity;
+      this._translateBackgroundPreviousY = Infinity;
+    }
+
+    const {x: mapX, y: mapY} = this.canvasToMapCoordinate(0, 0);
+    if (this._translateBackgroundPreviousX === mapX && this._translateBackgroundPreviousY === mapY) {
+      return;
+    }
+
+    const translateX = -Math.floor(mapX * MAP_CELL_SIZE);
+    const translateY = -Math.floor(this.backgroundCanvas.height - (mapY * MAP_CELL_SIZE));
+    this.backgroundCanvas.style.transform = `translate(${translateX}px, ${translateY}px)`;
+
+    // TODO: translate out of bound background
+
+    this._translateBackgroundPreviousX = mapX;
+    this._translateBackgroundPreviousY = mapY;
+  }
+
+  /**
    * Draw everything onto the canvas.
    */
   draw() {
@@ -222,9 +312,11 @@ class MapRenderer {
     this.updateViewerPosition();
 
     // draw background
-    this._drawEveryCellWrapper(this._drawLayer.bind(this, 'ground'));
+    this.generateBackground();
+    this.translateBackground();
 
     // draw foreground
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     for (const [, layerName, renderFunction, renderArgs] of this.customizedLayers) {
       switch (renderFunction) {
         case '_drawManyCharacterImage':
@@ -241,10 +333,6 @@ class MapRenderer {
 
         case '_drawOneCharacterName':
           this._drawOneCharacterName(renderArgs);
-          break;
-
-        case '_drawWatermark':
-          this._drawWatermark(renderArgs);
           break;
 
         default:
@@ -276,23 +364,9 @@ class MapRenderer {
     };
     const mapSize = this.map.getMapSize(this.viewerPosition.mapName);
 
-    const outerSpaceRenderInfo = this.map.graphicAsset.getTile(...OUTER_SPACE_TILE);
     for (let mapY = firstCellMapCoordInt.y; mapY <= lastCellMapCoordInt.y; ++mapY) {
       for (let mapX = firstCellMapCoordInt.x; mapX <= lastCellMapCoordInt.x; ++mapX) {
         if (mapX < 0 || mapX >= mapSize.width || mapY < 0 || mapY >= mapSize.height) {
-          // out of bound
-          const canvasCoordinate = this.mapToCanvasCoordinate(new MapCoord(this.viewerPosition.mapName, mapX, mapY));
-          this.ctx.drawImage(
-            outerSpaceRenderInfo.image,
-            outerSpaceRenderInfo.srcX,
-            outerSpaceRenderInfo.srcY,
-            outerSpaceRenderInfo.srcWidth,
-            outerSpaceRenderInfo.srcHeight,
-            canvasCoordinate.x,
-            canvasCoordinate.y - outerSpaceRenderInfo.srcHeight,
-            MAP_CELL_SIZE,
-            MAP_CELL_SIZE,
-          );
           continue;
         }
         const coord = new MapCoord(this.viewerPosition.mapName, mapX, mapY);
@@ -409,15 +483,17 @@ class MapRenderer {
    * @param {watermarks} players - The watermarks to be drawn. Refer to extensions/MapWatermark for format.
    */
   _drawWatermark(watermarks) {
-    watermarks.forEach((watermark) => {
-      watermark.mapCoords.forEach((mapCoord) => {
-        // Check the player is in the same map
-        if (this.gameClient.playerInfo.mapCoord.mapName !== mapCoord.mapName) {
-          return;
+    for (const watermark of watermarks) {
+      for (const mapCoord of watermark.mapCoords) {
+        // check if watermark is in current map
+        if (mapCoord.mapName !== this.viewerPosition.mapName) {
+          continue;
         }
 
-        const canvasCoordinate = this.mapToCanvasCoordinate(mapCoord);
-        const topLeftCanvasCoord = Object.assign({}, canvasCoordinate);
+        const topLeftCanvasCoord = {
+          x: mapCoord.x * MAP_CELL_SIZE,
+          y: this.backgroundCanvas.height - mapCoord.y * MAP_CELL_SIZE,
+        };
 
         // adjust horizontal
         switch (watermark.position) {
@@ -442,21 +518,11 @@ class MapRenderer {
             break;
         }
 
-        // Check the watermark is inside the player's viewport
-        const rightBottomCanvasCoord = {x: topLeftCanvasCoord.x + watermark.dWidth, y: topLeftCanvasCoord.y + watermark.dHeight};
-        if (!this.insideViewport(topLeftCanvasCoord, rightBottomCanvasCoord)) {
-          return;
-        }
-
         // if dWidth, dHeight undefined, then use sWidth, sHeight instead
-        if (!watermark.dWidth) {
-          watermark.dWidth = watermark.sWidth;
-        }
-        if (!watermark.dHeight) {
-          watermark.dHeight = watermark.sHeight;
-        }
+        const dWidth = watermark.dWidth ?? watermark.sWidth;
+        const dHeight = watermark.dHeight ?? watermark.sHeight;
 
-        this.ctx.drawImage(
+        this.backgroundCtx.drawImage(
             watermark.image,
             watermark.srcX,
             watermark.srcY,
@@ -464,11 +530,11 @@ class MapRenderer {
             watermark.sHeight,
             topLeftCanvasCoord.x,
             topLeftCanvasCoord.y,
-            watermark.dWidth,
-            watermark.dHeight,
+            dWidth,
+            dHeight,
         );
-      });
-    });
+      }
+    }
   }
 }
 
