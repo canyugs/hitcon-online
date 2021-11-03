@@ -14,7 +14,7 @@ export function tilesetTransform(tileset) {
     }
   }
 
-  const {name, ext} = path.parse(tileset.image);
+  const {ext} = path.parse(tileset.image);
 
   const imageSrc = {
     name: tileset.name,

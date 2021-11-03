@@ -6,35 +6,39 @@ import {mapTransform} from './map.mjs';
 import {tilesetTransform} from './assets.mjs';
 import {readFileFromJSON, writeFileToJSON} from './utils.mjs';
 
-const TILED_PROJECT_DIR = '../../tiled_maps';
-const ONLINE_PROJECT_DIR = '../../run/map';
+
+// Setup path first
+const TILED_PROJECT_DIR = '../../../hitcon-cat-adventure/tiled_maps';
+const ONLINE_MAP_CONFIG_DIR = '../../../hitcon-cat-adventure/run/map';
+
 
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
-const mapsDir = path.join(__dirname, `${TILED_PROJECT_DIR}/maps/map01`);
+const mapsDir = path.join(__dirname, `${TILED_PROJECT_DIR}/maps`);
 const tilesetsDir = path.join(__dirname, `${TILED_PROJECT_DIR}/tilesets`);
 
-const mapsConfigPath = path.join(__dirname, `${ONLINE_PROJECT_DIR}/map.json`);
-const assetsConfigPath = path.join(__dirname, `${ONLINE_PROJECT_DIR}/assets.json`);
+const mapsConfigPath = path.join(__dirname, `${ONLINE_MAP_CONFIG_DIR}/map.json`);
+const assetsConfigPath = path.join(__dirname, `${ONLINE_MAP_CONFIG_DIR}/assets.json`);
 const currentAssetsConfig = readFileFromJSON(assetsConfigPath);
 
 const newMaps = {};
 const mapNameList = [];
 const tmpLayerMap = {};
 const tmpImagesDef = {};
-const tmpTilesets = {};
+const tilesetSource = {};
+const allTilesets = {};
 
 console.log(`read tilesets from ${tilesetsDir}`);
 fs.readdirSync(tilesetsDir).forEach((file) => {
   const pathData = path.parse(file);
   const {ext, name} = pathData;
   if (ext === '.json') {
-    console.log(` > add ${file}`);
+    //console.log(` > add ${file}`);
     const data = readFileFromJSON(`${tilesetsDir}/${file}`);
 
     // Copy source image to online
     const imageRealSrc = path.join(tilesetsDir, data.image);
     const {ext: destExt} = path.parse(imageRealSrc);
-    const imageRealDest = path.resolve(path.join(__dirname, `${data.name}${destExt}`));
+    const imageRealDest = path.resolve(path.join(__dirname, ONLINE_MAP_CONFIG_DIR, `${data.name}${destExt}`));
     fs.copyFileSync(imageRealSrc, imageRealDest);
 
     // export image and tiles definition
@@ -44,74 +48,138 @@ fs.readdirSync(tilesetsDir).forEach((file) => {
   }
 });
 
-// TODO read other layer not only 'ground';
-// Combine multiple maps to one world
-console.log(`read maps from ${mapsDir}`);
-fs.readdirSync(mapsDir).forEach((file) => {
-  const {ext, name} = path.parse(file);
+// read data from child maps.
+const targetMap = path.join(mapsDir, 'map01');
+const {base} = path.parse(targetMap);
+
+console.log(`read maps from ${targetMap}`);
+fs.readdirSync(targetMap).forEach((file) => {
+  const {ext, name:mapName} = path.parse(file);
   if (ext === '.json') {
-    console.log(` > add ${file}`);
-    const data = readFileFromJSON(`${mapsDir}/${file}`);
-    newMaps[name] = data;
-    mapNameList.push(name);
+    //console.log(` > add ${file}`);
+    const data = readFileFromJSON(`${targetMap}/${file}`);
+
+    newMaps[mapName] = data;
+    mapNameList.push(mapName);
+    tilesetSource[mapName] = {};
+    const gidRange = [];
     data.tilesets.forEach((tileset) => {
-      const {name, ext} = path.parse(tileset.source);
-      tmpTilesets[name] = tileset;
+      const {source} = tileset;
+      if (source === undefined) {
+        console.error('embed tileset unsupport');
+      }
+      const {name: tilesetName} = path.parse(source);
+      // Tileset source for all maps;
+      gidRange.push({...tileset, name: tilesetName});
+      tilesetSource[mapName]
+      tilesetSource[mapName][tilesetName] = tileset;
+      allTilesets[tilesetName] = tileset;
     });
+    console.log(gidRange);
   }
 });
 
-const worldWidth = 200;
-const worldHeight = 100;
-const worldTotalCell = worldWidth * worldHeight;
-const worldName = 'world1';
-const mapWidth = newMaps['map01-01'].width;
-const mapHeight = newMaps['map01-01'].height;
+//console.log('tileset source for all maps\n', tilesetSource)
+console.log({allTilesets});
 
-const newLayer = [];
+function combineSingleLayer(childMaps, layerName) {
+  const worldWidth = 200;
+  const worldHeight = 100;
+  const mapWidth = 40;
+  const mapHeight = 50;
+  const combinedLayer = [];
 
-// 01 ~ 05
-for (let row = 0; row < mapHeight; row++) {
-  const startIdx = mapWidth * row;
-  const endIdx = (mapWidth * row) + mapWidth;
-  for (let idx = 1; idx < 6; idx++) {
-    const mapName = `map01-0${idx}`;
-    const data = newMaps[mapName].layers[0].data.slice(startIdx, endIdx);
-    newLayer.push(...data);
+  // map01 ~ 05
+  for (let row = 0; row < mapHeight; row++) {
+    const startIdx = mapWidth * row;
+    const endIdx = (mapWidth * row) + mapWidth;
+    for (let idx = 1; idx < 6; idx++) {
+      const mapName = `${base}-0${idx}`;
+      tilesetSource[mapName]
+      const targetLayer = childMaps[mapName].layers
+        .filter((layer) => layer.name.toLowerCase() === layerName)[0];
+      const data = targetLayer.data.slice(startIdx, endIdx);
+      combinedLayer.push(...data);
+    }
   }
+
+  // map06 ~ 10
+  for (let row = 0; row < mapHeight; row++) {
+    const startIdx = mapWidth * row;
+    const endIdx = (mapWidth * row) + mapWidth;
+    for (let idx = 6; idx < 11; idx++) {
+      const numStr = idx < 10 ? `0${idx}` : idx;
+      const mapName = `${base}-${numStr}`;
+      const targetLayer = childMaps[mapName].layers
+        .filter((layer) => layer.name.toLowerCase() === layerName)[0];
+      const data = targetLayer.data.slice(startIdx, endIdx);
+      combinedLayer.push(...data);
+    }
+  }
+  const adjLayer = combinedLayer.map((gid) => {
+    let index = 0;
+
+  });
+  return adjLayer;
 }
 
-// 06 ~ 10
-for (let row = 0; row < mapHeight; row++) {
-  const startIdx = mapWidth * row;
-  const endIdx = (mapWidth * row) + mapWidth;
-  for (let idx = 6; idx < 11; idx++) {
-    const numStr = idx < 10 ? `0${idx}` : idx;
-    const mapName = `map01-${numStr}`;
-    const data = newMaps[mapName].layers[0].data.slice(startIdx, endIdx);
-    newLayer.push(...data);
-  }
+function combineGroupLayer(childMaps, layerName) {
+  const worldWidth = 200;
+  const worldHeight = 100;
+  const mapWidth = 40;
+  const mapHeight = 50;
+  const combinedLayer = [];
+  // TODO
+  return combinedLayer;
 }
 
-// TODO support multiple tilesets
+
+const layerTemplate = {
+  width: 200,
+  height: 100,
+  type: 'tilelayer',
+  name: 'template',
+  x: 0,
+  y: 0,
+  data: null
+}
+
+
 const mapDataTemplate = {
-  height: worldHeight,
-  width: worldWidth,
+  width: 200,
+  height: 100,
   layers: [
     {
-      data: newLayer,
-      height: worldHeight,
-      width: worldWidth,
+      ...layerTemplate,
+      data: combineSingleLayer(newMaps, 'ground'),
       name: 'ground',
-      type: 'tilelayer',
-      x: 0,
-      y: 0,
     },
+    {
+      ...layerTemplate,
+      data: combineSingleLayer(newMaps, 'background'),
+      name: 'background',
+    },
+    {
+      ...layerTemplate,
+      data: combineSingleLayer(newMaps, 'foreground'),
+      name: 'foreground',
+    },
+    {
+      ...layerTemplate,
+      data: combineSingleLayer(newMaps, 'wall'),
+      name: 'wall',
+    },
+//     {
+//       ...layerTemplate,
+//       data: combineGroupLayer(newMaps, 'jitsi'),
+//       name: 'jitsi',
+//     },
   ],
   tilesets: [],
   type: 'map',
 };
 
+// To covert mapData to fit canvas;
 const {mapData, tilesetSrc} = mapTransform(mapDataTemplate);
 
 const originalImages = [
@@ -132,9 +200,6 @@ const originalImages = [
 originalImages.forEach((img) => {
   tmpImagesDef[img.name] = img;
 });
-
-const wallLayer = Array(worldTotalCell).fill(false);
-const objectLayer = Array(worldTotalCell).fill(null);
 
 const originalAssets = {
   'G': [
@@ -217,26 +282,26 @@ const originalCellSets = [
   },
 ];
 
+const worldName = 'world1';
+
 const newMapsConfig = {};
 newMapsConfig[worldName] = {
   startX: 0,
   startY: 0,
-  width: worldWidth,
-  height: worldHeight,
-  wall: wallLayer,
-  object: objectLayer,
+  width: 200,
+  height: 100,
   ...mapData,
   cellSets: originalCellSets,
 };
 
-writeFileToJSON('./map.json', newMapsConfig);
+writeFileToJSON(mapsConfigPath, newMapsConfig);
 
 
 const newAssetsConfig = {
   layerMap: {
     ground: {},
-    wall: {},
-    object: {},
+    background: {},
+    foreground: {},
   },
   images: [],
   characters: {
@@ -316,12 +381,16 @@ newAssetsConfig.layerMap.ground = {
   ...tmpLayerMap['Exterior_w41'],
   ...originalAssets,
 };
-
-newAssetsConfig.layerMap.object = {
+newAssetsConfig.layerMap.background = {
+  ...tmpLayerMap['Exterior_w41'],
+  ...originalAssets,
+};
+newAssetsConfig.layerMap.foreground = {
   ...tmpLayerMap['Exterior_w41'],
   ...originalAssets,
 };
 
-writeFileToJSON('./assets.json', newAssetsConfig);
+
+writeFileToJSON(assetsConfigPath, newAssetsConfig);
 
 
