@@ -7,7 +7,6 @@ import InteractiveObjectClientBaseClass from '/static/common/interactive-object/
 
 const TERMINAL_CONTAINER = 'terminal-container';
 const TERMINAL_DIV = 'terminal';
-const TERMINAL_SERVER = '127.0.0.1:5050';
 
 class TerminalModal extends Modal {
   constructor(mainUI) {
@@ -67,6 +66,7 @@ class Client {
     this.socket = null;
     this.term = null;
     this.roomId = null;
+    this.terminalServerAddress = null;
 
     this.terminals = new Map();
   }
@@ -80,6 +80,9 @@ class Client {
       const clientInfo = await this.helper.callC2sAPI('escape-game', 'getTerminalClientInfo', this.helper.defaultTimeout, terminalId);
       this.terminals.set(terminalId, new TerminalObject(this.helper, terminalId, clientInfo));
     }
+
+    this.terminalServerAddress = await this.helper.callC2sAPI('escape-game', 'getTerminalServerAddress', this.helper.defaultTimeout);
+    console.log(this.terminalServerAddress);
   }
 
   /**
@@ -93,7 +96,7 @@ class Client {
     this.term = new Terminal({cursorBlink: true});
     this.term.open(document.getElementById(TERMINAL_DIV));
 
-    this.socket = window.io(TERMINAL_SERVER, {reconnection: false});
+    this.socket = window.io(this.terminalServerAddress, {reconnection: false});
 
     this.socket.on('connect', () => {
       this.term.write('\r\n*** Connected ***\r\n');

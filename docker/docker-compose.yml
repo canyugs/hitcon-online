@@ -11,6 +11,8 @@ services:
     command:  bash -c "yarn && ./run-all.sh"
     depends_on:
       - redis
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   redis:
     image: redis
@@ -24,3 +26,5 @@ services:
     depends_on:
       - online
       - redis
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
