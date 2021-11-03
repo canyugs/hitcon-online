@@ -73,6 +73,7 @@ class MapRenderer {
 
     // other background layers
     this.registerCustomizedLayerToDrawBackground(-100000, 'ground');
+    this.registerCustomizedLayerToDrawBackground(-99999, 'background');
     this.registerCustomizedLayerToDrawBackground(LAYER_OBJECT.zIndex, LAYER_OBJECT.layerName);
   }
 
@@ -469,7 +470,13 @@ class MapRenderer {
    * @param {MapCoord} mapCoord - The map coordinate to be drawn.
    */
   _drawLayer(layerName, mapCoord) {
-    const renderInfo = this.map.getCellRenderInfo(mapCoord, layerName);
+    let renderInfo;
+    try {
+      renderInfo = this.map.getCellRenderInfo(mapCoord, layerName);
+    } catch (e) {
+      console.log(e, e.stack);
+      console.log(layerName, mapCoord);
+    }
     if (renderInfo === null) return;
 
     const canvasCoordinate = this.mapToCanvasCoordinate(mapCoord);

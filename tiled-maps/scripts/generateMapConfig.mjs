@@ -26,9 +26,10 @@ const tmpLayerMap = {};
 const tmpImagesDef = {};
 const tilesetSource = {};
 const allTilesets = {};
+const tilesetDirectory = {};
 
 console.log(`read tilesets from ${tilesetsDir}`);
-fs.readdirSync(tilesetsDir).forEach((file) => {
+fs.readdirSync(tilesetsDir).forEach((file, index) => {
   const pathData = path.parse(file);
   const {ext, name} = pathData;
   if (ext === '.json') {
@@ -42,11 +43,64 @@ fs.readdirSync(tilesetsDir).forEach((file) => {
     fs.copyFileSync(imageRealSrc, imageRealDest);
 
     // export image and tiles definition
-    const {imageSrc, tiles} = tilesetTransform(data);
+    const prefix = String.fromCharCode('a'.charCodeAt()+index);
+    const {imageSrc, tiles} = tilesetTransform(data, prefix);
     tmpLayerMap[name] = tiles;
     tmpImagesDef[imageSrc.name] = imageSrc;
+    tilesetDirectory[name] = {tiles: tiles, imageSrc: imageSrc, prefix: prefix};
   }
 });
+
+
+//////////////////////////////////////////
+
+const originalAssets = {
+  'G': [
+    'base',
+    2,
+    0,
+  ],
+  'P': [
+    'base',
+    3,
+    0,
+  ],
+  'H': [
+    'base',
+    15,
+    1,
+  ],
+  'O': [
+    'base',
+    2,
+    0,
+  ],
+  'TV': [
+    'base',
+    11,
+    4,
+  ],
+};
+
+function getAllTileLayerMap() {
+  let res = {};
+  for (const n in tmpLayerMap) {
+    res = {
+      ...res,
+      ...tmpLayerMap[n]
+    };
+  }
+  res = {
+    ...res,
+    ...originalAssets,
+  };
+  return res;
+}
+
+const resultLayerMap = getAllTileLayerMap();
+
+//////////////////////////////////////////
+
 
 // read data from child maps.
 const targetMap = path.join(mapsDir, 'map01');
@@ -76,11 +130,23 @@ fs.readdirSync(targetMap).forEach((file) => {
       allTilesets[tilesetName] = tileset;
     });
     console.log(gidRange);
+    gidRange.sort((a, b) => { return a-b; });
+    data.gidRange = gidRange;
   }
 });
 
 //console.log('tileset source for all maps\n', tilesetSource)
 console.log({allTilesets});
+function getGidRange(gidRange, gid) {
+  let result = undefined;
+  for (const r of gidRange) {
+    if (r.firstgid > gid) {
+      return result;
+    }
+    result = r;
+  }
+  return result;
+}
 
 function combineSingleLayer(childMaps, layerName) {
   const worldWidth = 200;
@@ -89,6 +155,20 @@ function combineSingleLayer(childMaps, layerName) {
   const mapHeight = 50;
   const combinedLayer = [];
 
+  function mapGid(gid, mapName, idx) {
+    if (layerName === 'wall') return gid;
+
+    const r = getGidRange(childMaps[mapName].gidRange, gid);
+    if (typeof r === 'undefined') return null;
+    const cell = tilesetDirectory[r.name].prefix + (gid-(r.firstgid));
+
+    if (!(cell in resultLayerMap)) {
+      console.warn("AABBCC", cell, mapName, layerName, idx, gid, r);
+      return null;
+    }
+
+    return cell;
+  }
   // map01 ~ 05
   for (let row = 0; row < mapHeight; row++) {
     const startIdx = mapWidth * row;
@@ -99,7 +179,10 @@ function combineSingleLayer(childMaps, layerName) {
       const targetLayer = childMaps[mapName].layers
         .filter((layer) => layer.name.toLowerCase() === layerName)[0];
       const data = targetLayer.data.slice(startIdx, endIdx);
-      combinedLayer.push(...data);
+      const mappedData = data.map((gid, idx) => {
+        return mapGid(gid, mapName, idx);
+      });
+      combinedLayer.push(...mappedData);
     }
   }
 
@@ -113,12 +196,14 @@ function combineSingleLayer(childMaps, layerName) {
       const targetLayer = childMaps[mapName].layers
         .filter((layer) => layer.name.toLowerCase() === layerName)[0];
       const data = targetLayer.data.slice(startIdx, endIdx);
-      combinedLayer.push(...data);
+      const mappedData = data.map((gid, idx) => {
+        return mapGid(gid, mapName, idx);
+      });
+      combinedLayer.push(...mappedData);
     }
   }
   const adjLayer = combinedLayer.map((gid) => {
-    let index = 0;
-
+    return gid;
   });
   return adjLayer;
 }
@@ -162,7 +247,7 @@ const mapDataTemplate = {
     {
       ...layerTemplate,
       data: combineSingleLayer(newMaps, 'foreground'),
-      name: 'foreground',
+      name: 'object',
     },
     {
       ...layerTemplate,
@@ -200,29 +285,6 @@ const originalImages = [
 originalImages.forEach((img) => {
   tmpImagesDef[img.name] = img;
 });
-
-const originalAssets = {
-  'G': [
-    'base',
-    2,
-    0,
-  ],
-  'P': [
-    'base',
-    3,
-    0,
-  ],
-  'H': [
-    'base',
-    15,
-    1,
-  ],
-  'TV': [
-    'base',
-    11,
-    4,
-  ],
-};
 
 const originalCellSets = [
   {
@@ -267,14 +329,8 @@ const originalCellSets = [
     'name': 'spawnPoint',
     'cells': [
       {
-        'x': 1,
-        'y': 1,
-        'w': 2,
-        'h': 2,
-      },
-      {
-        'x': 5,
-        'y': 6,
+        'x': 6,
+        'y': 60,
         'w': 1,
         'h': 1,
       },
@@ -377,18 +433,23 @@ Object.entries(tmpImagesDef).forEach(([name, image]) => {
 
 // TODO defemine Which tileset should be add (like tmpLayerMap['Exterior_w41'] )
 newAssetsConfig.images = newImageDef;
-newAssetsConfig.layerMap.ground = {
-  ...tmpLayerMap['Exterior_w41'],
-  ...originalAssets,
-};
-newAssetsConfig.layerMap.background = {
-  ...tmpLayerMap['Exterior_w41'],
-  ...originalAssets,
-};
-newAssetsConfig.layerMap.foreground = {
-  ...tmpLayerMap['Exterior_w41'],
-  ...originalAssets,
-};
+newAssetsConfig.layerMap.ground = getAllTileLayerMap();
+newAssetsConfig.layerMap.background = getAllTileLayerMap();
+newAssetsConfig.layerMap.object = getAllTileLayerMap();
+newAssetsConfig.layerMap.bombmanObstacle = {
+      "O": [
+        "base",
+        6,
+        12
+      ]
+    };
+newAssetsConfig.layerMap.bombmanHasBomb = {
+      "B": [
+        "base",
+        15,
+        14
+      ]
+    };
 
 
 writeFileToJSON(assetsConfigPath, newAssetsConfig);
