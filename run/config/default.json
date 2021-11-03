@@ -49,8 +49,10 @@
     "prefix": "hitcon"
   },
   "terminal": {
-    "grpcAddress": "127.0.0.1:5051",
-    "publicAddress": "127.0.0.1:5050"
+    "internalAddress": "localhost",
+    "grpcPort": 5051,
+    "publicAddress": "localhost",
+    "socketioPort": 5050
   },
   "publicAddress": null,
   "movingRequestThreshold": 100

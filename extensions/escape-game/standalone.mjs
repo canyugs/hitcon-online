@@ -423,7 +423,6 @@ class Standalone {
       this.helper.callS2cAPI(playerID, 'dialog', 'showDialog', 60*1000,
         sfInfo.name, 'Team created, the invitation code is: ' + this.teams.get(teamId).invitationCode);
 
-      console.log(nextState);
       return nextState;
     } catch (e) {
       console.error(e);

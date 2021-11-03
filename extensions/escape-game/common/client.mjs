@@ -82,7 +82,6 @@ class Client {
     }
 
     this.terminalServerAddress = await this.helper.callC2sAPI('escape-game', 'getTerminalServerAddress', this.helper.defaultTimeout);
-    console.log(this.terminalServerAddress);
   }
 
   /**
