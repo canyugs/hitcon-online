@@ -2587,6 +2587,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["hitcon-online-escape-game", "workspace:extensions/escape-game"],
             ["@grpc/grpc-js", "npm:1.3.7"],
             ["@grpc/proto-loader", "npm:0.6.4"],
+            ["config", "npm:3.3.6"],
             ["jsonwebtoken", "npm:8.5.1"]
           ],
           "linkType": "SOFT",

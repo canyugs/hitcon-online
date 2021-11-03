@@ -9,6 +9,7 @@ const protoLoader = require('@grpc/proto-loader');
 const randomBytes = require('crypto').randomBytes;
 const path = require('path');
 const jwt = require('jsonwebtoken');
+const config = require('config');
 
 import fs from 'fs';
 import {promisify} from 'util';
@@ -17,12 +18,27 @@ import InteractiveObjectServerBaseClass from '../../common/interactive-object/se
 import {getRunPath, getConfigPath} from '../../common/path-util/path.mjs';
 
 const MAX_PLAYER_PER_TEAM = 5;
-const TERMINAL_SERVER_GRPC_LOCATION = '127.0.0.1:5051';
 
 // Bring out the FSM_ERROR for easier reference.
 const FSM_ERROR = InteractiveObjectServerBaseClass.FSM_ERROR;
 const SF_PREFIX = 's2s_sf_';
 
+
+/**
+ * Get config from config with default.
+ */
+function getConfigWithDefault(entry, def) {
+  let res = def;
+  try {
+    res = config.get(entry);
+  } catch (e) {
+    console.warn('Failed to get config with default: ', entry, e);
+  }
+  return res;
+}
+
+
+const TERMINAL_SERVER_GRPC_LOCATION = getConfigWithDefault('terminal.internalAddress', '127.0.0.1:5051') + ':' + getConfigWithDefault('terminal.grpcPort', 5051).toString();
 
 /**
  * Terminology:
@@ -54,7 +70,7 @@ class Standalone {
     fs.readdirSync(getRunPath('terminal')).forEach((file) => {
       const terminalName = file.slice(0, -('.json'.length));
       const terminal = new TerminalObject(helper, terminalName, getRunPath('terminal', file));
-      this.terminalObjects.set(terminalName, terminal);
+      this.terminalObjects.set(terminal.visibleName, terminal);
     });
 
     // this.defaultTerminals determines the list of containers to start when the team is created.
@@ -93,6 +109,13 @@ class Standalone {
   }
 
   /**
+   * Return the public address of the terminal server.
+   */
+  async c2s_getTerminalServerAddress(player) {
+    return getConfigWithDefault('terminal.publicAddress', '127.0.0.1') + ':' + getConfigWithDefault('terminal.socketioPort', 5000).toString();
+  }
+
+  /**
    * Create a new team and start all terminal.
    * @param {string} playerID The player ID.
    */
@@ -105,7 +128,7 @@ class Standalone {
     // Create a new team
     let teamId = randomBytes(32).toString('hex');
     this.teams.set(teamId, new Team(teamId, this.terminalServerGrpcService, this.defaultTerminals));
-    await this.teams.get(teamId).startContainers();
+    this.teams.get(teamId).startContainers(); // do not wait for the container to start.
     return teamId;
   }
 
@@ -353,7 +376,7 @@ class Standalone {
    */
   async s2s_sf_showTerminal(srcExt, playerID, kwargs, sfInfo) {
     const {nextState} = kwargs;
-    const token = await this.getAccessToken(playerID, sfInfo.name.split(' ')[1]);
+    const token = await this.getAccessToken(playerID, sfInfo.visibleName);
     await this.helper.callS2cAPI(playerID, 'escape-game', 'showTerminalModal', 60*1000, token);
     return nextState;
   }
@@ -371,16 +394,21 @@ class Standalone {
    */
   async s2s_sf_joinTeamByInvitationCode(srcExt, playerID, kwargs, sfInfo) {
     const {nextState, nextStateCantEnter, nextStateNotFound, dialog} = kwargs;
-    const res = await this.helper.callS2cAPI(playerID, 'dialog', 'showDialogWithPrompt', 60*1000, sfInfo.name, dialog);
+    try {
+      const res = await this.helper.callS2cAPI(playerID, 'dialog', 'showDialogWithPrompt', 60*1000, sfInfo.name, dialog);
 
-    for (const [teamId, team] of this.teams) {
-      if (team.invitationCode === res.msg) {
-        return this.joinTeam(playerID, teamId) ? nextState : nextStateCantEnter;
+      for (const [teamId, team] of this.teams) {
+        if (team.invitationCode === res.msg) {
+          return this.joinTeam(playerID, teamId) ? nextState : nextStateCantEnter;
+        }
       }
-    }
 
-    //The invitation code is wrong
-    return nextStateNotFound;
+      //The invitation code is wrong
+      return nextStateNotFound;
+    } catch (e) {
+      console.error(e);
+      return FSM_ERROR;
+    }
   }
 
   /**
@@ -389,12 +417,18 @@ class Standalone {
   async s2s_sf_createTeam(srcExt, playerID, kwargs, sfInfo) {
     const {nextState} = kwargs;
 
-    const teamId = await this.createTeam(playerID); // create team.
-    await this.joinTeam(playerID, teamId); // add the player to the team.
-    await this.helper.callS2cAPI(playerID, 'dialog', 'showDialog', 60*1000,
-      sfInfo.name, 'Team created, the invitation code is: ' + this.teams.get(teamId).invitationCode);
+    try {
+      const teamId = await this.createTeam(playerID); // create team.
+      await this.joinTeam(playerID, teamId); // add the player to the team.
+      this.helper.callS2cAPI(playerID, 'dialog', 'showDialog', 60*1000,
+        sfInfo.name, 'Team created, the invitation code is: ' + this.teams.get(teamId).invitationCode);
 
-    return nextState;
+      console.log(nextState);
+      return nextState;
+    } catch (e) {
+      console.error(e);
+      return FSM_ERROR;
+    }
   }
 
   /**
@@ -403,34 +437,39 @@ class Standalone {
   async s2s_sf_showTeamMenu(srcExt, playerID, kwargs, sfInfo) {
     const {showMembers, showInvitationCode, finalize, quitTeam, exit} = kwargs;
 
-    if (!this.playerToTeam.has(playerID)) {
-      throw new Error(`The player ${playerID} isn't in any team.`);
-    }
+    try {
+      if (!this.playerToTeam.has(playerID)) {
+        throw new Error(`The player ${playerID} isn't in any team.`);
+      }
 
-    // The team has finalized.
-    if (this.playerToTeam.get(playerID).isFinalized) {
+      // The team has finalized.
+      if (this.playerToTeam.get(playerID).isFinalized) {
+        return (await this.helper.callS2cAPI(playerID, 'dialog', 'showDialogWithMultichoice', 60*1000,
+          sfInfo.name, 'Team ID: ' + this.playerToTeam.get(playerID).teamId,
+          [
+            {token: showMembers, display: 'List all members.'},
+            {token: showInvitationCode, display: 'Show invitation code.'},
+            {token: quitTeam, display: 'Quit Team. You\' lose all progresses and items.'},
+            {token: exit, display: 'Bye!'}
+          ]
+        )).token;
+      }
+
+      // The team has not finalized.
       return (await this.helper.callS2cAPI(playerID, 'dialog', 'showDialogWithMultichoice', 60*1000,
         sfInfo.name, 'Team ID: ' + this.playerToTeam.get(playerID).teamId,
         [
           {token: showMembers, display: 'List all members.'},
           {token: showInvitationCode, display: 'Show invitation code.'},
-          {token: quitTeam, display: 'Quit Team. You\' lose all progresses and items.'},
+          {token: finalize, display: 'Finalize the team and enter the game.'},
+          {token: quitTeam, display: 'Quit team.'},
           {token: exit, display: 'Bye!'}
         ]
       )).token;
+    } catch (e) {
+      console.error(e);
+      return FSM_ERROR;
     }
-
-    // The team has not finalized.
-    return (await this.helper.callS2cAPI(playerID, 'dialog', 'showDialogWithMultichoice', 60*1000,
-      sfInfo.name, 'Team ID: ' + this.playerToTeam.get(playerID).teamId,
-      [
-        {token: showMembers, display: 'List all members.'},
-        {token: showInvitationCode, display: 'Show invitation code.'},
-        {token: finalize, display: 'Finalize the team and enter the game.'},
-        {token: quitTeam, display: 'Quit team.'},
-        {token: exit, display: 'Bye!'}
-      ]
-    )).token;
   }
 
   /**
@@ -439,19 +478,24 @@ class Standalone {
   async s2s_sf_showMembers(srcExt, playerID, kwargs, sfInfo) {
     const {nextState} = kwargs;
 
-    if (!this.playerToTeam.has(playerID)) {
-      throw new Error(`The player ${playerID} isn't in any team.`);
+    try {
+      if (!this.playerToTeam.has(playerID)) {
+        throw new Error(`The player ${playerID} isn't in any team.`);
+      }
+
+      const playerList = `
+        <ul>
+          ${this.playerToTeam.get(playerID).playerIDs.map(pid => `<li>${pid}</li>`).join('')}
+        </ul>
+      `;
+      await this.helper.callS2cAPI(playerID, 'dialog', 'showDialog', 60*1000,
+        sfInfo.name, 'Team member:' + playerList);
+
+      return nextState;
+    } catch (e) {
+      console.error(e);
+      return FSM_ERROR;
     }
-
-    const playerList = `
-      <ul>
-        ${this.playerToTeam.get(playerID).playerIDs.map(pid => `<li>${pid}</li>`).join('')}
-      </ul>
-    `;
-    await this.helper.callS2cAPI(playerID, 'dialog', 'showDialog', 60*1000,
-      sfInfo.name, 'Team member:' + playerList);
-
-    return nextState;
   }
 
   /**
@@ -460,14 +504,19 @@ class Standalone {
   async s2s_sf_showInvitationCode(srcExt, playerID, kwargs, sfInfo) {
     const {nextState} = kwargs;
 
-    if (!this.playerToTeam.has(playerID)) {
-      throw new Error(`The player ${playerID} isn't in any team.`);
+    try {
+      if (!this.playerToTeam.has(playerID)) {
+        throw new Error(`The player ${playerID} isn't in any team.`);
+      }
+
+      await this.helper.callS2cAPI(playerID, 'dialog', 'showDialog', 60*1000,
+        sfInfo.name, 'Invitation code: ' + this.playerToTeam.get(playerID).invitationCode);
+
+      return nextState;
+    } catch (e) {
+      console.error(e);
+      return FSM_ERROR;
     }
-
-    await this.helper.callS2cAPI(playerID, 'dialog', 'showDialog', 60*1000,
-      sfInfo.name, 'Invitation code: ' + this.playerToTeam.get(playerID).invitationCode);
-
-    return nextState;
   }
 
   /**
@@ -476,19 +525,24 @@ class Standalone {
   async s2s_sf_finalize(srcExt, playerID, kwargs, sfInfo) {
     const {nextState} = kwargs;
 
-    if (!this.playerToTeam.has(playerID)) {
-      throw new Error(`The player ${playerID} isn't in any team.`);
+    try {
+      if (!this.playerToTeam.has(playerID)) {
+        throw new Error(`The player ${playerID} isn't in any team.`);
+      }
+      if (this.playerToTeam.get(playerID).isFinalized) {
+        throw new Error(`The team ${this.playerToTeam.get(playerID).teamId} has already finalized.`);
+      }
+
+      this.finalizeTeam(playerID, this.playerToTeam.get(playerID).teamId);
+
+      await this.helper.callS2cAPI(playerID, 'dialog', 'showDialog', 60*1000,
+        sfInfo.name, 'Finalized');
+
+      return nextState;
+    } catch (e) {
+      console.error(e);
+      return FSM_ERROR;
     }
-    if (this.playerToTeam.get(playerID).isFinalized) {
-      throw new Error(`The team ${this.playerToTeam.get(playerID).teamId} has already finalized.`);
-    }
-
-    this.finalizeTeam(playerID, this.playerToTeam.get(playerID).teamId);
-
-    await this.helper.callS2cAPI(playerID, 'dialog', 'showDialog', 60*1000,
-      sfInfo.name, 'Finalized');
-
-    return nextState;
   }
 
   /**
@@ -497,12 +551,17 @@ class Standalone {
   async s2s_sf_quitTeam(srcExt, playerID, kwargs, sfInfo) {
     const {nextState} = kwargs;
 
-    if (!this.playerToTeam.has(playerID)) {
-      throw new Error(`The player ${playerID} isn't in any team.`);
-    }
+    try {
+      if (!this.playerToTeam.has(playerID)) {
+        throw new Error(`The player ${playerID} isn't in any team.`);
+      }
 
-    await this.quitTeam(playerID);
-    return nextState;
+      await this.quitTeam(playerID);
+      return nextState;
+    } catch (e) {
+      console.error(e);
+      return FSM_ERROR;
+    }
   }
 }
 
@@ -559,7 +618,7 @@ class Team {
       try {
         let ret = await promisify(this.terminalServerGrpcService.CreateContainer.bind(this.terminalServerGrpcService))({
           imageName: defaultTerminal.imageName
-        }, {deadline: new Date(Date.now() + 5000)});
+        }, {deadline: new Date(Date.now() + 20000)});
 
         if (!ret.success) {
           console.error(`Fail to start container with image ${defaultTerminal.imageName}.`);

@@ -17,5 +17,6 @@ Path(f'{run_dir}/nginx.conf').touch()
 Path(f'{run_dir}/nginx.conf').write_text(template.format(
     publicAddress=config['publicAddress'],
     online='online:' + str(config['assetServer']['port']),
+    terminal=str(config['terminal']['internalAddress']) + ':' + str(config['terminal']['socketioPort']),
     gateways=''.join([f"\n        server online:{v['httpAddress'].split(':')[1]}; # {k}" for k, v in config['gatewayServers'].items()])
 ))

@@ -41,7 +41,8 @@
       "npc",
       "playerlist",
       "iframe",
-      "escape-room"
+      "escape-game",
+      "jitsi"
     ],
     "standalone": {
       "chat": "127.0.0.1:5020",
@@ -56,8 +57,19 @@
       "npc": "127.0.0.1:5029",
       "playerlist": "127.0.0.1:5030",
       "iframe": "127.0.0.1:5031",
-      "escape-room": "127.0.0.1:5032"
+      "escape-game": "127.0.0.1:5032",
+      "jitsi": "127.0.0.1:5033"
     }
+  },
+  "jitsi": {
+    "hmacSecret": "secret",
+    "prefix": "hitcon"
+  },
+  "terminal": {
+    "internalAddress": "host.docker.internal",
+    "grpcPort": 5051,
+    "publicAddress": "online.hitcon.org",
+    "socketioPort": 5050
   },
   "publicAddress": "online.hitcon.org",
   "movingRequestThreshold": 100
