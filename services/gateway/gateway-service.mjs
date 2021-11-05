@@ -332,6 +332,11 @@ class GatewayService {
       return;
     }
 
+    if (!updateMsg.check(this.gameMap.graphicAsset)) {
+      failOnPlayerUpdate(socket);
+      return;
+    }
+
     // if the player moves
     if (updateMsg.mapCoord !== undefined) {
       if (!checkPlayerMove(socket.playerData, updateMsg, this.gameMap)) {

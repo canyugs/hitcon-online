@@ -53,7 +53,7 @@ async function mainServer() {
   // Load the map.
   const mapList = config.get("map");
   const rawMapJSON = fs.readFileSync(getRunPath(mapList[0]));
-  const rawAssetJSON = fs.readFileSync(getRunPath('map', 'assets.json'));
+  const rawAssetJSON = fs.readFileSync(getRunPath('map', 'assets.json')); // TODO: get path from config file
   const mapJSON = JSON.parse(rawMapJSON);
   const assetJSON = JSON.parse(rawAssetJSON);
   // We do not load the graphic asset on the server side.
