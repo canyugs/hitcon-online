@@ -114,7 +114,7 @@ class GraphicAsset {
   /**
    * Return if we have a particular character.
    */
-  haveCharacter(char) {
+  hasCharacter(char) {
     if (typeof char !== 'string') {
       return false;
     }

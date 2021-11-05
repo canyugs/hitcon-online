@@ -250,11 +250,15 @@ class PlayerSyncMessage {
    * Check that the displayName and displayChar is correct.
    */
   check(graphicAsset) {
-    if (typeof this.displayName !== 'string' || this.displayName.length <= 0 || this.displayName.length > PLAYER_DISPLAY_NAME_MAX_LENGTH) {
+    if (this.facing !== undefined && !['U', 'D', 'L', 'R'].includes(this.facing)) {
+      console.warn('Got invalid facing: ', this.facing, this);
+      return false;
+    }
+    if (this.displayName !== undefined && (typeof this.displayName !== 'string' || this.displayName.length <= 0 || this.displayName.length > PLAYER_DISPLAY_NAME_MAX_LENGTH)) {
       console.warn('Got invalid displayName: ', this.displayName, this);
       return false;
     }
-    if (typeof this.displayChar !== 'string' || !graphicAsset.haveCharacter(this.displayChar)) {
+    if (this.displayChar !== undefined && (typeof this.displayChar !== 'string' || !graphicAsset.hasCharacter(this.displayChar))) {
       console.warn('Got invalid displayChar: ', this.displayChar, this);
       return false;
     }
@@ -280,11 +284,10 @@ class PlayerSyncMessage {
   }
 }
 
-Player.PLAYER_DISPLAY_NAME_MAX_LENGTH = PLAYER_DISPLAY_NAME_MAX_LENGTH;
-
 export default Player;
 
 export {
   Player,
   PlayerSyncMessage,
+  PLAYER_DISPLAY_NAME_MAX_LENGTH,
 };

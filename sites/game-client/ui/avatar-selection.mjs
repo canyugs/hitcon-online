@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 import {MAP_CELL_SIZE} from '../map-renderer.mjs';
-import Player from '../../../common/gamelib/player.mjs';
+import {PLAYER_DISPLAY_NAME_MAX_LENGTH} from '../../../common/gamelib/player.mjs';
+import {randomChoice} from '../../../common/utility/random-tool.mjs';
 
 const DOM_ID = 'avatar-selection-div';
-const DISPLAY_NAME_MAX_LEN = Player.PLAYER_DISPLAY_NAME_MAX_LENGTH;
 
 /**
  * The logic of avatar selection page.
@@ -62,7 +62,7 @@ class AvatarSelectionPage {
     }
 
     // select random one by default
-    container.children[Math.floor(Math.random() * container.children.length)].click();
+    randomChoice(container.children).click();
   }
 
   /**
@@ -82,10 +82,9 @@ class AvatarSelectionPage {
    * Submit the display name and selected avatar.
    */
   submit() {
-    // TODO
     const displayName = this.DOM.querySelector('input[name="display-name"]').value;
-    if (displayName.length > DISPLAY_NAME_MAX_LEN || displayName.length <= 0) {
-      alert(`Name should be non-empty and no longer than ${DISPLAY_NAME_MAX_LEN}`);
+    if (displayName.length > PLAYER_DISPLAY_NAME_MAX_LENGTH || displayName.length <= 0) {
+      alert(`Name should be non-empty and no longer than ${PLAYER_DISPLAY_NAME_MAX_LENGTH}`);
       return;
     }
     const displayChar = this.selectedAvatar[0];
