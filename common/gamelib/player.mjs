@@ -53,17 +53,27 @@ class Player {
    * @return {Object}
    */
   getDrawInfo() {
-    // smoothly move the player
     const now = Date.now();
     const smoothMoveEnd = this.lastMovingTime + PLAYER_MOVE_TIME_INTERVAL;
-    let retMapCoord, retFacing;
+    let retMapCoord = this.mapCoord.copy();
+    let retFacing = this.facing;
+    let opacity = 1.0;
+
+    // smoothly move the player
     if (now < smoothMoveEnd) {
       // moving, calculate interpolated coordinate
-      const inter = MapCoord.fromObject(this.mapCoord);
+      let inter = this.mapCoord.copy();
       const frac = (now - this.lastMovingTime) / PLAYER_MOVE_TIME_INTERVAL;
-      inter.x = (1 - frac) * this._previousMapCoord.x + frac * this.mapCoord.x;
-      inter.y = (1 - frac) * this._previousMapCoord.y + frac * this.mapCoord.y;
+      if (this._previousMapCoord.mapName !== this.mapCoord.mapName) {
+        // special case for teleportation between different maps
+        inter = (frac < 0.5) ? this._previousMapCoord : this.mapCoord;
+        opacity = Math.abs(frac - 0.5) * 2; // the character will faded out/in when teleporting between maps
+      } else {
+        inter.x = (1 - frac) * this._previousMapCoord.x + frac * this.mapCoord.x;
+        inter.y = (1 - frac) * this._previousMapCoord.y + frac * this.mapCoord.y;
+      }
       retMapCoord = inter;
+
       // calculate the moving animation phase
       const phase = Math.floor(now / PLAYER_MOVE_ANIMATION_FRAME_RATE) % 4;
       if (phase === 0) {
@@ -73,9 +83,6 @@ class Player {
       } else { // phase === 1 || phase === 3
         retFacing = this.facing;
       }
-    } else {
-      retMapCoord = this.mapCoord;
-      retFacing = this.facing;
     }
 
     return {
@@ -84,6 +91,7 @@ class Player {
       facing: retFacing,
       displayName: this.displayName,
       ghostMode: this.ghostMode,
+      opacity,
     };
   }
 

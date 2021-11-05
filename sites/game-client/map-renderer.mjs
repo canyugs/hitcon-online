@@ -505,7 +505,7 @@ class MapRenderer {
    * would be called to get the information for drawing.
    */
   _drawOneCharacterImage(player) {
-    const {mapCoord, displayChar, facing, ghostMode} = player.getDrawInfo();
+    const {mapCoord, displayChar, facing, ghostMode, opacity} = player.getDrawInfo();
     const canvasCoordinate = this.mapToCanvasCoordinate(mapCoord);
     const topLeftCanvasCoord = {x: canvasCoordinate.x, y: canvasCoordinate.y - MAP_CELL_SIZE};
     // check if this player is out of viewport
@@ -520,6 +520,9 @@ class MapRenderer {
     const oldOpacity = this.ctx.globalAlpha;
     if (ghostMode) {
       this.ctx.globalAlpha = 0.4;
+    }
+    if (typeof opacity === 'number') {
+      this.ctx.globalAlpha *= opacity;
     }
     this.ctx.drawImage(
         renderInfo.image,
