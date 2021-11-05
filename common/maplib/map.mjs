@@ -125,6 +125,14 @@ class MapCoord {
   }
 
   /**
+   * Copy this MapCoord.
+   * @return {MapCoord}
+   */
+  copy() {
+    return MapCoord.fromObject(this);
+  }
+
+  /**
    * Deserialize a string into MapCoord.
    * It should be in the format `${x}_${y}_${mapName}`
    * @param {String} s - The serialized string representation for the MapCoord.
