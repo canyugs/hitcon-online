@@ -273,6 +273,17 @@ class MainUI {
     this.focusOverlay.show(OverlayPosition.MAIN_VIEW);
   }
 
+  /**
+   * Enable a ruler div that shows the coordinate under the cursor.
+   * Used only for debugging.
+   */
+  enableRuler() {
+    $('#ruler-helper-div').css('z-index', '300');
+    game.inputManager.registerCanvasOnMouseMoveMapCoord((coord) => {
+      $('#ruler-helper-text').text(`Coord: ${coord.x.toFixed(1)} ${coord.y.toFixed(1)}`);
+    });
+  }
+
   // ========== Internal Methods ============
   // Methods below should only be used by UI classes such as Model/Overlay.
 

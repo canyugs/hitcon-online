@@ -204,3 +204,15 @@ body {
 .modal-container.visible {
   z-index: 110;
 }
+
+.ruler-helper {
+  position: absolute;
+  z-index: -300;
+  right: 0;
+  bottom: 0;
+  background-color: red;
+}
+
+.ruler-helper-text {
+  font-size: 5vh;
+}
