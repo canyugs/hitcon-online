@@ -38,7 +38,7 @@ function getConfigWithDefault(entry, def) {
 }
 
 
-const TERMINAL_SERVER_GRPC_LOCATION = getConfigWithDefault('terminal.internalAddress', '127.0.0.1:5051') + ':' + getConfigWithDefault('terminal.grpcPort', 5051).toString();
+const TERMINAL_SERVER_GRPC_LOCATION = getConfigWithDefault('terminal.internalAddress', '127.0.0.1') + ':' + getConfigWithDefault('terminal.grpcPort', 5051).toString();
 
 /**
  * Terminology:
@@ -112,7 +112,10 @@ class Standalone {
    * Return the public address of the terminal server.
    */
   async c2s_getTerminalServerAddress(player) {
-    return getConfigWithDefault('terminal.publicAddress', '127.0.0.1') + ':' + getConfigWithDefault('terminal.socketioPort', 5000).toString();
+    return {
+      address: getConfigWithDefault('terminal.publicAddress', '127.0.0.1'),
+      path: getConfigWithDefault('terminal.socketioPath', '') + '/socket.io'
+    }
   }
 
   /**
