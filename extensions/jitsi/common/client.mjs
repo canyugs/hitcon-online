@@ -41,15 +41,19 @@ class JitsiFullscreenOverlay extends Overlay {
     const dom = document.getElementById('jitsi-fullscreen-overlay');
     super(mainUI, dom);
     this.hide();
+    this.hasFullscreen = false;
 
     const self = this;
     $('#jitsi-remote-container').on('click', '.jitsi-user-container', function() {
+      if (self.hasFullscreen) return;
+      self.hasFullscreen = true;
       const focusedParticipantId = $(this).attr('data-id');
       $(this).find('video').eq(0).appendTo('#jitsi-fullscreen-overlay');
       self.show(OverlayPosition.LEFT_BOTTOM);
       mainUI.enterFocusMode(self, OverlayPosition.LEFT_BOTTOM, () => {
         $('#jitsi-fullscreen-overlay > video').appendTo(`#jitsi-${focusedParticipantId}-container > .jitsi-user-video`);
         self.hide();
+        self.hasFullscreen = false;
       });
     });
   }
