@@ -48,7 +48,7 @@ async function mainServer() {
       return;
     }
 
-    if (!config.get('publicAddress')) {
+    if (!config.get('allowedOrigins')) {
       callback(null, true);
       return;
     }
@@ -59,7 +59,7 @@ async function mainServer() {
       return;
     }
 
-    if (config.get('publicAddress') === originHostname) {
+    if (Array.isArray(config.get('allowedOrigins')) && config.get('allowedOrigins').includes(originHostname)) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
