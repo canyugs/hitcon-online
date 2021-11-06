@@ -106,6 +106,25 @@ class InputManager {
   }
 
   /**
+   * Register a callback function when the mouse moves over the canvas of MapRenderer.
+   * Note that this is used only for debugging so it uses the DOM element's
+   * event directly and does not abstract away the MouseOver event.
+   * @param {Function} callback - Takes one argument: the clicked map coordinate.
+   * Note that the map coordinate is not necessarily in integer.
+   */
+  registerCanvasOnMouseMoveMapCoord(callback) {
+    document.addEventListener('mousemove', (event) => {
+      if (event.target === this.canvas) {
+        const rect = this.canvas.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        const mapCoord = this.mapRender.canvasToMapCoordinate(x, y);
+        callback(mapCoord);
+      }
+    });
+  }
+
+  /**
    * Register a callback function on keydown.
    * The callback will be triggered every tick.
    * @param {Element} DOMElement

@@ -30,6 +30,10 @@ absolute URL.
         </div>
       </div>
 
+      <div id="ruler-helper-div" class="ruler-helper">
+        <span id="ruler-helper-text">Coord: </span>
+      </div>
+
       <div id="staging-div">
         <!--
         This div is for stuff that's not yet being displayed.
@@ -263,6 +267,11 @@ absolute URL.
 
         if (window.query.test === 'type1'){
           game.clientBot = new ClientBot(game.mapRenderer);
+        }
+
+        // Ruler helper utility.
+        if (window.query.ruler === 'true') {
+          game.mainUI.enableRuler();
         }
 
         function onGameTick () {
