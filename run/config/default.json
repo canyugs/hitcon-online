@@ -55,5 +55,6 @@
     "socketioPath": ""
   },
   "publicAddress": null,
+  "allowedOrigins": [],
   "movingRequestThreshold": 100
 }
