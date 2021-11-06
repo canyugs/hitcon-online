@@ -423,6 +423,7 @@ class JitsiHandler {
     if (this.room) {
       try {
         await this.room.leave();
+        this.room = undefined;
       } catch (e) {
         console.error(`Failed to unload jitsi room`, e, e.stack);
       }
