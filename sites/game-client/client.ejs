@@ -251,6 +251,19 @@ absolute URL.
         game.movementManager = new MovementManager(game.socket, game.gameState, game.inputManager, game.mapRenderer);
         game.gameClient = new GameClient(game.socket, game.map, game.gameState, game.mapRenderer, game.inputManager, game.movementManager, game.extMan, game.mainUI, game.avatarSelectionPage);
 
+        if (window.query.test === 'type1'){
+          window.addEventListener('previousData', (evt) => {
+            let displayChar = evt.detail.displayChar;
+            let displayName = evt.detail.displayName;
+            if (!displayName) displayName = evt.detail.playerID;
+            if (!displayChar) displayChar = null;
+            game.avatarSelectionPage.autoSubmit(displayName, displayChar);
+            setTimeout(() => {
+              game.clientBot = new ClientBot(game.mapRenderer);
+            }, 3000);
+          });
+        }
+
         game.gameClient.initialize(game.token);
         game.mapRenderer.setGameClient(game.gameClient);
 
@@ -264,10 +277,6 @@ absolute URL.
             detail: {mainUI: game.mainUI},
           },
         ));
-
-        if (window.query.test === 'type1'){
-          game.clientBot = new ClientBot(game.mapRenderer);
-        }
 
         // Ruler helper utility.
         if (window.query.ruler === 'true') {
