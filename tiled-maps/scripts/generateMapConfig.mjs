@@ -157,6 +157,7 @@ function combineSingleLayer(childMaps, layerName) {
 
   function mapGid(gid, mapName, idx) {
     if (layerName === 'wall') return gid;
+    if (layerName === 'jitsi') return gid;
 
     const r = getGidRange(childMaps[mapName].gidRange, gid);
     if (typeof r === 'undefined') return null;
@@ -184,7 +185,7 @@ function combineSingleLayer(childMaps, layerName) {
       const data = targetLayer.layers.filter((l) => {
         return typeof l.data[idx] === "number" && l.data[idx] !== 0
       }).map((l) => {
-        return l.data[idx];
+        return l.name;
       });
       if (data.length === 0) {
         // No jitsi here.
