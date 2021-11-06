@@ -62,6 +62,9 @@ class GameClient {
         this.mainUI.errorModal.displayError("Authorization failed.", "Please refresh to reconnect.");
         this.onDisconnect();
       });
+      socket.on('previousData', (msg) => {
+        this.onPreviousData(msg);
+      });
       socket.on('gameStart', (msg) => {
         this.onStartup(msg);
       });
@@ -138,6 +141,17 @@ class GameClient {
 
     // Start the browser side of all extensions.
     this.extMan.startAllExtensionClient();
+  }
+
+  /**
+   * This is called when the server gives us the data from previous session
+   * when the connection is established.
+   */
+  async onPreviousData(msg) {
+    window.dispatchEvent(new CustomEvent(
+      'previousData', {
+        detail: msg
+      }));
   }
 
   /**

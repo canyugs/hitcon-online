@@ -214,6 +214,9 @@ class GatewayService {
     socket.playerData = await this.dir.getPlayerData(playerID);
     socket.playerID = playerID;
 
+    // Notify the client about any previous data.
+    socket.emit('previousData', PlayerSyncMessage.fromObject(socket.playerData));
+
     socket.on('disconnect', (reason) => {
       this.onDisconnect(socket, reason);
       // onDisconnect is async, so returns immediately.
