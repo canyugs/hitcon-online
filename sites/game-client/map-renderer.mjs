@@ -91,10 +91,16 @@ class MapRenderer {
    */
   disableRenderForTesting() {
     const noop = ()=>{};
-    this.ctx.drawImage = noop;
-    this.ctx.fillText = noop;
-    this.ctx.save = noop;
-    this.ctx.restore = noop;
+    function clearCtx(ctx) {
+      ctx.drawImage = noop;
+      ctx.fillText = noop;
+      ctx.save = noop;
+      ctx.restore = noop;
+    }
+    clearCtx(this.ctx);
+    clearCtx(this.backgroundCtx);
+    clearCtx(this.outOfBoundCtx);
+
     // Note: The last one is a bit too extreme, if testing fails for any reason
     // try removing the next line.
     this.draw = noop;
