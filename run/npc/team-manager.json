@@ -20,7 +20,7 @@
       "initialState": "baseState",
       "states": {
         "baseState": {
-          "func": "checkTeamStatus",
+          "func": "checkIsInTeam",
           "kwargs": {
             "indivMenu": "indivMenu",
             "teamMenu": "team1"
