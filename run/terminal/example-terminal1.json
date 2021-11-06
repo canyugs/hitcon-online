@@ -23,7 +23,7 @@
     "initialState": "baseState",
     "states": {
       "baseState": {
-        "func": "checkStatus",
+        "func": "checkIsInFinalizedTeam",
         "kwargs": {
           "nextState": "s1",
           "errorState": "s2"
