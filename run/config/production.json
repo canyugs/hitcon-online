@@ -69,7 +69,7 @@
     "internalAddress": "host.docker.internal",
     "grpcPort": 5051,
     "publicAddress": "online.hitcon.org",
-    "socketioPort": 5050
+    "socketioPath": "/terminal"
   },
   "publicAddress": "online.hitcon.org",
   "movingRequestThreshold": 100

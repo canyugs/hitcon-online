@@ -95,7 +95,7 @@ class Client {
     this.term = new Terminal({cursorBlink: true});
     this.term.open(document.getElementById(TERMINAL_DIV));
 
-    this.socket = window.io(this.terminalServerAddress, {reconnection: false});
+    this.socket = window.io(this.terminalServerAddress.address, {reconnection: false, path: this.terminalServerAddress.path});
 
     this.socket.on('connect', () => {
       this.term.write('\r\n*** Connected ***\r\n');
