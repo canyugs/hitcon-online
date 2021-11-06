@@ -9,6 +9,7 @@ services:
       - "../:/home/node/app"
       - "${RUN_DIR:-../run}:/home/node/app/run"
     command:  bash -c "yarn && ./run-all.sh"
+    user: "${_UID}:${_GID}"
     depends_on:
       - redis
     extra_hosts:
