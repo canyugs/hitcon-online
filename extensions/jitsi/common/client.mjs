@@ -94,12 +94,14 @@ class Client {
         this.microphoneButton.changeIcon('/static/extensions/jitsi/common/icons/microphone-off.svg');
         this.isMicrophoneOn = false;
         if (this.jitsiObj) {
+          this.jitsiObj.isMuted.audio = false;
           this.jitsiObj.mute('audio');
         }
       } else {
         this.microphoneButton.changeIcon('/static/extensions/jitsi/common/icons/microphone-on.svg');
         this.isMicrophoneOn = true;
         if (this.jitsiObj) {
+          this.jitsiObj.isMuted.audio = true;
           this.jitsiObj.unmute('audio');
         }
       }
@@ -114,12 +116,14 @@ class Client {
         this.cameraButton.changeIcon('/static/extensions/jitsi/common/icons/camera-off.svg');
         this.isCameraOn = false;
         if (this.jitsiObj) {
+          this.jitsiObj.isMuted.video = false;
           this.jitsiObj.mute('video');
         }
       } else {
         this.cameraButton.changeIcon('/static/extensions/jitsi/common/icons/camera-on.svg');
         this.isCameraOn = true;
         if (this.jitsiObj) {
+          this.jitsiObj.isMuted.video = true;
           this.jitsiObj.unmute('video');
         }
       }
@@ -138,7 +142,7 @@ class Client {
 
         if (this.jitsiObj) {
           this.jitsiObj.isWebcam = true;
-          this.jitsiObj.createLocalTracks();
+          this.jitsiObj.createLocalTrack('video');
         }
       } else {
         this.screenButton.changeIcon('/static/extensions/jitsi/common/icons/screen-on.svg');
@@ -150,8 +154,9 @@ class Client {
         this.cameraButton.changeIcon('/static/extensions/jitsi/common/icons/camera-off.svg');
 
         if (this.jitsiObj) {
+          this.jitsiObj.isMuted.video = true;
           this.jitsiObj.isWebcam = false;
-          this.jitsiObj.createLocalTracks();
+          this.jitsiObj.createLocalTrack('desktop');
         }
       }
     });
@@ -164,14 +169,14 @@ class Client {
       this.settingTab.addDropdown('device', 'video', '影像輸入', (value) => {
         console.log('device video', value);
         if (this.videoDevice !== value && this.jitsiObj) {
-          this.jitsiObj.createLocalTracks();
+          this.jitsiObj.createLocalTrack('video');
         }
         this.videoDevice = value;
       }, 0);
       this.settingTab.addDropdown('device', 'audio', '音訊輸入', (value) => {
         console.log('device audio', value);
         if (this.audioDevice !== value && this.jitsiObj) {
-          this.jitsiObj.createLocalTracks();
+          this.jitsiObj.createLocalTrack('audio');
         }
         this.audioDevice = value;
       }, 10);
@@ -193,14 +198,12 @@ class Client {
 
     this.jitsiObj = new JitsiHandler(realMeetingName, password,
       this.helper.gameClient.playerInfo.displayName, this.getDevices, this.setSettingDeviceOptions.bind(this));
+
+    this.jitsiObj.isMuted.audio = !this.isMicrophoneOn;
+    this.jitsiObj.isMuted.video = !this.isCameraOn;
+
     this.currentMeeting = meetingName;
     this.container.show();
-
-    this.isCameraOn = false;
-    this.cameraButton.changeIcon('/static/extensions/jitsi/common/icons/camera-off.svg');
-
-    this.isMicrophoneOn = false;
-    this.microphoneButton.changeIcon('/static/extensions/jitsi/common/icons/microphone-off.svg');
   }
 
   /**
@@ -212,6 +215,11 @@ class Client {
       await this.jitsiObj.unload();
       this.jitsiObj = undefined;
       this.currentMeeting = undefined;
+
+      // Set screen sharing to false.
+      this.screenButton.changeIcon('/static/extensions/jitsi/common/icons/screen-off.svg');
+      this.isScreenSharingOn = false;
+      this.cameraButton.show();
     }
   }
 
