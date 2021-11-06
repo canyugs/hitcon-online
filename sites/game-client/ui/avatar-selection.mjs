@@ -79,6 +79,13 @@ class AvatarSelectionPage {
   }
 
   /**
+   * Send the selection to gateway server.
+   */
+  _submit(displayName, displayChar) {
+    this.socket.emit('avatarSelect', {displayName, displayChar});
+  }
+
+  /**
    * Submit the display name and selected avatar.
    */
   submit() {
@@ -93,7 +100,18 @@ class AvatarSelectionPage {
       alert('Please select a character');
       return;
     }
-    this.socket.emit('avatarSelect', {displayName, displayChar: displayChar});
+    this._submit(displayName, displayChar);
+  }
+
+  /**
+   * Automatically skip the selection screen.
+   * This is usually used for debugging purpose.
+   */
+  autoSubmit(displayName, displayChar) {
+    if (displayChar === null) {
+      displayChar = this.selectedAvatar[0];
+    }
+    this._submit(displayName, displayChar);
   }
 
   /**
