@@ -2,6 +2,10 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 const KEYSTROKE_RATE = 30; // keystroke per second
+const RELEASE_KEY_AFTER_MS = 2000;
+// If we don't receive any key event after 2s, we consider the key to be released.
+// This is so that if somebody press a key then alt-tab while the key is still held,
+// keydown would not be fired.
 
 /**
  * Input manager deals with all user input.
@@ -28,7 +32,7 @@ class InputManager {
     // TODO: Maintain a list of pressed key for better user experience (player moving)
     this.pressedKeys = new Map(); // key: event.key, value: event.code
     document.addEventListener('keydown', (event) => {
-      this.pressedKeys.set(event.key, event.code);
+      this.pressedKeys.set(event.key, {code: event.code, time: Date.now()});
       for (const {DOMElement, callback} of this.keydownOnceCallbacks) {
         if (this.focusedElement === DOMElement) {
           callback(event);
@@ -44,7 +48,11 @@ class InputManager {
       }
     });
     setInterval(() => {
-      for (const [key, code] of this.pressedKeys.entries()) {
+      for (const [key, obj] of this.pressedKeys.entries()) {
+        if (Date.now() - obj.time > RELEASE_KEY_AFTER_MS) {
+          this.pressedKeys.delete(key);
+        }
+        const code = obj.code;
         for (const {DOMElement, callback} of this.keydownEveryTickCallbacks) {
           if (this.focusedElement === DOMElement) {
             callback(new KeyboardEvent('keydown', {key, code}));
