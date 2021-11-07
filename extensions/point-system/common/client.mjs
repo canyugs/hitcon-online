@@ -21,7 +21,10 @@ class Client {
   async gameStart() {
     this.helper.mainUI.contextMenu.addToOthersMenu('Transfer Points', 'https://via.placeholder.com/15x15', (player) => {
       // TODO: use modal or something else instead of prompt.
-      this.transferPoints(parseInt(prompt("How many points to transfer:", 0)), player.playerID);
+      if (this.transferPoints(parseInt(prompt("How many points to transfer:", 0)), player.playerID)) {
+        this.helper.mainUI.showNotification('Point transferred successfully.', 5000);
+        this.notifyUpdatePoints(player.playerID, 'TRASNFERRED');
+      }
     });
 
     await this.s2c_updatePoints();
@@ -61,11 +64,10 @@ class Client {
         receiver: receiver
       });
       await this.s2c_updatePoints();
-      this.notifyUpdatePoints(receiver);
       return ret?.message === "OK";
     } catch (e) {
       console.error('Failed to transfer points: ', e);
-      throw new Error('Failed to transfer points.');
+      return false;
     }
   }
 
@@ -73,8 +75,8 @@ class Client {
    * Notify other users to update the points.
    * @param uid User id
    */
-  async notifyUpdatePoints(uid) {
-    return await this.helper.callC2sAPI('point-system', 'notifyUpdatePoints', this.helper.defaultTimeout, uid);
+  async notifyUpdatePoints(uid, message) {
+    return await this.helper.callC2sAPI('point-system', 'notifyUpdatePoints', this.helper.defaultTimeout, uid, message);
   }
 
   /**

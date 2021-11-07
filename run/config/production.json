@@ -42,7 +42,8 @@
       "playerlist",
       "iframe",
       "escape-game",
-      "jitsi"
+      "jitsi",
+      "point-system"
     ],
     "standalone": {
       "chat": "127.0.0.1:5020",
@@ -58,7 +59,8 @@
       "playerlist": "127.0.0.1:5030",
       "iframe": "127.0.0.1:5031",
       "escape-game": "127.0.0.1:5032",
-      "jitsi": "127.0.0.1:5033"
+      "jitsi": "127.0.0.1:5033",
+      "point-system": "127.0.0.1:5034"
     }
   },
   "jitsi": {

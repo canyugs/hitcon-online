@@ -39,7 +39,8 @@
       "npc",
       "playerlist",
       "escape-game",
-      "iframe"
+      "iframe",
+      "point-system"
     ],
     "standalone": {
     }
