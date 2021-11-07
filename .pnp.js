@@ -943,6 +943,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD",
         }]
       ]],
+      ["async-lock", [
+        ["npm:1.3.0", {
+          "packageLocation": "./.yarn/cache/async-lock-npm-1.3.0-8c5290d175-22dd2901d9.zip/node_modules/async-lock/",
+          "packageDependencies": [
+            ["async-lock", "npm:1.3.0"]
+          ],
+          "linkType": "HARD",
+        }]
+      ]],
       ["axios", [
         ["npm:0.21.1", {
           "packageLocation": "./.yarn/cache/axios-npm-0.21.1-d192f6b3b3-864fb7b5d0.zip/node_modules/axios/",
@@ -2629,6 +2638,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./services/gateway/",
           "packageDependencies": [
             ["hitcon-online-gateway", "workspace:services/gateway"],
+            ["async-lock", "npm:1.3.0"],
             ["config", "npm:3.3.6"],
             ["cors", "npm:2.8.5"],
             ["express", "npm:4.16.4"],
