@@ -60,9 +60,13 @@ class Client {
         } else if (message_to_id.value.toLowerCase() == 'nearby') {
           await client.helper.callC2sAPI('chat', 'nearbyMessage', this.helper.defaultTimeout, msg_info);
         } else if (message_to_id.value) {
-          msg_info.msg_to_id = message_to_id.value;
-          msg_info.msg_to_name = client.helper.gameState.players.get(message_to_id.value)._displayName;
-          await client.helper.callC2sAPI('chat', 'privateMessage', this.helper.defaultTimeout, msg_info);
+          if (client.helper.gameState.players.has(message_to_id.value)) {
+            msg_info.msg_to_id = message_to_id.value;
+            msg_info.msg_to_name = client.helper.gameState.players.get(message_to_id.value)._displayName;
+            await client.helper.callC2sAPI('chat', 'privateMessage', this.helper.defaultTimeout, msg_info);
+          } else {
+            document.getElementById('message_history').prepend(this.generateMessageBox(display_name + ' => ' + message_to_id.value, 'Error: Cannot find target player id', 'private-message'));
+          }
         } else {
           await client.helper.callC2sAPI('chat', 'broadcastMessage', this.helper.defaultTimeout, msg_info);
         }
