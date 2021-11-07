@@ -15,6 +15,9 @@ const ONLINE_MAP_CONFIG_DIR = '../../../hitcon-cat-adventure/run/map';
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const mapsDir = path.join(__dirname, `${TILED_PROJECT_DIR}/maps`);
 const tilesetsDir = path.join(__dirname, `${TILED_PROJECT_DIR}/tilesets`);
+const fixedsetsDir = path.join(__dirname, `${TILED_PROJECT_DIR}/fixedsetsDir`);
+const charactersConfig = readFileFromJSON(`${fixedsetsDir}/characters.json`);
+const cellsetsConfig = readFileFromJSON(`${fixedsetsDir}/cellsets.json`);
 
 const mapsConfigPath = path.join(__dirname, `${ONLINE_MAP_CONFIG_DIR}/map.json`);
 const assetsConfigPath = path.join(__dirname, `${ONLINE_MAP_CONFIG_DIR}/assets.json`);
@@ -323,57 +326,7 @@ originalImages.forEach((img) => {
   tmpImagesDef[img.name] = img;
 });
 
-const originalCellSets = [
-  {
-    'name': 'bombmanArena1',
-    'priority': 1,
-    'cells': [
-      {
-        'x': 2,
-        'y': 2,
-        'w': 6,
-        'h': 6,
-      },
-    ],
-    'layers': {
-      'ground': 'H',
-      'wall': false,
-    },
-  },
-  {
-    'name': 'bombmanObstacles1',
-    'priority': 2,
-    'cells': [
-      {
-        'x': 3,
-        'y': 5,
-        'w': 2,
-        'h': 1,
-      },
-      {
-        'x': 6,
-        'y': 3,
-        'w': 1,
-        'h': 1,
-      },
-    ],
-    'layers': {
-      'bombmanObstacle': 'O',
-      'wall': true,
-    },
-  },
-  {
-    'name': 'spawnPoint',
-    'cells': [
-      {
-        'x': 6,
-        'y': 60,
-        'w': 1,
-        'h': 1,
-      },
-    ],
-  },
-];
+const originalCellSets = cellsetsConfig;
 
 const worldName = 'world1';
 
@@ -397,70 +350,7 @@ const newAssetsConfig = {
     foreground: {},
   },
   images: [],
-  characters: {
-    'char1': {
-      'D': [
-        'char1img',
-        1,
-        0,
-      ],
-      'DR': [
-        'char1img',
-        0,
-        0,
-      ],
-      'DL': [
-        'char1img',
-        2,
-        0,
-      ],
-      'L': [
-        'char1img',
-        1,
-        1,
-      ],
-      'LR': [
-        'char1img',
-        0,
-        1,
-      ],
-      'LL': [
-        'char1img',
-        2,
-        1,
-      ],
-      'R': [
-        'char1img',
-        1,
-        2,
-      ],
-      'RR': [
-        'char1img',
-        0,
-        2,
-      ],
-      'RL': [
-        'char1img',
-        2,
-        2,
-      ],
-      'U': [
-        'char1img',
-        1,
-        3,
-      ],
-      'UR': [
-        'char1img',
-        0,
-        3,
-      ],
-      'UL': [
-        'char1img',
-        2,
-        3,
-      ],
-    },
-  },
+  characters: charactersConfig,
 };
 
 const newImageDef = [];
