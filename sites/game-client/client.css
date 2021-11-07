@@ -191,3 +191,21 @@ body {
 .ruler-helper-text {
   font-size: 5vh;
 }
+
+.loading-div {
+  /* Lesser than error modal but higher than avatar selection. */
+  z-index: 95;
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+
+  /* Temp attributes */
+  background-color: cornsilk;
+  font-size: 12vh;
+  padding: 5%;
+  box-sizing: border-box;
+}
+
+.loading-div--inactive {
+  display: none;
+}

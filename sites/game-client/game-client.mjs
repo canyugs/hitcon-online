@@ -149,7 +149,12 @@ class GameClient {
    * when the connection is established.
    */
   async onPreviousData(msg) {
-    document.getElementById("display-name").value = msg.displayName;
+    // Update the avatar selection screen with previous data.
+    this.avatarSelectionPage.setDisplayCharAndNameOnScreen(msg.displayChar, msg.displayName);
+
+    // Show loading screen.
+    $('.loading-div').addClass('loading-div--inactive');
+
     window.dispatchEvent(new CustomEvent(
       'previousData', {
         detail: msg
