@@ -12,7 +12,7 @@
   padding: 20px 0;
   color: #FFF;
   width: 378px;
-  opacity: 70%; /* TODO tmp style, see things under utilpanel */
+  opacity: 100%;
   z-index: 10; /* TODO tmp style, make utilpanel visible */
 }
 
