@@ -208,10 +208,7 @@ class Client {
     this.jitsiObj.connect(
       realMeetingName,
       password,
-      this.helper.gameClient.playerInfo.displayName,
-      this.getDevices,
-      this.setSettingDeviceOptions.bind(this),
-      this.broadcastParticipantId.bind(this)
+      this.helper.gameClient.playerInfo.displayName
     );
 
     this.jitsiObj.isMuted.audio = !this.isMicrophoneOn;
