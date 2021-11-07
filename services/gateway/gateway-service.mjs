@@ -6,6 +6,7 @@ import {createRequire} from 'module';
 const require = createRequire(import.meta.url);
 
 const config = require('config');
+const AsyncLock = require('async-lock');
 const movingRequestThreshold = config.get('movingRequestThreshold');
 
 import {MapCoord} from '../../common/maplib/map.mjs';
@@ -210,77 +211,82 @@ class GatewayService {
       }
     }
 
-    // Load the player data.
-    socket.playerData = await this.dir.getPlayerData(playerID);
-    socket.playerID = playerID;
+    // Acquire this lock if you need to move the player.
+    socket.moveLock = new AsyncLock();
+    await socket.moveLock.acquire('move', async () => {
+      // Load the player data.
+      socket.playerData = await this.dir.getPlayerData(playerID);
+      socket.playerID = playerID;
 
-    // Notify the client about any previous data.
-    socket.emit('previousData', PlayerSyncMessage.fromObject(socket.playerData));
+      // Notify the client about any previous data.
+      socket.emit('previousData', PlayerSyncMessage.fromObject(socket.playerData));
 
-    socket.on('disconnect', (reason) => {
-      this.onDisconnect(socket, reason);
-      // onDisconnect is async, so returns immediately.
-    });
-
-    // Add it to our records.
-    this.socks[playerID] = socket;
-
-    if (socket.disconnected) {
-      // Disconnected halfway.
-      console.warn(`Player ${playerID} disconnected halfway through.`);
-      await this.onDisconnect(socket.reason);
-      return;
-    } else {
-      console.log(`Player ${playerID} connected.`);
-    }
-
-    socket.on('callC2sAPI', (msg, callback) => {
-      const p = this.extMan.onC2sCalled(msg, socket.playerID);
-      p.then((msg) => {
-        if (typeof msg === 'object' && msg !== null && 'error' in msg && typeof msg.error === 'string') {
-          console.error(`c2s call error: ${msg.error}`);
-        }
-        callback(msg);
-      }, (reason) => {
-        console.error(`c2s call exception: ${reason}`);
-        // Full exception detailed NOT provided for security reason.
-        callback({'error': 'exception'});
+      socket.on('disconnect', (reason) => {
+        this.onDisconnect(socket, reason);
+        // onDisconnect is async, so returns immediately.
       });
-    });
 
-    // Synchronize the state.
-    const initLoc = socket.playerData.mapCoord ?? this.gameMap.getRandomSpawnPoint();
-    await this._enterCoord(initLoc);
-    socket.playerData.mapCoord = initLoc;
-    socket.playerData.facing = 'D';
-    socket.playerData.lastMovingTime = Date.now();
-    socket.playerData.ghostMode = false;
+      // Add it to our records.
+      this.socks[playerID] = socket;
 
-    // Register all events.
-    socket.on('playerUpdate', (msg) => {
-      this.onPlayerUpdate(socket, PlayerSyncMessage.fromObject(msg));
-      // onPlayerUpdate is async, so returns immediately.
-    });
-
-    // notify the client to start the game after his/her avatar is selected
-    socket.on('avatarSelect', async (msg) => {
-      // initialize the appearance of player
-      socket.playerData.displayName = msg.displayName;
-      socket.playerData.displayChar = msg.displayChar;
-
-      const firstLocation = PlayerSyncMessage.fromObject(socket.playerData);
-      if (!firstLocation.check(this.gameMap.graphicAsset)) {
-        // Kick player for invalid avatar args.
-        await this.notifyKicked(socket, 'Invalid avatarSelect args');
+      if (socket.disconnected) {
+        // Disconnected halfway.
+        console.warn(`Player ${playerID} disconnected halfway through.`);
+        // Leave onDisconnect() to run in the background.
+        this.onDisconnect(socket.reason);
         return;
+      } else {
+        console.log(`Player ${playerID} connected.`);
       }
 
-      await this._broadcastPlayerUpdate(firstLocation);
-      this.broadcaster.sendStateTransfer(socket);
+      socket.on('callC2sAPI', (msg, callback) => {
+        const p = this.extMan.onC2sCalled(msg, socket.playerID);
+        p.then((msg) => {
+          if (typeof msg === 'object' && msg !== null && 'error' in msg && typeof msg.error === 'string') {
+            console.error(`c2s call error: ${msg.error}`);
+          }
+          callback(msg);
+        }, (reason) => {
+          console.error(`c2s call exception: ${reason}`);
+          // Full exception detailed NOT provided for security reason.
+          callback({'error': 'exception'});
+        });
+      });
 
-      // Emit the gameStart event.
-      const startPack = {playerData: socket.playerData};
-      socket.emit('gameStart', startPack);
+      // Synchronize the state.
+      const initLoc = socket.playerData.mapCoord ?? this.gameMap.getRandomSpawnPoint();
+      await this._enterCoord(initLoc);
+      socket.playerData.mapCoord = initLoc;
+      socket.playerData.facing = 'D';
+      socket.playerData.lastMovingTime = Date.now();
+      socket.playerData.ghostMode = false;
+
+      // Register all events.
+      socket.on('playerUpdate', (msg) => {
+        this.onPlayerUpdate(socket, PlayerSyncMessage.fromObject(msg));
+        // onPlayerUpdate is async, so returns immediately.
+      });
+
+      // notify the client to start the game after his/her avatar is selected
+      socket.on('avatarSelect', async (msg) => {
+        // initialize the appearance of player
+        socket.playerData.displayName = msg.displayName;
+        socket.playerData.displayChar = msg.displayChar;
+
+        const firstLocation = PlayerSyncMessage.fromObject(socket.playerData);
+        if (!firstLocation.check(this.gameMap.graphicAsset)) {
+          // Kick player for invalid avatar args.
+          await this.notifyKicked(socket, 'Invalid avatarSelect args');
+          return;
+        }
+
+        await this._broadcastPlayerUpdate(firstLocation);
+        this.broadcaster.sendStateTransfer(socket);
+
+        // Emit the gameStart event.
+        const startPack = {playerData: socket.playerData};
+        socket.emit('gameStart', startPack);
+      });
     });
   }
 
@@ -297,23 +303,26 @@ class GatewayService {
       console.error(`Player ${playerID} is non-existent when disconnected.`);
       return;
     }
-    if (this.socks[playerID] !== socket) {
-      // This should not happen.
-      console.error(`Player ${playerID}'s socket mismatch when disconnected.`);
-    }
 
-    // Take socket off first to avoid race condition in the await below.
-    delete this.socks[playerID];
+    await socket.moveLock.acquire('move', async () => {
+      if (this.socks[playerID] !== socket) {
+        // This should not happen.
+        console.error(`Player ${playerID}'s socket mismatch when disconnected.`);
+      } else {
+        // Take socket off first to avoid race condition in the await below.
+        delete this.socks[playerID];
+      }
 
-    const lastLocation = PlayerSyncMessage.fromObject({playerID, removed: true});
-    await this._broadcastPlayerUpdate(lastLocation);
+      const lastLocation = PlayerSyncMessage.fromObject({playerID, removed: true});
+      await this._broadcastPlayerUpdate(lastLocation);
 
-    // release grid after disconnection
-    await this._leaveCoord(socket.playerData.mapCoord);
+      // release grid after disconnection
+      await this._leaveCoord(socket.playerData.mapCoord);
 
-    // Try to unregister the player.
-    await this.rpcHandler.unregisterPlayer(playerID);
-    console.log(`Player ${playerID} disconnected`);
+      // Try to unregister the player.
+      await this.rpcHandler.unregisterPlayer(playerID);
+      console.log(`Player ${playerID} disconnected`);
+    });
   }
 
   /**
@@ -368,23 +377,27 @@ class GatewayService {
    * @return {Boolean} - success or not
    */
   async _teleportPlayerInternal(socket, msg, allowOverlap=false) {
-    const ret = await this._enterCoord(msg.mapCoord);
+    let res;
+    res = await socket.moveLock.acquire('move', async () => {
+      const ret = await this._enterCoord(msg.mapCoord);
 
-    // If the player was in ghost mode, ignore the occupation check.
-    if (!(socket.playerData.ghostMode || allowOverlap)) {
-      // If the player moves in normal mode, check the occupation.
-      if (!msg.ghostMode && !ret) {
-        await this._leaveCoord(msg.mapCoord);
-        return false;
+      // If the player was in ghost mode, ignore the occupation check.
+      if (!(socket.playerData.ghostMode || allowOverlap)) {
+        // If the player moves in normal mode, check the occupation.
+        if (!msg.ghostMode && !ret) {
+          await this._leaveCoord(msg.mapCoord);
+          return false;
+        }
       }
-    }
 
-    // Leave the previous location.
-    await this._leaveCoord(socket.playerData.mapCoord);
+      // Leave the previous location.
+      await this._leaveCoord(socket.playerData.mapCoord);
 
-    // Everything seems well, update everyone on our new location.
-    await this._broadcastPlayerUpdate(msg);
-    return true;
+      // Everything seems well, update everyone on our new location.
+      await this._broadcastPlayerUpdate(msg);
+      return true;
+    });
+    return res;
   }
 
   /**
