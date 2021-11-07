@@ -18,10 +18,22 @@ services:
   redis:
     image: redis
 
+  haproxy:
+    image: haproxy:lts
+    ports:
+      - "15000:15000"
+    volumes:
+      - "${RUN_DIR:-../run}/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg"
+    depends_on:
+      - online
+      - redis
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
   nginx:
     image: nginx:latest
     ports:
-      - "80:80"
+      - "14000:80"
     volumes:
       - "${RUN_DIR:-../run}/nginx.conf:/etc/nginx/conf.d/default.conf"
     depends_on:
