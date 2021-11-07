@@ -64,7 +64,7 @@ class InteractiveObjectClientBaseClass {
           // Not the current player.
           return;
         }
-        if (msg.mapCoord.equalsTo(this.mapCoord)) {
+        if (msg.mapCoord !== undefined && msg.mapCoord.equalsTo(this.mapCoord)) {
           // We hit the user.
           this.onInteract();
         }
