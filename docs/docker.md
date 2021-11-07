@@ -17,3 +17,8 @@ Also, modify the `hosts` file so that the temporary address works.
 ```
 127.0.0.1       online.hitcon.org
 ```
+
+Note that the gateway services config can be generated with:
+```
+print('\n'.join(['"gatewayService%d": {"httpAddress": "127.0.0.1:%d", "grpcAddress": "127.0.0.1:%d"},'%(x, x, x+100) for x in range(5100, 5132)]))
+```
