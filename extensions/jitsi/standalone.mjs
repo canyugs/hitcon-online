@@ -49,6 +49,21 @@ class Standalone {
    * Initializes the extension.
    */
   async initialize() {
+    // Notify to remove the recently quit user.
+    this.helper.registerOnPlayerUpdate((msg) => {
+      if (!msg?.removed) {
+        return;
+      }
+
+      for (const meetingName in this.meetingName2playerId2ParticipantIdMapping) {
+        if (Object.keys(this.meetingName2playerId2ParticipantIdMapping[meetingName]).includes(msg.playerID)) {
+          delete this.meetingName2playerId2ParticipantIdMapping[meetingName][msg.playerID];
+          for (const playerID in this.meetingName2playerId2ParticipantIdMapping[meetingName]) {
+            this.helper.callS2cAPI(playerID, 'jitsi', 'updateIdMapping', 5000, this.meetingName2playerId2ParticipantIdMapping[meetingName]);
+          }
+        }
+      }
+    });
   }
 
   /**
