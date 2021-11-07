@@ -13,7 +13,34 @@ const ALPHA = 0.0205;
  * One instance is created for each connected player.
  */
 class JitsiHandler {
-  constructor(meetingName, password, userName, getDevices, setSettingDeviceOptions, broadcastParticipantId) {
+  constructor(getDevices, setSettingDeviceOptions, broadcastParticipantId) {
+    this.getDevices = getDevices;
+    this.setSettingDeviceOptions = setSettingDeviceOptions;
+    this.broadcastParticipantId = broadcastParticipantId;
+
+    $(window).bind('beforeunload', this.unload.bind(this));
+    $(window).bind('unload', this.unload.bind(this));
+
+    /* Bind functions */
+    this.disconnectBinded = this.disconnect.bind(this);
+    this.onConnectionFailedBinded = this.onConnectionFailed.bind(this);
+    this.onConnectionSuccessBinded = this.onConnectionSuccess.bind(this);
+
+    this.updateDeviceListBinded = () => {
+      JitsiHandler.updateDeviceList(this.setSettingDeviceOptions);
+    };
+
+    this.isInMeeting = false;
+  }
+
+  /**
+   * Create Jitsi connection
+   */
+  connect(meetingName, password, userName) {
+    this.meetingName = meetingName;
+    this.password = password;
+    this.userName = userName;
+
     this.connection = null;
     this.isVideo = true;
     this.localTracks = {};
@@ -27,16 +54,12 @@ class JitsiHandler {
     this.isWebcam = true; // Is webcam or screen sharing.
     this.playerIdToParticipantIdMapping = {};
 
-    this.meetingName = meetingName;
-    this.password = password;
-    this.userName = userName;
-    this.getDevices = getDevices;
-    this.setSettingDeviceOptions = setSettingDeviceOptions;
-    this.broadcastParticipantId = broadcastParticipantId;
+    this.isInMeeting = true;
 
     // Is track mute
     this.isMuted = {video: true, audio: true};
 
+    // Connection options
     this.options = {
       hosts: {
         domain: 'meet.jit.si',
@@ -50,29 +73,6 @@ class JitsiHandler {
       openBridgeChannel: 'websocket'
     };
 
-    $(window).bind('beforeunload', this.unload.bind(this));
-    $(window).bind('unload', this.unload.bind(this));
-
-    /* Bind functions */
-    this.disconnectBinded = this.disconnect.bind(this);
-    this.onConnectionFailedBinded = this.onConnectionFailed.bind(this);
-    this.onConnectionSuccessBinded = this.onConnectionSuccess.bind(this);
-    this.updateDeviceListBinded = () => {
-      JitsiHandler.updateDeviceList(this.setSettingDeviceOptions);
-    };
-
-    /* Sort the jitsi screens periodically */
-    this.updateSmoothedSoundInterval = setInterval(this.updateSmoothedSound.bind(this), 100);
-    this.sortScreensInterval = setInterval(this.sortScreens.bind(this), 2500);
-
-    /* Establish connection */
-    this.connect();
-  }
-
-  /**
-   * Create Jitsi connection
-   */
-  connect() {
     JitsiMeetJS.setLogLevel(JitsiMeetJS.logLevels.ERROR);
     JitsiMeetJS.init({
       disableAudioLevels: true,
@@ -92,6 +92,10 @@ class JitsiHandler {
     JitsiMeetJS.mediaDevices.addEventListener(
         JitsiMeetJS.events.mediaDevices.DEVICE_LIST_CHANGED,
         this.updateDeviceListBinded);
+
+    /* Sort the jitsi screens periodically */
+    this.updateSmoothedSoundInterval = setInterval(this.updateSmoothedSound.bind(this), 100);
+    this.sortScreensInterval = setInterval(this.sortScreens.bind(this), 2500);
 
     this.connection.connect();
 
@@ -354,22 +358,10 @@ class JitsiHandler {
     );
     this.room.on(JitsiMeetJS.events.conference.TRACK_ADDED, this.onRemoteTrack.bind(this));
     this.room.on(JitsiMeetJS.events.conference.TRACK_REMOVED, this.onRemoteTrackRemove.bind(this));
-    this.room.on(
-        JitsiMeetJS.events.conference.CONFERENCE_JOINED,
-        this.onConferenceJoined.bind(this));
+    this.room.on(JitsiMeetJS.events.conference.CONFERENCE_JOINED, this.onConferenceJoined.bind(this));
     this.room.on(JitsiMeetJS.events.conference.USER_JOINED, this.onUserJoin.bind(this));
     this.room.on(JitsiMeetJS.events.conference.USER_LEFT, this.onUserLeft.bind(this));
     this.room.on(JitsiMeetJS.events.conference.TRACK_MUTE_CHANGED, this.onTrackMute.bind(this));
-    this.room.on(
-        JitsiMeetJS.events.conference.DISPLAY_NAME_CHANGED,
-        (userID, displayName) => console.log(`${userID} - ${displayName}`));
-    this.room.on(
-        JitsiMeetJS.events.conference.TRACK_AUDIO_LEVEL_CHANGED,
-        (userID, audioLevel) => console.log(`${userID} - ${audioLevel}`));
-    this.room.on(
-        JitsiMeetJS.events.conference.PHONE_NUMBER_CHANGED,
-        () => console.log(`${this.room.getPhoneNumber()} - ${this.room.getPhonePin()}`));
-
     this.room.on(JitsiMeetJS.events.conference.PARTICIPANT_PROPERTY_CHANGED, this.setRemoteVolumeMeter.bind(this));
 
     this.room.setDisplayName(this.userName);
@@ -417,12 +409,20 @@ class JitsiHandler {
     this.connection.removeEventListener(
         JitsiMeetJS.events.connection.CONNECTION_DISCONNECTED,
         this.disconnectBinded);
+    this.connection = undefined;
+    this.unload();
   }
 
   /**
    * Leave the room and clean up the connection.
    */
   async unload() {
+    // Prevent unloading multiple times.
+    if (this?.isUnloading) {
+      return;
+    }
+    this.isUnloading = true;
+
     if (this.localTracks) {
       for (const [type, track] of Object.entries(this.localTracks)) {
         await track.dispose();
@@ -451,9 +451,8 @@ class JitsiHandler {
       this.connection.disconnect();
     }
 
-    JitsiMeetJS.mediaDevices.removeEventListener(
-        JitsiMeetJS.events.mediaDevices.DEVICE_LIST_CHANGED,
-        this.updateDeviceListBinded);
+    this.isInMeeting = false;
+    this.isUnloading = false;
   }
 
   /**

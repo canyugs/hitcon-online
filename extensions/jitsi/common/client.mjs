@@ -73,7 +73,6 @@ class Client {
    */
   constructor(helper) {
     this.helper = helper;
-    this.jitsiObj = undefined;
     this.currentMeeting = undefined;
 
     this.isMicrophoneOn = false;
@@ -82,6 +81,12 @@ class Client {
 
     this.audioDevice = null;
     this.videoDevice = null;
+
+    this.jitsiObj = new JitsiHandler(
+      this.getDevices,
+      this.setSettingDeviceOptions.bind(this),
+      this.broadcastParticipantId.bind(this)
+    );
   }
 
   async gameStart() {
@@ -193,14 +198,14 @@ class Client {
    * Start the Jitsi Meeeting
    */
   async startMeeting(meetingName, realMeetingName, password) {
-    // if this.jitsiObj is set, the previous meeting has not yet ended.
+    // if this.jitsiObj.isInMeeting is set, the previous meeting has not yet ended.
     // TODO: Probably use Promise instead.
     // We may need to handle the case that `startMeeting` is called multiple times.
-    while (this.jitsiObj) {
+    while (this.jitsiObj.isInMeeting) {
       await new Promise(r => setTimeout(r, 1000));
     }
 
-    this.jitsiObj = new JitsiHandler(
+    this.jitsiObj.connect(
       realMeetingName,
       password,
       this.helper.gameClient.playerInfo.displayName,
@@ -223,7 +228,6 @@ class Client {
     if (this.jitsiObj) {
       this.container.hide();
       await this.jitsiObj.unload();
-      this.jitsiObj = undefined;
       this.currentMeeting = undefined;
 
       // Set screen sharing to false.
@@ -238,7 +242,9 @@ class Client {
    */
   async updateMeeting(meetingName) {
     if (typeof meetingName !== 'string') {
-      this.stopMeeting();
+      if (this.jitsiObj.isInMeeting) {
+        await this.stopMeeting();
+      }
       return;
     }
 
