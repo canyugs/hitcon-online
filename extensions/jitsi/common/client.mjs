@@ -200,8 +200,14 @@ class Client {
       await new Promise(r => setTimeout(r, 1000));
     }
 
-    this.jitsiObj = new JitsiHandler(realMeetingName, password,
-      this.helper.gameClient.playerInfo.displayName, this.getDevices, this.setSettingDeviceOptions.bind(this));
+    this.jitsiObj = new JitsiHandler(
+      realMeetingName,
+      password,
+      this.helper.gameClient.playerInfo.displayName,
+      this.getDevices,
+      this.setSettingDeviceOptions.bind(this),
+      this.broadcastParticipantId.bind(this)
+    );
 
     this.jitsiObj.isMuted.audio = !this.isMicrophoneOn;
     this.jitsiObj.isMuted.video = !this.isCameraOn;
@@ -295,6 +301,20 @@ class Client {
     if (this.settingTab) {
       this.settingTab.updateDropdownOptions('device', deviceType, deviceList, currentDevice);
     }
+  }
+
+  async broadcastParticipantId(participantId) {
+    return await this.helper.callC2sAPI(null, 'updateIdMapping', this.helper.defaultTimeout, {
+      'participantId': participantId,
+      'meetingName': this.currentMeeting
+    });
+  }
+
+  async s2c_updateIdMapping(playerIdToParticipantIdMapping) {
+    if (this.jitsiObj) {
+      this.jitsiObj.updateMappingAndRemoveDanglingUser(playerIdToParticipantIdMapping);
+    }
+    return true;
   }
 };
 

@@ -13,7 +13,7 @@ const ALPHA = 0.0205;
  * One instance is created for each connected player.
  */
 class JitsiHandler {
-  constructor(meetingName, password, userName, getDevices, setSettingDeviceOptions) {
+  constructor(meetingName, password, userName, getDevices, setSettingDeviceOptions, broadcastParticipantId) {
     this.connection = null;
     this.isVideo = true;
     this.localTracks = {};
@@ -25,11 +25,14 @@ class JitsiHandler {
     this.isJoined = false;
     this.room = null;
     this.isWebcam = true; // Is webcam or screen sharing.
+    this.playerIdToParticipantIdMapping = {};
+
     this.meetingName = meetingName;
     this.password = password;
     this.userName = userName;
     this.getDevices = getDevices;
     this.setSettingDeviceOptions = setSettingDeviceOptions;
+    this.broadcastParticipantId = broadcastParticipantId;
 
     // Is track mute
     this.isMuted = {video: true, audio: true};
@@ -217,6 +220,12 @@ class JitsiHandler {
     } else {
       $(`#jitsi-${participantId}-container > .jitsi-user-${track.getType()}`).removeClass(`jitsi-user-${track.getType()}--close`);
     }
+
+    // Check if this is a dangling user.
+    if (!Object.values(this.playerIdToParticipantIdMapping).includes(participantId)) {
+      console.warn('Found dangling paritcipant', participantId);
+      $(`#jitsi-${participantId}-container`).hide();
+    }
   }
 
   onRemoteTrackRemove(track) {
@@ -276,11 +285,12 @@ class JitsiHandler {
 
     $('#jitsi-local').addClass('active');
     this.setLocalAudioVolumeMeter();
+    this.broadcastParticipantId(this.room.myUserId()); // broadcast the paritcipant id.
   }
 
   /**
    * This is executed when an user left.
-   * @param {Number} id The participant id of the user just left.
+   * @param {string} id The participant id of the user just left.
    */
   onUserLeft(id) {
     console.log('user left');
@@ -308,9 +318,22 @@ class JitsiHandler {
   }
 
   /**
+   * This is executed when an user joined.
+   * @param {string} id The participant id.
+   * @param {JitsiParticipant} user
+   */
+  onUserJoin(id, user) {
+    console.log('user joined: ', id, user._displayName);
+    this.participantsInfo[id] = user;
+    this.participantSounds[id] = 0;
+    this.participantSmoothedSounds[id] = 0;
+    this.remoteTracks[id] = [];
+  }
+
+  /**
    * Update the user's display name.
-   * @param {Number} id The participant id.
-   * @param {String} displayName The new display name.
+   * @param {string} id The participant id.
+   * @param {string} displayName The new display name.
    */
   onDisplayNameChanged(id, displayName) {
     $(`#jitsi-${id}-user-name`).text(displayName);
@@ -334,13 +357,7 @@ class JitsiHandler {
     this.room.on(
         JitsiMeetJS.events.conference.CONFERENCE_JOINED,
         this.onConferenceJoined.bind(this));
-    this.room.on(JitsiMeetJS.events.conference.USER_JOINED, (id, user) => {
-      console.log('user joined: ', id, user._displayName);
-      this.participantsInfo[id] = user;
-      this.participantSounds[id] = 0;
-      this.participantSmoothedSounds[id] = 0;
-      this.remoteTracks[id] = [];
-    });
+    this.room.on(JitsiMeetJS.events.conference.USER_JOINED, this.onUserJoin.bind(this));
     this.room.on(JitsiMeetJS.events.conference.USER_LEFT, this.onUserLeft.bind(this));
     this.room.on(JitsiMeetJS.events.conference.TRACK_MUTE_CHANGED, this.onTrackMute.bind(this));
     this.room.on(
@@ -411,6 +428,8 @@ class JitsiHandler {
         await track.dispose();
       }
     }
+
+    this.broadcastParticipantId(null); // broadcast that the player has quit.
 
     // We can safely remove all DOMs at this point.
     $('#jitsi-remote-container').empty();
@@ -573,6 +592,22 @@ class JitsiHandler {
       const bid = $(b).attr('data-id');
       return this.participantSmoothedSounds[bid] - this.participantSmoothedSounds[aid];
     }).appendTo('#jitsi-remote-container');
+  }
+
+  /**
+   * Update the playerIdToParticipantIdMapping, and check if there is any dangling user
+   * @param playerIdToParticipantIdMapping
+   */
+  updateMappingAndRemoveDanglingUser(playerIdToParticipantIdMapping) {
+    this.playerIdToParticipantIdMapping = playerIdToParticipantIdMapping;
+    $('#jitsi-remote-container > .jitsi-user-container').each(function() {
+      if (Object.values(playerIdToParticipantIdMapping).includes($(this).attr('data-id'))) {
+        $(this).show();
+      } else {
+        $(this).hide();
+        console.warn(`Found dangling paritcipant ${$(this).attr('data-id')}`);
+      }
+    });
   }
 }
 export default JitsiHandler;
