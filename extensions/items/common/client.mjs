@@ -156,8 +156,7 @@ class Client {
     const items = await this.helper.callC2sAPI('items', 'getAllItems', 5000);
     for (const itemName in items) {
       console.log(itemName, items[itemName]);
-      let amount = 0;
-      this.generateItemBlock(itemName, items[itemName].amount);
+      if (items[itemName].amount !== 0) this.generateItemBlock(itemName, items[itemName].amount);
     }
   }
 
