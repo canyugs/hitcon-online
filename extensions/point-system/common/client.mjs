@@ -19,11 +19,18 @@ class Client {
   }
 
   async gameStart() {
-    this.helper.mainUI.contextMenu.addToOthersMenu('Transfer Points', 'https://via.placeholder.com/15x15', (player) => {
-      // TODO: use modal or something else instead of prompt.
-      if (this.transferPoints(parseInt(prompt("How many points to transfer:", 0)), player.playerID)) {
+    this.helper.mainUI.contextMenu.addToOthersMenu('Transfer Points', 'https://via.placeholder.com/15x15', async (player) => {
+      let points = (await this.helper.getExtObj('dialog')?.modal.displayAsPrompt(
+        'Transfer Points',
+        `How many points do you want to transfer to ${player.displayName}? Only positive integer is allowed.`,
+        'Submit'
+      ))?.msg;
+
+      if (await this.transferPoints(parseInt(points, 10), player.playerID)) {
         this.helper.mainUI.showNotification('Point transferred successfully.', 5000);
         this.notifyUpdatePoints(player.playerID, 'TRASNFERRED');
+      } else {
+        this.helper.mainUI.showNotification('Failed to transfer points. ', 5000);
       }
     });
 
@@ -58,13 +65,17 @@ class Client {
    * @param {string} receiver The uid of the receiver.
    */
   async transferPoints(points, receiver) {
+    if (!Number.isInteger(points) || points <= 0) {
+      console.error('Illegal points recieved:', points);
+      return false;
+    }
     try {
       let ret = await this.requestApi('/points/transactions', 'POST', {
         points: points,
         receiver: receiver
       });
       await this.s2c_updatePoints();
-      return ret?.message === "OK";
+      return ret?.success;
     } catch (e) {
       console.error('Failed to transfer points: ', e);
       return false;
