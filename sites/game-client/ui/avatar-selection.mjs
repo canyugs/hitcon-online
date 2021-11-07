@@ -21,6 +21,7 @@ class AvatarSelectionPage {
     this.graphicAsset = graphicAsset;
     this.DOM = document.getElementById(DOM_ID);
     this.selectedAvatar = [null, null]; // [displayChar, DOMElement]
+    this.avatarDOM = new Map();
 
     this.DOM.querySelector('button[name="submit"]').addEventListener('click', this.submit.bind(this));
 
@@ -58,6 +59,7 @@ class AvatarSelectionPage {
       img.src = tempCanvas.toDataURL();
       newAvatar.appendChild(img);
       newAvatar.addEventListener('click', this.setSelectedAvatar.bind(this, charName, newAvatar));
+      this.avatarDOM.set(charName, newAvatar);
       container.appendChild(newAvatar);
     }
 
@@ -76,6 +78,21 @@ class AvatarSelectionPage {
     }
     this.selectedAvatar = [displayChar, ele];
     ele.classList.add('avatar-selected');
+  }
+
+  /**
+   * Set the character selected and display name on screen.
+   * This is usually called by gameClient when the server supplied the data
+   * from previous session.
+   */
+  setDisplayCharAndNameOnScreen(displayChar, displayName) {
+    if (this.avatarDOM.has(displayChar)) {
+      this.avatarDOM.get(displayChar).click();
+    } else {
+      console.warn('Cannot find displayChar in setDisplayCharAndNameOnScreen: ', displayChar);
+    }
+
+    this.DOM.querySelector('input[name="display-name"]').value = displayName;
   }
 
   /**
