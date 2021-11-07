@@ -80,6 +80,9 @@ class AssetServer {
       this.clientParams.gatewayAddress = this.gatewayAddresses ? this.gatewayAddresses[Math.floor(Math.random() * this.gatewayAddresses.length)] : null;
       res.render(path.resolve(__dirname, '../../sites/game-client/client.ejs'), this.clientParams);
     });
+    this.app.get('/health', (req, res) => {
+      res.status(200).send('OK');
+    });
   }
 
   /**
