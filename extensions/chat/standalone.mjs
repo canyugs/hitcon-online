@@ -196,8 +196,9 @@ class Standalone {
   async c2s_broadcastMessage(player, args) {
     let resultArgs = {};
     resultArgs['type'] = 'genericMsg';
-    resultArgs['msg_from'] = player.playerID;
+    resultArgs['msg_from_id'] = player.playerID;
     resultArgs['msg'] = args.msg;
+    resultArgs['msg_from_name'] = args.msg_from_name;
     
     await this.helper.broadcastToAllUser(resultArgs);
   }
@@ -215,10 +216,11 @@ class Standalone {
     const msg = cmd.substr(cmd.indexOf(' ')+1);
 
     let resultArgs = {};
-    resultArgs['msg_from'] = player.playerID;
+    resultArgs['msg_from_id'] = player.playerID;
     resultArgs['msg'] = msg;
     resultArgs['type'] = 'announcement';
     resultArgs['timeout'] = 25000;
+    resultArgs['msg_from_name'] = args.msg_from_name;
     
     await this.helper.broadcastToAllUser(resultArgs);
 
@@ -238,7 +240,7 @@ class Standalone {
       return;
     }
 
-    args['msg_from'] = player.playerID;
+    args['msg_from_id'] = player.playerID;
     this.helper.gameState.players.forEach(async (value, key, map) => {
       // TODO(zeze-zeze): Check the definition of "nearby". Now is equal to or less than two blocks in x, y coordinates.
       if (Math.abs(value.mapCoord.x - centerPlayerCoord.x) <= 2 && Math.abs(value.mapCoord.y - centerPlayerCoord.y) <= 2) {
@@ -254,8 +256,8 @@ class Standalone {
    * @param {object} args - chat information including message, target player id
    */
   async c2s_privateMessage(player, args) {
-    args['msg_from'] = player.playerID;
-    await this.helper.callS2cAPI(args.msg_to, 'chat', 'getPrivateMessage', 5000, args);
+    args['msg_from_id'] = player.playerID;
+    await this.helper.callS2cAPI(args.msg_to_id, 'chat', 'getPrivateMessage', 5000, args);
     await this.helper.callS2cAPI(player.playerID, 'chat', 'sendedPrivateMessage', 5000, args);
   }
 
