@@ -15,11 +15,11 @@ const ONLINE_MAP_CONFIG_DIR = '../../../hitcon-cat-adventure/run/map';
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const mapsDir = path.join(__dirname, `${TILED_PROJECT_DIR}/maps`);
 const tilesetsDir = path.join(__dirname, `${TILED_PROJECT_DIR}/tilesets`);
-const fixedsetsDir = path.join(__dirname, `${TILED_PROJECT_DIR}/fixedsetsDir`);
+const fixedsetsDir = path.join(__dirname, `${TILED_PROJECT_DIR}/fixedsets`);
 const charactersConfig = readFileFromJSON(`${fixedsetsDir}/characters.json`);
 const cellsetsConfig = readFileFromJSON(`${fixedsetsDir}/cellsets.json`);
 
-const mapsConfigPath = path.join(__dirname, `${ONLINE_MAP_CONFIG_DIR}/map.json`);
+const mapsConfigPath = path.join(__dirname, `${ONLINE_MAP_CONFIG_DIR}/map2.json`);
 const assetsConfigPath = path.join(__dirname, `${ONLINE_MAP_CONFIG_DIR}/assets.json`);
 const currentAssetsConfig = readFileFromJSON(assetsConfigPath);
 
@@ -106,8 +106,10 @@ const resultLayerMap = getAllTileLayerMap();
 
 
 // read data from child maps.
-const targetMap = path.join(mapsDir, 'map01');
+const targetMap = path.join(mapsDir, 'map02');
 const {base} = path.parse(targetMap);
+const originalCellSets = cellsetsConfig;
+const worldName = 'world2';
 
 console.log(`read maps from ${targetMap}`);
 fs.readdirSync(targetMap).forEach((file) => {
@@ -210,7 +212,7 @@ function combineSingleLayer(childMaps, layerName) {
       const mapName = `${base}-0${idx}`;
       const targetLayer = childMaps[mapName].layers
         .filter((layer) => layer.name.toLowerCase() === layerName)[0];
-
+      if (targetLayer === undefined) return null;
       let data;
       if (layerName === 'jitsi') data = fetchJitsiLayer(targetLayer, startIdx, endIdx, mapName);
       else data = targetLayer.data.slice(startIdx, endIdx);
@@ -326,9 +328,7 @@ originalImages.forEach((img) => {
   tmpImagesDef[img.name] = img;
 });
 
-const originalCellSets = cellsetsConfig;
 
-const worldName = 'world1';
 
 const newMapsConfig = {};
 newMapsConfig[worldName] = {

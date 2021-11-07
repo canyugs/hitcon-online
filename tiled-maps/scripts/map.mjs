@@ -15,6 +15,7 @@ export function mapTransform(map) {
 
   for (let i = 0; i < rootLayers.length; i++) {
     const layer = rootLayers[i];
+    if (layer.data === null) continue;
     const newArray = new Array(map.width * map.height).fill(0);
 
     // start at last row
