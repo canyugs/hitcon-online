@@ -205,7 +205,7 @@ ${this.clientCmdsInfo.helpMsg}
    */
   s2c_getNearbyMessage(args) {
     document.getElementById('message_history').prepend(
-    this.generateMessageBox(this.HTMLEncode(args.msg_from_name), this.HTMLEncode(args.msg), 'nearby'));
+    this.generateMessageBox(args.msg_from_name, args.msg, 'nearby'));
   }
 
   /**
@@ -215,7 +215,7 @@ ${this.clientCmdsInfo.helpMsg}
    */
   s2c_getPrivateMessage(args) {
     document.getElementById('message_history').prepend(
-    this.generateMessageBox(this.HTMLEncode(args.msg_from_name), this.HTMLEncode(args.msg), 'private-message'));
+    this.generateMessageBox(args.msg_from_name + ' => ' + args.msg_to_name, args.msg, 'private-message'));
   }
 
   /**
@@ -225,7 +225,7 @@ ${this.clientCmdsInfo.helpMsg}
    */
   s2c_sendedPrivateMessage(args) {
     document.getElementById('message_history').prepend(
-    this.generateMessageBox(this.HTMLEncode(args.msg_to_name), this.HTMLEncode(args.msg), 'private-message'));
+    this.generateMessageBox(args.msg_from_name + ' => ' + args.msg_to_name, args.msg, 'private-message'));
   }
 
   /**
@@ -241,7 +241,7 @@ ${this.clientCmdsInfo.helpMsg}
       this.clientCmdsInfo = args.clientCmdsInfo;
     } else if (args.type === 'genericMsg') {
       document.getElementById('message_history').prepend(
-    this.generateMessageBox(this.HTMLEncode(args.msg_from_name), this.HTMLEncode(args.msg), 'all'));
+    this.generateMessageBox(args.msg_from_name, args.msg, 'all'));
     } else {
       console.error('Invalid chat ext broadcast message: ', args);
     }
