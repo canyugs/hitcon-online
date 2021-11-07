@@ -149,6 +149,7 @@ class GameClient {
    * when the connection is established.
    */
   async onPreviousData(msg) {
+    document.getElementById("display-name").value = msg.displayName;
     window.dispatchEvent(new CustomEvent(
       'previousData', {
         detail: msg
