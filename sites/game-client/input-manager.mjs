@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 const KEYSTROKE_RATE = 30; // keystroke per second
-const RELEASE_KEY_AFTER_MS = 2000;
-// If we don't receive any key event after 2s, we consider the key to be released.
-// This is so that if somebody press a key then alt-tab while the key is still held,
-// keydown would not be fired.
+const RELEASE_KEY_AFTER_MS = 1000;
+// If we don't receive any key event after this interval, we manually release this key.
+// For example, if somebody press a key and then alt-tab while the key is still held,
+// keyup will not be sent by the browser.
 
 /**
  * Input manager deals with all user input.
@@ -29,10 +29,12 @@ class InputManager {
     // TODO: Better way of maintaining focused element.
     this.focusedElement = document.activeElement;
 
-    // TODO: Maintain a list of pressed key for better user experience (player moving)
+    // Maintain a list of pressed key for better user experience (player moving)
     this.pressedKeys = new Map(); // key: event.key, value: event.code
     document.addEventListener('keydown', (event) => {
       this.pressedKeys.set(event.key, {code: event.code, time: Date.now()});
+      // TODO: Bug. The browser will continuouslly fire keydown event if key remains pressed.
+      // Can be solved by recording how many times the callback is called.
       for (const {DOMElement, callback} of this.keydownOnceCallbacks) {
         if (this.focusedElement === DOMElement) {
           callback(event);
@@ -40,19 +42,19 @@ class InputManager {
       }
     });
     document.addEventListener('keyup', (event) => {
-      this.pressedKeys.delete(event.key);
-      for (const {DOMElement, callback} of this.keyupCallbacks) {
-        if (this.focusedElement === DOMElement) {
-          callback(event);
+      if (this.pressedKeys.delete(event.key)) {
+        for (const {DOMElement, callback} of this.keyupCallbacks) {
+          if (this.focusedElement === DOMElement) {
+            callback(event);
+          }
         }
       }
     });
     setInterval(() => {
-      for (const [key, obj] of this.pressedKeys.entries()) {
-        if (Date.now() - obj.time > RELEASE_KEY_AFTER_MS) {
+      for (const [key, {code, time}] of this.pressedKeys.entries()) {
+        if (Date.now() - time > RELEASE_KEY_AFTER_MS) {
           this.pressedKeys.delete(key);
         }
-        const code = obj.code;
         for (const {DOMElement, callback} of this.keydownEveryTickCallbacks) {
           if (this.focusedElement === DOMElement) {
             callback(new KeyboardEvent('keydown', {key, code}));
