@@ -53,7 +53,7 @@ class InputManager {
     setInterval(() => {
       for (const [key, {code, time}] of this.pressedKeys.entries()) {
         if (Date.now() - time > RELEASE_KEY_AFTER_MS) {
-          this.pressedKeys.delete(key);
+          this.pressedKeys.delete(key); // TODO: call keyup callback
         }
         for (const {DOMElement, callback} of this.keydownEveryTickCallbacks) {
           if (this.focusedElement === DOMElement) {
