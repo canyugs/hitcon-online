@@ -148,6 +148,8 @@ class JitsiHandler {
       // Check if the track should be muted, unless it is screen sharing.
       if ((this.isWebcam || track.getType() !== 'video') && this.isMuted[track.getType()]) {
         track.mute();
+      } else {
+        track.unmute();
       }
 
       // Add mute overlay
@@ -163,9 +165,9 @@ class JitsiHandler {
       }
 
       if (track.getType() in this.localTracks) {
-        this.room.replaceTrack(this.localTracks[track.getType()], track);
+        await this.room.replaceTrack(this.localTracks[track.getType()], track);
       } else {
-        this.room.addTrack(track);
+        await this.room.addTrack(track);
       }
 
       this.localTracks[track.getType()] = track;
@@ -323,7 +325,8 @@ class JitsiHandler {
       {
         e2eping: {
           pingInterval: -1
-        }
+        },
+        enableLayerSuspension: true
       }
     );
     this.room.on(JitsiMeetJS.events.conference.TRACK_ADDED, this.onRemoteTrack.bind(this));
@@ -352,12 +355,8 @@ class JitsiHandler {
 
     this.room.on(JitsiMeetJS.events.conference.PARTICIPANT_PROPERTY_CHANGED, this.setRemoteVolumeMeter.bind(this));
 
-    // This is required yet not documented :(
-    // https://github.com/jitsi/lib-jitsi-meet/issues/1333
-    this.room.setReceiverVideoConstraint(720);
-    this.room.setSenderVideoConstraint(720);
-
     this.room.setDisplayName(this.userName);
+    this.room.setSenderVideoConstraint(720);
     this.room.join(this.password);
   }
 
