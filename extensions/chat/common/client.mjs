@@ -30,6 +30,7 @@ class Client {
   constructor(helper) {
     this.helper = helper;
     document.getElementById('chat_message').addEventListener('keypress', this.send_msg(this));
+    document.getElementById('send_msg').addEventListener('click', this.send_msg(this));
     this.clientCmdsInfo = {};
   }
 
@@ -48,7 +49,7 @@ class Client {
    */
   send_msg(client) {
     return async (evt) => {
-      if (evt.keyCode === 13) {
+      if (evt.keyCode === 13 || evt.pointerType === 'mouse') {
         const display_name = client.helper.gameClient.playerInfo._displayName;
         const message_to_id = document.getElementById('message_to');
         const chat_message_id = document.getElementById('chat_message');
