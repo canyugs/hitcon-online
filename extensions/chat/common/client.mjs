@@ -53,6 +53,13 @@ class Client {
         const display_name = client.helper.gameClient.playerInfo._displayName;
         const message_to_id = document.getElementById('message_to');
         const chat_message_id = document.getElementById('chat_message');
+
+        // Check if the message is empty exclusive of whitespace
+        if (chat_message_id.value.trim().length === 0) {
+          chat_message_id.value = '';
+          return;
+        }
+
         const msg_info = {'msg_from_name': display_name, 'msg': chat_message_id.value};
         
         if (chat_message_id.value.substring(0, 2) === '!/') {

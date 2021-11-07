@@ -194,6 +194,10 @@ class Standalone {
    * @param {object} args - chat information including message
    */
   async c2s_broadcastMessage(player, args) {
+    if (args.msg.trim().length === 0) {
+      return;
+    }
+
     let resultArgs = {};
     resultArgs['type'] = 'genericMsg';
     resultArgs['msg_from_id'] = player.playerID;
@@ -210,6 +214,10 @@ class Standalone {
    *   !/announce <msg>
    */
   async c2s_cmdAnnounce(player, cmd) {
+    if (cmd.msg.trim().length === 0) {
+      return;
+    }
+
     if (!await this.helper.checkPerm(player.playerID, 'mod')) {
       return {status: 'noperm'};
     }
@@ -234,6 +242,10 @@ class Standalone {
    * @param {object} args - nearby message including msg
    */
   async c2s_nearbyMessage(player, args) {
+    if (args.msg.trim().length === 0) {
+      return;
+    }
+
     const centerPlayerCoord = this.helper.gameState.getPlayer(player.playerID).mapCoord;
     if (!centerPlayerCoord) {
       console.error('Cannot find target player id');
@@ -256,6 +268,10 @@ class Standalone {
    * @param {object} args - chat information including message, target player id
    */
   async c2s_privateMessage(player, args) {
+    if (args.msg.trim().length === 0) {
+      return;
+    }
+
     args['msg_from_id'] = player.playerID;
     await this.helper.callS2cAPI(args.msg_to_id, 'chat', 'getPrivateMessage', 5000, args);
     await this.helper.callS2cAPI(player.playerID, 'chat', 'sendedPrivateMessage', 5000, args);
