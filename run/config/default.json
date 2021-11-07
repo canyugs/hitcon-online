@@ -4,16 +4,7 @@
     "address": "127.0.0.1",
     "port": 5000
   },
-  "gatewayServers": {
-    "gatewayService5010": {
-      "httpAddress": "127.0.0.1:5010",
-      "grpcAddress": "127.0.0.1:5030"
-    },
-    "gatewayService5011": {
-      "httpAddress": "127.0.0.1:5011",
-      "grpcAddress": "127.0.0.1:5031"
-    }
-  },
+  "gatewayServers": {},
   "map": [
     "map/map.json"
   ],
