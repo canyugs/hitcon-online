@@ -597,7 +597,7 @@ class JitsiHandler {
    * Update the playerIdToParticipantIdMapping, and check if there is any dangling user
    * @param playerIdToParticipantIdMapping
    */
-  updateMappingAndRemoveDanglingUser(playerIdToParticipantIdMapping) {
+  updateIdMappingAndRemoveDanglingUser(playerIdToParticipantIdMapping) {
     this.playerIdToParticipantIdMapping = playerIdToParticipantIdMapping;
     $('#jitsi-remote-container > .jitsi-user-container').each(function() {
       if (Object.values(playerIdToParticipantIdMapping).includes($(this).attr('data-id'))) {
