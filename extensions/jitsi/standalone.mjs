@@ -59,7 +59,7 @@ class Standalone {
         if (Object.keys(this.meetingName2playerId2ParticipantIdMapping[meetingName]).includes(msg.playerID)) {
           delete this.meetingName2playerId2ParticipantIdMapping[meetingName][msg.playerID];
           for (const playerID in this.meetingName2playerId2ParticipantIdMapping[meetingName]) {
-            this.helper.callS2cAPI(playerID, 'jitsi', 'updateIdMapping', 5000, this.meetingName2playerId2ParticipantIdMapping[meetingName]);
+            this.helper.callS2cAPI(playerID, 'jitsi', 'updateIdMappingAndRemoveDanglingUser', 5000, this.meetingName2playerId2ParticipantIdMapping[meetingName]);
           }
         }
       }
@@ -106,7 +106,6 @@ class Standalone {
    * Update the mapping for the player ID and the Jitsi participant ID.
    * @param {Player} player - player information
    * @param {object} args - participant id and  meeting name
-   * @returns string
    */
    async c2s_updateIdMapping(player, args) {
     const {participantId, meetingName} = args;
@@ -121,7 +120,7 @@ class Standalone {
     }
 
     for (const playerID in this.meetingName2playerId2ParticipantIdMapping[meetingName]) {
-      this.helper.callS2cAPI(playerID, 'jitsi', 'updateIdMapping', 5000, this.meetingName2playerId2ParticipantIdMapping[meetingName]);
+      this.helper.callS2cAPI(playerID, 'jitsi', 'updateIdMappingAndRemoveDanglingUser', 5000, this.meetingName2playerId2ParticipantIdMapping[meetingName]);
     }
 
     return true;

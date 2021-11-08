@@ -310,7 +310,10 @@ class Client {
   }
 
   /**
-   *
+   * Update the list of dropdown options. This is called when Jitsi detect new input devices.
+   * @param {string} deviceType - The type of device. "audioinput", "videoinput" or "audiooutput"
+   * @param {Array} deviceList - The list of devices.
+   * @param {string} currentDevice - The selected option.
    */
   setSettingDeviceOptions(deviceType, deviceList, currentDevice) {
     if (this.settingTab) {
@@ -318,6 +321,10 @@ class Client {
     }
   }
 
+  /**
+   * Notify the standalone of the player's participant ID on Jitsi.
+   * @param participantId The player's participant ID on Jitsi.
+   */
   async broadcastParticipantId(participantId) {
     return await this.helper.callC2sAPI(null, 'updateIdMapping', this.helper.defaultTimeout, {
       'participantId': participantId,
@@ -325,9 +332,13 @@ class Client {
     });
   }
 
-  async s2c_updateIdMapping(playerIdToParticipantIdMapping) {
+  /**
+   * Notify the Jitsi Handler to update id mapping and remove the dangling user.
+   * @param playerIdToParticipantIdMapping The player ID to Participant ID mapping.
+   */
+  async s2c_updateIdMappingAndRemoveDanglingUser(playerIdToParticipantIdMapping) {
     if (this.jitsiObj) {
-      this.jitsiObj.updateMappingAndRemoveDanglingUser(playerIdToParticipantIdMapping);
+      this.jitsiObj.updateIdMappingAndRemoveDanglingUser(playerIdToParticipantIdMapping);
     }
     return true;
   }
