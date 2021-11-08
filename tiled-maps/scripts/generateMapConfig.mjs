@@ -212,7 +212,7 @@ function combineSingleLayer(childMaps, layerName) {
       const mapName = `${base}-0${idx}`;
       const targetLayer = childMaps[mapName].layers
         .filter((layer) => layer.name.toLowerCase() === layerName)[0];
-      if (targetLayer === undefined) return null;
+      if (targetLayer === undefined) continue;
       let data;
       if (layerName === 'jitsi') data = fetchJitsiLayer(targetLayer, startIdx, endIdx, mapName);
       else data = targetLayer.data.slice(startIdx, endIdx);
@@ -233,7 +233,7 @@ function combineSingleLayer(childMaps, layerName) {
       const mapName = `${base}-${numStr}`;
       const targetLayer = childMaps[mapName].layers
         .filter((layer) => layer.name.toLowerCase() === layerName)[0];
-
+      if (targetLayer === undefined) continue;
       let data;
       if (layerName === 'jitsi') data = fetchJitsiLayer(targetLayer, startIdx, endIdx, mapName);
       else data = targetLayer.data.slice(startIdx, endIdx);
