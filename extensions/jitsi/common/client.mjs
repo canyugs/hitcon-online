@@ -36,24 +36,36 @@ class JitsiFullscreenOverlay extends Overlay {
    * Create the overlay, and add an event listener to put the Jitsi video into fullscreen when clicked.
    * @constructor
    * @param mainUI - main UI
+   * @param jitsiObj - The Jitsi object.
    */
-  constructor(mainUI) {
+  constructor(mainUI, jitsiObj) {
     const dom = document.getElementById('jitsi-fullscreen-overlay');
     super(mainUI, dom);
     this.hide();
     this.hasFullscreen = false;
+    this.jitsiObj = jitsiObj;
 
     const self = this;
     $('#jitsi-remote-container').on('click', '.jitsi-user-container', function() {
       if (self.hasFullscreen) return;
       self.hasFullscreen = true;
-      const focusedParticipantId = $(this).attr('data-id');
-      $(this).find('video').eq(0).appendTo('#jitsi-fullscreen-overlay');
-      self.show(OverlayPosition.LEFT_BOTTOM);
+      const focusedParticipantId = $(this).attr('data-id'); // get participant id
+      $(this).find('video').eq(0).appendTo('#jitsi-fullscreen-overlay'); // move the video element to #jitsi-fullscreen-overlay
+      self.show(OverlayPosition.LEFT_BOTTOM); // show the overlay
+
+      // try to select the participant, so that the video quality would be better.
+      try {
+        self.jitsiObj.room.selectParticipant(focusedParticipantId);
+      } catch (e) {
+        console.error("Failed to select the participant", e);
+      }
+
       mainUI.enterFocusMode(self, OverlayPosition.LEFT_BOTTOM, () => {
+        // move the video element back to where it should be
         $('#jitsi-fullscreen-overlay > video').appendTo(`#jitsi-${focusedParticipantId}-container > .jitsi-user-video`);
-        self.hide();
+        self.hide();// hide the overlay
         self.hasFullscreen = false;
+        self.jitsiObj.room.selectParticipant(null); // clear participant selection.
       });
     });
   }
@@ -93,7 +105,7 @@ class Client {
     this.container = new JitsiContainer(this.helper.mainUI);
     this.container.hide();
 
-    this.overlay = new JitsiFullscreenOverlay(this.helper.mainUI);
+    this.overlay = new JitsiFullscreenOverlay(this.helper.mainUI, this.jitsiObj);
 
     // Microphone button
     this.microphoneButton = new ToolbarButton('/static/extensions/jitsi/common/icons/microphone-off.svg', false);
