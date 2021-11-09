@@ -28,48 +28,88 @@ class Client {
    */
   constructor(helper) {
     this.helper = helper;
+    this.template = document.getElementById('playerlist-player').cloneNode(true);
+    this.playerList = {};    
   }
 
   async gameStart() {
     this.tab = new PlayerlistTab(this.helper.mainUI);
-
-    this.showPlayerList();
+    this.initPlayerList();
+    this.helper.gameState.registerOnPlayerUpdate(msg => this.syncPlayerList(msg));
+    this.updatePlayerList();
   }
 
   /**
-   * Show player list on left top.
-   * @showPlayerList
+   * init the playlist from the server
+   * @todo Get user role.
+   * @todo Get user picture.
    */
-  showPlayerList() {
-    const template = document.getElementById('playerlist-player').cloneNode(true);
-    // TODO(zeze-zeze): Optimize the way to update playerlist
+  initPlayerList() {
+    this.helper.gameState.getPlayers().forEach(player => {
+      this.playerList[player.playerID] = {
+        playerID : player.playerID, 
+        displayName : player.displayName, 
+        displayChar : player.displayChar
+      }
+    });
+  }
+
+  /**
+   * Get the PlayerSyncMessage from server and update the playerList object.
+   * @param {object} msg - The PlayerSyncMessage from server.
+   * @todo Get user role.
+   * @todo Get user picture.
+   */
+  syncPlayerList(msg) {
+    if(msg.removed == true){
+      delete this.playerList[msg.playerID];
+      return;
+    }
+
+    if(Object.keys(this.playerList).includes(msg.playerID) == false) {
+      this.playerList[msg.playerID] = {
+        playerID : msg.playerID, 
+        displayName : msg.displayName, 
+        displayChar : msg.displayChar
+      }
+    }else {
+      return;
+    }
+  }
+
+  /**
+   * refresh the playerlist dom.
+   * @updatePlayerList
+   * @todo Get user role.
+   * @todo Get user picture.
+   */
+  updatePlayerList() {
     setInterval(() => {
       document.getElementById('playerlist').innerHTML = '';
-      this.helper.gameState.getPlayers().forEach(playerID => {
-        if (typeof playerID.displayName !== 'string' || !playerID.displayName.includes(document.getElementById("searchPlayer").value)) {
-          return;
+      for (const playerID of Object.keys(this.playerList)) {
+        if(typeof this.playerList[playerID].displayName !== 'string' || !this.playerList[playerID].displayName.includes(document.getElementById("searchPlayer").value)){
+          continue;
         }
-        const playerDOM = template.cloneNode(true);
-        playerDOM.setAttribute('id', playerID.playerID);
-        playerDOM.setAttribute('data-player-context-menu', playerID.playerID);
-        
-        // Sanitize XSS
-        const san_playerID = filterXSS(playerID.playerID);
-        const san_displayName = filterXSS(playerID.displayName);
-
-
-        playerDOM.setAttribute('onclick', 'startPrivateMessage(\'' + san_playerID + '\')');
-        playerDOM.querySelector('.player-name').textContent = san_displayName;
-        // TODO: get user role;
+  
+        const playerDOM = this.template.cloneNode(true);
+        playerDOM.setAttribute('id', this.playerList[playerID].playerID);
+        playerDOM.setAttribute('data-player-context-menu', this.playerList[playerID].playerID);
+        playerDOM.setAttribute('onclick', 'startPrivateMessage(\'' + this.playerList[playerID].playerID + '\')');
+        playerDOM.querySelector('.player-name').textContent = this.HTMLEncode(this.playerList[playerID].displayName);
         playerDOM.querySelector('.player-role').textContent = 'unknown role';
-        // TODO: get user picture;
         playerDOM.querySelector('.player-picture').setAttribute('src', 'https://via.placeholder.com/56x61');
-        // TODO(zeze-zeze): Keep a record of dom elements
-        // TODO(zeze-zeze): Move it to a separate function
         document.getElementById('playerlist').appendChild(playerDOM);
-        // TODO(zeze-zeze): Use onchange callback to update playerlist instead of waiting 1 second
-     });
-    }, 1000);
+      }
+    }, 500);
+  }
+
+  /**
+   * Encode the html in case of XSS
+   * @HTMLEncode
+   * @param {string} str - the string being encoded
+   */
+  HTMLEncode(str) {
+    return $('<div/>').text(str).html();
   }
 }
 
