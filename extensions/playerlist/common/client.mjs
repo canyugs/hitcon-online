@@ -61,18 +61,18 @@ class Client {
    * @todo Get user picture.
    */
   syncPlayerList(msg) {
-    if(msg.removed == true){
+    if (msg.removed == true) {
       delete this.playerList[msg.playerID];
       return;
     }
 
-    if(Object.keys(this.playerList).includes(msg.playerID) == false) {
+    if (Object.keys(this.playerList).includes(msg.playerID) == false) {
       this.playerList[msg.playerID] = {
         playerID : msg.playerID, 
         displayName : msg.displayName, 
         displayChar : msg.displayChar
       }
-    }else {
+    } else {
       return;
     }
   }
@@ -87,7 +87,7 @@ class Client {
     setInterval(() => {
       document.getElementById('playerlist').innerHTML = '';
       for (const playerID of Object.keys(this.playerList)) {
-        if(typeof this.playerList[playerID].displayName !== 'string' || !this.playerList[playerID].displayName.includes(document.getElementById("searchPlayer").value)){
+        if (typeof this.playerList[playerID].displayName !== 'string' || !this.playerList[playerID].displayName.includes(document.getElementById("searchPlayer").value)) {
           continue;
         }
   
