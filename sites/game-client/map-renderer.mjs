@@ -73,6 +73,7 @@ class MapRenderer {
 
     // other background layers
     this.registerCustomizedLayerToDrawBackground(-100000, 'ground');
+    this.registerCustomizedLayerToDrawBackground(-99999, 'background');
     this.registerCustomizedLayerToDrawBackground(LAYER_OBJECT.zIndex, LAYER_OBJECT.layerName);
   }
 
@@ -90,10 +91,16 @@ class MapRenderer {
    */
   disableRenderForTesting() {
     const noop = ()=>{};
-    this.ctx.drawImage = noop;
-    this.ctx.fillText = noop;
-    this.ctx.save = noop;
-    this.ctx.restore = noop;
+    function clearCtx(ctx) {
+      ctx.drawImage = noop;
+      ctx.fillText = noop;
+      ctx.save = noop;
+      ctx.restore = noop;
+    }
+    clearCtx(this.ctx);
+    clearCtx(this.backgroundCtx);
+    clearCtx(this.outOfBoundCtx);
+
     // Note: The last one is a bit too extreme, if testing fails for any reason
     // try removing the next line.
     this.draw = noop;
@@ -469,7 +476,13 @@ class MapRenderer {
    * @param {MapCoord} mapCoord - The map coordinate to be drawn.
    */
   _drawLayer(layerName, mapCoord) {
-    const renderInfo = this.map.getCellRenderInfo(mapCoord, layerName);
+    let renderInfo;
+    try {
+      renderInfo = this.map.getCellRenderInfo(mapCoord, layerName);
+    } catch (e) {
+      console.log(e, e.stack);
+      console.log(layerName, mapCoord);
+    }
     if (renderInfo === null) return;
 
     const canvasCoordinate = this.mapToCanvasCoordinate(mapCoord);

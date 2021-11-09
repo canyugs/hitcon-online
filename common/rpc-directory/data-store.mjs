@@ -211,10 +211,12 @@ class DataStore {
         await writeFd.close();
 
         // Overwrite the actual file.
-        fsPromises.rename(filePath, this._getPath(dataName, true));
+        await fsPromises.rename(filePath, this._getPath(dataName, true));
       } catch (e) {
-        console.error('Unable to open \'' + filePath + '\' for writing. Reason: '+e);
-        throw e;
+        console.error(`Unable to open '${filePath}' for writing. Reason: `, e, e.stack);
+        // Failed, let's try it again.
+        obj.dirty = true;
+        obj.pending = true;
       }
 
       // We're done.

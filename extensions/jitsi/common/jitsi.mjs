@@ -16,7 +16,7 @@ class JitsiHandler {
   constructor(meetingName, password, userName, getDevices, setSettingDeviceOptions) {
     this.connection = null;
     this.isVideo = true;
-    this.localTracks = [];
+    this.localTracks = {};
     this.remoteTracks = {};
     this.volumeMeters = {};
     this.participantsInfo = {};
@@ -30,6 +30,9 @@ class JitsiHandler {
     this.userName = userName;
     this.getDevices = getDevices;
     this.setSettingDeviceOptions = setSettingDeviceOptions;
+
+    // Is track mute
+    this.isMuted = {video: true, audio: true};
 
     this.options = {
       hosts: {
@@ -89,48 +92,25 @@ class JitsiHandler {
 
     this.connection.connect();
 
-    this.createLocalTracks();
+    $('#jitsi-local').empty();
   }
 
   /**
    * Create local track. This method would drop all current local tracks.
    */
-  async createLocalTracks() {
-    if (!this.isWebcam && !JitsiMeetJS.isDesktopSharingEnabled()) {
-      alert('Screen sharing is not enabled.');
+  async createLocalTrack(type) {
+    console.log('createLocalTrack', type);
+    if (!this.isWebcam && type === 'desktop' && !JitsiMeetJS.isDesktopSharingEnabled()) {
+      throw new Error('Screen sharing is not enabled.');
     }
-
-    // Drop the current local tracks.
-    try {
-      await Promise.all(this.localTracks.map(track => track.dispose()));
-    } catch (e) {
-      console.error('Failed to drop current local tracks: ', e);
-    }
-
-    this.localTracks = [];
-    $('#jitsi-local').empty();
 
     // Create new local tracks
-    try {
-      const tracks = await JitsiMeetJS.createLocalTracks({
-        devices: ['audio', this.isWebcam ? 'video' : 'desktop'],
-        cameraDeviceId: this.getDevices('video'),
-        micDeviceId: this.getDevices('audio')
-      });
-      await this.onLocalTracks(tracks);
-    } catch (e) {
-      console.error('Failed to create local tracks: ', e);
-      // if (!this.isWebcam) {
-      //   // something goes wrong, switch back to video.
-      //   console.warning('Fall back to video');
-      //   try {
-      //     this.isWebcam = true;
-      //     this.createLocalTracks();
-      //   } catch (e) {
-      //     console.error('Fall back to video failed: ', e);
-      //   }
-      // }
-    }
+    const tracks = await JitsiMeetJS.createLocalTracks({
+      devices: [type],
+      cameraDeviceId: this.getDevices('video'),
+      micDeviceId: this.getDevices('audio')
+    });
+    await this.onLocalTracks(tracks);
   }
 
   /**
@@ -147,15 +127,17 @@ class JitsiHandler {
         <div class='jitsi-user-audio'></div>
         <div class='jitsi-user-name' id='jitsi-local-user-name'></div>
       `);
+      $('#jitsi-local-user-name').text(this.userName);
     }
 
-    this.localTracks = tracks;
     for (const track of tracks) {
       const trackId = 'jitsi-local-track-' + track.getType();
       if (track.getType() === 'video') {
+        $('#jitsi-local > .jitsi-user-video').empty();
         $('#jitsi-local > .jitsi-user-video').append(`<video autoplay='1' id='${trackId}' class='jitsi-local-video' />`);
         track.attach($(`#${trackId}`)[0]);
       } else if (track.getType() === 'audio') {
+        $('#jitsi-local > .jitsi-user-audio').empty();
         $('#jitsi-local > .jitsi-user-audio').append(`<audio autoplay='1' muted='true' id='${trackId}' class='jitsi-audio' />`);
         track.attach($(`#${trackId}`)[0]);
       } else {
@@ -163,13 +145,13 @@ class JitsiHandler {
         continue;
       }
 
-      // All tracks should be disabled by default (except screen sharing), and enabled upon requested.
-      if (this.isWebcam || track.getType() !== 'video') {
+      // Check if the track should be muted, unless it is screen sharing.
+      if ((this.isWebcam || track.getType() !== 'video') && this.isMuted[track.getType()]) {
         track.mute();
       }
 
       // Add mute overlay
-      if (this.isWebcam || track.getType() !== 'video') {
+      if ((this.isWebcam || track.getType() !== 'video') && this.isMuted[track.getType()]) {
         $(`#jitsi-local > .jitsi-user-${track.getType()}`).addClass(`jitsi-user-${track.getType()}--close`);
         $(`#${trackId}`).css('display', 'none');
       } else {
@@ -180,9 +162,13 @@ class JitsiHandler {
         JitsiMeetJS.createTrackVADEmitter(track.getDeviceId(), 4096, await createRnnoiseProcessor());
       }
 
-      if (this.isJoined) {
+      if (track.getType() in this.localTracks) {
+        this.room.replaceTrack(this.localTracks[track.getType()], track);
+      } else {
         this.room.addTrack(track);
       }
+
+      this.localTracks[track.getType()] = track;
     }
   }
 
@@ -273,11 +259,20 @@ class JitsiHandler {
   onConferenceJoined() {
     console.log('conference joined!');
     this.isJoined = true;
-    for (let i = 0; i < this.localTracks.length; i++) {
-      this.room.addTrack(this.localTracks[i]);
+
+    try {
+      this.createLocalTrack('audio');
+    } catch (e) {
+      console.error('Failed to create audio track', e);
     }
+
+    try {
+      this.createLocalTrack(this.isWebcam ? 'video' : 'desktop');
+    } catch (e) {
+      console.error('Failed to create video track', e);
+    }
+
     $('#jitsi-local').addClass('active');
-    $('#jitsi-local-user-name').text(this.userName);
     this.setLocalAudioVolumeMeter();
   }
 
@@ -387,7 +382,6 @@ class JitsiHandler {
         const deviceList = devices
           .filter(m => m.kind === deviceType + 'input')
           .reduce((obj, item) => Object.assign(obj, {[item.deviceId]: item.label}), {});
-        console.log(devices, deviceList);
         setSettingDeviceOptions(deviceType, deviceList);
       });
     }
@@ -414,8 +408,8 @@ class JitsiHandler {
    */
   async unload() {
     if (this.localTracks) {
-      for (let i = 0; i < this.localTracks.length; i++) {
-        await this.localTracks[i].dispose();
+      for (const [type, track] of Object.entries(this.localTracks)) {
+        await track.dispose();
       }
     }
 
@@ -429,6 +423,7 @@ class JitsiHandler {
     if (this.room) {
       try {
         await this.room.leave();
+        this.room = undefined;
       } catch (e) {
         console.error(`Failed to unload jitsi room`, e, e.stack);
       }
@@ -448,14 +443,17 @@ class JitsiHandler {
    * @param {string} type Which type to mute (audio|video)
    */
   async mute(type) {
-    for (const track of this.localTracks) {
-      if (track.getType() === type) {
-        track.mute();
-
-        $(`#jitsi-local > .jitsi-user-${track.getType()}`).addClass(`jitsi-user-${track.getType()}--close`);
-        $(`#jitsi-local-track-${track.getType()}`).css('display', 'none');
-      }
+    if (!(type in this.localTracks)) {
+      return;
     }
+
+    const track = this.localTracks[type];
+    this.isMuted[type] = true;
+
+    track.mute();
+    $(`#jitsi-local > .jitsi-user-${track.getType()}`).addClass(`jitsi-user-${track.getType()}--close`);
+    $(`#jitsi-local-track-${track.getType()}`).css('display', 'none');
+
   }
 
   /**
@@ -463,16 +461,19 @@ class JitsiHandler {
    * @param {string} type Which type to unmute (audio|video)
    */
   async unmute(type) {
-    for (const track of this.localTracks) {
-      if (track.getType() === type) {
-        track.unmute();
-
-        $(`#jitsi-local > .jitsi-user-${track.getType()}`).removeClass(`jitsi-user-${track.getType()}--close`);
-        if (track.getType() === 'video') {
-          $(`#jitsi-local-track-${track.getType()}`).css('display', 'block');
-        }
-      }
+    if (!(type in this.localTracks)) {
+      return;
     }
+
+    const track = this.localTracks[type];
+    this.isMuted[type] = false;
+
+    track.unmute();
+    $(`#jitsi-local > .jitsi-user-${track.getType()}`).removeClass(`jitsi-user-${track.getType()}--close`);
+    if (track.getType() === 'video') {
+      $(`#jitsi-local-track-${track.getType()}`).css('display', 'block');
+    }
+
   }
 
   /**
@@ -501,7 +502,7 @@ class JitsiHandler {
       const volumes = new Uint8Array(analyser.frequencyBinCount);
       volumeCallback = () => {
         // If the audio track is muted, return 0.
-        if (this.localTracks.filter(track => track.getType() === 'audio' && !track.isMuted()).length === 0) {
+        if (!('audio' in this.localTracks) || this.isMuted['audio']) {
           this.room?.setLocalParticipantProperty('volume', '0');
           $(`#jitsi-local`).removeClass('speaking');
           return;

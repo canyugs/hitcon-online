@@ -35,7 +35,7 @@
       },
       "j1": {
         "func": "haveItem", "kwargs": {
-          "amount": "1",
+          "amount": 1,
           "itemName": "facemask",
           "haveItem": "j3",
           "noItem": "j2"
@@ -55,23 +55,23 @@
       },
       "f1": {
         "func": "giveItem", "kwargs": {
-          "amount": "1",
-          "maxAmount": "1",
+          "amount": 1,
+          "maxAmount": 1,
           "itemName": "facemask",
           "nextState": "d"
         }
       },
       "u1": {
         "func": "giveItem", "kwargs": {
-          "amount": "1",
-          "maxAmount": "1",
+          "amount": 1,
+          "maxAmount": 1,
           "itemName": "fuzzer",
           "nextState": "d"
         }
       },
       "t1": {
         "func": "takeItem", "kwargs": {
-          "amount": "1",
+          "amount": 1,
           "itemName": "facemask",
           "haveItem": "t2",
           "noItem": "t3"

@@ -214,6 +214,9 @@ class GatewayService {
     socket.playerData = await this.dir.getPlayerData(playerID);
     socket.playerID = playerID;
 
+    // Notify the client about any previous data.
+    socket.emit('previousData', PlayerSyncMessage.fromObject(socket.playerData));
+
     socket.on('disconnect', (reason) => {
       this.onDisconnect(socket, reason);
       // onDisconnect is async, so returns immediately.
@@ -329,6 +332,11 @@ class GatewayService {
 
     if (socket.playerID !== updateMsg.playerID) {
       console.error(`Player '${updateMsg.playerID}' tries to update player '${socket.playerID}'s data, which is invalid.`);
+      return;
+    }
+
+    if (!updateMsg.check(this.gameMap.graphicAsset)) {
+      failOnPlayerUpdate(socket);
       return;
     }
 

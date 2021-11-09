@@ -25,7 +25,7 @@ absolute URL.
       <div id="avatar-selection-div" style="background-color: aquamarine;" class="container-center">
         <div class="container-center">
           <div id="avatar-preview-container" class="container-center"></div>
-          <label>Display Name: <input type="text" name="display-name"></label>
+          <label>Display Name: <input id="display-name" type="text" name="display-name"></label>
           <button name="submit">Join HITCON Online!</button>
         </div>
       </div>
@@ -251,6 +251,19 @@ absolute URL.
         game.movementManager = new MovementManager(game.socket, game.gameState, game.inputManager, game.mapRenderer);
         game.gameClient = new GameClient(game.socket, game.map, game.gameState, game.mapRenderer, game.inputManager, game.movementManager, game.extMan, game.mainUI, game.avatarSelectionPage);
 
+        if (window.query.test === 'type1'){
+          window.addEventListener('previousData', (evt) => {
+            let displayChar = evt.detail.displayChar;
+            let displayName = evt.detail.displayName;
+            if (!displayName) displayName = evt.detail.playerID;
+            if (!displayChar) displayChar = null;
+            game.avatarSelectionPage.autoSubmit(displayName, displayChar);
+            setTimeout(() => {
+              game.clientBot = new ClientBot(game.mapRenderer);
+            }, 3000);
+          });
+        }
+
         game.gameClient.initialize(game.token);
         game.mapRenderer.setGameClient(game.gameClient);
 
@@ -264,10 +277,6 @@ absolute URL.
             detail: {mainUI: game.mainUI},
           },
         ));
-
-        if (window.query.test === 'type1'){
-          game.clientBot = new ClientBot(game.mapRenderer);
-        }
 
         // Ruler helper utility.
         if (window.query.ruler === 'true') {

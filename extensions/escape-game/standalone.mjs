@@ -38,7 +38,7 @@ function getConfigWithDefault(entry, def) {
 }
 
 
-const TERMINAL_SERVER_GRPC_LOCATION = getConfigWithDefault('terminal.internalAddress', '127.0.0.1:5051') + ':' + getConfigWithDefault('terminal.grpcPort', 5051).toString();
+const TERMINAL_SERVER_GRPC_LOCATION = getConfigWithDefault('terminal.internalAddress', '127.0.0.1') + ':' + getConfigWithDefault('terminal.grpcPort', 5051).toString();
 
 /**
  * Terminology:
@@ -104,7 +104,7 @@ class Standalone {
     await this.helper.callS2sAPI('iobj-lib', 'reqRegister');
     this.terminalObjects.forEach((v) => {
       v.registerExtStateFunc('showTerminal', 'escape-game', 'sf_showTerminal');
-      v.registerExtStateFunc('checkStatus', 'escape-game', 'sf_checkStatus');
+      v.registerExtStateFunc('checkIsInFinalizedTeam', 'escape-game', 'sf_checkIsInFinalizedTeam');
     });
   }
 
@@ -112,7 +112,10 @@ class Standalone {
    * Return the public address of the terminal server.
    */
   async c2s_getTerminalServerAddress(player) {
-    return getConfigWithDefault('terminal.publicAddress', '127.0.0.1') + ':' + getConfigWithDefault('terminal.socketioPort', 5000).toString();
+    return {
+      address: getConfigWithDefault('terminal.publicAddress', '127.0.0.1'),
+      path: getConfigWithDefault('terminal.socketioPath', '') + '/socket.io'
+    }
   }
 
   /**
@@ -361,7 +364,7 @@ class Standalone {
   /**
    * Check if the player is in a finalized team and therefore can access the game.
    */
-  async s2s_sf_checkStatus(srcExt, playerID, kwargs, sfInfo) {
+  async s2s_sf_checkIsInFinalizedTeam(srcExt, playerID, kwargs, sfInfo) {
     const {nextState, errorState} = kwargs;
 
     if (this.playerToTeam.has(playerID) && this.playerToTeam.get(playerID).isFinalized) {
@@ -384,7 +387,7 @@ class Standalone {
 
   // Team Manager
 
-  async s2s_sf_checkTeamStatus(srcExt, playerID, kwargs, sfInfo) {
+  async s2s_sf_checkIsInTeam(srcExt, playerID, kwargs, sfInfo) {
     const {indivMenu, teamMenu} = kwargs;
     return this.playerToTeam.has(playerID) ? teamMenu : indivMenu;
   }

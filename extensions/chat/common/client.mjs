@@ -30,6 +30,7 @@ class Client {
   constructor(helper) {
     this.helper = helper;
     document.getElementById('chat_message').addEventListener('keypress', this.send_msg(this));
+    document.getElementById('send_msg').addEventListener('click', this.send_msg(this));
     this.clientCmdsInfo = {};
   }
 
@@ -48,18 +49,34 @@ class Client {
    */
   send_msg(client) {
     return async (evt) => {
-      if (evt.keyCode === 13) {
+      if (evt.keyCode === 13 || evt.pointerType === 'mouse') {
+        const display_name = client.helper.gameClient.playerInfo._displayName;
         const message_to_id = document.getElementById('message_to');
         const chat_message_id = document.getElementById('chat_message');
+
+        // Check if the message is empty exclusive of whitespace
+        if (chat_message_id.value.trim().length === 0) {
+          chat_message_id.value = '';
+          return;
+        }
+
+        const msg_info = {'msg_from_name': display_name, 'msg': chat_message_id.value};
+        
         if (chat_message_id.value.substring(0, 2) === '!/') {
           client.handleCommand(chat_message_id.value.trim());
           // TODO(zeze-zeze): Use drop down menu to replace it
         } else if (message_to_id.value.toLowerCase() == 'nearby') {
-          await client.helper.callC2sAPI('chat', 'nearbyMessage', this.helper.defaultTimeout, {'msg': chat_message_id.value});
+          await client.helper.callC2sAPI('chat', 'nearbyMessage', this.helper.defaultTimeout, msg_info);
         } else if (message_to_id.value) {
-          await client.helper.callC2sAPI('chat', 'privateMessage', this.helper.defaultTimeout, {'msg_to': message_to_id.value, 'msg': chat_message_id.value});
+          if (client.helper.gameState.getPlayers().has(message_to_id.value)) {
+            msg_info.msg_to_id = message_to_id.value;
+            msg_info.msg_to_name = client.helper.gameState.getPlayers().get(message_to_id.value)._displayName;
+            await client.helper.callC2sAPI('chat', 'privateMessage', this.helper.defaultTimeout, msg_info);
+          } else {
+            document.getElementById('message_history').prepend(this.generateMessageBox(display_name + ' => ' + message_to_id.value, 'Error: Cannot find target player id', 'private-message'));
+          }
         } else {
-          await client.helper.callC2sAPI('chat', 'broadcastMessage', this.helper.defaultTimeout, {'msg': chat_message_id.value});
+          await client.helper.callC2sAPI('chat', 'broadcastMessage', this.helper.defaultTimeout, msg_info);
         }
         chat_message_id.value = '';
       }
@@ -190,7 +207,7 @@ ${this.clientCmdsInfo.helpMsg}
    */
   s2c_getNearbyMessage(args) {
     document.getElementById('message_history').prepend(
-    this.generateMessageBox(this.HTMLEncode(args.msg_from), this.HTMLEncode(args.msg), 'nearby'));
+    this.generateMessageBox(this.HTMLEncode(args.msg_from_name), this.HTMLEncode(args.msg), 'nearby'));
   }
 
   /**
@@ -200,7 +217,7 @@ ${this.clientCmdsInfo.helpMsg}
    */
   s2c_getNearbyMessage(args) {
     document.getElementById('message_history').prepend(
-    this.generateMessageBox(this.HTMLEncode(args.msg_to), this.HTMLEncode(args.msg), 'nearby'));
+    this.generateMessageBox(args.msg_from_name, args.msg, 'nearby'));
   }
 
   /**
@@ -210,7 +227,7 @@ ${this.clientCmdsInfo.helpMsg}
    */
   s2c_getPrivateMessage(args) {
     document.getElementById('message_history').prepend(
-    this.generateMessageBox(this.HTMLEncode(args.msg_from), this.HTMLEncode(args.msg), 'private-message'));
+    this.generateMessageBox(args.msg_from_name + ' => ' + args.msg_to_name, args.msg, 'private-message'));
   }
 
   /**
@@ -220,7 +237,7 @@ ${this.clientCmdsInfo.helpMsg}
    */
   s2c_sendedPrivateMessage(args) {
     document.getElementById('message_history').prepend(
-    this.generateMessageBox(this.HTMLEncode(args.msg_to), this.HTMLEncode(args.msg), 'private-message'));
+    this.generateMessageBox(args.msg_from_name + ' => ' + args.msg_to_name, args.msg, 'private-message'));
   }
 
   /**
@@ -236,7 +253,7 @@ ${this.clientCmdsInfo.helpMsg}
       this.clientCmdsInfo = args.clientCmdsInfo;
     } else if (args.type === 'genericMsg') {
       document.getElementById('message_history').prepend(
-    this.generateMessageBox(this.HTMLEncode(args.msg_from), this.HTMLEncode(args.msg), 'all'));
+    this.generateMessageBox(args.msg_from_name, args.msg, 'all'));
     } else {
       console.error('Invalid chat ext broadcast message: ', args);
     }

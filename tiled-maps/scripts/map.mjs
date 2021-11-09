@@ -43,9 +43,7 @@ export function mapTransform(map) {
       }
     } else {
       for (let l = 0; l < newArray.length; l++) {
-        newArray[l] = newArray[l] === 0 ?
-                      null :
-                      valueReplace ? valueReplace : newArray[l];
+        newArray[l] = valueReplace ? valueReplace : newArray[l];
       }
     }
     mapData[layer.name] = newArray;

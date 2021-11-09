@@ -68,9 +68,10 @@
   "terminal": {
     "internalAddress": "host.docker.internal",
     "grpcPort": 5051,
-    "publicAddress": "online.hitcon.org",
-    "socketioPort": 5050
+    "publicAddress": "online-staging.hitcon.org",
+    "socketioPath": "/terminal"
   },
-  "publicAddress": "online.hitcon.org",
+  "publicAddress": "online-staging.hitcon.org",
+  "allowedOrigins": ["online-staging.hitcon.org", "onepage-staging.hitcon.org"],
   "movingRequestThreshold": 100
 }

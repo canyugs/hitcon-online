@@ -51,9 +51,10 @@
   "terminal": {
     "internalAddress": "localhost",
     "grpcPort": 5051,
-    "publicAddress": "localhost",
-    "socketioPort": 5050
+    "publicAddress": "localhost:5050",
+    "socketioPath": ""
   },
   "publicAddress": null,
+  "allowedOrigins": [],
   "movingRequestThreshold": 100
 }
