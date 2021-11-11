@@ -5,9 +5,7 @@
 import {createRequire} from 'module';
 const require = createRequire(import.meta.url);
 
-const config = require('config');
 const AsyncLock = require('async-lock');
-const movingRequestThreshold = config.get('movingRequestThreshold');
 
 import {MapCoord} from '../../common/maplib/map.mjs';
 import {PlayerSyncMessage} from '../../common/gamelib/player.mjs';
@@ -40,7 +38,6 @@ class GatewayService {
     // A map that tracks the current connected clients.
     // key is the player ID. value is the socket.
     this.socks = {};
-
   }
 
   /**
@@ -290,7 +287,7 @@ class GatewayService {
         this.broadcaster.sendStateTransfer(socket);
 
         // Emit the gameStart event.
-        const startPack = {playerData: socket.playerData};
+        const startPack = {playerID: socket.playerData.playerID};
         socket.emit('gameStart', startPack);
 
         // Player is now free to move around after the first location have been

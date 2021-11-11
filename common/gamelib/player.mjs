@@ -9,7 +9,7 @@ import {PLAYER_MOVE_TIME_INTERVAL} from './move-check.mjs';
  * It should be used whenever anyone wants to pass players to function calls or between client and server.
  */
 
-const PLAYER_MOVE_ANIMATION_FRAME_RATE = 100; // ms per frame
+const PLAYER_MOVE_ANIMATION_FRAME_RATE = 60; // ms per frame
 const PLAYER_DISPLAY_NAME_MAX_LENGTH = 14;
 
 /**
@@ -27,17 +27,21 @@ class Player {
       'displayChar',
       'mapCoord',
       'facing',
-      'lastMovingTime',
+      'lastMovingTime', // the time recorded on the server
       'ghostMode',
     ];
 
     this.playerID = playerID;
     this._displayName = undefined;
     this.displayChar = undefined;
-    this.mapCoord = undefined; // TODO: Set it to a spawn point specified by map.json.
+    this.mapCoord = undefined;
     this.facing = undefined;
     this.lastMovingTime = undefined;
     this.ghostMode = false;
+
+    // only on client side
+    this.lastMovingTimeClient = 0;
+    this.mainPlayer = false;
   }
 
   get displayName() {
@@ -53,27 +57,19 @@ class Player {
    * @return {Object}
    */
   getDrawInfo() {
-    const now = Date.now();
-    const smoothMoveEnd = this.lastMovingTime + PLAYER_MOVE_TIME_INTERVAL;
-    let retMapCoord = this.mapCoord.copy();
-    let retFacing = this.facing;
-    let opacity = 1.0;
-
     // smoothly move the player
+    const now = Date.now();
+    const lastMovingTime = (this.mainPlayer) ? this.lastMovingTimeClient : this.lastMovingTime;
+    const smoothMoveEnd = lastMovingTime + PLAYER_MOVE_TIME_INTERVAL;
+    let retMapCoord;
+    let retFacing;
     if (now < smoothMoveEnd) {
       // moving, calculate interpolated coordinate
-      let inter = this.mapCoord.copy();
-      const frac = (now - this.lastMovingTime) / PLAYER_MOVE_TIME_INTERVAL;
-      if (this._previousMapCoord.mapName !== this.mapCoord.mapName) {
-        // special case for teleportation between different maps
-        inter = (frac < 0.5) ? this._previousMapCoord : this.mapCoord;
-        opacity = Math.abs(frac - 0.5) * 2; // the character will faded out/in when teleporting between maps
-      } else {
-        inter.x = (1 - frac) * this._previousMapCoord.x + frac * this.mapCoord.x;
-        inter.y = (1 - frac) * this._previousMapCoord.y + frac * this.mapCoord.y;
-      }
+      const inter = MapCoord.fromObject(this.mapCoord);
+      const frac = (now - lastMovingTime) / PLAYER_MOVE_TIME_INTERVAL;
+      inter.x = (1 - frac) * this._previousMapCoord.x + frac * this.mapCoord.x;
+      inter.y = (1 - frac) * this._previousMapCoord.y + frac * this.mapCoord.y;
       retMapCoord = inter;
-
       // calculate the moving animation phase
       const phase = Math.floor(now / PLAYER_MOVE_ANIMATION_FRAME_RATE) % 4;
       if (phase === 0) {
@@ -83,6 +79,9 @@ class Player {
       } else { // phase === 1 || phase === 3
         retFacing = this.facing;
       }
+    } else {
+      retMapCoord = this.mapCoord;
+      retFacing = this.facing;
     }
 
     return {
@@ -91,23 +90,24 @@ class Player {
       facing: retFacing,
       displayName: this.displayName,
       ghostMode: this.ghostMode,
-      opacity,
     };
   }
 
   /**
    * Update the player data from the message.
    * @param {PlayerSyncMessage} msg - The message.
+   * @param {String} movingTime - Which moving time is to be updated. Empty string means don't update.
    * @return {Boolean} - Whether the update succeeds or not.
    */
-  updateFromMessage(msg) {
+  updateFromMessage(msg, movingTime='server') {
     if (msg.playerID !== this.playerID) {
       return false;
     }
     // TODO: check whether msg is in the correct format
     if (msg.mapCoord !== undefined) {
       if (this.mapCoord !== undefined && !msg.mapCoord.equalsTo(this.mapCoord)) {
-        this.lastMovingTime = Date.now();
+        if (movingTime === 'client' || movingTime === 'both') this.lastMovingTimeClient = Date.now();
+        if (movingTime === 'server' || movingTime === 'both') this.lastMovingTime = Date.now();
       }
       this._previousMapCoord = (this.mapCoord ?? msg.mapCoord); // for smooth moving of the player
       this.mapCoord = msg.mapCoord;
@@ -218,7 +218,7 @@ class Player {
  * Note that the ALL the fields in this class can be modified by user.
  */
 class PlayerSyncMessage {
-  constructor(playerID, mapCoord, facing, displayName, displayChar, removed, clientTime, updateSuccess, ghostMode) {
+  constructor(playerID, mapCoord, facing, displayName, displayChar, removed, clientTime, updateSuccess, ghostMode, lastMovingTime) {
     if (playerID === undefined) {
       console.error(`'playerID' of class 'PlayerSyncMessage' should not be undefined.`);
       return;
@@ -233,6 +233,7 @@ class PlayerSyncMessage {
     this.clientTime = clientTime; // a counter
     this.updateSuccess = updateSuccess; // used by server to tell client whether success or not
     this.ghostMode = ghostMode;
+    this.lastMovingTime = lastMovingTime;
   }
 
   /**
@@ -251,6 +252,7 @@ class PlayerSyncMessage {
     if (this.clientTime !== undefined) ret.clientTime = this.clientTime;
     if (this.updateSuccess !== undefined) ret.updateSuccess = this.updateSuccess;
     if (this.ghostMode !== undefined) ret.ghostMode = this.ghostMode;
+    if (this.lastMovingTime !== undefined) ret.lastMovingTime = this.lastMovingTime;
     return ret;
   }
 
@@ -288,6 +290,7 @@ class PlayerSyncMessage {
     if (obj.clientTime !== undefined) ret.clientTime = obj.clientTime;
     if (obj.updateSuccess !== undefined) ret.updateSuccess = obj.updateSuccess;
     if (obj.ghostMode !== undefined) ret.ghostMode = obj.ghostMode;
+    if (obj.lastMovingTime !== undefined) ret.lastMovingTime = obj.lastMovingTime;
     return ret;
   }
 }

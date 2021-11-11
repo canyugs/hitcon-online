@@ -260,7 +260,7 @@ absolute URL.
           return;
         }
         game.map = new GameMap(game.graphicAsset, game.mapData);
-        game.gameState = new GameState(game.map);
+        game.gameState = new GameState(game.map, true);
         game.socketURL = ("<%= gatewayAddress %>" || "");
         game.socket = game.io(game.socketURL, {reconnection: false});
 
