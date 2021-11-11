@@ -17,9 +17,11 @@ class GameState {
    * @constructor
    * @param {GameMap} gameMap - The GameMap object for getting information on
    * the current map.
+   * @param {Boolean} clientSide - Whether this GameState instance is on client browser.
    */
-  constructor(gameMap) {
+  constructor(gameMap, clientSide=false) {
     this.gameMap = gameMap;
+    this.clientSide = clientSide;
 
     /**
      * @member {Map} players - The players
@@ -45,6 +47,9 @@ class GameState {
     this.cellSetsOfMaps = {};
 
     this.playerUpdateCallbacks = [];
+
+    // this function is injected by movement-manager, which only exists on client side
+    this.clientPlayerUpdateInjectedFunction = null;
   }
 
   /**
@@ -62,7 +67,21 @@ class GameState {
       }
     } else {
       if (!this.players.has(playerID)) this.players.set(playerID, new Player(playerID));
-      this.players.get(playerID).updateFromMessage(msg);
+      if (this.clientSide) {
+        // on client side
+        const action = this.clientPlayerUpdateInjectedFunction(msg);
+        switch (action) {
+          case 'abort':
+            return;
+          case 'updated':
+            break;
+          default:
+            this.players.get(playerID).updateFromMessage(msg, 'server');
+        }
+      } else {
+        // on server side, just update
+        this.players.get(playerID).updateFromMessage(msg);
+      }
     }
     for (const f of this.playerUpdateCallbacks) {
       f(msg);

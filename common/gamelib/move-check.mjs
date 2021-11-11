@@ -9,11 +9,12 @@ const PLAYER_MOVE_DISTANCE_LIMIT = 1; // cell
  * @param {Player} oldPlayerData - TODO
  * @param {PlayerSyncMessage} updateMessage - TODO
  * @param {GameMap} gameMap - TODO
+ * @param {Boolean} clientSide - `true` if speed check uses Player.lastMovingTimeClient.
  * @return {Boolean}
  */
-function checkPlayerMove(oldPlayerData, updateMessage, gameMap) {
+function checkPlayerMove(oldPlayerData, updateMessage, gameMap, clientSide=false) {
   let canMove = true;
-  canMove = canMove && _speedCheck(oldPlayerData, updateMessage);
+  canMove = canMove && _speedCheck(oldPlayerData, updateMessage, clientSide);
   canMove = canMove && _borderAndWallCheck(oldPlayerData, updateMessage, gameMap);
   return canMove;
 }
@@ -22,11 +23,35 @@ function checkPlayerMove(oldPlayerData, updateMessage, gameMap) {
  * TODO
  * @param {Player} oldPlayerData - TODO
  * @param {PlayerSyncMessage} updateMessage - TODO
+ * @param {GameMap} gameMap - TODO
  * @return {Boolean}
  */
-function _speedCheck(oldPlayerData, updateMessage) {
+function checkPlayerMoveOnlyBorderAndWall(oldPlayerData, updateMessage, gameMap) {
+  return _borderAndWallCheck(oldPlayerData, updateMessage, gameMap);
+}
+
+/**
+ * TODO
+ * @param {Player} oldPlayerData - TODO
+ * @param {PlayerSyncMessage} updateMessage - TODO
+ * @param {Boolean} clientSide - `true` if speed check uses Player.lastMovingTimeClient.
+ * @return {Boolean}
+ */
+function checkPlayerMoveOnlySpeed(oldPlayerData, updateMessage, clientSide=false) {
+  return _speedCheck(oldPlayerData, updateMessage, clientSide);
+}
+
+/**
+ * TODO
+ * @param {Player} oldPlayerData - TODO
+ * @param {PlayerSyncMessage} updateMessage - TODO
+ * @param {Boolean} clientSide - `true` if speed check uses Player.lastMovingTimeClient.
+ * @return {Boolean}
+ */
+function _speedCheck(oldPlayerData, updateMessage, clientSide) {
   // check time
-  if (Date.now() < oldPlayerData.lastMovingTime + PLAYER_MOVE_TIME_INTERVAL) {
+  const lmt = (clientSide) ? oldPlayerData.lastMovingTimeClient : oldPlayerData.lastMovingTime;
+  if (Date.now() < lmt + PLAYER_MOVE_TIME_INTERVAL) {
     return false;
   }
 
@@ -68,7 +93,10 @@ function _borderAndWallCheck(oldPlayerData, updateMessage, gameMap) {
   return true;
 }
 
-export {checkPlayerMove,
+export {
+  checkPlayerMove,
+  checkPlayerMoveOnlyBorderAndWall,
+  checkPlayerMoveOnlySpeed,
   PLAYER_MOVE_TIME_INTERVAL,
   PLAYER_MOVE_DISTANCE_LIMIT,
 };

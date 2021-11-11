@@ -119,13 +119,12 @@ class GameClient {
       console.error('Duplicate game start event.');
       return;
     }
-    this.playerInfo = Player.fromObject(msg.playerData);
+    this.playerInfo = this.gameState.getPlayer(msg.playerID);
+    this.playerInfo.mainPlayer = true;
 
     this.gameStarted = true;
     this.gameState.registerOnPlayerUpdate((msg) => {
       if (msg.playerID === this.playerInfo.playerID) {
-        this.playerInfo.updateFromMessage(msg);
-        // Notify the extensions as well.
         this.extMan.notifySelfPlayerUpdate(msg);
       }
     });
