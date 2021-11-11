@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 import OverlayPosition from '/static/sites/game-client/ui/overlay-position.mjs';
-import {Player, PlayerSyncMessage} from '/static/common/gamelib/player.mjs';
+import {PlayerSyncMessage} from '/static/common/gamelib/player.mjs';
 
 /**
  * The game client. This is in charge of interacting with the gateway service
