@@ -135,11 +135,11 @@
  "tilesets":[
         {
          "firstgid":1,
-         "source":"..\/tilesets\/base.json"
+         "source":"..\/..\/tilesets\/base.json"
         }, 
         {
          "firstgid":1711,
-         "source":"..\/tilesets\/char1.json"
+         "source":"..\/..\/tilesets\/char1img.json"
         }],
  "tilewidth":32,
  "type":"map",
