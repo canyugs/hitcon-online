@@ -15,7 +15,7 @@ const ONLINE_MAP_CONFIG_DIR = '../../../hitcon-cat-adventure/run/map';
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const mapsDir = path.join(__dirname, `${TILED_PROJECT_DIR}/maps`);
 const tilesetsDir = path.join(__dirname, `${TILED_PROJECT_DIR}/tilesets`);
-const fixedsetsDir = path.join(__dirname, `${TILED_PROJECT_DIR}/fixedsetsDir`);
+const fixedsetsDir = path.join(__dirname, `${TILED_PROJECT_DIR}/fixedsets`);
 const charactersConfig = readFileFromJSON(`${fixedsetsDir}/characters.json`);
 const cellsetsConfig = readFileFromJSON(`${fixedsetsDir}/cellsets.json`);
 
