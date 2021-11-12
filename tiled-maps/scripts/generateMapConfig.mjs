@@ -8,8 +8,15 @@ import {readFileFromJSON, writeFileToJSON} from './utils.mjs';
 
 
 // Setup path first
-const TILED_PROJECT_DIR = '../../../hitcon-cat-adventure/tiled_maps';
-const ONLINE_MAP_CONFIG_DIR = '../../../hitcon-cat-adventure/run/map';
+function getEnvWithDefault(name, def) {
+  if (typeof process.env[name] === 'string') {
+    return process.env[name];
+  }
+  return def;
+}
+
+const TILED_PROJECT_DIR = getEnvWithDefault('TILED_IN', '../../../hitcon-cat-adventure/tiled_maps');
+const ONLINE_MAP_CONFIG_DIR = getEnvWithDefault('MAP_OUT', '../../../hitcon-cat-adventure/run/map');
 
 
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
