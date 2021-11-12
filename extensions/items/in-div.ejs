@@ -6,22 +6,34 @@
   height: 100%;
   display: flex;
   flex-direction: column;
+  padding: 40px;
+  background: #FFFFFF 0% 0% no-repeat padding-box;
+  border: 1px solid #707070;
+  border-radius: 40px;
 }
 
 .item-inv-text {
   font-size: 2em;
-  padding: 0.5em;
 }
 
 #item-modal-close-btn {
   font-size: xx-large;
   position: absolute;
-  right: 3%;
+  right: 0;
+  background: none;
+  border-style: none;
+  color: #707070;
+  font-weight: bold;
+}
+
+#item-modal-close-btn:hover {
+  color: #000000;
 }
 
 .item-modal-divider {
-  border: 1.5px solid black;
-  width: 95%;
+  border: 1px solid #0F0F0F;
+  width: 100%;
+  margin: 1.5em 0;
 }
 
 .item-container {
@@ -29,22 +41,41 @@
   display: flex;
   flex-direction: column;
   flex-grow: 10;
-  margin: 2.5%;
+  /* margin: 2.5%; */
+}
+
+.item-container::-webkit-scrollbar {
+  border-radius: 5px;
+  background-color: #AEC1F7;
+}
+
+.item-container::-webkit-scrollbar-thumb {
+  border-radius: 5px;
+  background-color: #00144B;
+}
+
+.item-container::-webkit-scrollbar-track {
+  border-radius: 5px;
+  background-color: #AEC1F7;
 }
 
 .item-divider {
-  border-left: 3px solid black;
+  border: 1px solid #707070;
+  margin: .5em;
 }
 
 .item-obj {
   display: flex;
   flex-direction: row;
-  margin: 0.3em;
-  margin-right: 2.5%;
-  padding: 0.5em;
-  border-radius: 1em;
-  border: .2em solid grey;
-  box-shadow: 5px 5px 5px grey;
+  margin: 1em 2em 1em .5em;
+  padding: 1em;
+  background: #FFFFFF 0% 0% no-repeat padding-box;
+  box-shadow: 0px 3px 8px #1E378972;
+  border-radius: 16px;
+}
+
+.item-icon {
+  padding: 1em;
 }
 
 .item-block {
@@ -52,30 +83,46 @@
   padding-left: 0.5em;
 }
 
+.item-block-name-holder {
+  margin-bottom: 0.5em;
+}
+
 .item-block-name {
   font-weight: bold;
-  font-size: larger;
+  font-size: 18px;
+}
+
+.item-block-descr {
+  font-size: 16px;
 }
 
 .item-use-block {
-  display: flex;
+  display: block;
+  float: right;
 }
 
 .item-use-button {
   display: none;
-  font-size: x-large;
+  font-size: 16px;
+  font-weight: bold;
   margin: auto;
   margin-right: 0.3em;
+  background: #1465FF 0% 0% no-repeat padding-box;
+  border-radius: 15px;
+  text-align: center;
+  color: #FFFFFF;
+  padding: 0.25em 1em;
+  border-style: none;
 }
 
 .item-block--usable .item-use-button {
-  display: block;
+  display: inline-block;
 }
 
 </style>
 
 <div id="item-modal">
-  <div class="item-inv-text">Inventory <button id="item-modal-close-btn">X</button></div>
+  <div class="item-inv-text">Inventory <button id="item-modal-close-btn">×</button></div>
   <hr class="item-modal-divider" />
   <div class="item-container" id="item-container">
   </div>
@@ -83,14 +130,17 @@
 
 <div class="item-obj" id="item-obj-template">
       <div class="item-icon">
-        <span style="font-size: 3em; padding: .5em">?</span>
+        <!-- <span style="font-size: 3em; padding: .5em">?</span> -->
+        <img src="/static/extensions/items/common/icons/unknown.svg" alt="">
       </div>
       <div class="item-divider"></div>
       <div class="item-block">
-        <div class="item-block-name-holder"><span class="item-block-name">Item Name</span> x <span class="item-block-count">1</span></div>
+        <div class="item-block-name-holder">
+          <span class="item-block-name">Item Name</span> x <span class="item-block-count">1</span>
+          <div class="item-use-block">
+            <button class="item-use-button">Use</button>
+          </div>
+        </div>
         <div class="item-block-descr">Item Description</div>
-      </div>
-      <div class="item-use-block">
-        <button class="item-use-button">Use</button>
       </div>
 </div>
