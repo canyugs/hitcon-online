@@ -167,7 +167,6 @@ function combineSingleLayer(childMaps, layerName) {
     const cell = tilesetDirectory[r.name].prefix + (gid-(r.firstgid));
 
     if (!(cell in resultLayerMap)) {
-      console.warn("AABBCC", cell, mapName, layerName, idx, gid, r);
       return null;
     }
 
