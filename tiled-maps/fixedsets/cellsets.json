@@ -1,0 +1,88 @@
+[
+      {
+        "name": "portal1",
+        "priority": 1,
+        "cells": [
+          {
+            "x": 12,
+            "y": 12,
+            "w": 2,
+            "h": 1
+          }
+        ],
+        "layers": {
+          "portal": "13_3_world1"
+        }
+      },
+      {
+        "name": "bombmanArena1",
+        "priority": 1,
+        "cells": [
+          {
+            "x": 2,
+            "y": 2,
+            "w": 6,
+            "h": 6
+          }
+        ],
+        "layers": {
+          "ground": "H",
+          "wall": false
+        }
+      },
+      {
+        "name": "bombmanObstacles1",
+        "priority": 2,
+        "cells": [
+          {
+            "x": 3,
+            "y": 5,
+            "w": 2,
+            "h": 1
+          },
+          {
+            "x": 6,
+            "y": 3,
+            "w": 1,
+            "h": 1
+          }
+        ],
+        "layers": {
+          "bombmanObstacle": "O",
+          "wall": true
+        }
+      },
+      {
+        "name": "spawnPoint",
+        "cells": [
+          {
+            "x": 1,
+            "y": 1,
+            "w": 2,
+            "h": 2
+          },
+          {
+            "x": 5,
+            "y": 6,
+            "w": 1,
+            "h": 1
+          }
+        ]
+      },
+      {
+        "name": "markVideoIframe",
+        "cells": [
+          {
+            "x": 10,
+            "y": 3,
+            "w": 1,
+            "h": 1
+          }
+        ],
+        "priority": 1,
+        "layers": {
+          "ground": "TV",
+          "wall": true
+        }
+      }
+    ]
