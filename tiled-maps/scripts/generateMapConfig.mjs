@@ -204,12 +204,14 @@ function convertWorld(newMaps, tilesetDirectory, resultLayerMap, base, cellsetsC
   return result;
 }
 
-const worldName = 'world1';
-
-let result = loadWorld(mapsDir, 'map01');
+function loadAndConvertWorld(mapName, mapsDir, tilesetDirectory, resultLayerMap, cellsetsConfig) {
+  let result = loadWorld(mapsDir, mapName);
+  return convertWorld(result.mapData, tilesetDirectory, resultLayerMap, result.base, cellsetsConfig);
+}
 
 const newMapsConfig = {};
-newMapsConfig[worldName] = convertWorld(result.mapData, tilesetDirectory, resultLayerMap, result.base, cellsetsConfig);
+const worldName = 'world1';
+newMapsConfig[worldName] = loadAndConvertWorld('map01', mapsDir, tilesetDirectory, resultLayerMap, cellsetsConfig);
 
 writeFileToJSON(mapsConfigPath, newMapsConfig);
 
