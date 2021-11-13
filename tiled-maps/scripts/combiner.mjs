@@ -15,6 +15,8 @@ function getGidRange(gidRange, gid) {
 function mapGid(gid, childMaps, tilesetDirectory, resultLayerMap, mapName, layerName, idx) {
   if (layerName === 'wall') return gid;
   if (layerName === 'jitsi') return gid;
+  if (layerName === 'iframe') return gid;
+  if (layerName === 'portal') return gid;
 
   const r = getGidRange(childMaps[mapName].gidRange, gid);
   if (typeof r === 'undefined') return null;
@@ -27,13 +29,13 @@ function mapGid(gid, childMaps, tilesetDirectory, resultLayerMap, mapName, layer
   return cell;
 }
 
-function fetchJitsiLayer(targetLayer, startIdx, endIdx, mapName) {
+function fetchTextLayer(targetLayer, startIdx, endIdx, mapName, layerName) {
   let result = [];
   for (let idx = startIdx; idx < endIdx; idx++) result.push(idx);
 
   if (targetLayer === undefined) {
-    // no jitsi here.
-    console.warn(`No jitsi layer in ${mapName}`);
+    // no text layer here.
+    console.warn(`No text layer ${layerName} in ${mapName}`);
     return result.map((idx) => null);
   }
 
@@ -48,7 +50,7 @@ function fetchJitsiLayer(targetLayer, startIdx, endIdx, mapName) {
       return null;
     }
     if (data.length !== 1) {
-      console.warn(`Multiple jitsi value on ${mapName} - ${idx}`, data);
+      console.warn(`Multiple text layer ${layerName} value on ${mapName} - ${idx}`, data);
     }
     return data[0];
   });
@@ -72,7 +74,7 @@ function combineSingleLayer(childMaps, layerName, tilesetDirectory, resultLayerM
         .filter((layer) => layer.name.toLowerCase() === layerName)[0];
 
       let data;
-      if (layerName === 'jitsi') data = fetchJitsiLayer(targetLayer, startIdx, endIdx, mapName);
+      if (layerName === 'jitsi' || layerName === 'iframe' || layerName === 'portal') data = fetchTextLayer(targetLayer, startIdx, endIdx, mapName, layerName);
       else data = targetLayer.data.slice(startIdx, endIdx);
 
       const mappedData = data.map((gid, idx) => {
@@ -93,7 +95,7 @@ function combineSingleLayer(childMaps, layerName, tilesetDirectory, resultLayerM
         .filter((layer) => layer.name.toLowerCase() === layerName)[0];
 
       let data;
-      if (layerName === 'jitsi') data = fetchJitsiLayer(targetLayer, startIdx, endIdx, mapName);
+      if (layerName === 'jitsi' || layerName === 'iframe' || layerName === 'portal') data = fetchTextLayer(targetLayer, startIdx, endIdx, mapName, layerName);
       else data = targetLayer.data.slice(startIdx, endIdx);
 
       const mappedData = data.map((gid, idx) => {

@@ -184,6 +184,16 @@ function convertWorld(newMaps, tilesetDirectory, resultLayerMap, base, cellsetsC
         data: combineSingleLayer(newMaps, 'jitsi', tilesetDirectory, resultLayerMap, base),
         name: 'jitsi',
       },
+      {
+        ...layerTemplate,
+        data: combineSingleLayer(newMaps, 'iframe', tilesetDirectory, resultLayerMap, base),
+        name: 'videoIframe',
+      },
+      {
+        ...layerTemplate,
+        data: combineSingleLayer(newMaps, 'portal', tilesetDirectory, resultLayerMap, base),
+        name: 'portal',
+      },
     ],
     tilesets: [],
     type: 'map',
