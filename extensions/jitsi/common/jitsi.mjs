@@ -429,7 +429,7 @@ class JitsiHandler {
       }
     }
 
-    this.broadcastParticipantId(null); // broadcast that the player has quit.
+    await this.broadcastParticipantId(null); // broadcast that the player has quit.
 
     // We can safely remove all DOMs at this point.
     $('#jitsi-remote-container').empty();
