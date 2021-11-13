@@ -1,0 +1,88 @@
+.loading-screen-div {
+  position: absolute;
+  background-color: #131033;
+  top: 0px;
+  left: 0px;
+  width: 100vw;
+  height: 100vh;
+  box-sizing: border-box;
+  z-index: 95; /* less than error-modal more than avatar-selection */
+  color: #04E627;
+}
+
+.loading-screen--inactive {
+  display: none !important;
+}
+
+.loading-screen-image {
+  position: absolute;
+}
+
+.loading-screen-div ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  width: 60vw;
+  height: 60vh;
+}
+
+.loading-screen-container {
+  border: 15px solid #fff;
+  padding: 50px 80px 30px 50px;
+}
+
+.loading-screen-div li {
+  display: flex;
+  justify-content: space-between;
+}
+
+.loading-screen-footer {
+  background-color: #04E627;
+  color: #000;
+  padding: 5px;
+}
+
+.typewriter {
+  overflow: hidden;
+  white-space: nowrap;
+  letter-spacing: .15em;
+  animation: typing 1s steps(40, end) ;
+}
+
+@keyframes typing {
+  from { width: 0 }
+  to { width: 100% }
+}
+
+.typewriter.end {
+  visibility: hidden;
+  animation: typingResult 1s steps(4, end) forwards;
+}
+
+.typewriter.end.warn {
+  color: #AC7723;
+}
+
+@keyframes typingResult {
+  99% { visibility: hidden }
+  100% { visibility: visible }
+}
+
+.typing {
+  letter-spacing: .15em;
+}
+
+.blinker {
+  opacity: 1;
+  margin-bottom: -2px;
+  height: 15px;
+  margin-left: -5px;
+  border-left: 7px solid #04E627;
+  animation: blinker 0.9s steps(2, start) infinite;
+}
+
+@keyframes blinker {
+  to {
+    visibility: hidden;
+  }
+}
