@@ -385,8 +385,7 @@ class GatewayService {
    * @return {Boolean} - success or not
    */
   async _teleportPlayerInternal(socket, msg, allowOverlap=false) {
-    let res;
-    res = await socket.moveLock.acquire('move', async () => {
+    const res = await socket.moveLock.acquire('move', async () => {
       const ret = await this._enterCoord(msg.mapCoord);
 
       // If the player was in ghost mode, ignore the occupation check.
