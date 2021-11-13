@@ -5,7 +5,7 @@ import path from 'path';
 import {mapTransform} from './map.mjs';
 import {tilesetTransform} from './assets.mjs';
 import {readFileFromJSON, writeFileToJSON} from './utils.mjs';
-
+import {combineSingleLayer} from './combiner.mjs';
 
 // Setup path first
 function getEnvWithDefault(name, def) {
@@ -30,11 +30,11 @@ const mapsConfigPath = path.join(__dirname, `${ONLINE_MAP_CONFIG_DIR}/map.json`)
 const assetsConfigPath = path.join(__dirname, `${ONLINE_MAP_CONFIG_DIR}/assets.json`);
 const currentAssetsConfig = readFileFromJSON(assetsConfigPath);
 
-const newMaps = {};
+let newMaps = {};
 const mapNameList = [];
 const tmpLayerMap = {};
 const tmpImagesDef = {};
-const tilesetSource = {};
+let tilesetSource = {};
 const allTilesets = {};
 const tilesetDirectory = {};
 
@@ -111,158 +111,58 @@ const resultLayerMap = getAllTileLayerMap();
 
 //////////////////////////////////////////
 
+function loadMap(mapsDir, mapName) {
+  // read data from child maps.
+  const targetMap = path.join(mapsDir, mapName);
+  const {base} = path.parse(targetMap);
 
-// read data from child maps.
-const targetMap = path.join(mapsDir, 'map01');
-const {base} = path.parse(targetMap);
+  let result = {};
+  result.mapData = {};
+  result.tilesetSource = {};
+  result.base = base;
+  console.log(`read maps from ${targetMap}`);
+  fs.readdirSync(targetMap).forEach((file) => {
+    const {ext, name:mapName} = path.parse(file);
+    if (ext === '.json') {
+      //console.log(` > add ${file}`);
+      const data = readFileFromJSON(`${targetMap}/${file}`);
 
-console.log(`read maps from ${targetMap}`);
-fs.readdirSync(targetMap).forEach((file) => {
-  const {ext, name:mapName} = path.parse(file);
-  if (ext === '.json') {
-    //console.log(` > add ${file}`);
-    const data = readFileFromJSON(`${targetMap}/${file}`);
-
-    newMaps[mapName] = data;
-    mapNameList.push(mapName);
-    tilesetSource[mapName] = {};
-    const gidRange = [];
-    data.tilesets.forEach((tileset) => {
-      const {source} = tileset;
-      if (source === undefined) {
-        console.error('embed tileset unsupport');
-      }
-      const {name: tilesetName} = path.parse(source);
-      // Tileset source for all maps;
-      gidRange.push({...tileset, name: tilesetName});
-      tilesetSource[mapName]
-      tilesetSource[mapName][tilesetName] = tileset;
-      allTilesets[tilesetName] = tileset;
-    });
-    console.log(gidRange);
-    gidRange.sort((a, b) => { return a-b; });
-    data.gidRange = gidRange;
-  }
-});
-
-//console.log('tileset source for all maps\n', tilesetSource)
-console.log({allTilesets});
-function getGidRange(gidRange, gid) {
-  let result = undefined;
-  for (const r of gidRange) {
-    if (r.firstgid > gid) {
-      return result;
+      mapNameList.push(mapName);
+      result.tilesetSource[mapName] = {};
+      const gidRange = [];
+      data.tilesets.forEach((tileset) => {
+        const {source} = tileset;
+        if (source === undefined) {
+          console.error('embed tileset unsupport');
+        }
+        const {name: tilesetName} = path.parse(source);
+        // Tileset source for all maps;
+        gidRange.push({...tileset, name: tilesetName});
+        result.tilesetSource[mapName][tilesetName] = tileset;
+        allTilesets[tilesetName] = tileset;
+      });
+      gidRange.sort((a, b) => { return a-b; });
+      data.gidRange = gidRange;
+      result.mapData[mapName] = data;
     }
-    result = r;
-  }
+  });
+
   return result;
 }
 
-function combineSingleLayer(childMaps, layerName) {
-  const worldWidth = 200;
-  const worldHeight = 100;
-  const mapWidth = 40;
-  const mapHeight = 50;
-  const combinedLayer = [];
+let result = loadMap(mapsDir, 'map01');
+newMaps = {
+  ...(result.mapData),
+  ...newMaps
+};
+tilesetSource = {
+  ...(result.tilesetSource),
+  ...tilesetSource
+};
+const base = result.base;
 
-  function mapGid(gid, mapName, idx) {
-    if (layerName === 'wall') return gid;
-    if (layerName === 'jitsi') return gid;
-
-    const r = getGidRange(childMaps[mapName].gidRange, gid);
-    if (typeof r === 'undefined') return null;
-    const cell = tilesetDirectory[r.name].prefix + (gid-(r.firstgid));
-
-    if (!(cell in resultLayerMap)) {
-      return null;
-    }
-
-    return cell;
-  }
-
-  function fetchJitsiLayer(targetLayer, startIdx, endIdx, mapName) {
-    let result = [];
-    for (let idx = startIdx; idx < endIdx; idx++) result.push(idx);
-
-    if (targetLayer === undefined) {
-      // no jitsi here.
-      console.warn(`No jitsi layer in ${mapName}`);
-      return result.map((idx) => null);
-    }
-
-    result = result.map((idx) => {
-      const data = targetLayer.layers.filter((l) => {
-        return typeof l.data[idx] === "number" && l.data[idx] !== 0
-      }).map((l) => {
-        return l.name;
-      });
-      if (data.length === 0) {
-        // No jitsi here.
-        return null;
-      }
-      if (data.length !== 1) {
-        console.warn(`Multiple jitsi value on ${mapName} - ${idx}`, data);
-      }
-      return data[0];
-    });
-    return result;
-  }
-
-  // map01 ~ 05
-  for (let row = 0; row < mapHeight; row++) {
-    const startIdx = mapWidth * row;
-    const endIdx = (mapWidth * row) + mapWidth;
-    for (let idx = 1; idx < 6; idx++) {
-      const mapName = `${base}-0${idx}`;
-      const targetLayer = childMaps[mapName].layers
-        .filter((layer) => layer.name.toLowerCase() === layerName)[0];
-
-      let data;
-      if (layerName === 'jitsi') data = fetchJitsiLayer(targetLayer, startIdx, endIdx, mapName);
-      else data = targetLayer.data.slice(startIdx, endIdx);
-
-      const mappedData = data.map((gid, idx) => {
-        return mapGid(gid, mapName, idx);
-      });
-      combinedLayer.push(...mappedData);
-    }
-  }
-
-  // map06 ~ 10
-  for (let row = 0; row < mapHeight; row++) {
-    const startIdx = mapWidth * row;
-    const endIdx = (mapWidth * row) + mapWidth;
-    for (let idx = 6; idx < 11; idx++) {
-      const numStr = idx < 10 ? `0${idx}` : idx;
-      const mapName = `${base}-${numStr}`;
-      const targetLayer = childMaps[mapName].layers
-        .filter((layer) => layer.name.toLowerCase() === layerName)[0];
-
-      let data;
-      if (layerName === 'jitsi') data = fetchJitsiLayer(targetLayer, startIdx, endIdx, mapName);
-      else data = targetLayer.data.slice(startIdx, endIdx);
-
-      const mappedData = data.map((gid, idx) => {
-        return mapGid(gid, mapName, idx);
-      });
-      combinedLayer.push(...mappedData);
-    }
-  }
-  const adjLayer = combinedLayer.map((gid) => {
-    return gid;
-  });
-  return adjLayer;
-}
-
-function combineGroupLayer(childMaps, layerName) {
-  const worldWidth = 200;
-  const worldHeight = 100;
-  const mapWidth = 40;
-  const mapHeight = 50;
-  const combinedLayer = [];
-  // TODO
-  return combinedLayer;
-}
+//console.log('tileset source for all maps\n', tilesetSource)
+console.log({allTilesets});
 
 
 const layerTemplate = {
@@ -282,27 +182,27 @@ const mapDataTemplate = {
   layers: [
     {
       ...layerTemplate,
-      data: combineSingleLayer(newMaps, 'ground'),
+      data: combineSingleLayer(newMaps, 'ground', tilesetDirectory, resultLayerMap, base),
       name: 'ground',
     },
     {
       ...layerTemplate,
-      data: combineSingleLayer(newMaps, 'background'),
+      data: combineSingleLayer(newMaps, 'background', tilesetDirectory, resultLayerMap, base),
       name: 'background',
     },
     {
       ...layerTemplate,
-      data: combineSingleLayer(newMaps, 'foreground'),
+      data: combineSingleLayer(newMaps, 'foreground', tilesetDirectory, resultLayerMap, base),
       name: 'object',
     },
     {
       ...layerTemplate,
-      data: combineSingleLayer(newMaps, 'wall'),
+      data: combineSingleLayer(newMaps, 'wall', tilesetDirectory, resultLayerMap, base),
       name: 'wall',
     },
     {
       ...layerTemplate,
-      data: combineSingleLayer(newMaps, 'jitsi'),
+      data: combineSingleLayer(newMaps, 'jitsi', tilesetDirectory, resultLayerMap, base),
       name: 'jitsi',
     },
   ],
