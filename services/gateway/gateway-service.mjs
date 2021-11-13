@@ -261,19 +261,12 @@ class GatewayService {
         });
       });
 
-      // Synchronize the state.
+      // Initialize the player data.
       const initLoc = socket.playerData.mapCoord ?? this.gameMap.getRandomSpawnPoint();
-      await this._enterCoord(initLoc);
       socket.playerData.mapCoord = initLoc;
       socket.playerData.facing = 'D';
       socket.playerData.lastMovingTime = Date.now();
       socket.playerData.ghostMode = false;
-
-      // Register all events.
-      socket.on('playerUpdate', (msg) => {
-        this.onPlayerUpdate(socket, PlayerSyncMessage.fromObject(msg));
-        // onPlayerUpdate is async, so returns immediately.
-      });
 
       // notify the client to start the game after his/her avatar is selected
       socket.on('avatarSelect', async (msg) => {
@@ -288,12 +281,24 @@ class GatewayService {
           return;
         }
 
+        // Occupy the player's current location so the player enters the game.
+        await this._enterCoord(firstLocation.mapCoord);
         await this._broadcastPlayerUpdate(firstLocation);
+
+        // Note that it is required that we do not have any away between
+        // sendStateTransfer() to 'gameStart' emission
         this.broadcaster.sendStateTransfer(socket);
 
         // Emit the gameStart event.
         const startPack = {playerData: socket.playerData};
         socket.emit('gameStart', startPack);
+
+        // Player is now free to move around after the first location have been
+        // broadcasted and the game start event have been emitted.
+        socket.on('playerUpdate', (msg) => {
+          this.onPlayerUpdate(socket, PlayerSyncMessage.fromObject(msg));
+          // onPlayerUpdate is async, so returns immediately.
+        });
       });
     });
   }
