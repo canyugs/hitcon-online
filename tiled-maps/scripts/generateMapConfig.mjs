@@ -209,9 +209,25 @@ function loadAndConvertWorld(mapName, mapsDir, tilesetDirectory, resultLayerMap,
   return convertWorld(result.mapData, tilesetDirectory, resultLayerMap, result.base, cellsetsConfig);
 }
 
+
+const conversionConfig = [
+  {
+    srcMapName: 'map01',
+    dstMapName: 'world1',
+    cellsetsConfig: cellsetsConfig
+  },
+  {
+    srcMapName: 'map03',
+    dstMapName: 'world3',
+    cellsetsConfig: []
+  }
+];
+
 const newMapsConfig = {};
-const worldName = 'world1';
-newMapsConfig[worldName] = loadAndConvertWorld('map01', mapsDir, tilesetDirectory, resultLayerMap, cellsetsConfig);
+
+for (const c of conversionConfig) {
+  newMapsConfig[c.dstMapName] = loadAndConvertWorld(c.srcMapName, mapsDir, tilesetDirectory, resultLayerMap, c.cellsetsConfig);
+}
 
 writeFileToJSON(mapsConfigPath, newMapsConfig);
 
