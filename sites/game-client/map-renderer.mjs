@@ -506,6 +506,10 @@ class MapRenderer {
    */
   _drawOneCharacterImage(player) {
     const {mapCoord, displayChar, facing, ghostMode, opacity} = player.getDrawInfo();
+
+    // If we're not on the same map, we don't need to draw it.
+    if (mapCoord.mapName !== this.viewerPosition.mapName) return;
+
     const canvasCoordinate = this.mapToCanvasCoordinate(mapCoord);
     const topLeftCanvasCoord = {x: canvasCoordinate.x, y: canvasCoordinate.y - MAP_CELL_SIZE};
     // check if this player is out of viewport
@@ -544,6 +548,11 @@ class MapRenderer {
    * would be called to get the information for drawing.
    */
   _drawOneCharacterName(player) {
+    const {mapCoord, displayName} = player.getDrawInfo();
+
+    // If we're not on the same map, we don't need to draw it.
+    if (mapCoord.mapName !== this.viewerPosition.mapName) return;
+
     // TODO: Remember whether the previous call of `this.draw()` renders text.
     // If so, no need to save and restore the context. May improve performance.
     this.ctx.save();
@@ -551,7 +560,6 @@ class MapRenderer {
     this.ctx.textAlign = 'center';
     this.ctx.textBaseline = 'bottom';
 
-    const {mapCoord, displayName} = player.getDrawInfo();
     const {x, y} = mapCoord;
     const canvasCoordinate = this.mapToCanvasCoordinate(new MapCoord(this.viewerPosition.mapName, x + 0.5, y + 1));
     // there is no need for out-of-canvas check

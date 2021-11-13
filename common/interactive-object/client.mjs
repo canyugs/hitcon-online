@@ -45,6 +45,7 @@ class InteractiveObjectClientBaseClass {
         // determine whether this object is clicked
         const {x: cx, y: cy} = clickedMapCoord;
         const {x, y} = this.mapCoord;
+        if (clickedMapCoord.mapName != this.mapCoord.mapName) return;
         if (!(x <= cx && cx < x+1 && y <= cy && cy < y+1)) return;
 
         this.onInteract();
