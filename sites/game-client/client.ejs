@@ -22,11 +22,24 @@ absolute URL.
   </head>
   <body>
     <div id="rootdiv" class="container-center">
-      <div id="avatar-selection-div" style="background-color: aquamarine;" class="container-center">
-        <div class="container-center">
+
+      <div id="avatar-selection-div" style="background-color: #000E26;" class="container-center">
+        <div class="avatar-selection-background container-center-column">
+          <div class="avatar-selection-title">Welcome to HITCON Online<br>Choose Avatar</div>
           <div id="avatar-preview-container" class="container-center"></div>
-          <label>Display Name: <input id="display-name" type="text" name="display-name"></label>
-          <button name="submit">Join HITCON Online!</button>
+          <label class="avatar-display-name container-center">
+            Display Name:
+            <input id="display-name" type="text" name="display-name" class="avatar-display-name-text">
+            <div class="tooltip">
+              <img src="/static/sites/game-client/question-mark.svg" class="avatar-display-name-desc" alt="naming description">
+              <span class="tooltip-text">
+                暱稱將會顯示在公眾場合<br>
+                不可使用冒犯他人的詞彙<br>
+                詳細情形可查看<a href="https://hitcon.org/2021/coc/" target="_blank">大會行為守則</a>
+              </span>
+            </div>
+          </label>
+          <button name="submit" class="avatar-confirm-button">Join HITCON Online!</button>
         </div>
       </div>
 
