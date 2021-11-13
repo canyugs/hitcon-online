@@ -211,8 +211,15 @@ class GatewayService {
       }
     }
 
-    // Acquire this lock if you need to move the player.
+    // Acquire this lock if you need to move the player or during connection/
+    // disconnection.
     socket.moveLock = new AsyncLock();
+
+    // Note: We're locking the connection process while there's no code that
+    // moves the player because we want ensure that the connection handler
+    // (addSocket) does not run concurrent to the disconnection handler
+    // (onDisconnect) and connection handler will always run til completion
+    // before the disconnection handler have a chance to run.
     await socket.moveLock.acquire('move', async () => {
       // Load the player data.
       socket.playerData = await this.dir.getPlayerData(playerID);
@@ -233,6 +240,7 @@ class GatewayService {
         // Disconnected halfway.
         console.warn(`Player ${playerID} disconnected halfway through.`);
         // Leave onDisconnect() to run in the background.
+        // Note: Do *NOT* await here, we might dead lock due to socket.moveLock.
         this.onDisconnect(socket.reason);
         return;
       } else {
