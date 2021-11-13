@@ -22,8 +22,14 @@ absolute URL.
   </head>
   <body>
     <div id="rootdiv" class="container-center">
-      <div id="loading-div" class="loading-div">
-        Loading...
+
+      <div id="loading-screen-div" class="loading-screen-div container-center">
+        <img class="loading-screen-image" src="/static/sites/game-client/hat.svg">
+        <div class="loading-screen-container">
+          <ul id="loading-screen-text" class="loading-screen-text">
+          </ul>
+          <div class="loading-screen-footer">[0] 0: HITCON Online</div>
+        </div>
       </div>
 
       <div id="avatar-selection-div" style="background-color: #000E26;" class="container-center">
@@ -174,6 +180,7 @@ absolute URL.
       import ClientExtensionManager from '/static/common/extlib/client-extension-manager.mjs';
       import MainUI from '/static/sites/game-client/ui/main-ui.mjs';
       import MapRendererOverlay from '/static/sites/game-client/ui/map-renderer-overlay.mjs';
+      import LoadingScreenPage from '/static/sites/game-client/ui/loading-screen.mjs';
       import AvatarSelectionPage from '/static/sites/game-client/ui/avatar-selection.mjs';
       import OverlayPosition from '/static/sites/game-client/ui/overlay-position.mjs';
       import ErrorModal from '/static/sites/game-client/ui/error-modal.mjs';
@@ -262,6 +269,8 @@ absolute URL.
         if (window.query.disableRender) {
           game.mapRenderer.disableRenderForTesting();
         }
+
+        game.loadingScreenPage = new LoadingScreenPage();
         game.avatarSelectionPage = new AvatarSelectionPage(game.socket, game.graphicAsset);
         game.inputManager = new InputManager(game.mapRenderer);
         game.movementManager = new MovementManager(game.socket, game.gameState, game.inputManager, game.mapRenderer);
