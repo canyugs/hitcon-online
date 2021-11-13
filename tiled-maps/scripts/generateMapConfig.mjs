@@ -33,7 +33,6 @@ const currentAssetsConfig = readFileFromJSON(assetsConfigPath);
 const mapNameList = [];
 const tmpLayerMap = {};
 const tmpImagesDef = {};
-let tilesetSource = {};
 const tilesetDirectory = {};
 
 console.log(`read tilesets from ${tilesetsDir}`);
@@ -116,7 +115,6 @@ function loadWorld(mapsDir, mapName) {
 
   let result = {};
   result.mapData = {};
-  result.tilesetSource = {};
   result.base = base;
   console.log(`read maps from ${targetMap}`);
   fs.readdirSync(targetMap).forEach((file) => {
@@ -126,7 +124,6 @@ function loadWorld(mapsDir, mapName) {
       const data = readFileFromJSON(`${targetMap}/${file}`);
 
       mapNameList.push(mapName);
-      result.tilesetSource[mapName] = {};
       const gidRange = [];
       data.tilesets.forEach((tileset) => {
         const {source} = tileset;
@@ -136,7 +133,6 @@ function loadWorld(mapsDir, mapName) {
         const {name: tilesetName} = path.parse(source);
         // Tileset source for all maps;
         gidRange.push({...tileset, name: tilesetName});
-        result.tilesetSource[mapName][tilesetName] = tileset;
       });
       gidRange.sort((a, b) => { return a-b; });
       data.gidRange = gidRange;
@@ -208,6 +204,26 @@ function convertWorld(newMaps, tilesetDirectory, resultLayerMap, base, cellsetsC
   return result;
 }
 
+const worldName = 'world1';
+
+let result = loadWorld(mapsDir, 'map01');
+
+const newMapsConfig = {};
+newMapsConfig[worldName] = convertWorld(result.mapData, tilesetDirectory, resultLayerMap, result.base, cellsetsConfig);
+
+writeFileToJSON(mapsConfigPath, newMapsConfig);
+
+
+const newAssetsConfig = {
+  layerMap: {
+    ground: {},
+    background: {},
+    foreground: {},
+  },
+  images: [],
+  characters: charactersConfig,
+};
+
 const originalImages = [
   {
     'name': 'base',
@@ -226,32 +242,6 @@ const originalImages = [
 originalImages.forEach((img) => {
   tmpImagesDef[img.name] = img;
 });
-
-const originalCellSets = cellsetsConfig;
-
-const worldName = 'world1';
-
-let result = loadWorld(mapsDir, 'map01');
-tilesetSource = {
-  ...(result.tilesetSource),
-  ...tilesetSource
-};
-
-const newMapsConfig = {};
-newMapsConfig[worldName] = convertWorld(result.mapData, tilesetDirectory, resultLayerMap, result.base, cellsetsConfig);
-
-writeFileToJSON(mapsConfigPath, newMapsConfig);
-
-
-const newAssetsConfig = {
-  layerMap: {
-    ground: {},
-    background: {},
-    foreground: {},
-  },
-  images: [],
-  characters: charactersConfig,
-};
 
 const newImageDef = [];
 Object.entries(tmpImagesDef).forEach(([name, image]) => {
