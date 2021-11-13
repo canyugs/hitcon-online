@@ -45,22 +45,9 @@
       "jitsi",
       "point-system"
     ],
-    "standalone": {
-      "chat": "127.0.0.1:5020",
-      "dialog": "127.0.0.1:5021",
-      "setting": "127.0.0.1:5022",
-      "bombman": "127.0.0.1:5023",
-      "iobj-lib": "127.0.0.1:5024",
-      "items": "127.0.0.1:5025",
-      "map-portal": "127.0.0.1:5026",
-      "MapWatermark": "127.0.0.1:5027",
-      "notification": "127.0.0.1:5028",
-      "npc": "127.0.0.1:5029",
-      "playerlist": "127.0.0.1:5030",
-      "iframe": "127.0.0.1:5031",
-      "escape-game": "127.0.0.1:5032",
-      "jitsi": "127.0.0.1:5033",
-      "point-system": "127.0.0.1:5034"
+    "standaloneAuto": {
+      "addr": "127.0.0.1",
+      "port": 5020
     }
   },
   "jitsi": {
