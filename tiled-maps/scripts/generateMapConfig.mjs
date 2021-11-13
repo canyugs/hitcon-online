@@ -30,12 +30,10 @@ const mapsConfigPath = path.join(__dirname, `${ONLINE_MAP_CONFIG_DIR}/map.json`)
 const assetsConfigPath = path.join(__dirname, `${ONLINE_MAP_CONFIG_DIR}/assets.json`);
 const currentAssetsConfig = readFileFromJSON(assetsConfigPath);
 
-let newMaps = {};
 const mapNameList = [];
 const tmpLayerMap = {};
 const tmpImagesDef = {};
 let tilesetSource = {};
-const allTilesets = {};
 const tilesetDirectory = {};
 
 console.log(`read tilesets from ${tilesetsDir}`);
@@ -111,7 +109,7 @@ const resultLayerMap = getAllTileLayerMap();
 
 //////////////////////////////////////////
 
-function loadMap(mapsDir, mapName) {
+function loadWorld(mapsDir, mapName) {
   // read data from child maps.
   const targetMap = path.join(mapsDir, mapName);
   const {base} = path.parse(targetMap);
@@ -139,7 +137,6 @@ function loadMap(mapsDir, mapName) {
         // Tileset source for all maps;
         gidRange.push({...tileset, name: tilesetName});
         result.tilesetSource[mapName][tilesetName] = tileset;
-        allTilesets[tilesetName] = tileset;
       });
       gidRange.sort((a, b) => { return a-b; });
       data.gidRange = gidRange;
@@ -150,68 +147,66 @@ function loadMap(mapsDir, mapName) {
   return result;
 }
 
-let result = loadMap(mapsDir, 'map01');
-newMaps = {
-  ...(result.mapData),
-  ...newMaps
-};
-tilesetSource = {
-  ...(result.tilesetSource),
-  ...tilesetSource
-};
-const base = result.base;
-
-//console.log('tileset source for all maps\n', tilesetSource)
-console.log({allTilesets});
+function convertWorld(newMaps, tilesetDirectory, resultLayerMap, base, cellsetsConfig) {
+  const layerTemplate = {
+    width: 200,
+    height: 100,
+    type: 'tilelayer',
+    name: 'template',
+    x: 0,
+    y: 0,
+    data: null
+  }
 
 
-const layerTemplate = {
-  width: 200,
-  height: 100,
-  type: 'tilelayer',
-  name: 'template',
-  x: 0,
-  y: 0,
-  data: null
+  const mapDataTemplate = {
+    width: 200,
+    height: 100,
+    layers: [
+      {
+        ...layerTemplate,
+        data: combineSingleLayer(newMaps, 'ground', tilesetDirectory, resultLayerMap, base),
+        name: 'ground',
+      },
+      {
+        ...layerTemplate,
+        data: combineSingleLayer(newMaps, 'background', tilesetDirectory, resultLayerMap, base),
+        name: 'background',
+      },
+      {
+        ...layerTemplate,
+        data: combineSingleLayer(newMaps, 'foreground', tilesetDirectory, resultLayerMap, base),
+        name: 'object',
+      },
+      {
+        ...layerTemplate,
+        data: combineSingleLayer(newMaps, 'wall', tilesetDirectory, resultLayerMap, base),
+        name: 'wall',
+      },
+      {
+        ...layerTemplate,
+        data: combineSingleLayer(newMaps, 'jitsi', tilesetDirectory, resultLayerMap, base),
+        name: 'jitsi',
+      },
+    ],
+    tilesets: [],
+    type: 'map',
+  };
+
+  // To covert mapData to fit canvas;
+  const {mapData, tilesetSrc} = mapTransform(mapDataTemplate);
+
+  const result = {
+    startX: 0,
+    startY: 0,
+    width: 200,
+    height: 100,
+    ...mapData,
+    cellSets: cellsetsConfig,
+  };
+
+  return result;
 }
-
-
-const mapDataTemplate = {
-  width: 200,
-  height: 100,
-  layers: [
-    {
-      ...layerTemplate,
-      data: combineSingleLayer(newMaps, 'ground', tilesetDirectory, resultLayerMap, base),
-      name: 'ground',
-    },
-    {
-      ...layerTemplate,
-      data: combineSingleLayer(newMaps, 'background', tilesetDirectory, resultLayerMap, base),
-      name: 'background',
-    },
-    {
-      ...layerTemplate,
-      data: combineSingleLayer(newMaps, 'foreground', tilesetDirectory, resultLayerMap, base),
-      name: 'object',
-    },
-    {
-      ...layerTemplate,
-      data: combineSingleLayer(newMaps, 'wall', tilesetDirectory, resultLayerMap, base),
-      name: 'wall',
-    },
-    {
-      ...layerTemplate,
-      data: combineSingleLayer(newMaps, 'jitsi', tilesetDirectory, resultLayerMap, base),
-      name: 'jitsi',
-    },
-  ],
-  tilesets: [],
-  type: 'map',
-};
-
-// To covert mapData to fit canvas;
-const {mapData, tilesetSrc} = mapTransform(mapDataTemplate);
 
 const originalImages = [
   {
@@ -236,15 +231,14 @@ const originalCellSets = cellsetsConfig;
 
 const worldName = 'world1';
 
-const newMapsConfig = {};
-newMapsConfig[worldName] = {
-  startX: 0,
-  startY: 0,
-  width: 200,
-  height: 100,
-  ...mapData,
-  cellSets: originalCellSets,
+let result = loadWorld(mapsDir, 'map01');
+tilesetSource = {
+  ...(result.tilesetSource),
+  ...tilesetSource
 };
+
+const newMapsConfig = {};
+newMapsConfig[worldName] = convertWorld(result.mapData, tilesetDirectory, resultLayerMap, result.base, cellsetsConfig);
 
 writeFileToJSON(mapsConfigPath, newMapsConfig);
 
