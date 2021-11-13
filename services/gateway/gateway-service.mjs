@@ -287,64 +287,76 @@ class GatewayService {
 
       // notify the client to start the game after his/her avatar is selected
       socket.on('avatarSelect', async (msg) => {
-        // avatarSelect modifies the stage and moves the player.
-        await socket.moveLock.acquire('move', async () => {
-
-        if (socket.stage !== ConnectionStages.REGED) {
-          console.warn('Duplicate avatarSelect: ', playerID, socket.stage, socket);
-          // Kick player for race condition.
-          await this.notifyKicked(socket, 'Duplicated avatarSelect');
-          return;
-        }
-
-        // initialize the appearance of player
-        socket.playerData.displayName = msg.displayName;
-        socket.playerData.displayChar = msg.displayChar;
-
-        const firstLocation = PlayerSyncMessage.fromObject(socket.playerData);
-        if (!firstLocation.check(this.gameMap.graphicAsset)) {
-          // Kick player for invalid avatar args.
-          await this.notifyKicked(socket, 'Invalid avatarSelect args');
-          return;
-        }
-
-        // Occupy the player's current location so the player enters the game.
-        await this._enterCoord(firstLocation.mapCoord);
-        await this._broadcastPlayerUpdate(firstLocation);
-
-        // Note that it is required that we do not have any away between
-        // sendStateTransfer() to 'gameStart' emission
-        this.broadcaster.sendStateTransfer(socket);
-
-        // Emit the gameStart event.
-        const startPack = {playerID: socket.playerData.playerID};
-        socket.emit('gameStart', startPack);
-        socket.stage = ConnectionStages.RUNNING;
-
-        // Player is now free to move around after the first location have been
-        // broadcasted and the game start event have been emitted.
-        socket.on('playerUpdate', (msg) => {
-          this.onPlayerUpdate(socket, PlayerSyncMessage.fromObject(msg));
-          // onPlayerUpdate is async, so returns immediately.
-        });
-
-        // Start accepting extension calls from the client.
-        socket.on('callC2sAPI', (msg, callback) => {
-          const p = this.extMan.onC2sCalled(msg, socket.playerID);
-          p.then((msg) => {
-            if (typeof msg === 'object' && msg !== null && 'error' in msg && typeof msg.error === 'string') {
-              console.error(`c2s call error: ${msg.error}`);
-            }
-            callback(msg);
-          }, (reason) => {
-            console.error(`c2s call exception: ${reason}`);
-            // Full exception detailed NOT provided for security reason.
-            callback({'error': 'exception'});
-          });
-        });
-
-        });
+        await this._onAvatarSelect(socket, msg)
       });
+    });
+  }
+
+  /**
+   * Handles the avatarSelect event.
+   */
+  async _onAvatarSelect(socket, msg) {
+    // avatarSelect modifies the stage and moves the player.
+    await socket.moveLock.acquire('move', async () => {
+      if (socket.stage !== ConnectionStages.REGED) {
+        console.warn('Duplicate avatarSelect: ', playerID, socket.stage, socket);
+        // Kick player for race condition.
+        await this.notifyKicked(socket, 'Duplicated avatarSelect');
+        return;
+      }
+
+      // initialize the appearance of player
+      socket.playerData.displayName = msg.displayName;
+      socket.playerData.displayChar = msg.displayChar;
+
+      const firstLocation = PlayerSyncMessage.fromObject(socket.playerData);
+      if (!firstLocation.check(this.gameMap.graphicAsset)) {
+        // Kick player for invalid avatar args.
+        await this.notifyKicked(socket, 'Invalid avatarSelect args');
+        return;
+      }
+
+      // Occupy the player's current location so the player enters the game.
+      await this._enterCoord(firstLocation.mapCoord);
+      await this._broadcastPlayerUpdate(firstLocation);
+
+      // Note that it is required that we do not have any away between
+      // sendStateTransfer() to 'gameStart' emission
+      this.broadcaster.sendStateTransfer(socket);
+
+      // Emit the gameStart event.
+      const startPack = {playerID: socket.playerData.playerID};
+      socket.emit('gameStart', startPack);
+      socket.stage = ConnectionStages.RUNNING;
+
+      // Player is now free to move around after the first location have been
+      // broadcasted and the game start event have been emitted.
+      socket.on('playerUpdate', (msg) => {
+        this.onPlayerUpdate(socket, PlayerSyncMessage.fromObject(msg));
+        // onPlayerUpdate is async, so returns immediately.
+      });
+
+      // Start accepting extension calls from the client.
+      socket.on('callC2sAPI', (msg, callback) => {
+        this._onCallC2sAPI(socket, msg, callback);
+      });
+    });
+  }
+
+  /**
+   * Called on callS2cAPI event.
+   */
+  _onCallC2sAPI(socket, msg, callback) {
+    const p = this.extMan.onC2sCalled(msg, socket.playerID);
+    p.then((msg) => {
+      if (typeof msg === 'object' && msg !== null && 'error' in msg && typeof msg.error === 'string') {
+        console.error(`c2s call error: ${msg.error}`);
+      }
+      callback(msg);
+    }, (reason) => {
+      console.error(`c2s call exception: ${reason}`);
+      // Full exception detailed NOT provided for security reason.
+      callback({'error': 'exception'});
     });
   }
 
