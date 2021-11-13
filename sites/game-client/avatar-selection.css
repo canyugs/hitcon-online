@@ -1,0 +1,125 @@
+#avatar-selection-div {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 100vw;
+  height: 100vh;
+  box-sizing: border-box;
+  z-index: 90; /* less than error-modal */
+  background-image: url('./avatar-bg.png');
+  background-repeat: no-repeat;
+  background-position: bottom;
+  background-size: contain;
+}
+
+@media(min-width: 1920px) {
+  #avatar-selection-div {
+    background-image: url('./avatar-bg-2x.png');
+  }
+}
+
+.avatar-selection-background {
+  width: 65%;
+  background: #1F344B 0% 0% no-repeat padding-box;
+  border-radius: 47px;
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  padding: 30px 0;
+}
+
+.avatar-selection-title {
+  margin-bottom: 2%;
+  text-align: center;
+  color: #fff;
+  font-size: 22px;
+}
+
+
+#avatar-selection-div #avatar-preview-container {
+  margin-bottom: 2%;
+  max-width: 75%;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.avatar-preview-container-big {
+  display: none;
+  padding: 20px 5px;
+}
+
+.avatar-preview-container-big-img {
+  width: 200px;
+}
+
+
+#avatar-selection-div .single-avatar-container {
+  background-color: #586375;
+  box-sizing: border-box;
+  border: 4px solid #fff;
+  border-radius: 15px;
+  padding: 15px 8px;
+  margin: 10px;
+}
+
+#avatar-selection-div .avatar-selected {
+  border: 4px solid #2569F2;
+  background-color: #BFC2C9;
+}
+
+#avatar-selection-div .avatar-confirm-button {
+  padding: 15px 60px;
+  background: #FFFFFF 0% 0% no-repeat padding-box;
+  box-shadow: 0px 3px 6px #00000029;
+  border-radius: 26px;
+  font-size: 22px;
+  font-weight: bolder;
+}
+
+.avatar-display-name {
+  margin-bottom: 5%;
+  color: #fff;
+  font-size: 22px;
+}
+
+.avatar-display-name-text {
+  margin-left: 17px;
+  background: #FFFFFF 0% 0% no-repeat padding-box;
+  border-radius: 7px;
+  height: 52px;
+}
+
+.avatar-display-name-desc {
+  margin-left: 25px;
+  padding: 5px;
+  background-color: #45536D;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  box-sizing: border-box;
+  width: 26px;
+  height: 26px;
+}
+
+.tooltip {
+  position: relative;
+}
+
+.tooltip-text {
+  visibility: hidden;
+  position: absolute;
+  left: 40px;
+  top: 15px;
+  min-width: max-content;
+  height: max-content;
+  padding: 10px;
+  background: #FFFFFFE3 0% 0% no-repeat padding-box;
+  box-shadow: 0px 3px 6px #00000029;
+  border-radius: 8px;
+  text-align: left;
+  line-height: 25px;
+  font-size: 11px;
+  color: #000;
+}
+
+.tooltip:hover .tooltip-text {
+  visibility: visible;
+}
