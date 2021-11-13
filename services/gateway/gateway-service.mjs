@@ -10,6 +10,14 @@ const AsyncLock = require('async-lock');
 import {MapCoord} from '../../common/maplib/map.mjs';
 import {PlayerSyncMessage} from '../../common/gamelib/player.mjs';
 
+const ConnectionStages = Object.freeze({
+  UNAUTH: Symbol(1),
+  AUTHED: Symbol(2),
+  REGED: Symbol(3),
+  RUNNING: Symbol(4),
+  DISCONNECTED: Symbol(5),
+});
+
 /**
  * This class handles the connections from the client and does the most
  * processing required to service the client.
@@ -121,7 +129,28 @@ class GatewayService {
   addServer(server) {
     this.servers.push(server);
     server.on('connection', (socket) => {
+      // We listen to the disconnect event here at the earliest point so that
+      // onDisconnect() is always fired no matter when the connection is
+      // dropped.
+      socket.on('disconnect', (reason) => {
+        this.onDisconnect(socket, reason);
+        // onDisconnect is async, so returns immediately.
+      });
+
+      // Acquire this lock if you need to move the player or during connection/
+      // disconnection.
+      socket.moveLock = new AsyncLock();
+      socket.stage = ConnectionStages.UNAUTH;
+
       socket.on('authenticate', (msg) => {
+        // Note: This method MUST remain non-async so that there's no
+        // await between checking socket.stage to setting socket.stage.
+        if (socket.stage !== ConnectionStages.UNAUTH) {
+          console.warn('Client tried to authenticate again: ', socket.stage, socket);
+          this.notifyKicked(socket, 'Double authentication');
+          return;
+        }
+
         if (!('token' in msg)) {
           socket.emit('unauthorized', {data: 'No token found'});
           return;
@@ -135,8 +164,12 @@ class GatewayService {
           socket.emit('unauthorized', {data: 'Token verification failed'});
           return;
         }
+
+        // Socket is authenticated.
         socket.emit('authenticated', {});
         socket.decoded_token = verified;
+        socket.stage = ConnectionStages.AUTHED;
+
         const kickIfConnected = (msg.kickIfConnected === true);
         this.addSocket(socket, kickIfConnected);
       });
@@ -171,6 +204,8 @@ class GatewayService {
    * Notify a player that the player have been kicked.
    */
   async notifyKicked(socket, reason) {
+    // Note: Do not await on any code that waits for moveLock.
+    // This method is free to be called by code that holds moveLock.
     socket.emit('kicked', reason);
     await new Promise((r) => setTimeout(r, 5000));
     socket.disconnect();
@@ -185,51 +220,52 @@ class GatewayService {
   async addSocket(socket, kickIfConnected) {
     // This socket is authenticated, we are good to handle more events from it.
 
-    const playerID = socket.decoded_token.sub;
-
-    // Let everyone know we've accepted this player.
-    let ret = await this.rpcHandler.registerPlayer(playerID);
-    if (!ret) {
-      // Player already connected.
-      if (!kickIfConnected) {
-        await this.notifyKicked(socket, 'Duplicate connection');
-        console.warn(`Player ${playerID} already connected and kickIfConnected=false`);
-        return;
-      }
-
-      // Try kick player.
-      await this.kickRemotePlayer(playerID);
-      // Try again in 0.5s.
-      await new Promise(resolve => setTimeout(resolve, 500));
-      ret = await this.rpcHandler.registerPlayer(playerID);
-      if (!ret) {
-        await this.notifyKicked(socket, 'Duplicate connection');
-        console.warn(`Player ${playerID} already connected but retry still failed`);
-        return;
-      }
-    }
-
-    // Acquire this lock if you need to move the player or during connection/
-    // disconnection.
-    socket.moveLock = new AsyncLock();
-
     // Note: We're locking the connection process while there's no code that
     // moves the player because we want ensure that the connection handler
     // (addSocket) does not run concurrent to the disconnection handler
     // (onDisconnect) and connection handler will always run til completion
     // before the disconnection handler have a chance to run.
     await socket.moveLock.acquire('move', async () => {
-      // Load the player data.
+      const playerID = socket.decoded_token.sub;
+
+      if (socket.stage !== ConnectionStages.AUTHED) {
+        console.error('Weird race condition on socket.stage in addSocket(): ', socket.stage, playerID, socket);
+        await this.notifyKicked(socket, 'Race in addSocket');
+        return;
+      }
+
+      // Let everyone know we've accepted this player.
+      let ret = await this.rpcHandler.registerPlayer(playerID);
+      if (!ret) {
+        // Player already connected.
+        if (!kickIfConnected) {
+          console.warn(`Player ${playerID} already connected and kickIfConnected=false`);
+          await this.notifyKicked(socket, 'Duplicate connection');
+          return;
+        }
+
+        // Try kick player.
+        await this.kickRemotePlayer(playerID);
+        // Try again in 0.5s.
+        await new Promise(resolve => setTimeout(resolve, 500));
+        ret = await this.rpcHandler.registerPlayer(playerID);
+        if (!ret) {
+          await this.notifyKicked(socket, 'Duplicate connection');
+          console.warn(`Player ${playerID} already connected but retry still failed`);
+          return;
+        }
+      }
+
+      // We're now registered.
+      socket.stage = ConnectionStages.REGED;
+
+      // Now we've acquired the ownership of this player, we're free to
+      // load the player data.
       socket.playerData = await this.dir.getPlayerData(playerID);
       socket.playerID = playerID;
 
       // Notify the client about any previous data.
       socket.emit('previousData', PlayerSyncMessage.fromObject(socket.playerData));
-
-      socket.on('disconnect', (reason) => {
-        this.onDisconnect(socket, reason);
-        // onDisconnect is async, so returns immediately.
-      });
 
       // Add it to our records.
       this.socks[playerID] = socket;
@@ -237,27 +273,10 @@ class GatewayService {
       if (socket.disconnected) {
         // Disconnected halfway.
         console.warn(`Player ${playerID} disconnected halfway through.`);
-        // Leave onDisconnect() to run in the background.
-        // Note: Do *NOT* await here, we might dead lock due to socket.moveLock.
-        this.onDisconnect(socket.reason);
+        // The rest would be handled by onDisconnect().
         return;
-      } else {
-        console.log(`Player ${playerID} connected.`);
       }
-
-      socket.on('callC2sAPI', (msg, callback) => {
-        const p = this.extMan.onC2sCalled(msg, socket.playerID);
-        p.then((msg) => {
-          if (typeof msg === 'object' && msg !== null && 'error' in msg && typeof msg.error === 'string') {
-            console.error(`c2s call error: ${msg.error}`);
-          }
-          callback(msg);
-        }, (reason) => {
-          console.error(`c2s call exception: ${reason}`);
-          // Full exception detailed NOT provided for security reason.
-          callback({'error': 'exception'});
-        });
-      });
+      console.log(`Player ${playerID} connected.`);
 
       // Initialize the player data.
       const initLoc = socket.playerData.mapCoord ?? this.gameMap.getRandomSpawnPoint();
@@ -268,6 +287,16 @@ class GatewayService {
 
       // notify the client to start the game after his/her avatar is selected
       socket.on('avatarSelect', async (msg) => {
+        // avatarSelect modifies the stage and moves the player.
+        await socket.moveLock.acquire('move', async () => {
+
+        if (socket.stage !== ConnectionStages.REGED) {
+          console.warn('Duplicate avatarSelect: ', playerID, socket.stage, socket);
+          // Kick player for race condition.
+          await this.notifyKicked(socket, 'Duplicated avatarSelect');
+          return;
+        }
+
         // initialize the appearance of player
         socket.playerData.displayName = msg.displayName;
         socket.playerData.displayChar = msg.displayChar;
@@ -290,12 +319,30 @@ class GatewayService {
         // Emit the gameStart event.
         const startPack = {playerID: socket.playerData.playerID};
         socket.emit('gameStart', startPack);
+        socket.stage = ConnectionStages.RUNNING;
 
         // Player is now free to move around after the first location have been
         // broadcasted and the game start event have been emitted.
         socket.on('playerUpdate', (msg) => {
           this.onPlayerUpdate(socket, PlayerSyncMessage.fromObject(msg));
           // onPlayerUpdate is async, so returns immediately.
+        });
+
+        // Start accepting extension calls from the client.
+        socket.on('callC2sAPI', (msg, callback) => {
+          const p = this.extMan.onC2sCalled(msg, socket.playerID);
+          p.then((msg) => {
+            if (typeof msg === 'object' && msg !== null && 'error' in msg && typeof msg.error === 'string') {
+              console.error(`c2s call error: ${msg.error}`);
+            }
+            callback(msg);
+          }, (reason) => {
+            console.error(`c2s call exception: ${reason}`);
+            // Full exception detailed NOT provided for security reason.
+            callback({'error': 'exception'});
+          });
+        });
+
         });
       });
     });
@@ -307,32 +354,47 @@ class GatewayService {
    * @param {reason} reason - The reason why we disconnected.
    */
   async onDisconnect(socket, reason) {
-    const playerID = socket.decoded_token.sub;
-    if (!(playerID in this.socks)) {
-      // This could happen in possible race condition between setting up
-      // on('disconnect') and when we check connection state again.
-      console.error(`Player ${playerID} is non-existent when disconnected.`);
-      return;
-    }
-
     await socket.moveLock.acquire('move', async () => {
-      if (this.socks[playerID] !== socket) {
-        // This should not happen.
-        console.error(`Player ${playerID}'s socket mismatch when disconnected.`);
+      if (socket.stage === ConnectionStages.DISCONNECTED) {
+        // Should not happen, nobody calls it twice.
+        console.error('Concurrent onDisconnect(): ', socket);
+      } else if (socket.stage === ConnectionStages.UNAUTH ||
+                 socket.stage === ConnectionStages.AUTHED) {
+        console.info('Player disconnected without joining the game: ', socket);
+        // Nothing needs to be done, they've not yet registered.
+      } else if (socket.stage === ConnectionStages.REGED ||
+                 socket.stage === ConnectionStages.RUNNING) {
+        const playerID = socket.decoded_token.sub;
+        if (!(playerID in this.socks)) {
+          // This should not happen.
+          console.error(`Player ${playerID} is non-existent when disconnected.`);
+        } else if (this.socks[playerID] !== socket) {
+          // This should not happen.
+          console.error(`Player ${playerID}'s socket mismatch when disconnected.`);
+        } else {
+          delete this.socks[playerID];
+        }
+
+        const lastLocation = PlayerSyncMessage.fromObject({playerID, removed: true});
+        await this._broadcastPlayerUpdate(lastLocation);
+
+        // If we're in REGED state, then we've not taken the coordinate
+        // and is still waiting for avatar select.
+        if (socket.stage === ConnectionStages.RUNNING) {
+          // release grid after disconnection
+          await this._leaveCoord(socket.playerData.mapCoord);
+        }
+
+        // Try to unregister the player.
+        await this.rpcHandler.unregisterPlayer(playerID);
+        // Note: After this point, the player is free to reconnect.
+
+        socket.stage = ConnectionStages.DISCONNECTED;
+
+        console.log(`Player ${playerID} disconnected`);
       } else {
-        // Take socket off first to avoid race condition in the await below.
-        delete this.socks[playerID];
+        console.error('Unknown stage for connection in onDisconnect: ', socket);
       }
-
-      const lastLocation = PlayerSyncMessage.fromObject({playerID, removed: true});
-      await this._broadcastPlayerUpdate(lastLocation);
-
-      // release grid after disconnection
-      await this._leaveCoord(socket.playerData.mapCoord);
-
-      // Try to unregister the player.
-      await this.rpcHandler.unregisterPlayer(playerID);
-      console.log(`Player ${playerID} disconnected`);
     });
   }
 
