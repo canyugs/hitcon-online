@@ -82,7 +82,9 @@ async function mainServer() {
 
   /* Initialize broadcaster and gateway service */
   await broadcaster.initialize();
-  await gatewayService.initialize(Object.keys(config.get('gatewayServers'))[0]);
+  // We're in single process mode, so we only have one gateway service and we
+  // can name it anything we want.
+  await gatewayService.initialize('TheGatewayService');
   authServer.run();
   for (const extName of extensionManager.listExtensions()) {
     await extensionManager.startExtensionService(extName);
