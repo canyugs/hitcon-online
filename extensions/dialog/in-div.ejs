@@ -1,36 +1,77 @@
 <style>
   .dialog {
-    background: rgb(245, 237, 237);
     display: flex;
     box-sizing: border-box;
-    flex-direction: column;
-    padding: 5px 10px;
-    border: gray solid 3px;
-    height: 100%;
+    border-radius: 40px;
+    background-color: #2D365C;
+    padding: 34px;
     width: 100%;
   }
-  #dialog-subject {
-    background: white;
-    width: 50%;
-    margin: 1vh 1vw 1vh 1vw;
-    border: gray solid 3px;
-    padding: 3px;
+
+  .dialog-img {
+    background-color: #FFFFFF;
+    border-radius: 22px;
+    box-sizing: border-box;
+    width: 210px;
+    height: 231px;
+    display: flex;
+    overflow: hidden;
   }
-  #dialog-msg {
-    background: white;
-    margin: 1vh 1vw 1vh 1vw;
-    border: gray solid 3px;
+
+  .dialog-img > img {
+    margin: auto;
+    display: block;
+  }
+
+  .dialog-left {
+    margin-right: 55px;
+  }
+
+  .dialog-right {
+    position: relative;
+    display: flex;
+    flex-grow: 1;
+    flex-direction: column;
+  }
+
+  .dialog-subject {
+    color: #FFF;
     padding: 3px;
-    text-overflow:ellipsis;
-    white-space:nowrap;
-    flex-grow: 10;
+    font-size: 24px;
+    text-align: center;
+    max-width: 231px;
+    margin-bottom: 0;
+  }
+
+  .dialog-msg {
+    flex-grow: 1;
+    box-sizing: border-box;
+    background: white;
+    border-radius: 22px;
+    padding: 23px;
+    max-height: 297px;
+    word-break: break-word;
   }
 
   #dialog-btn-container {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    margin-right: 1em;
+    margin-bottom: 2em;
     display: none;
     flex-direction: row;
     justify-content: right;
   }
+
+  #dialog-btn-container > button {
+    background: #384564 0% 0% no-repeat padding-box;
+    box-shadow: 0px 2px 5px #00000033;
+    border-radius: 40px;
+    color: #fff;
+    padding: 5px 15px;
+  }
+
   #dialog-btn-container.visible {
     display: flex;
   }
@@ -38,6 +79,7 @@
   .dialog-choice-entry {
     color: blue;
   }
+
   .dialog-choice-entry:hover {
     text-decoration: underline;
   }
@@ -45,6 +87,7 @@
   .button {
     margin-left: 5px;
   }
+
 </style>
 
 <div>
@@ -52,9 +95,16 @@
 </div>
 
 <div id="dialog-div" class="dialog">
-  <h3 id="dialog-subject"></h3>
-  <p id="dialog-msg"></p>
-  <div id="dialog-btn-container">
-    <!-- <button id="button">OK</button> -->
+  <div class="dialog-left">
+    <div class="dialog-img">
+      <img src="https://via.placeholder.com/137x186">
+    </div>
+    <h3 class="dialog-subject" id="dialog-subject"></h3>
+  </div>
+  <div class="dialog-right">
+    <div class="dialog-msg" id="dialog-msg"></div>
+    <div id="dialog-btn-container">
+      <!-- <button id="button">OK</button> -->
+    </div>
   </div>
 </div>
