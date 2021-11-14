@@ -108,6 +108,7 @@ class Player {
       if (this.mapCoord !== undefined && !msg.mapCoord.equalsTo(this.mapCoord)) {
         if (movingTime === 'client' || movingTime === 'both') this.lastMovingTimeClient = Date.now();
         if (movingTime === 'server' || movingTime === 'both') this.lastMovingTime = Date.now();
+        if (!['client', 'server', 'both'].includes(movingTime)) console.warn(`Invalid parameter \`movingTime\` when updating player, msg = ${msg}`);
       }
       this._previousMapCoord = (this.mapCoord ?? msg.mapCoord); // for smooth moving of the player
       this.mapCoord = msg.mapCoord;

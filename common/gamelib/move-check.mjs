@@ -59,8 +59,8 @@ function getPlayerMoveCooldown(oldPlayerData) {
  */
 function _speedCheck(oldPlayerData, updateMessage, clientSide) {
   // check time
-  const lmt = (clientSide) ? oldPlayerData.lastMovingTimeClient : oldPlayerData.lastMovingTime;
-  if (Date.now() < lmt + PLAYER_MOVE_TIME_INTERVAL) {
+  const lastMovingTime = (clientSide) ? oldPlayerData.lastMovingTimeClient : oldPlayerData.lastMovingTime;
+  if (Date.now() < lastMovingTime + PLAYER_MOVE_TIME_INTERVAL) {
     return false;
   }
 
