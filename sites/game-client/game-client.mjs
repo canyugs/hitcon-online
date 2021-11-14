@@ -36,6 +36,7 @@ class GameClient {
     // This function is called if server disconnects us or if any fatal
     // error occurs.
     this.disconnectCallback = undefined;
+    this.currentPlayerDisplayName = undefined;
   }
 
   /**
@@ -126,6 +127,11 @@ class GameClient {
     this.gameStarted = true;
     this.gameState.registerOnPlayerUpdate((msg) => {
       if (msg.playerID === this.playerInfo.playerID) {
+        if (typeof msg.displayName === 'string' && msg.displayName !== this.currentPlayerDisplayName) {
+          // Filter XSS and update
+          this.currentPlayerDisplayName = msg.displayName;
+          document.getElementById('user-name').innerHTML = filterXSS(msg.displayName);
+        }
         this.extMan.notifySelfPlayerUpdate(msg);
       }
     });
