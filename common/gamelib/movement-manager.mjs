@@ -187,7 +187,16 @@ class MovementManagerClient {
     if (!checkPlayerMove(player, msg, this.gameClient.gameMap, true)) {
       return;
     }
+
+    this.sendPlayerUpdateInternal(msg);
+  }
+
+  /**
+   * Send a message and update clientTime.
+   */
+  sendPlayerUpdateInternal(msg) {
     msg.clientTime = this.clientTime++;
+    const player = this.gameClient.playerInfo;
     player.updateFromMessage(msg, 'client'); // Client-side prediction. If error occurs, this update will be reverted in this.updateFromServer()
     this.socket.emit('playerUpdate', msg);
   }
