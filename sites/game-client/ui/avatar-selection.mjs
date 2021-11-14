@@ -91,13 +91,17 @@ class AvatarSelectionPage {
    * from previous session.
    */
   setDisplayCharAndNameOnScreen(displayChar, displayName) {
-    if (this.avatarDOM.has(displayChar)) {
+    if (typeof displayChar === 'string' && this.avatarDOM.has(displayChar)) {
       this.avatarDOM.get(displayChar).click();
     } else {
       console.warn('Cannot find displayChar in setDisplayCharAndNameOnScreen: ', displayChar);
     }
 
-    this.DOM.querySelector('input[name="display-name"]').value = displayName;
+    if (typeof displayName === 'string') {
+      this.DOM.querySelector('input[name="display-name"]').value = displayName;
+    } else {
+      console.warn('Invalid displayName in setDisplayCharAndNameOnScreen: ', displayName);
+    }
   }
 
   /**
