@@ -255,6 +255,7 @@ class GameMap {
    * @return {String} cell - The raw content of the cell. '' if any error.
    */
   getCell(coord, layer) {
+    if (!coord) return;
     return this._maps.get(coord.mapName).getCell(coord, layer);
   }
 
