@@ -40,6 +40,10 @@ class AvatarSelectionPage {
     for (const charName of Object.keys(this.graphicAsset.config.characters)) {
       // get image
       const renderInfo = this.graphicAsset.getCharacter(charName, 'D');
+      if (this.graphicAsset.config.characters[charName].isNPC === true) {
+        // We don't allow selecting NPC image.
+        continue;
+      }
       tempCtx.drawImage(
           renderInfo.image,
           renderInfo.srcX,

@@ -273,6 +273,10 @@ class PlayerSyncMessage {
       console.warn('Got invalid displayChar: ', this.displayChar, this);
       return false;
     }
+    if (graphicAsset.isCharNPC(this.displayChar)) {
+      console.warn('Got NPC in PlayerSyncMessage: ', this.displayChar, this);
+      return false;
+    }
     return true;
   }
 
