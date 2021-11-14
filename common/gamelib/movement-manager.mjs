@@ -111,9 +111,13 @@ class MovementManagerClient {
    * Called when an update message is not successful.
    */
   _setErrorCooldown() {
+    if (this._errorCooldownTimer !== undefined) {
+      clearTimeout(this._errorCooldownTimer);
+    }
     this.errorCooldown = true;
-    setTimeout(() => {
+    this._errorCooldownTimer = setTimeout(() => {
       this.errorCooldown = false;
+      this._errorCooldownTimer = undefined;
     }, ERROR_COOLDOWN_MS);
   }
 
