@@ -53,17 +53,18 @@ class Client {
         const display_name = client.helper.gameClient.playerInfo._displayName;
         const message_to_id = document.getElementById('message_to');
         const chat_message_id = document.getElementById('chat_message');
-
+        const message = chat_message_id.value;
+        chat_message_id.value = '';
+        
         // Check if the message is empty exclusive of whitespace
-        if (chat_message_id.value.trim().length === 0) {
-          chat_message_id.value = '';
+        if (message.trim().length === 0) {
           return;
         }
 
-        const msg_info = {'msg_from_name': display_name, 'msg': chat_message_id.value};
+        const msg_info = {'msg_from_name': display_name, 'msg': message};
         
-        if (chat_message_id.value.substring(0, 2) === '!/') {
-          client.handleCommand(chat_message_id.value.trim());
+        if (message.substring(0, 2) === '!/') {
+          client.handleCommand(message.trim());
           // TODO(zeze-zeze): Use drop down menu to replace it
         } else if (message_to_id.value.toLowerCase() == 'nearby') {
           await client.helper.callC2sAPI('chat', 'nearbyMessage', this.helper.defaultTimeout, msg_info);
@@ -78,7 +79,6 @@ class Client {
         } else {
           await client.helper.callC2sAPI('chat', 'broadcastMessage', this.helper.defaultTimeout, msg_info);
         }
-        chat_message_id.value = '';
       }
     };
   }
