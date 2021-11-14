@@ -47,12 +47,26 @@ class ContextMenu {
    * @param {Event} e event
    */
   elementOnContextMenu(e) {
+    // Search for the node that contains the attrbute.
+    // The event might be fired on a child element so we need to travel
+    // upwards.
+    let dom = e.target;
+    while (dom) {
+      if (typeof $(dom).attr('data-player-context-menu') === 'string') break;
+      dom = dom.parentElement;
+    }
+    if (!dom) {
+      console.warn('elementOnContextMenu fired on invalid node: ', e.target);
+      return;
+    }
+    const playerID = $(dom).attr('data-player-context-menu');
+
     // Check if the player exists.
-    if (!this.gameState.players.has($(e.target).attr('data-player-context-menu'))) {
+    if (!this.gameState.players.has(playerID)) {
       return;
     }
 
-    this.focusedPlayer = this.gameState.getPlayer($(e.target).attr('data-player-context-menu'));
+    this.focusedPlayer = this.gameState.getPlayer(playerID);
 
     e.preventDefault();
     this.onContextMenu(e);
