@@ -1,16 +1,66 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
-import {checkPlayerMove} from '/static/common/gamelib/move-check.mjs';
-import {PlayerSyncMessage} from '/static/common/gamelib/player.mjs';
-import {MapCoord} from '/static/common/maplib/map.mjs';
+import {checkPlayerMove, getPlayerMoveCooldown} from './move-check.mjs';
+import {PlayerSyncMessage} from './player.mjs';
+import {MapCoord} from '../maplib/map.mjs';
 
 const ERROR_COOLDOWN_MS = 300;
 
 /**
+ *TODO: jsdoc
+ */
+class MovementManagerServer {
+  /**
+   * TODO: jsdoc
+   */
+  constructor() {
+    this.playerMovingTimer = new Map();
+  }
+
+  /**
+   * TODO: jsdoc
+   * @param {GateWayService} gs
+   * @param {Socket} socket
+   * @param {PlayerSyncMessage} updateMsg
+   * @param {Function} failOnPlayerUpdate
+   */
+  async handlePlayerMove(gs, socket, updateMsg, failOnPlayerUpdate) {
+    const player = socket.playerData;
+
+    // If the update message comes too early, handles it later.
+    if (getPlayerMoveCooldown(player) > 0) {
+      // We reserve only one moving request per player.
+      if (this.playerMovingTimer.has(player.playerID)) {
+        clearTimeout(this.playerMovingTimer.get(player.playerID));
+      }
+      // Handle the moving request later.
+      setTimeout((gs, socket, updateMsg, failOnPlayerUpdate) => {
+        this.handlePlayerMove(gs, socket, updateMsg, failOnPlayerUpdate);
+      }, Math.max(getPlayerMoveCooldown(player), 0), gs, socket, updateMsg, failOnPlayerUpdate);
+      return;
+    }
+
+    // clean up the timer
+    this.playerMovingTimer.delete(player.playerID);
+
+    if (!checkPlayerMove(player, updateMsg, gs.gameMap)) {
+      failOnPlayerUpdate();
+      return;
+    }
+
+    if (!(await gs._teleportPlayerInternal(socket, updateMsg, false))) {
+      failOnPlayerUpdate();
+      return;
+    }
+  }
+}
+
+
+/**
  * TODO: jsdoc
  */
-class MovementManager {
+class MovementManagerClient {
   /**
    * Construct a movement manager
    * @constructor
@@ -80,7 +130,7 @@ class MovementManager {
 
     const player = this.gameClient.playerInfo;
 
-    // don't care about other player's movement
+    // right here we only care about main player's movement
     if (msg.playerID !== player.playerID) {
       return 'continue';
     }
@@ -90,9 +140,9 @@ class MovementManager {
       return 'abort';
     }
 
-    this.serverTime = msg.clientTime + 1;
+    this.serverTime = (msg.clientTime ?? (this.clientTime - 1)) + 1;
 
-    // abort if not successful
+    // ignore this message if it is a notification about previous success
     if (msg.updateSuccess) {
       return 'abort';
     }
@@ -139,4 +189,7 @@ class MovementManager {
   }
 }
 
-export default MovementManager;
+export {
+  MovementManagerServer,
+  MovementManagerClient,
+};
