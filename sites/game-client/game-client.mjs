@@ -19,7 +19,7 @@ class GameClient {
    * @param {ClientExtensionManager} extMan
    * @constructor
    */
-  constructor(socket, gameMap, gameState, mapRenderer, inputManager, movementManager, extMan, mainUI, avatarSelectionPage) {
+  constructor(socket, gameMap, gameState, mapRenderer, inputManager, movementManager, extMan, mainUI, avatarSelectionPage, loadingScreenPage) {
     this.socket = socket;
     this.gameMap = gameMap;
     this.gameState = gameState;
@@ -29,6 +29,7 @@ class GameClient {
     this.extMan = extMan;
     this.mainUI = mainUI;
     this.avatarSelectionPage = avatarSelectionPage;
+    this.loadingScreenPage = loadingScreenPage;
     this.gameStarted = false;
     // playerInfo stores information regarding the current player.
     this.playerInfo = undefined;
@@ -152,7 +153,7 @@ class GameClient {
     this.avatarSelectionPage.setDisplayCharAndNameOnScreen(msg.displayChar, msg.displayName);
 
     // Show loading screen.
-    $('.loading-div').addClass('loading-div--inactive');
+    this.loadingScreenPage.close();
 
     window.dispatchEvent(new CustomEvent(
       'previousData', {
