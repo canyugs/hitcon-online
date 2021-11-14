@@ -44,6 +44,7 @@ class AvatarSelectionPage {
         // We don't allow selecting NPC image.
         continue;
       }
+      tempCtx.clearRect(0, 0, MAP_CELL_SIZE, MAP_CELL_SIZE);
       tempCtx.drawImage(
           renderInfo.image,
           renderInfo.srcX,
