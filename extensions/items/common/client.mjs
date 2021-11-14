@@ -22,8 +22,8 @@ class ItemModal extends Modal {
   }
 
   onPostShow() {
-    this.setSize('80vw', '80vh');
-    this.setPosition('10vw', '10vh');
+    this.setSize('40vw', '70vh');
+    this.setPosition('25vw', '10vh');
     this.client.resetItemModal();
   }
 }

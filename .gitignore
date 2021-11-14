@@ -24,3 +24,5 @@ run/small_data
 
 # nginx config
 /run/nginx.conf
+/run/haproxy.cfg
+

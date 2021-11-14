@@ -68,9 +68,22 @@ async function main() {
     const flushall = promisify(redisClient.flushall).bind(redisClient);
     await flushall();
 
-    const ext_addresses = config.get('ext.standalone');
-    for (const ext in ext_addresses) {
-      await hmset('ServiceIndex', 'ext_' + ext, ext_addresses[ext]);
+    const extEnabled = config.get('ext.enabled');
+    const extAddresses = config.get('ext.standalone');
+    let standaloneAutoPort, standaloneAutoAddr;
+    try {
+      standaloneAutoPort = config.get('ext.standaloneAuto.port');
+      standaloneAutoAddr = config.get('ext.standaloneAuto.addr');
+    } catch (e) {
+      // This is expected.
+    }
+    for (const ext of extEnabled) {
+      let curAddr = extAddresses[ext];
+      if (typeof curAddr !== 'string' && typeof standaloneAutoAddr === 'string') {
+        curAddr = `${standaloneAutoAddr}:${standaloneAutoPort}`;
+        standaloneAutoPort++;
+      }
+      await hmset('ServiceIndex', 'ext_' + ext, curAddr);
     }
 
     const servers = config.get('gatewayServers');
@@ -116,8 +129,8 @@ async function main() {
 
   /* Start standalone extension services */
   const extServices = {};
-  const enabledExtStandalone = config.get('ext.standalone');
-  for (const ext in enabledExtStandalone) {
+  const enabledExtStandalone = config.get('ext.enabled');
+  for (const ext of enabledExtStandalone) {
     extServices[ext] = fork('./services/standalone/standalone-extension.mjs', ['--ext', ext], {cwd: '.', stdio: 'pipe'});
     extServices[ext].stdout.pipe(prepender(`[Extension ${ext}] `)).pipe(process.stdout);
     extServices[ext].stderr.pipe(prepender(`[Extension ${ext}] `)).pipe(process.stderr);
@@ -138,7 +151,7 @@ async function main() {
   await Promise.all(standalonePromises);
 
   // Notify that the extension can start.
-  for (const ext in enabledExtStandalone) {
+  for (const ext of enabledExtStandalone) {
     extServices[ext].send('start');
   }
 
@@ -156,7 +169,7 @@ async function main() {
       } catch {}
     }
 
-    for (const ext in enabledExtStandalone) {
+    for (const ext of enabledExtStandalone) {
       try {
         extServices[ext].kill();
       } catch {}
@@ -180,7 +193,7 @@ async function main() {
       handler(serverName + ' service closed.', err);
     });
   }
-  for (const ext in enabledExtStandalone) {
+  for (const ext of enabledExtStandalone) {
     extServices[ext].on('error', (err) => {
       handler(ext + ' service error.', err);
     });

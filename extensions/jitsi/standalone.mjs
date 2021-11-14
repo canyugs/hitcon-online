@@ -34,6 +34,7 @@ class Standalone {
    */
   constructor(helper) {
     this.helper = helper;
+    this.meetingName2playerId2ParticipantIdMapping = {};
     this.hmacSecret = getConfigWithDefault('jitsi.hmacSecret', undefined);
     if (typeof this.hmacSecret !== 'string' || this.hmacSecret.length === 0) {
       this.hmacSecret = undefined;
@@ -48,6 +49,21 @@ class Standalone {
    * Initializes the extension.
    */
   async initialize() {
+    // Notify to remove the recently quit user.
+    this.helper.registerOnPlayerUpdate((msg) => {
+      if (!msg?.removed) {
+        return;
+      }
+
+      for (const meetingName in this.meetingName2playerId2ParticipantIdMapping) {
+        if (Object.keys(this.meetingName2playerId2ParticipantIdMapping[meetingName]).includes(msg.playerID)) {
+          delete this.meetingName2playerId2ParticipantIdMapping[meetingName][msg.playerID];
+          for (const playerID in this.meetingName2playerId2ParticipantIdMapping[meetingName]) {
+            this.helper.callS2cAPI(playerID, 'jitsi', 'updateIdMappingAndRemoveDanglingUser', 5000, this.meetingName2playerId2ParticipantIdMapping[meetingName]);
+          }
+        }
+      }
+    });
   }
 
   /**
@@ -79,12 +95,36 @@ class Standalone {
     if (typeof this.hmacSecret === 'string') {
       // HMAC for meetingName is enabled.
       const c = crypto.createHmac('sha256', this.hmacSecret);
-      c.update(meetingName)
+      c.update(meetingName);
       meetingName = c.digest().toString('hex');
     }
     meetingName = this.prefix + meetingName;
     return {'pass': 'Unimplemented', 'meetingName': meetingName};
   }
+
+  /**
+   * Update the mapping for the player ID and the Jitsi participant ID.
+   * @param {Player} player - player information
+   * @param {object} args - participant id and  meeting name
+   */
+   async c2s_updateIdMapping(player, args) {
+    const {participantId, meetingName} = args;
+    if (!(meetingName in this.meetingName2playerId2ParticipantIdMapping)) {
+      this.meetingName2playerId2ParticipantIdMapping[meetingName] = {};
+    }
+
+    if (participantId) {
+      this.meetingName2playerId2ParticipantIdMapping[meetingName][player.playerID] = participantId;
+    } else if (player.playerID in this.meetingName2playerId2ParticipantIdMapping[meetingName]) {
+      delete this.meetingName2playerId2ParticipantIdMapping[meetingName][player.playerID];
+    }
+
+    for (const playerID in this.meetingName2playerId2ParticipantIdMapping[meetingName]) {
+      this.helper.callS2cAPI(playerID, 'jitsi', 'updateIdMappingAndRemoveDanglingUser', 5000, this.meetingName2playerId2ParticipantIdMapping[meetingName]);
+    }
+
+    return true;
+   }
 }
 
 export default Standalone;

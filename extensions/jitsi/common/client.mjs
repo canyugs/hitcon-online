@@ -36,24 +36,36 @@ class JitsiFullscreenOverlay extends Overlay {
    * Create the overlay, and add an event listener to put the Jitsi video into fullscreen when clicked.
    * @constructor
    * @param mainUI - main UI
+   * @param jitsiObj - The Jitsi object.
    */
-  constructor(mainUI) {
+  constructor(mainUI, jitsiObj) {
     const dom = document.getElementById('jitsi-fullscreen-overlay');
     super(mainUI, dom);
     this.hide();
     this.hasFullscreen = false;
+    this.jitsiObj = jitsiObj;
 
     const self = this;
     $('#jitsi-remote-container').on('click', '.jitsi-user-container', function() {
       if (self.hasFullscreen) return;
       self.hasFullscreen = true;
-      const focusedParticipantId = $(this).attr('data-id');
-      $(this).find('video').eq(0).appendTo('#jitsi-fullscreen-overlay');
-      self.show(OverlayPosition.LEFT_BOTTOM);
+      const focusedParticipantId = $(this).attr('data-id'); // get participant id
+      $(this).find('video').eq(0).appendTo('#jitsi-fullscreen-overlay'); // move the video element to #jitsi-fullscreen-overlay
+      self.show(OverlayPosition.LEFT_BOTTOM); // show the overlay
+
+      // try to select the participant, so that the video quality would be better.
+      try {
+        self.jitsiObj.room.selectParticipant(focusedParticipantId);
+      } catch (e) {
+        console.error("Failed to select the participant", e);
+      }
+
       mainUI.enterFocusMode(self, OverlayPosition.LEFT_BOTTOM, () => {
+        // move the video element back to where it should be
         $('#jitsi-fullscreen-overlay > video').appendTo(`#jitsi-${focusedParticipantId}-container > .jitsi-user-video`);
-        self.hide();
+        self.hide();// hide the overlay
         self.hasFullscreen = false;
+        self.jitsiObj.room.selectParticipant(null); // clear participant selection.
       });
     });
   }
@@ -73,7 +85,6 @@ class Client {
    */
   constructor(helper) {
     this.helper = helper;
-    this.jitsiObj = undefined;
     this.currentMeeting = undefined;
 
     this.isMicrophoneOn = false;
@@ -82,13 +93,19 @@ class Client {
 
     this.audioDevice = null;
     this.videoDevice = null;
+
+    this.jitsiObj = new JitsiHandler(
+      this.getDevices,
+      this.setSettingDeviceOptions.bind(this),
+      this.broadcastParticipantId.bind(this)
+    );
   }
 
   async gameStart() {
     this.container = new JitsiContainer(this.helper.mainUI);
     this.container.hide();
 
-    this.overlay = new JitsiFullscreenOverlay(this.helper.mainUI);
+    this.overlay = new JitsiFullscreenOverlay(this.helper.mainUI, this.jitsiObj);
 
     // Microphone button
     this.microphoneButton = new ToolbarButton('/static/extensions/jitsi/common/icons/microphone-off.svg', false);
@@ -193,15 +210,18 @@ class Client {
    * Start the Jitsi Meeeting
    */
   async startMeeting(meetingName, realMeetingName, password) {
-    // if this.jitsiObj is set, the previous meeting has not yet ended.
+    // if this.jitsiObj.isInMeeting is set, the previous meeting has not yet ended.
     // TODO: Probably use Promise instead.
     // We may need to handle the case that `startMeeting` is called multiple times.
-    while (this.jitsiObj) {
+    while (this.jitsiObj.isInMeeting) {
       await new Promise(r => setTimeout(r, 1000));
     }
 
-    this.jitsiObj = new JitsiHandler(realMeetingName, password,
-      this.helper.gameClient.playerInfo.displayName, this.getDevices, this.setSettingDeviceOptions.bind(this));
+    this.jitsiObj.connect(
+      realMeetingName,
+      password,
+      this.helper.gameClient.playerInfo.displayName
+    );
 
     this.jitsiObj.isMuted.audio = !this.isMicrophoneOn;
     this.jitsiObj.isMuted.video = !this.isCameraOn;
@@ -217,7 +237,6 @@ class Client {
     if (this.jitsiObj) {
       this.container.hide();
       await this.jitsiObj.unload();
-      this.jitsiObj = undefined;
       this.currentMeeting = undefined;
 
       // Set screen sharing to false.
@@ -232,7 +251,9 @@ class Client {
    */
   async updateMeeting(meetingName) {
     if (typeof meetingName !== 'string') {
-      this.stopMeeting();
+      if (this.jitsiObj.isInMeeting) {
+        await this.stopMeeting();
+      }
       return;
     }
 
@@ -289,12 +310,37 @@ class Client {
   }
 
   /**
-   *
+   * Update the list of dropdown options. This is called when Jitsi detect new input devices.
+   * @param {string} deviceType - The type of device. "audioinput", "videoinput" or "audiooutput"
+   * @param {Array} deviceList - The list of devices.
+   * @param {string} currentDevice - The selected option.
    */
   setSettingDeviceOptions(deviceType, deviceList, currentDevice) {
     if (this.settingTab) {
       this.settingTab.updateDropdownOptions('device', deviceType, deviceList, currentDevice);
     }
+  }
+
+  /**
+   * Notify the standalone of the player's participant ID on Jitsi.
+   * @param participantId The player's participant ID on Jitsi.
+   */
+  async broadcastParticipantId(participantId) {
+    return await this.helper.callC2sAPI(null, 'updateIdMapping', this.helper.defaultTimeout, {
+      'participantId': participantId,
+      'meetingName': this.currentMeeting
+    });
+  }
+
+  /**
+   * Notify the Jitsi Handler to update id mapping and remove the dangling user.
+   * @param playerIdToParticipantIdMapping The player ID to Participant ID mapping.
+   */
+  async s2c_updateIdMappingAndRemoveDanglingUser(playerIdToParticipantIdMapping) {
+    if (this.jitsiObj) {
+      this.jitsiObj.updateIdMappingAndRemoveDanglingUser(playerIdToParticipantIdMapping);
+    }
+    return true;
   }
 };
 

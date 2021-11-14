@@ -23,6 +23,7 @@ import SingleProcessRPCDirectory from
 import MultiProcessRPCDirectory from
   '../../common/rpc-directory/multi-process-RPC-directory.mjs';
 import AuthServer from '../auth/AuthServer.mjs';
+import AssetServer from '../assets/asset-server.mjs';
 
 /* Import all utility classes */
 import GameMap from '../../common/maplib/map.mjs';
@@ -100,6 +101,12 @@ async function mainServer() {
   const extensionManager = new ExtensionManager(rpcDirectory, broadcaster, gameMap, gameState);
   const gatewayService = new GatewayService(rpcDirectory, gameMap, authServer,
     broadcaster, io, extensionManager);
+  const assetServer = new AssetServer(app, extensionManager, null);
+
+  /* Initialize static asset server */
+  await assetServer.initialize();
+  /* Start static asset server */
+  assetServer.run();
 
   /* Initialize broadcaster and gateway service */
   const serviceName = ('service-name' in argv) ? argv['service-name'] : Object.keys(config.get('gatewayServers'))[0];
