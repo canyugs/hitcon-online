@@ -33,35 +33,18 @@ class AvatarSelectionPage {
    */
   renderAvatars() {
     const container = this.DOM.querySelector('#avatar-preview-container');
-    const tempCanvas = document.createElement('canvas');
-    const tempCtx = tempCanvas.getContext('2d');
-    tempCanvas.width = tempCanvas.height = MAP_CELL_SIZE;
 
     for (const charName of Object.keys(this.graphicAsset.config.characters)) {
-      // get image
-      const renderInfo = this.graphicAsset.getCharacter(charName, 'D');
       if (this.graphicAsset.config.characters[charName].isNPC === true) {
         // We don't allow selecting NPC image.
         continue;
       }
-      tempCtx.clearRect(0, 0, MAP_CELL_SIZE, MAP_CELL_SIZE);
-      tempCtx.drawImage(
-          renderInfo.image,
-          renderInfo.srcX,
-          renderInfo.srcY,
-          renderInfo.srcWidth,
-          renderInfo.srcHeight,
-          0,
-          0,
-          MAP_CELL_SIZE,
-          MAP_CELL_SIZE,
-      );
 
       // create DOM element
       const newAvatar = document.createElement('div');
       newAvatar.classList.add('single-avatar-container', 'container-center', 'hoverable');
       const img = document.createElement('img');
-      img.src = tempCanvas.toDataURL();
+      img.src = this.graphicAsset.characterToImageURL(charName, 'D', MAP_CELL_SIZE, MAP_CELL_SIZE);
       newAvatar.appendChild(img);
       newAvatar.addEventListener('click', this.setSelectedAvatar.bind(this, charName, newAvatar));
       this.avatarDOM.set(charName, newAvatar);
