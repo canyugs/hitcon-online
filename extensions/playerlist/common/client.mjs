@@ -1,6 +1,7 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
+import {MAP_CELL_SIZE} from '/static/sites/game-client/map-renderer.mjs';
 import UtilPanelTab from '/static/sites/game-client/ui/utilpanel/utilpanel-tab.mjs';
 import OverlayPosition from '/static/sites/game-client/ui/overlay-position.mjs';
 
@@ -122,6 +123,12 @@ class Client {
       cached.displayName = p.displayName;
       modified = true;
     }
+    if (cached.displayChar !== p.displayChar) {
+      const imgURL = this.helper.gameMap.graphicAsset.characterToImageURL(
+        p.displayChar, 'D', MAP_CELL_SIZE, MAP_CELL_SIZE);
+      cached.dom.querySelector('.player-picture').setAttribute('src', imgURL);
+      modified = true;
+    }
     return modified;
   }
 
@@ -139,7 +146,10 @@ class Client {
     cached.displayName = p.displayName;
 
     cached.dom.querySelector('.player-role').textContent = '';
-    cached.dom.querySelector('.player-picture').setAttribute('src', 'https://via.placeholder.com/56x61');
+    const imgURL = this.helper.gameMap.graphicAsset.characterToImageURL(
+      p.displayChar, 'D', MAP_CELL_SIZE, MAP_CELL_SIZE);
+    cached.dom.querySelector('.player-picture').setAttribute('src', imgURL);
+    cached.displayChar = p.displayChar;
 
     document.getElementById('playerlist').appendChild(cached.dom);
     this.doms.set(p.playerID, cached);
