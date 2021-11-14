@@ -29,6 +29,7 @@ import AssetServer from '../assets/asset-server.mjs';
 import GameMap from '../../common/maplib/map.mjs';
 import GraphicAsset from '../../common/maplib/graphic-asset.mjs';
 import GameState from '../../common/gamelib/game-state.mjs';
+import {MovementManagerServer} from '../../common/gamelib/movement-manager.mjs';
 import ExtensionManager from '../../common/extlib/extension-manager.mjs';
 import {getRunPath, getConfigPath} from '../../common/path-util/path.mjs';
 
@@ -94,13 +95,14 @@ async function mainServer() {
   const graphicAsset = new GraphicAsset(assetJSON);
   const gameMap = new GameMap(graphicAsset, mapJSON);
   const gameState = new GameState(gameMap);
+  const movementManager = new MovementManagerServer();
 
   /* Create all services */
   const authServer = new AuthServer(app);
   const broadcaster = new AllAreaBroadcaster(rpcDirectory, gameMap, gameState);
   const extensionManager = new ExtensionManager(rpcDirectory, broadcaster, gameMap, gameState);
   const gatewayService = new GatewayService(rpcDirectory, gameMap, authServer,
-    broadcaster, io, extensionManager);
+    broadcaster, io, extensionManager, movementManager);
   const assetServer = new AssetServer(app, extensionManager, null);
 
   /* Initialize static asset server */

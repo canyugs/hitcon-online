@@ -44,6 +44,15 @@ function checkPlayerMoveOnlySpeed(oldPlayerData, updateMessage, clientSide=false
 /**
  * TODO
  * @param {Player} oldPlayerData - TODO
+ * @return {Number} Remaining cooldown in millisecond.
+ */
+function getPlayerMoveCooldown(oldPlayerData) {
+  return oldPlayerData.lastMovingTime + PLAYER_MOVE_TIME_INTERVAL - Date.now();
+}
+
+/**
+ * TODO
+ * @param {Player} oldPlayerData - TODO
  * @param {PlayerSyncMessage} updateMessage - TODO
  * @param {Boolean} clientSide - `true` if speed check uses Player.lastMovingTimeClient.
  * @return {Boolean}
@@ -97,6 +106,7 @@ export {
   checkPlayerMove,
   checkPlayerMoveOnlyBorderAndWall,
   checkPlayerMoveOnlySpeed,
+  getPlayerMoveCooldown,
   PLAYER_MOVE_TIME_INTERVAL,
   PLAYER_MOVE_DISTANCE_LIMIT,
 };

@@ -9,7 +9,6 @@ const AsyncLock = require('async-lock');
 
 import {MapCoord} from '../../common/maplib/map.mjs';
 import {PlayerSyncMessage} from '../../common/gamelib/player.mjs';
-import {checkPlayerMove} from '../../common/gamelib/move-check.mjs';
 
 /**
  * This class handles the connections from the client and does the most
@@ -26,15 +25,17 @@ class GatewayService {
    * @param {AuthServer} authServer - Auth server for verifying the token.
    * @param {io} io - Socket.io object.
    * @param {ExtensionManager} extMan - Extension Manager object.
+   * @param {MovementManagerServer} movementManager - Handles PlayerSyncMessage.
    * and player locations.
    */
-  constructor(dir, gameMap, authServer, broadcaster, io, extMan) {
+  constructor(dir, gameMap, authServer, broadcaster, io, extMan, movementManager) {
     this.dir = dir;
     this.gameMap = gameMap;
     this.authServer = authServer;
     this.broadcaster = broadcaster;
     this.io = io;
     this.extMan = extMan;
+    this.movementManager = movementManager;
     // A map that tracks the current connected clients.
     // key is the player ID. value is the socket.
     this.socks = {};
@@ -343,11 +344,12 @@ class GatewayService {
    */
   async onPlayerUpdate(socket, updateMsg) {
     updateMsg.updateSuccess = true;
-    const failOnPlayerUpdate = (socket) => {
+    const failOnPlayerUpdate = ((socket, updateMsg) => {
       const msg = PlayerSyncMessage.fromObject(socket.playerData);
       msg.updateSuccess = false;
+      msg.clientTime = updateMsg.clientTime;
       socket.emit('playerUpdate', msg);
-    };
+    }).bind(this, socket, updateMsg);
 
     if (socket.playerID !== updateMsg.playerID) {
       console.error(`Player '${updateMsg.playerID}' tries to update player '${socket.playerID}'s data, which is invalid.`);
@@ -355,21 +357,14 @@ class GatewayService {
     }
 
     if (!updateMsg.check(this.gameMap.graphicAsset)) {
-      failOnPlayerUpdate(socket);
+      failOnPlayerUpdate();
       return;
     }
 
     // if the player moves
     if (updateMsg.mapCoord !== undefined) {
-      if (!checkPlayerMove(socket.playerData, updateMsg, this.gameMap)) {
-        failOnPlayerUpdate(socket);
-        return;
-      }
-
-      if (!(await this._teleportPlayerInternal(socket, updateMsg, false))) {
-        failOnPlayerUpdate(socket);
-        return;
-      }
+      this.movementManager.handlePlayerMove(this, socket, updateMsg, failOnPlayerUpdate.bind(this));
+      return;
     } else {
       // If the player didn't move, still update everyone.
       // Could be name change or something else.
