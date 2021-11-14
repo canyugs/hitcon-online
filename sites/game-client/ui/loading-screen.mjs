@@ -115,7 +115,8 @@ class LoadingScreenPage {
       (function type() {
         text = typeText.slice(0, ++i);
         if (text === typeText) {
-          document.getElementById(DOM_ID).classList.add(DOM_INACTIVE);
+          // Finished typing.
+          // GameClient will call this.close().
           return;
         }
         element.innerHTML = text + `<span class='blinker'>&#32;</span>`;

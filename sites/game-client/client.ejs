@@ -233,6 +233,9 @@ absolute URL.
       }
 
       async function gameMain(game) {
+        // Loading screen will always show first.
+        game.loadingScreenPage = new LoadingScreenPage();
+
         game.io = window.io;
 
         // WARNING: The following is developer mode only.
@@ -270,11 +273,10 @@ absolute URL.
           game.mapRenderer.disableRenderForTesting();
         }
 
-        game.loadingScreenPage = new LoadingScreenPage();
         game.avatarSelectionPage = new AvatarSelectionPage(game.socket, game.graphicAsset);
         game.inputManager = new InputManager(game.mapRenderer);
         game.movementManager = new MovementManagerClient(game.socket, game.gameState, game.inputManager, game.mapRenderer);
-        game.gameClient = new GameClient(game.socket, game.map, game.gameState, game.mapRenderer, game.inputManager, game.movementManager, game.extMan, game.mainUI, game.avatarSelectionPage);
+        game.gameClient = new GameClient(game.socket, game.map, game.gameState, game.mapRenderer, game.inputManager, game.movementManager, game.extMan, game.mainUI, game.avatarSelectionPage, game.loadingScreenPage);
 
         if (window.query.test === 'type1'){
           window.addEventListener('previousData', (evt) => {
