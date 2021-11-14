@@ -126,6 +126,18 @@ class GraphicAsset {
     }
     return true;
   }
+
+  /**
+   * Return if a particular NPC char is NPC.
+   */
+  isCharNPC(char) {
+    if (!this.hasCharacter(char)) return false;
+
+    if (!('isNPC' in this.config.characters[char])) {
+      return false;
+    }
+    return this.config.characters[char].isNPC;
+  }
 }
 
 export default GraphicAsset;
