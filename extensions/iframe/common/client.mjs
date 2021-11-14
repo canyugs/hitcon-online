@@ -64,8 +64,13 @@ class Client {
   onSelfPlayerUpdate(msg) {
     const map = this.helper.getMap();
     if (typeof map === 'object') {
-      let src = map.getCell(msg.mapCoord, 'videoIframe');
-      if (typeof this.overlay === 'object') {
+      let src = undefined;
+      try {
+        src = map.getCell(msg.mapCoord, 'videoIframe');
+      } catch (e) {
+        console.log("Failed to get videoIframe", e);
+      }
+      if (typeof src !== 'undefined' && typeof this.overlay === 'object') {
         this.overlay.updateIframe(src);
       }
     }
