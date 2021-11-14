@@ -138,6 +138,29 @@ class GraphicAsset {
     }
     return this.config.characters[char].isNPC;
   }
+
+  /**
+   * Get the character in image data URL format.
+   */
+  characterToImageURL(charName, facing, outWidth, outHeight) {
+    const renderInfo = this.getCharacter(charName, facing);
+    const tempCanvas = document.createElement('canvas');
+    const tempCtx = tempCanvas.getContext('2d');
+    tempCanvas.width = outWidth;
+    tempCanvas.height = outHeight;
+    tempCtx.drawImage(
+          renderInfo.image,
+          renderInfo.srcX,
+          renderInfo.srcY,
+          renderInfo.srcWidth,
+          renderInfo.srcHeight,
+          0,
+          0,
+          outWidth,
+          outHeight,
+    );
+    return tempCanvas.toDataURL();
+  }
 }
 
 export default GraphicAsset;
