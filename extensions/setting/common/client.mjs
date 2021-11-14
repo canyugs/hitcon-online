@@ -296,7 +296,7 @@ class Client {
         playerID: player.playerID,
         displayName: value,
       });
-      this.helper.gameClient.socket.emit('playerUpdate', msg);
+      this.helper.gameClient.movementManager.sendPlayerUpdateInternal(msg);
     }, 0);
 
     this.tab.addSwitch('general', 'data_collect', '去識別化資料蒐集', true, (value) => {
