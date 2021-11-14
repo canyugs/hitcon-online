@@ -1,0 +1,71 @@
+{
+  "enabled": true,
+  "initialPosition": {
+    "mapName": "world1",
+    "x": 14,
+    "y": 6
+  },
+  "display": [{
+      "zIndex": 11,
+      "layerName": "npcImage",
+      "renderFunction": "_drawOneCharacterImage",
+      "renderArgs": null,
+      "character": "char21"
+    },
+    {
+      "zIndex": 16,
+      "layerName": "npcName",
+      "renderFunction": "_drawOneCharacterName",
+      "renderArgs": null
+    }
+  ],
+  "FSM": {
+    "initialState": "s1",
+    "states": {
+      "s1": {
+        "func": "showDialog",
+        "kwargs": {
+          "dialogs": "Hello!\n change time",
+          "options": {
+            "Change Time!": "s2",
+            "Bye!": "s5"
+          }
+        }
+      },
+      "s2": {
+        "func": "showDialogAndCheckKey",
+        "kwargs": {
+          "dialog": "change time",
+          "nextState": "s3",
+          "nextStateIncorrect": "s5",
+          "buttonText": "Submit",
+          "key": "2021/11/26"
+        }
+      },
+      "s3": {
+        "func": "showDialog",
+        "kwargs": {
+          "dialogs": "Correct!",
+          "options": {
+            "bye": "s5"
+          }
+        }
+      },
+      "s4": {
+        "func": "showDialog",
+        "kwargs": {
+          "dialogs": "Incorrect",
+          "options": {
+            "bye": "s5"
+          }
+        }
+      },
+      "s5": {
+        "func": "exit",
+        "kwargs": {
+          "next": "s1"
+        }
+      }
+    }
+  }
+}
