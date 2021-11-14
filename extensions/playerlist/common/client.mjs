@@ -34,6 +34,7 @@ class Client {
     // displayName - The current display name that is being shown.
     // Note that we need this because DOM access could be expensive.
     this.doms = new Map();
+    this.queryDOM = document.getElementById("searchPlayer");
   }
 
   async gameStart() {
@@ -47,6 +48,23 @@ class Client {
     setInterval(() => {
       this.syncPlayerList(false);
     }, 60*1000);
+
+    // Handle the search function
+    this.queryDOM.addEventListener('change', () => {
+      this.handleSearch();
+    });
+  }
+
+  handleSearch() {
+    const q = this.queryDOM.value;
+    Array.from(this.doms.keys()).forEach((playerID) => {
+      const cached = this.doms.get(playerID);
+      if (cached.displayName.includes(q) || playerID.includes(q)) {
+        cached.dom.classList.remove('playerlist-player--hidden');
+      } else {
+        cached.dom.classList.add('playerlist-player--hidden');
+      }
+    });
   }
 
   /**
