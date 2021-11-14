@@ -58,6 +58,58 @@ fs.readdirSync(tilesetsDir).forEach((file, index) => {
   }
 });
 
+function createCharImages(srcDir, dstDir) {
+  let images = [];
+  let characters = {};
+  function loadCharDir(isNPC, dir) {
+    const charDir = path.resolve(srcDir, dir);
+    let dstat = undefined;
+    try {
+      dstat = fs.statSync(charDir);
+    } catch (e) {
+      console.warn(`stat on ${charDir} failed`, e);
+    }
+    if (typeof dstat === 'undefined' || !dstat.isDirectory()) {
+      console.warn(`${charDir} doesn't exist`);
+      return;
+    }
+    fs.readdirSync(charDir).forEach((file) => {
+      const pathData = path.parse(file);
+      const {ext, name} = pathData;
+      const dstName = `${name}${ext}`;
+      if (ext === '.png' || ext === '.jpg') {
+        let charName;
+        if (isNPC) {
+          charName = `npc_${name}`;
+        } else {
+          charName = `char_${name}`;
+        }
+        const imgName = `img_${name}`;
+        images.push({
+          name: imgName,
+          url: `/static/run/map/chars/${dstName}`,
+          gridWidth: 32,
+          gridHeight: 32
+        });
+        const c = {
+          D:[imgName, 1, 0], DR:[imgName, 0, 0], DL:[imgName, 2, 0],
+          L:[imgName, 1, 1], LR:[imgName, 0, 1], LL:[imgName, 2, 1],
+          R:[imgName, 1, 2], RR:[imgName, 0, 2], RL:[imgName, 2, 2],
+          U:[imgName, 1, 3], UR:[imgName, 0, 3], UL:[imgName, 2, 3],
+          isNPC: isNPC
+        };
+        characters[charName] = c;
+        const srcPath = path.resolve(srcDir, dir, file);
+        const dstPath = path.resolve(dstDir, 'chars', dstName);
+        fs.mkdirSync(path.resolve(dstDir, 'chars'), {recursive: true});
+        fs.copyFileSync(srcPath, dstPath);
+      }
+    });
+  }
+  loadCharDir(false, 'char_asset');
+  loadCharDir(true, 'npc_asset');
+  return {images, characters};
+}
 
 //////////////////////////////////////////
 
@@ -241,17 +293,6 @@ for (const c of conversionConfig) {
 
 writeFileToJSON(mapsConfigPath, newMapsConfig);
 
-
-const newAssetsConfig = {
-  layerMap: {
-    ground: {},
-    background: {},
-    foreground: {},
-  },
-  images: [],
-  characters: charactersConfig,
-};
-
 const originalImages = [
   {
     'name': 'base',
@@ -270,6 +311,32 @@ const originalImages = [
 originalImages.forEach((img) => {
   tmpImagesDef[img.name] = img;
 });
+
+const charImages = createCharImages(TILED_PROJECT_DIR, ONLINE_MAP_CONFIG_DIR);
+charImages.images.forEach((img) => {
+  if (img.name in tmpImagesDef) {
+    console.warn(`Duplicate img ${img.name}: `, img, tmpImagesDef[img.name]);
+  }
+  tmpImagesDef[img.name] = img;
+});
+
+for (const charName in charImages.characters) {
+  const c = charImages.characters[charName];
+  if (charName in charactersConfig) {
+    console.warn(`Duplicate char ${charName}: `, c, charactersConfig[charName]);
+  }
+  charactersConfig[charName] = c;
+}
+
+const newAssetsConfig = {
+  layerMap: {
+    ground: {},
+    background: {},
+    foreground: {},
+  },
+  images: [],
+  characters: charactersConfig,
+};
 
 const newImageDef = [];
 Object.entries(tmpImagesDef).forEach(([name, image]) => {
