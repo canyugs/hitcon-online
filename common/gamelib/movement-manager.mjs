@@ -148,7 +148,7 @@ class MovementManagerClient {
 
     // ignore this message if it is a notification about previous success
     if (msg.updateSuccess) {
-      return 'abort';
+      return 'updated';
     }
 
     // The update at msg.clientTime is not successful, revert it.
