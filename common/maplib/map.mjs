@@ -252,10 +252,10 @@ class GameMap {
    * Get the raw cell content at the coordinate.
    * @param {MapCoord} coord - The map coordinate.
    * @param {String} layer - The raw layer designation.
-   * @return {String} cell - The raw content of the cell. '' if any error.
+   * @return {String} cell - The raw content of the cell. null if any error.
    */
   getCell(coord, layer) {
-    if (!coord) return;
+    if (!coord) return null;
     return this._maps.get(coord.mapName).getCell(coord, layer);
   }
 
