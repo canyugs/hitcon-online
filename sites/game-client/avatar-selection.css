@@ -34,12 +34,14 @@
   font-size: 22px;
 }
 
-
 #avatar-selection-div #avatar-preview-container {
   margin-bottom: 2%;
-  max-width: 75%;
+  min-width: 60%;
   display: flex;
   flex-wrap: wrap;
+  flex-direction: column;
+  overflow: auto;
+  max-height: 180px;
 }
 
 .avatar-preview-container-big {
