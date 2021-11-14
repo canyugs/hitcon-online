@@ -170,7 +170,7 @@ absolute URL.
 
     <script type="module">
       import ClientBot from '/static/sites/game-client/client-bot.mjs';
-      import GameMap from '/static/common/maplib/map.mjs';
+      import {MapCoord, GameMap} from '/static/common/maplib/map.mjs';
       import GraphicAsset from '/static/common/maplib/graphic-asset.mjs';
       import GameState from '/static/common/gamelib/game-state.mjs';
       import GameClient from '/static/sites/game-client/game-client.mjs';
@@ -194,6 +194,7 @@ absolute URL.
       gameClass.ClientExtensionManager = ClientExtensionManager;
       gameClass.MainUI = MainUI;
       gameClass.OverlayPosition = OverlayPosition;
+      gameClass.MapCoord = MapCoord;
       window.gameClass = gameClass;
 
       // Create the various essential game classes.
