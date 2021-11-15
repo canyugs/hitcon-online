@@ -30,17 +30,27 @@
   align-items: center;
   padding: 0;
   margin: 0;
+  opacity: 0.5;
+  min-height: 740px;
 }
+
+.jitsi-container:hover, .jitsi-container:focus {
+  opacity: 1;
+  transition: opacity 0.3s ease-in-out;
+}
+
 .jitsi-container--inactive {
   display: none;
 }
 .jitsi-remote-container {
   display: flex;
-  flex-direction: column;
-  flex-wrap: wrap-reverse;
+  flex-direction: row;
   align-items: center;
   margin: 0;
-  max-height: 558px;
+  max-height: 370px;
+  max-width: 250px;
+  overflow-y: auto;
+  flex-wrap: wrap;
 }
 .jitsi-local-container {
   display: flex;
@@ -145,14 +155,27 @@
   height: 95%;
 }
 
+#jitsi-others-btn {
+  display: none;
+}
+
 </style>
 <div class="jitsi-container jitsi-container--inactive" id='jitsi-container'>
-  <div class='jitsi-remote-container' id='jitsi-remote-container'>
-
-  </div>
   <div class='jitsi-local-container' id='jitsi-local-container'>
     <div class='jitsi-user-container' id='jitsi-local'></div>
+  </div>
+  <div class='jitsi-remote-container' id='jitsi-remote-container'>
+  </div>
+  <div>
+    <button id="jitsi-others-btn"></button>
   </div>
 </div>
 
 <div id='jitsi-fullscreen-overlay'></div>
+
+<div id="jitsi-modal">
+  <div class="jitsi-modal-title">Others <button id="jitsi-modal-close-btn">×</button></div>
+  <hr class="jitsi-modal-divider" />
+  <div class="jitsi-modal-container" id="jitsi-modal-container">
+  </div>
+</div>
