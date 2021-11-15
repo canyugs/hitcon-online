@@ -17,6 +17,14 @@ body {
   width: 100vw;
 }
 
+* {
+  font-family: 'Noto Sans CJK TC', 'PingFang TC', 'Microsoft JhengHei UI', sans-serif;
+}
+
+.monospace {
+  font-family: 'Fira Code SemiBold', 'Source Code Pro Medium', 'Consolas Bold', 'PT Mono Bold', 'Consolas', 'PT Mono', monospace;
+}
+
 .hoverable:hover {
   cursor: pointer;
   filter: brightness(120%);
