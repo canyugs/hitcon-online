@@ -146,6 +146,22 @@ body {
   bottom: 50px;
   right: 50px;
   z-index: 100;
+  background: #1B2E5A 0% 0% no-repeat padding-box;
+  box-shadow: 0px 3px 6px #00000029;
+  border-radius: 24px;
+  opacity: 0.75;
+  color: white;
+  font-size: 20px;
+  font-weight: bold;
+  padding: 0.5em;
+  border-style: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+#exit-focus:hover {
+  opacity: 1;
+  transition: opacity 0.3s ease-in-out;
 }
 
 #rootdiv:not(.focus-mode) #exit-focus {
