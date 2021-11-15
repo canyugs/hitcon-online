@@ -32,9 +32,9 @@ class IframeOverlay extends Overlay {
       return;
     }
 
+    this.iframe.src = src;
+    this.lastSrc = src;
     if (!this.isOpen) {
-      this.iframe.src = src;
-      this.lastSrc = src;
       this.show(OverlayPosition.LEFT_BOTTOM);
       return;
     }
