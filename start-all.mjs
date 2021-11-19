@@ -121,8 +121,8 @@ async function main() {
         if (msg === 'started') resolve(msg);
       });
       setTimeout(() => {
-        reject(new Error(`Failed to start "${name}" server successfully in 10 seconds.`));
-      }, 10 * 1000);
+        reject(new Error(`Failed to start "${name}" server successfully in 60 seconds.`));
+      }, 60 * 1000);
     });
   });
   await Promise.all(gatewayPromises);
@@ -144,8 +144,8 @@ async function main() {
         if (msg === 'ready') resolve(msg);
       });
       setTimeout(() => {
-        reject(new Error(`Failed to start "${name}" extension successfully in 10 seconds.`));
-      }, 10 * 1000);
+        reject(new Error(`Failed to start "${name}" extension successfully in 60 seconds.`));
+      }, 60 * 1000);
     });
   });
   await Promise.all(standalonePromises);
