@@ -9,6 +9,7 @@ const fontStyle = '12px serif';
 const LAYER_PLAYER_IMAGE = {zIndex: 10, layerName: 'playerImage'};
 const LAYER_PLAYER_NAME = {zIndex: 15, layerName: 'playerName'};
 const LAYER_OBJECT = {zIndex: 1, layerName: 'object'};
+const LAYER_FOREGROUND = {zIndex: 1000, layerName: 'foreground'};
 
 const OUTER_SPACE_TILE = ['ground', 'H']; // the parameters of GraphicAsset.getTile()
 
@@ -75,6 +76,7 @@ class MapRenderer {
     this.registerCustomizedLayerToDrawBackground(-100000, 'ground');
     this.registerCustomizedLayerToDrawBackground(-99999, 'background');
     this.registerCustomizedLayerToDrawBackground(LAYER_OBJECT.zIndex, LAYER_OBJECT.layerName);
+    this.registerCustomizedLayerToDrawBackground(LAYER_FOREGROUND.zIndex, LAYER_FOREGROUND.layerName);
   }
 
   /**
