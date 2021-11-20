@@ -43,6 +43,11 @@ class Standalone {
     if (typeof this.prefix !== 'string') {
       this.prefix = '';
     }
+    this.hosts = getConfigWithDefault('jitsi.hosts',  {
+      "domain": "meet.jit.si",
+      "muc": "conference.meet.jit.si",
+      "focus": "focus.meet.jit.si"
+    });
   }
 
   /**
@@ -99,7 +104,7 @@ class Standalone {
       meetingName = c.digest().toString('hex');
     }
     meetingName = this.prefix + meetingName;
-    return {'pass': 'Unimplemented', 'meetingName': meetingName};
+    return {'pass': 'Unimplemented', 'meetingName': meetingName, 'hosts': this.hosts};
   }
 
   /**

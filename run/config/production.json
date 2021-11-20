@@ -56,7 +56,12 @@
   },
   "jitsi": {
     "hmacSecret": "secret",
-    "prefix": "hitcon"
+    "prefix": "hitcon",
+    "hosts": {
+      "domain": "meet.jit.si",
+      "muc": "conference.meet.jit.si",
+      "focus": "focus.meet.jit.si"
+    }
   },
   "terminal": {
     "internalAddress": "host.docker.internal",
