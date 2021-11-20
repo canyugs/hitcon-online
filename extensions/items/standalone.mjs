@@ -720,6 +720,7 @@ class Standalone {
     const result = {};
     result.ok = true;
     if (amount >= 1) result.ok = this._addItem(playerID, item, amount);
+    result.amount = amount;
     return result;
   }
 
