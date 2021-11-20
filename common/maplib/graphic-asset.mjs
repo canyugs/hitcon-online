@@ -101,6 +101,10 @@ class GraphicAsset {
    */
   getCharacter(char, facing) {
     const info = {};
+    if (!(char in this.config.characters)) {
+      console.warn('Invalid parameters to getCharacter', char, facing);
+      return undefined;
+    }
     const charObj = this.config.characters[char][facing];
     info.imageRef = charObj[0];
     info.image = this.getImage(info.imageRef);
@@ -144,6 +148,7 @@ class GraphicAsset {
    */
   characterToImageURL(charName, facing, outWidth, outHeight) {
     const renderInfo = this.getCharacter(charName, facing);
+    if (!renderInfo) return undefined;
     const tempCanvas = document.createElement('canvas');
     const tempCtx = tempCanvas.getContext('2d');
     tempCanvas.width = outWidth;
