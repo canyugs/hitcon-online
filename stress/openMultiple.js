@@ -3,6 +3,8 @@
 
 const puppeteer = require('puppeteer');
 
+const TABS_PER_BROWSER = 20;
+
 // Usage example:
 // $ node openMultiple.js 10 127.0.0.1:5000
 
@@ -41,36 +43,46 @@ async function main() {
 
   console.log(`Opening ${cnt} x ${outURL}`);
 
-  let browser = undefined;
+  let browsers = [];
   let pages = [];
   function onClose() {
     (async () => {
       console.log('Cleaning up...');
-      if (browser) {
-        await browser.close();
+      for (const b of browsers) {
+        await b.close();
       }
       console.log('Done cleaning up...');
       process.exit(0);
     })();
   }
-
-  browser = await puppeteer.launch();
-
   process.on('exit', onClose);
   process.on('SIGINT', onClose);
   process.on('SIGTERM', onClose);
 
+  let browser = null;
+  let browserTabCount = 0;
+  async function ensureBrowser() {
+    if (browser === null || browserTabCount >= TABS_PER_BROWSER) {
+      console.log('Creating new browser...');
+      browser = await puppeteer.launch();
+      browserTabCount = 0;
+      browsers.push(browser);
+    }
+  };
+
   async function openPage(i) {
     console.log(`Opening page ${i}`);
+    await ensureBrowser();
     const page = await browser.newPage();
     await page.goto(outURL);
     pages.push(page);
-    console.log(`Done opening page ${i}`);
+    browserTabCount++;
+    //console.log(`Done opening page ${i}`);
   }
 
   for (let i = 0; i < cnt; i++) {
     // Add await to open page by page.
-    openPage(i);
+    await openPage(i);
   }
 
   while (true) {
