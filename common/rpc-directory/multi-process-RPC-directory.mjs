@@ -114,7 +114,9 @@ class MultiProcessRPCDirectory extends Directory {
         serviceName: serviceName,
         methodName: methodName,
         args: JSON.stringify(args)
-      }, {deadline: new Date(Date.now() + 5000)});
+      }, {deadline: new Date(Date.now() + 1000*60*24*365)});
+      // Sometimes the dialog may take a bit of time, setting the deadline to
+      // 365 days to prevent DEADLINE_EXCEEDED error.
       return ret.response ? JSON.parse(ret.response) : null;
     }
 
