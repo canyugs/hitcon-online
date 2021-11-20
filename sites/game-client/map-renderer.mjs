@@ -521,6 +521,10 @@ class MapRenderer {
     }
     const renderInfo = this.map.graphicAsset.getCharacter(displayChar,
         facing);
+    if (!renderInfo) {
+      // Not info, just pass.
+      return;
+    }
     const oldOpacity = this.ctx.globalAlpha;
     if (ghostMode) {
       this.ctx.globalAlpha = 0.4;
