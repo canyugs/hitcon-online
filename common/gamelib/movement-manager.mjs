@@ -1,7 +1,7 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
-import {checkPlayerMove, getPlayerMoveCooldown} from './move-check.mjs';
+import {checkPlayerMove, getPlayerMoveCooldown, checkOccupationOnClient} from './move-check.mjs';
 import {PlayerSyncMessage} from './player.mjs';
 import {MapCoord} from '../maplib/map.mjs';
 
@@ -185,6 +185,9 @@ class MovementManagerClient {
     // TODO: If (player.lastMovingTimeClient - player.lastMovingTime) too large, return.
     // This is the situation where the time delay between client and server becomes too large.
     if (!checkPlayerMove(player, msg, this.gameClient.gameMap, true)) {
+      return;
+    }
+    if (!ghostMode && !checkOccupationOnClient(msg.mapCoord, this.gameState)) {
       return;
     }
 
