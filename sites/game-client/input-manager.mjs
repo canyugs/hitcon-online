@@ -28,14 +28,15 @@ class InputManager {
     // Maintain a list of pressed key for better user experience (player moving)
     this.pressedKeys = new Map(); // key: event.key, value: event.code
     document.addEventListener('keydown', (event) => {
+      // We trigger `keydownOnceCallbacks` instead of `keydownEveryTickCallbacks`.
+      // Since the browser will continuously fire keydown event if key remains pressed, we have to check if this is the first event.
+      if (this.pressedKeys.has(event.key)) {
+        return;
+      }
+      this.pressedKeys.set(event.key, {code: event.code});
       for (const {DOMElement, callback} of this.keydownOnceCallbacks) {
-        // We trigger `keydownOnceCallbacks` instead of `keydownEveryTickCallbacks`.
-        // Since the browser will continuously fire keydown event if key remains pressed, we have to check if this is the first event.
-        if (!this.pressedKeys.has(event.key)) {
-          this.pressedKeys.set(event.key, {code: event.code});
-          if (this.focusedElement === DOMElement) {
-            callback(event);
-          }
+        if (this.focusedElement === DOMElement) {
+          callback(event);
         }
       }
     });
