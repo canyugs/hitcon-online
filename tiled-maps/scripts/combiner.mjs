@@ -101,7 +101,14 @@ function combineSingleLayer(childMaps, layerName, tilesetDirectory, resultLayerM
 
       let data;
       if (layerName === 'jitsi' || layerName === 'iframe' || layerName === 'portal') data = fetchTextLayer(targetLayer, startIdx, endIdx, mapName, layerName);
-      else data = targetLayer.data.slice(startIdx, endIdx);
+      else {
+        if (typeof targetLayer === 'undefined' || typeof targetLayer.data !== 'object') {
+          console.warn(`No data for ${layerName}, ${mapName}: `, targetLayer);
+          data = Array.from({length: endIdx-startIdx}, (v, i) => null);
+        } else {
+          data = targetLayer.data.slice(startIdx, endIdx);
+        }
+      }
 
       const mappedData = data.map((gid, idx) => {
         return mapGid(gid, childMaps, tilesetDirectory, resultLayerMap, mapName, layerName, idx);
@@ -122,7 +129,14 @@ function combineSingleLayer(childMaps, layerName, tilesetDirectory, resultLayerM
 
       let data;
       if (layerName === 'jitsi' || layerName === 'iframe' || layerName === 'portal') data = fetchTextLayer(targetLayer, startIdx, endIdx, mapName, layerName);
-      else data = targetLayer.data.slice(startIdx, endIdx);
+      else {
+        if (typeof targetLayer === 'undefined' || typeof targetLayer.data !== 'object') {
+          console.warn(`No data for ${layerName}, ${mapName}: `, targetLayer);
+          data = Array.from({length: endIdx-startIdx}, (v, i) => null);
+        } else {
+          data = targetLayer.data.slice(startIdx, endIdx);
+        }
+      }
 
       const mappedData = data.map((gid, idx) => {
         return mapGid(gid, childMaps, tilesetDirectory, resultLayerMap, mapName, layerName, idx);
