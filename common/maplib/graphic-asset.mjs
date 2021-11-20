@@ -18,6 +18,17 @@ class GraphicAsset {
       throw 'No asset config supplied for new GraphicAsset()';
     }
     this.images_arr = [];
+
+    // Used by getCharacter() to notify the developer of any failure.
+    // getCharacter() is called way too many times and too frequently
+    // to log any errors.
+    this.lastFailure = null;
+    setInterval(() => {
+      if (this.lastFailure) {
+        console.log(`getCharacter() failed: `, this.lastFailure);
+        this.lastFailure = null;
+      }
+    }, 5*1000);
   }
 
   /**
@@ -102,7 +113,8 @@ class GraphicAsset {
   getCharacter(char, facing) {
     const info = {};
     if (!(char in this.config.characters)) {
-      console.warn('Invalid parameters to getCharacter', char, facing);
+      // Note: We do not issue warnings here because it may flood the console.
+      this.lastFailure = {char, facing};
       return undefined;
     }
     const charObj = this.config.characters[char][facing];
