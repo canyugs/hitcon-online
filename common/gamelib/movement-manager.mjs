@@ -187,7 +187,11 @@ class MovementManagerClient {
     if (!checkPlayerMove(player, msg, this.gameClient.gameMap, true)) {
       return;
     }
-    if (!ghostMode && !checkOccupationOnClient(msg.mapCoord, this.gameState)) {
+    // If the player was in ghost mode, don't check occupation.
+    // Else if the player wants to enter ghost mode, don't check occupation either.
+    // Else, check occupation.
+    // The logic should be the same as `_teleportPlayerInternal()` in gateway-service.mjs.
+    if (!player.ghostMode && !ghostMode && !checkOccupationOnClient(msg.mapCoord, this.gameState)) {
       return;
     }
 
