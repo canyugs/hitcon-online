@@ -36,7 +36,7 @@ class JitsiHandler {
   /**
    * Create Jitsi connection
    */
-  connect(meetingName, password, userName) {
+  connect(meetingName, password, userName, hosts) {
     this.meetingName = meetingName;
     this.password = password;
     this.userName = userName;
@@ -56,28 +56,22 @@ class JitsiHandler {
 
     this.isInMeeting = true;
 
-    // Is track mute
+    // Is track muted
     this.isMuted = {video: true, audio: true};
-
-    // Connection options
-    this.options = {
-      hosts: {
-        domain: 'meet.jit.si',
-        muc: 'conference.meet.jit.si',
-        focus: 'focus.meet.jit.si',
-      },
-      externalConnectUrl: 'https://meet.jit.si/http-pre-bind',
-      serviceUrl: `https://meet.jit.si/http-bind?room=${meetingName}`,
-      websocket: 'wss://meet.jit.si/xmpp-websocket',
-      clientNode: 'http://jitsi.org/jitsimeet',
-      openBridgeChannel: 'websocket'
-    };
 
     JitsiMeetJS.setLogLevel(JitsiMeetJS.logLevels.ERROR);
     JitsiMeetJS.init({
       disableAudioLevels: true,
     });
-    this.connection = new JitsiMeetJS.JitsiConnection(null, null, this.options);
+    this.connection = new JitsiMeetJS.JitsiConnection(null, null, {
+      // Connection options
+      hosts: hosts,
+      externalConnectUrl: 'https://meet.jit.si/http-pre-bind',
+      serviceUrl: `https://meet.jit.si/http-bind?room=${meetingName}`,
+      websocket: 'wss://meet.jit.si/xmpp-websocket',
+      clientNode: 'http://jitsi.org/jitsimeet',
+      openBridgeChannel: 'websocket'
+    });
 
     this.connection.addEventListener(
         JitsiMeetJS.events.connection.CONNECTION_ESTABLISHED,
