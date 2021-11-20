@@ -1,6 +1,6 @@
 .notification--overlay {
   position: absolute;
-  bottom: 107px;
+  bottom: 10%;
 }
 
 .notification {
@@ -15,7 +15,6 @@
   box-sizing: border-box;
   padding-top: 10px;
   color: #000000;
-  opacity: 70%; /* TODO tmp style, see things under toolbar */
   z-index: 10; /* TODO tmp style, make toolbar visible */
 }
 
@@ -142,4 +141,58 @@
 .announcement-close {
   background: none;
   border: none;
+}
+
+.notification--card {
+  overflow: hidden;
+  width: fit-content;
+  padding: 20px 30px 0 30px;
+}
+
+.notification--npc-type {
+  position: relative;
+  display: flex;
+  overflow: hidden;
+}
+
+.notification--npc--border {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 10px;
+  background: #1465FF;
+}
+
+.notification--npc--avatar {
+  width: 53px;
+  height: 72px;
+  margin-right: 20px;
+}
+
+.notification--npc--text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.notification--npc--name {
+  font-size: 18px;
+  border-bottom: 1px solid #000;
+  padding-bottom: 10px;
+}
+
+.notification--npc--usage {
+  font-size: 15px;
+  text-align: center;
+  margin-top: 10px;
+}
+
+.notification--npc--usage span {
+  color: #fff;
+  background: #1465FF;
+  border-radius: 4px;
+  box-shadow: 0px 2px 4px #000000;
+  padding: 1px 5px;
 }
