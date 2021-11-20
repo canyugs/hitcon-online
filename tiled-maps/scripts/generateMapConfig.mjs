@@ -5,7 +5,7 @@ import path from 'path';
 import {mapTransform} from './map.mjs';
 import {tilesetTransform} from './assets.mjs';
 import {readFileFromJSON, writeFileToJSON} from './utils.mjs';
-import {combineSingleLayer} from './combiner.mjs';
+import {combineSingleLayer, mapSingleLayer} from './combiner.mjs';
 
 // Setup path first
 function getEnvWithDefault(name, def) {
@@ -195,7 +195,7 @@ function loadWorld(mapsDir, mapName) {
   return result;
 }
 
-function convertWorld(newMaps, tilesetDirectory, resultLayerMap, base, cellsetsConfig) {
+function convertWorldCombined(newMaps, tilesetDirectory, resultLayerMap, base, cellsetsConfig) {
   const layerTemplate = {
     width: 200,
     height: 100,
@@ -266,29 +266,119 @@ function convertWorld(newMaps, tilesetDirectory, resultLayerMap, base, cellsetsC
   return result;
 }
 
-function loadAndConvertWorld(mapName, mapsDir, tilesetDirectory, resultLayerMap, cellsetsConfig) {
-  let result = loadWorld(mapsDir, mapName);
-  return convertWorld(result.mapData, tilesetDirectory, resultLayerMap, result.base, cellsetsConfig);
+function convertWorldSingle(newMaps, tilesetDirectory, resultLayerMap, base, cellsetsConfig) {
+  const names = Object.keys(newMaps);
+  console.assert(names.length === 1, 'Incorrect amount of maps for convertWorldSingle: ', names, newMaps);
+  const mapName = names[0];
+  const map = newMaps[mapName];
+
+  const layerTemplate = {
+    width: map.width,
+    height: map.height,
+    type: 'tilelayer',
+    name: 'template',
+    x: 0,
+    y: 0,
+    data: null
+  }
+
+  const dataCount = map.width * map.height;
+  const mapDataTemplate = {
+    width: map.width,
+    height: map.height,
+    layers: [
+      {
+        ...layerTemplate,
+        data: mapSingleLayer(newMaps, mapName, dataCount, 'ground', tilesetDirectory, resultLayerMap, base),
+        name: 'ground',
+      },
+      {
+        ...layerTemplate,
+        data: mapSingleLayer(newMaps, mapName, dataCount, 'background', tilesetDirectory, resultLayerMap, base),
+        name: 'background',
+      },
+      {
+        ...layerTemplate,
+        data: mapSingleLayer(newMaps, mapName, dataCount, 'foreground', tilesetDirectory, resultLayerMap, base),
+        name: 'object',
+      },
+      {
+        ...layerTemplate,
+        data: mapSingleLayer(newMaps, mapName, dataCount, 'wall', tilesetDirectory, resultLayerMap, base),
+        name: 'wall',
+      },
+      {
+        ...layerTemplate,
+        data: mapSingleLayer(newMaps, mapName, dataCount, 'jitsi', tilesetDirectory, resultLayerMap, base),
+        name: 'jitsi',
+      },
+      {
+        ...layerTemplate,
+        data: mapSingleLayer(newMaps, mapName, dataCount, 'iframe', tilesetDirectory, resultLayerMap, base),
+        name: 'videoIframe',
+      },
+      {
+        ...layerTemplate,
+        data: mapSingleLayer(newMaps, mapName, dataCount, 'portal', tilesetDirectory, resultLayerMap, base),
+        name: 'portal',
+      },
+    ],
+    tilesets: [],
+    type: 'map',
+  };
+
+  // To covert mapData to fit canvas;
+  const {mapData, tilesetSrc} = mapTransform(mapDataTemplate);
+
+  const result = {
+    startX: 0,
+    startY: 0,
+    width: map.width,
+    height: map.height,
+    ...mapData,
+    cellSets: cellsetsConfig,
+  };
+
+  return result;
 }
 
+function loadAndConvertWorld(mapName, mapsDir, tilesetDirectory, resultLayerMap, cellsetsConfig, type) {
+  let result = loadWorld(mapsDir, mapName);
+  if (type === 'combined') {
+    return convertWorldCombined(result.mapData, tilesetDirectory, resultLayerMap, result.base, cellsetsConfig);
+  }
+  if (type === 'single') {
+    return convertWorldSingle(result.mapData, tilesetDirectory, resultLayerMap, result.base, cellsetsConfig);
+  }
+  console.assert(false, 'Unknown type: ', type);
+  return undefined;
+}
 
 const conversionConfig = [
   {
     srcMapName: 'map01',
     dstMapName: 'world1',
-    cellsetsConfig: cellsetsConfig
+    cellsetsConfig: cellsetsConfig,
+    type: 'combined'
   },
   {
     srcMapName: 'map03',
     dstMapName: 'world3',
-    cellsetsConfig: []
-  }
+    cellsetsConfig: [],
+    type: 'combined'
+  },
+  {
+    srcMapName: 'map05',
+    dstMapName: 'world5',
+    cellsetsConfig: [],
+    type: 'single'
+  },
 ];
 
 const newMapsConfig = {};
 
 for (const c of conversionConfig) {
-  newMapsConfig[c.dstMapName] = loadAndConvertWorld(c.srcMapName, mapsDir, tilesetDirectory, resultLayerMap, c.cellsetsConfig);
+  newMapsConfig[c.dstMapName] = loadAndConvertWorld(c.srcMapName, mapsDir, tilesetDirectory, resultLayerMap, c.cellsetsConfig, c.type);
 }
 
 writeFileToJSON(mapsConfigPath, newMapsConfig);
