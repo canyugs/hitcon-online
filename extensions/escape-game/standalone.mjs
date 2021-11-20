@@ -173,30 +173,39 @@ class Standalone {
    * Quit the team
    * @param {string} playerID The player id.
    */
-  async quitTeam(playerID) {
+   async quitTeam(playerID) {
     // Check if the team exists.
     if (!this.playerToTeam.has(playerID)) {
       throw new Error(`Player ${playerID} trys to quit a non-exist team.`);
     }
 
-    const teamId = this.playerToTeam.get(playerID).teamId;
+    const team = this.playerToTeam.get(playerID);
 
-    const ret = this.teams.get(teamId).removePlayer(playerID);
+    let ret = true;
+
+    // Remove all items get after joining the team.
+    // TODO: This should be done in the Team object instead of here for better abstraction.
+    for (const [itemName, amount] of team.givenItems.get(playerID)) {
+      const curAmount = (await this.helper.callS2sAPI('items', 'CountItem', playerID, itemName))?.amount;
+      ret = ret && (await this.helper.callS2sAPI('items', 'TakeItem', playerID, itemName, Math.min(curAmount, amount)));
+    }
+
+    // Remove the player from the team.
+    ret = ret && team.removePlayer(playerID);
 
     if (ret) {
       this.playerToTeam.delete(playerID);
 
       // Notify other team members.
       const displayName = this.helper.gameState.getPlayer(playerID).displayName;
-      console.log(this.teams.get(teamId).playerIDs);
-      for (const pid of this.teams.get(teamId).playerIDs) {
+      for (const pid of team.playerIDs) {
         this.helper.callS2cAPI(pid, 'notification', 'showNotification', 5000, `${displayName} has left the team.`);
       }
     }
 
     // remove team if all players quit
-    if (this.teams.get(teamId).playerIDs.length == 0) {
-      await this.destroyTeam(teamId);
+    if (team.playerIDs.length == 0) {
+      await this.destroyTeam(team.teamId);
     }
 
     return ret;
@@ -635,6 +644,10 @@ class Standalone {
       if (rlist[i].ok !== true) {
         console.warn('Failed to give items to player: ', rlist[i], team.playerIDs[i], team.playerIDs);
         result = false;
+      } else {
+        // update the list of given items.
+        const orig = team.givenItems.get(team.playerIDs[i]).get(itemName) ?? 0;
+        team.givenItems.get(team.playerIDs[i]).set(itemName, orig + rlist[i].amount);
       }
     }
     if (result) {
@@ -661,6 +674,7 @@ class Team {
     this.playerIDs = [];
     this.isFinalized = false;
     this.terminals = new Map(); // Mapping the terminal id to the container id in the terminal server.
+    this.givenItems = new Map();
 
     this.defaultTerminals = defaultTerminals;
   }
@@ -673,6 +687,7 @@ class Team {
     if (this.playerIDs.length >= MAX_PLAYER_PER_TEAM || this.isFinalized) {
       return false;
     }
+    this.givenItems.set(playerID, new Map());
     return this.playerIDs.push(playerID);
   }
 
@@ -685,6 +700,7 @@ class Team {
     if (!this.playerIDs.includes(playerID) || this.isFinalized) {
       return false;
     }
+    this.givenItems.delete(playerID);
     this.playerIDs = this.playerIDs.filter(pid => pid !== playerID);
     return true;
   }
