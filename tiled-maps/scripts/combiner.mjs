@@ -57,6 +57,32 @@ function fetchTextLayer(targetLayer, startIdx, endIdx, mapName, layerName) {
   return result;
 }
 
+function mapSingleLayer(childMaps, mapName, dataCount, layerName, tilesetDirectory, resultLayerMap, base) {
+  let targetLayer = childMaps[mapName].layers
+        .filter((layer) => layer.name.toLowerCase() === layerName)[0];
+
+  if (targetLayer === undefined) {
+    console.warn(`Unable to find ${layerName} in ${mapName}`);
+    return Array.from({length: dataCount}, (v, i) => null);
+  }
+
+  const startIdx = 0;
+  const endIdx = dataCount;
+  if (typeof targetLayer.data === 'object' && targetLayer.data.length) {
+    console.assert(targetLayer.data.length === dataCount, `Incorrect data count for ${layerName} in ${mapName}`);
+  }
+
+  let data;
+  if (layerName === 'jitsi' || layerName === 'iframe' || layerName === 'portal') data = fetchTextLayer(targetLayer, startIdx, endIdx, mapName, layerName);
+  else data = targetLayer.data.slice(startIdx, endIdx);
+
+  const result = data.map((gid, idx) => {
+    return mapGid(gid, childMaps, tilesetDirectory, resultLayerMap, mapName, layerName, idx);
+  });
+
+  return result;
+}
+
 function combineSingleLayer(childMaps, layerName, tilesetDirectory, resultLayerMap, base) {
   const worldWidth = 200;
   const worldHeight = 100;
@@ -110,4 +136,4 @@ function combineSingleLayer(childMaps, layerName, tilesetDirectory, resultLayerM
   return adjLayer;
 }
 
-export {combineSingleLayer, getGidRange};
+export {combineSingleLayer, mapSingleLayer, getGidRange};
