@@ -415,7 +415,12 @@ originalImages.forEach((img) => {
 const charImages = createCharImages(TILED_PROJECT_DIR, ONLINE_MAP_CONFIG_DIR);
 charImages.images.forEach((img) => {
   if (img.name in tmpImagesDef) {
-    console.warn(`Duplicate img ${img.name}: `, img, tmpImagesDef[img.name]);
+    if (img.url !== tmpImagesDef[img.name].url) {
+      console.error(`(Error) Duplicate image ${img.name} with different URL: `, img, tmpImagesDef[img.name]);
+    } else {
+      // Probably not an issue
+      console.warn(`(Warning) Duplicate img ${img.name}: `, img, tmpImagesDef[img.name]);
+    }
   }
   tmpImagesDef[img.name] = img;
 });
@@ -423,7 +428,8 @@ charImages.images.forEach((img) => {
 for (const charName in charImages.characters) {
   const c = charImages.characters[charName];
   if (charName in charactersConfig) {
-    console.warn(`Duplicate char ${charName}: `, c, charactersConfig[charName]);
+    // Not supposed to happen because npc and char have different prefix.
+    console.error(`(Error) Duplicate char ${charName}: `, c, charactersConfig[charName]);
   }
   charactersConfig[charName] = c;
 }
