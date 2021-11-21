@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="226" height="228" viewBox="0 0 226 228">
+  <defs>
+    <filter id="Rectangle_168" x="86" y="133" width="56" height="56" filterUnits="userSpaceOnUse">
+      <feOffset dy="3" input="SourceAlpha"/>
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feFlood flood-color="#2b4d79" flood-opacity="0.302"/>
+      <feComposite operator="in" in2="blur"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+  </defs>
+  <g id="Group_182" data-name="Group 182" transform="translate(-1181 -486)">
+    <rect id="Rectangle_170" data-name="Rectangle 170" width="226" height="228" rx="18" transform="translate(1181 486)" fill="#e8e8e8"/>
+    <g id="Group_163" data-name="Group 163" transform="translate(443 49)">
+      <g transform="matrix(1, 0, 0, 1, 738, 437)" filter="url(#Rectangle_168)">
+        <rect id="Rectangle_168-2" data-name="Rectangle 168" width="44" height="44" rx="8" transform="translate(92 136)" fill="#1d52cb"/>
+      </g>
+      <text id="G" transform="translate(840 578)" fill="#fff" font-size="26" font-family="SourceCodePro-Semibold, Source Code Pro" font-weight="600"><tspan x="0" y="26">G</tspan></text>
+    </g>
+    <text id="Ghost_Mode" data-name="Ghost Mode" transform="translate(1234 505)" font-size="26" font-family="NotoSansCJKtc-Bold, Noto Sans CJK TC" font-weight="700"><tspan x="25" y="30">Ghost </tspan><tspan x="25" y="72">Mode</tspan></text>
+  </g>
+</svg>

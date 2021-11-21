@@ -52,6 +52,21 @@ absolute URL.
         </div>
       </div>
 
+      <div id="intro-modal" class="intro-modal container-center">
+        <div id="intro-pages" class="intro-pages"></div>
+        <div class="intro-action">
+          <div class="intro-left">
+            <span id='intro-current-page'>-</span>/<span id='intro-max-page'>-</span>
+          </div>
+          <div class="intro-middle">
+            <button id='intro-next-page'>Next</button>
+          </div>
+          <div class="intro-right">
+            <button id='intro-skip'>Skip</button>
+          </div>
+        </div>
+      </div>
+
       <div id="ruler-helper-div" class="ruler-helper">
         <span id="ruler-helper-text">Coord: </span>
       </div>
@@ -184,6 +199,7 @@ absolute URL.
       import AvatarSelectionPage from '/static/sites/game-client/ui/avatar-selection.mjs';
       import OverlayPosition from '/static/sites/game-client/ui/overlay-position.mjs';
       import ErrorModal from '/static/sites/game-client/ui/error-modal.mjs';
+      import IntroModal from '/static/sites/game-client/ui/intro-modal.mjs';
 
       // Export internal classes for ease of debugging.
       let gameClass = {};
@@ -250,6 +266,7 @@ absolute URL.
 
         game.mainUI = new MainUI();
         game.mainUI.errorModal = new ErrorModal(game.mainUI);
+        game.mainUI.introModal = new IntroModal(game.mainUI);
         game.mapRendererOverlay = new MapRendererOverlay(game.mainUI);
         game.mainUI.mapRendererOverlay = game.mapRendererOverlay;
 

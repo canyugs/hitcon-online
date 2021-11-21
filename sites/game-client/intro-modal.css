@@ -1,0 +1,125 @@
+.intro-modal {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-radius: 44px;
+  padding: 50px;
+  padding-top: 20px;
+  box-sizing: border-box;
+  text-align: center;
+  width: 65vw;
+  height: 65vh;
+  top: -20%;
+  justify-content: space-between !important;
+}
+
+.intro-pages {
+  width: 100%;
+}
+
+.intro-page {
+  width: inherit;
+  heigth: inherit;
+}
+
+.intro-layout {
+  display: flex;
+  flex-direction: column;
+}
+.intro-layout--row {
+  flex-direction: row;
+  justify-content: center;
+  margin-top: 2em;
+}
+
+.intro-page--inactive {
+  display: none;
+}
+
+.intro-title {
+  font-size: 2em;
+  font-weight: bolder;
+  border-bottom: 1px solid #707070;
+  margin: 20px 0;
+  padding-bottom: 20px;
+}
+
+.intro-description {
+  margin-top: 1em;
+  margin-bottom: 1em;
+  font-size: 1.1em;
+  line-height: 2em;
+  font-size: 24px;
+}
+
+.intro-images {
+  margin-bottom: 2em;
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  overflow: auto;
+}
+
+@media(min-width: 1350px) {
+  .intro-images {
+    justify-content: center;;
+  }
+}
+
+.intro-images > img {
+  margin-right: 15px;
+  max-height: 364px;
+  max-width: 500px;
+}
+
+.intro-action {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+}
+
+.intro-left {
+  font-size: 20px;
+  font-weight: bolder;
+}
+
+.intro-middle > button {
+  color: #fff;
+  font-size: 20px;
+  background: #1465FF;
+  border-radius: 18px;
+  padding: 2px 30px;
+  cursor: pointer;
+}
+
+.intro-right > button {
+  color: #1465FF;
+  background: transparent;
+  border: unset;
+  font-size: 20px;
+  font-weight: bolder;
+  cursor: pointer;
+}
+
+#intro-skip.hide {
+  display: none;
+}
+
+.intro-layout--row .intro-description {
+  box-sizing: border-box;
+  flex-basis: 65%;
+  margin-top: 0;
+  margin-bottom: 0;
+  padding-right: 2em;
+  text-align: left;
+}
+
+.intro-layout--row .intro-images {}
+
+.intro-layout--row .intro-images > img {
+  margin-right: 0;
+}
