@@ -115,9 +115,16 @@ class Client {
   }
 
   onSelfPlayerUpdate(msg) {
+    if (typeof msg.mapCoord !== 'object') {
+      console.warn(`Invalid mapCoord in npc.onSelfPlayerUpdate: `, msg);
+      return;
+    }
+
     if (typeof this.NPCs === 'object') {
+      const NPC_HINT_DIST = 2;
       for (const npc of this.NPCs) {
-        if (msg.mapCoord.distanceTo1(npc[1].mapCoord) <= 1) {
+        if (msg.mapCoord.distanceTo1(npc[1].mapCoord) <= (npc[1].distanceLimit ?
+            Math.min(npc[1].distanceLimit, NPC_HINT_DIST) : NPC_HINT_DIST)) {
           this.helper.mainUI.showNPCHint(npc[1].npcName);
           return
         }
