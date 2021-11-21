@@ -176,7 +176,7 @@ absolute URL.
       </div>
 
       <!-- User overlay -->
-      <div class="user user--overlay">
+      <div id="user-overlay" class="user user--overlay">
         <div class="user-profile">
           <div class="user-name" id="user-name">Username</div>
           <div class="user-points">
@@ -218,6 +218,7 @@ absolute URL.
       import OverlayPosition from '/static/sites/game-client/ui/overlay-position.mjs';
       import ErrorModal from '/static/sites/game-client/ui/error-modal.mjs';
       import IntroModal from '/static/sites/game-client/ui/intro-modal.mjs';
+      import UserOverlay from '/static/sites/game-client/ui/user-overlay.mjs';
 
       // Export internal classes for ease of debugging.
       let gameClass = {};
@@ -287,6 +288,7 @@ absolute URL.
         game.mainUI.introModal = new IntroModal(game.mainUI);
         game.mapRendererOverlay = new MapRendererOverlay(game.mainUI);
         game.mainUI.mapRendererOverlay = game.mapRendererOverlay;
+        game.mainUI.userOverlay = new UserOverlay(game.mainUI);
 
         // TODO: Change map URL to follow the config in server side.
         game.mapData = await $.ajax({url: "/static/run/map/map.json", type: "GET",});
