@@ -15,6 +15,7 @@ class MapRendererOverlay extends Overlay {
     const dom = document.getElementById(MAP_RENDERER_DIV);
     super(mainUI, dom);
     this.canvas = document.querySelector('#mapcanvas');
+    this.inputCanvas = document.querySelector('#inputcanvas');
   }
 
   /**
@@ -24,8 +25,8 @@ class MapRendererOverlay extends Overlay {
     const widthCount = Math.floor(this.dom.clientWidth / MAP_CELL_SIZE) + 1;
     const heightCount = Math.floor(this.dom.clientHeight / MAP_CELL_SIZE) + 1;
 
-    this.canvas.height = MAP_CELL_SIZE * heightCount;
-    this.canvas.width = MAP_CELL_SIZE * widthCount;
+    this.canvas.height = this.inputCanvas.height = MAP_CELL_SIZE * heightCount;
+    this.canvas.width = this.inputCanvas.width = MAP_CELL_SIZE * widthCount;
   }
 };
 

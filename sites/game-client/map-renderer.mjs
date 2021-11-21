@@ -44,14 +44,16 @@ class MapRenderer {
    * @param {Canvas} backgroundCanvas - The background canvas.
    * @param {Canvas} foregroundCanvas - The foreground canvas.
    * @param {Canvas} outOfBoundCanvas - The canvas to draw out-of-bound tile.
+   * @param {Canvas} inputCanvas - The canvas to receive input events.
    * @param {GameMap} map - The map object to retrieve the map information.
    * @param {GameState} gameState - The game state.
    */
-  constructor(mainContentCanvas, backgroundCanvas, foregroundCanvas, outOfBoundCanvas, map, gameState) {
+  constructor(mainContentCanvas, backgroundCanvas, foregroundCanvas, outOfBoundCanvas, inputCanvas, map, gameState) {
     this.canvas = mainContentCanvas;
     this.backgroundCanvas = backgroundCanvas;
     this.foregroundCanvas = foregroundCanvas;
     this.outOfBoundCanvas = outOfBoundCanvas;
+    this.inputCanvas = inputCanvas;
     this.map = map;
     this.gameState = gameState;
     this.gameClient = null; // will be initialized in this.setGameClient()
@@ -138,7 +140,7 @@ class MapRenderer {
    * Return the canvas or DOM that is designed to received events.
    */
   getInputEventDOM() {
-    return this.foregroundCanvas;
+    return this.inputCanvas;
   }
 
   /**

@@ -101,6 +101,10 @@ body {
   z-index: 4;
 }
 
+#inputcanvas {
+  z-index: 5;
+}
+
 .overlay {
   position: absolute;
   opacity: 85%;
