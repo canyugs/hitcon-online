@@ -87,12 +87,12 @@ class MovementManagerClient {
       });
 
       // ghost mode
-      this.inputManager.registerKeydownOnce(mapRenderer.canvas, (event) => {
+      this.inputManager.registerKeydownOnce(mapRenderer.getInputEventDOM(), (event) => {
         if (event.key !== 'g') return;
         const {mapCoord: {x, y}, facing} = this.gameClient.playerInfo;
         this.moveTo(x, y, facing, true);
       });
-      this.inputManager.registerKeyup(mapRenderer.canvas, (event) => {
+      this.inputManager.registerKeyup(mapRenderer.getInputEventDOM(), (event) => {
         if (event.key !== 'g') return;
         const {mapCoord: {x, y}, facing} = this.gameClient.playerInfo;
         this.moveTo(x, y, facing, false);

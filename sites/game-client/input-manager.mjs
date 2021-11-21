@@ -16,7 +16,7 @@ class InputManager {
    */
   constructor(mapRender) {
     this.mapRender = mapRender;
-    this.canvas = this.mapRender.getCanvas();
+    this.canvas = this.mapRender.getInputEventDOM();
     this.clickCallbacks = []; // each element is a {DOMElement, callback} object
     this.keydownEveryTickCallbacks = []; // each element is a {DOMElement, callback} object
     this.keydownOnceCallbacks = []; // each element is a {DOMElement, callback} object

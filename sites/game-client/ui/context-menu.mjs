@@ -123,8 +123,8 @@ class ContextMenu {
    * @returns {Player} The player object at the position.
    */
   findFocusedUser(pageX, pageY) {
-    const x = pageX - this.mapRenderer.canvas.offsetLeft;
-    const y = pageY - this.mapRenderer.canvas.offsetTop;
+    const x = pageX - this.mapRenderer.getInputEventDOM().offsetLeft;
+    const y = pageY - this.mapRenderer.getInputEventDOM().offsetTop;
     for (const player of this.gameState.players.values()) {
       const mapCoord = player.getDrawInfo()?.mapCoord;
       const canvasCoordinate = this.mapRenderer.mapToCanvasCoordinate(mapCoord);
