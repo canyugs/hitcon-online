@@ -3,7 +3,7 @@
 
 import {createRnnoiseProcessor} from './rnnoise/index.js';
 
-const VOICE_INDICATOR_THRESHOLD = 3;
+const VOICE_INDICATOR_THRESHOLD = 0.4;
 
 // constant for exponential smoothing, deltaT = 0.1s, fc = 1/30 Hz
 const ALPHA = 0.0205;
@@ -49,6 +49,7 @@ class JitsiHandler {
     this.volumeMeters = {};
     this.participantsInfo = {};
     this.participantSounds = {};
+    this.participantSoundsLastUpate = {};
     this.participantSmoothedSounds = {};
     this.isJoined = false;
     this.room = null;
@@ -61,9 +62,7 @@ class JitsiHandler {
     this.isMuted = {video: true, audio: true};
 
     JitsiMeetJS.setLogLevel(JitsiMeetJS.logLevels.ERROR);
-    JitsiMeetJS.init({
-      disableAudioLevels: true,
-    });
+    JitsiMeetJS.init({});
 
     if (this.connectionLock) {
       return;
@@ -286,7 +285,6 @@ class JitsiHandler {
     }
 
     $('#jitsi-local').addClass('active');
-    this.setLocalAudioVolumeMeter();
     this.broadcastParticipantId(this.room.myUserId()); // broadcast the paritcipant id.
   }
 
@@ -316,6 +314,7 @@ class JitsiHandler {
     $(`#jitsi-${id}-container`).remove();
     delete this.participantsInfo[id];
     delete this.participantSounds[id];
+    delete this.participantSoundsLastUpate[id];
     delete this.participantSmoothedSounds[id];
   }
 
@@ -328,6 +327,7 @@ class JitsiHandler {
     console.log('user joined: ', id, user._displayName);
     this.participantsInfo[id] = user;
     this.participantSounds[id] = 0;
+    this.participantSoundsLastUpate[id] = 0;
     this.participantSmoothedSounds[id] = 0;
     this.remoteTracks[id] = [];
   }
@@ -365,7 +365,11 @@ class JitsiHandler {
     this.room.on(JitsiMeetJS.events.conference.USER_JOINED, this.onUserJoin.bind(this));
     this.room.on(JitsiMeetJS.events.conference.USER_LEFT, this.onUserLeft.bind(this));
     this.room.on(JitsiMeetJS.events.conference.TRACK_MUTE_CHANGED, this.onTrackMute.bind(this));
-    this.room.on(JitsiMeetJS.events.conference.PARTICIPANT_PROPERTY_CHANGED, this.setRemoteVolumeMeter.bind(this));
+    // this.room.on(JitsiMeetJS.events.conference.PARTICIPANT_PROPERTY_CHANGED, this.setRemoteVolumeMeter.bind(this));
+    this.room.on(JitsiMeetJS.events.conference.TRACK_AUDIO_LEVEL_CHANGED, (participantId, audioLevel) => {
+      console.log(participantId, audioLevel);
+      this.participantSounds[participantId] = audioLevel;
+    });
 
     this.room.setDisplayName(this.userName);
     this.room.setSenderVideoConstraint(720);
@@ -507,83 +511,17 @@ class JitsiHandler {
   }
 
   /**
-   * Start the local volume meter.
-   */
-  async setLocalAudioVolumeMeter() {
-    let volumeCallback;
-    try {
-      const audioStream = await navigator.mediaDevices.getUserMedia({audio: true, video: false});
-      const audioContext = new AudioContext();
-      const audioSource = audioContext.createMediaStreamSource(audioStream);
-      const analyser = audioContext.createAnalyser();
-      analyser.fftSize = 512;
-      analyser.minDecibels = -127;
-      analyser.maxDecibels = 0;
-      analyser.smoothingTimeConstant = 0.4;
-      audioSource.connect(analyser);
-      const volumes = new Uint8Array(analyser.frequencyBinCount);
-      volumeCallback = () => {
-        // If the audio track is muted, return 0.
-        if (!('audio' in this.localTracks) || this.isMuted['audio']) {
-          this.room?.setLocalParticipantProperty('volume', '0');
-          $(`#jitsi-local`).removeClass('speaking');
-          return;
-        }
-
-        analyser.getByteFrequencyData(volumes);
-        const averageVolume = volumes.reduce((a, b) => a + b, 0) / volumes.length;
-
-        // parsed volume = round((normalize(original volume - noise threshold) * 100 [transform [0, 1] to [0, 100]]) / 10) [discretization]
-        let averageVolumeParsed = (Math.round(((averageVolume - 30) / (analyser.maxDecibels - analyser.minDecibels - 30) * 100) / 10));
-        averageVolumeParsed = Math.min(Math.max(averageVolumeParsed, 0), 10); // clip to [0, 10]
-
-        this.room?.setLocalParticipantProperty('volume', averageVolumeParsed.toString());
-
-        if (parseInt(averageVolumeParsed) >= VOICE_INDICATOR_THRESHOLD) {
-          $(`#jitsi-local`).addClass('speaking');
-        } else {
-          $(`#jitsi-local`).removeClass('speaking');
-        }
-      };
-    } catch (e) {
-      console.error('Failed to setup audio volume meter: ', e);
-    }
-
-
-    this.volumeMeterIntervalId = setInterval(() => {
-      try {
-        volumeCallback();
-      } catch (e) {
-        console.error('Volume metering failed in volumeCallback(): ', e);
-        clearInterval(this.volumeMeterIntervalId);
-      }
-    }, 100);
-  }
-
-  /**
-   * Set the volume meter of the remote participant.
-   */
-  setRemoteVolumeMeter(user, propertyKey, oldPropertyValue, propertyValue) {
-    if (propertyKey !== 'volume') {
-      return;
-    }
-
-    const newVolume = parseInt(propertyValue);
-
-    this.participantSounds[user.getId()] = newVolume;
-    if (newVolume >= 1) {
-      $(`#jitsi-${user.getId()}-container`).addClass('speaking');
-    } else {
-      $(`#jitsi-${user.getId()}-container`).removeClass('speaking');
-    }
-  }
-
-  /**
    * Update the smoothed soundness.
    */
   updateSmoothedSound() {
     for (const id in this.participantSounds) {
       this.participantSmoothedSounds[id] = ALPHA * this.participantSounds[id] + (1 - ALPHA) * this.participantSmoothedSounds[id];
+
+      if (this.participantSmoothedSounds[id] >= VOICE_INDICATOR_THRESHOLD) {
+        $(`#jitsi-${id}-container`).addClass('speaking');
+      } else {
+        $(`#jitsi-${id}-container`).removeClass('speaking');
+      }
     }
   }
 
