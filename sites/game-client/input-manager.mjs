@@ -10,13 +10,13 @@ class InputManager {
   /**
    * Create a new input manager.
    * @constructor
-   * @param {MapRender} mapRender - The MapRender object for retrieving the
+   * @param {MapRenderer} mapRenderer - The MapRenderer object for retrieving the
    * canvas object for registering input events on it and mapping the
    * coordinates in the event to the map coordinate.
    */
-  constructor(mapRender) {
-    this.mapRender = mapRender;
-    this.canvas = this.mapRender.getInputEventDOM();
+  constructor(mapRenderer) {
+    this.mapRenderer = mapRenderer;
+    this.canvas = this.mapRenderer.getInputEventDOM();
     this.clickCallbacks = []; // each element is a {DOMElement, callback} object
     this.keydownEveryTickCallbacks = []; // each element is a {DOMElement, callback} object
     this.keydownOnceCallbacks = []; // each element is a {DOMElement, callback} object
@@ -98,7 +98,7 @@ class InputManager {
   }
 
   /**
-   * Register a callback function on clicking the canvas of MapRenderer.
+   * Register a callback function on clicking the canvas of MapRendererer.
    * The unit of clicking position is pixel.
    * @param {Function} callback - Takes two arguments: x and y coordinate
    * in canvas coordinate.
@@ -115,7 +115,7 @@ class InputManager {
    */
   registerCanvasOnClickMapCoord(callback) {
     this.registerCanvasOnClickPixel((canvasX, canvasY) => {
-      const mapCoord = this.mapRender.canvasToMapCoordinate(canvasX, canvasY);
+      const mapCoord = this.mapRenderer.canvasToMapCoordinate(canvasX, canvasY);
       callback(mapCoord);
     });
   }
@@ -133,7 +133,7 @@ class InputManager {
         const rect = this.canvas.getBoundingClientRect();
         const x = event.clientX - rect.left;
         const y = event.clientY - rect.top;
-        const mapCoord = this.mapRender.canvasToMapCoordinate(x, y);
+        const mapCoord = this.mapRenderer.canvasToMapCoordinate(x, y);
         callback(mapCoord);
       }
     });

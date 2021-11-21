@@ -27,7 +27,7 @@ class Client {
    * The initialization function.
    */
   async gameStart() {
-    this.helper.inputManager.registerKeydownOnce(this.helper.mapRenderer.getCanvas(), this.placeBomb.bind(this));
+    this.helper.inputManager.registerKeydownOnce(this.helper.mapRenderer.getInputEventDOM(), this.placeBomb.bind(this));
     // TODO: player cool down
 
     this.helper.mapRenderer.registerCustomizedLayerToDraw(LAYER_OBSTACLE.zIndex, LAYER_OBSTACLE.layerName);
