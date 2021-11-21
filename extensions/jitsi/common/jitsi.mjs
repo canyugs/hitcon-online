@@ -8,6 +8,9 @@ const VOICE_INDICATOR_THRESHOLD = 0.4;
 // constant for exponential smoothing, deltaT = 0.1s, fc = 1/30 Hz
 const ALPHA = 0.0205;
 
+// constant for the max amount of remote users able to display in the overlay
+const REMOTE_USER_MAXAMOUNT = 3;
+
 /**
  * This class is the browser/client side of an extension.
  * One instance is created for each connected player.
@@ -195,14 +198,25 @@ class JitsiHandler {
     const trackId = participantId + track.getType() + track.getId();
 
     if ($(`#jitsi-${participantId}-container`).length === 0) {
-      $('#jitsi-remote-container').append(`
-        <div class='jitsi-user-container active' id='jitsi-${participantId}-container' data-id='${participantId}'>
-          <div class='jitsi-user-loading'></div>
-          <div class='jitsi-user-video'></div>
-          <div class='jitsi-user-audio'></div>
-          <div class='jitsi-user-name' id='jitsi-${participantId}-user-name'>${this.participantsInfo[participantId]._displayName}</div>
-        </div>
-      `);
+      if ($('#jitsi-remote-container').children().length < REMOTE_USER_MAXAMOUNT) {
+        $('#jitsi-remote-container').append(`
+          <div class='jitsi-user-container active' id='jitsi-${participantId}-container' data-id='${participantId}'>
+            <div class='jitsi-user-loading'></div>
+            <div class='jitsi-user-video'></div>
+            <div class='jitsi-user-audio'></div>
+            <div class='jitsi-user-name' id='jitsi-${participantId}-user-name'>${this.participantsInfo[participantId]._displayName}</div>
+          </div>
+        `);
+      } else {
+        $('#jitsi-modal-container').append(`
+          <div class='jitsi-user-container active' id='jitsi-${participantId}-container' data-id='${participantId}'>
+            <div class='jitsi-user-loading'></div>
+            <div class='jitsi-user-video'></div>
+            <div class='jitsi-user-audio'></div>
+            <div class='jitsi-user-name' id='jitsi-${participantId}-user-name'>${this.participantsInfo[participantId]._displayName}</div>
+          </div>
+        `);
+      }
     }
 
     if (track.getType() !== 'audio') {
@@ -529,11 +543,13 @@ class JitsiHandler {
    * Sort the Jitsi screen based on the exponentially smoothed soundness.
    */
   sortScreens() {
-    $('#jitsi-remote-container > .jitsi-user-container').sort((a, b) => {
+    const remoteUserDOM = $('#jitsi-remote-container > .jitsi-user-container, #jitsi-modal-container > .jitsi-user-container').sort((a, b) => {
       const aid = $(a).attr('data-id');
       const bid = $(b).attr('data-id');
       return this.participantSmoothedSounds[bid] - this.participantSmoothedSounds[aid];
-    }).appendTo('#jitsi-remote-container');
+    })
+    remoteUserDOM.slice(0, REMOTE_USER_MAXAMOUNT).appendTo('#jitsi-remote-container');
+    remoteUserDOM.slice(REMOTE_USER_MAXAMOUNT).appendTo('#jitsi-modal-container');
   }
 
   /**
@@ -542,7 +558,7 @@ class JitsiHandler {
    */
   updateIdMappingAndRemoveDanglingUser(playerIdToParticipantIdMapping) {
     this.playerIdToParticipantIdMapping = playerIdToParticipantIdMapping;
-    $('#jitsi-remote-container > .jitsi-user-container').each(function() {
+    $('#jitsi-remote-container > .jitsi-user-container, #jitsi-modal-container > .jitsi-user-container').each(function() {
       if (Object.values(playerIdToParticipantIdMapping).includes($(this).attr('data-id'))) {
         $(this).show();
       } else {
@@ -550,6 +566,8 @@ class JitsiHandler {
         console.warn(`Found dangling paritcipant ${$(this).attr('data-id')}`);
       }
     });
+
+
   }
 }
 export default JitsiHandler;
