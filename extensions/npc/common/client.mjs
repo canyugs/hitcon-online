@@ -72,7 +72,7 @@ class SingleNPC extends InteractiveObjectClientBaseClass {
           mapCoord: mapCoord,
           displayName: clientInfo.visibleName,
           getDrawInfo() {
-            return {mapCoord: this.mapCoord, displayName: this.displayName};
+            return {mapCoord: this.mapCoord, displayName: this.displayName, NPCHighlight: true};
           },
         };
       }
