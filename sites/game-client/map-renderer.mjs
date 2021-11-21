@@ -4,7 +4,16 @@
 import {MapCoord} from '/static/common/maplib/map.mjs';
 
 const MAP_CELL_SIZE = 32; // pixel
-const fontStyle = '12px serif';
+const fontStyle = '12px "Noto Sans TC"';
+const fontColor = '#000';
+const NPCHighlightStyle = 'bold 12px "Noto Sans TC"';
+const NPCHighlightFontColor = '#fff';
+const NPCHighlightBackgroundColor = '#1d52cb';
+const NPCHighlightBorderColor = '#113993';
+const NPCHighlightBorderWidth = '2px';
+const NPCHighlightPaddingX = 4;
+const NPCHighlightPaddingY = 2;
+
 
 const LAYER_PLAYER_IMAGE = {zIndex: 10, layerName: 'playerImage'};
 const LAYER_PLAYER_NAME = {zIndex: 15, layerName: 'playerName'};
@@ -552,20 +561,49 @@ class MapRenderer {
    * would be called to get the information for drawing.
    */
   _drawOneCharacterName(player) {
-    const {mapCoord, displayName} = player.getDrawInfo();
+    const {mapCoord, displayName, NPCHighlight} = player.getDrawInfo();
 
     // If we're not on the same map, we don't need to draw it.
     if (mapCoord.mapName !== this.viewerPosition.mapName) return;
 
+    // TODO: If mapCoord is too far from the canvas, this.ctx.restore() and return;
+    const {x, y} = mapCoord;
+    const canvasCoordinate = this.mapToCanvasCoordinate(new MapCoord(this.viewerPosition.mapName, x + 0.5, y + 1));
+
     // TODO: Remember whether the previous call of `this.draw()` renders text.
     // If so, no need to save and restore the context. May improve performance.
     this.ctx.save();
-    this.ctx.font = fontStyle;
     this.ctx.textAlign = 'center';
     this.ctx.textBaseline = 'bottom';
+    this.ctx.font = (NPCHighlight) ? NPCHighlightStyle : fontStyle;
+    this.ctx.fillStyle = (NPCHighlight) ? NPCHighlightFontColor : fontColor;
 
-    const {x, y} = mapCoord;
-    const canvasCoordinate = this.mapToCanvasCoordinate(new MapCoord(this.viewerPosition.mapName, x + 0.5, y + 1));
+    // highlight NPCs
+    if (NPCHighlight) {
+      this.ctx.save();
+      const {
+        actualBoundingBoxLeft: l,
+        actualBoundingBoxRight: r,
+        actualBoundingBoxAscent: u, // up
+        actualBoundingBoxDescent: d, // down
+      } = this.ctx.measureText(displayName);
+
+      const boxl = Math.floor(canvasCoordinate.x - l) - NPCHighlightPaddingX;
+      const boxr = Math.ceil(canvasCoordinate.x + r) + NPCHighlightPaddingX;
+      const boxu = Math.floor(canvasCoordinate.y - u) - NPCHighlightPaddingY;
+      const boxd = Math.ceil(canvasCoordinate.y + d) + NPCHighlightPaddingY;
+
+      // background color and border
+      // TODO: rounded rectangle
+      this.ctx.fillStyle = NPCHighlightBackgroundColor;
+      this.ctx.strokeStyle = NPCHighlightBorderColor;
+      this.ctx.lineWidth = NPCHighlightBorderWidth;
+      this.ctx.fillRect(boxl, boxu, (boxr - boxl), (boxd - boxu));
+      this.ctx.strokeRect(boxl, boxu, (boxr - boxl), (boxd - boxu));
+
+      this.ctx.restore();
+    }
+
     // there is no need for out-of-canvas check
     this.ctx.fillText(displayName, canvasCoordinate.x, canvasCoordinate.y);
 
