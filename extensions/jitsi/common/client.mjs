@@ -62,29 +62,47 @@ class JitsiFullscreenOverlay extends Overlay {
     this.hide();
     this.hasFullscreen = false;
     this.jitsiObj = jitsiObj;
+    this.focusedParticipantId = null;
+
 
     const self = this;
+    const leaveFullScreen = () => {
+      console.log("leaveFullScreen", self.focusedParticipantId);
+      if (!self.focusedParticipantId) {
+        return;
+      }
+      // move the video element back to where it should be
+      $('#jitsi-fullscreen-overlay > video').appendTo(`#jitsi-${self.focusedParticipantId}-container > .jitsi-user-video`);
+      self.hide();// hide the overlay
+      self.hasFullscreen = false;
+      self.focusedParticipantId = null;
+      self.jitsiObj.room.selectParticipant(null); // clear participant selection.
+      self.jitsiObj.room.off(JitsiMeetJS.events.conference.USER_LEFT, leaveFullScreenEvent);
+    };
+
+    const leaveFullScreenEvent = (participantId) => {
+      console.log("leaveFullScreenEvent", participantId, self.focusedParticipantId);
+      if (participantId === self.focusedParticipantId && self.hasFullscreen) {
+        $('#exit-focus').click();
+      }
+    };
+
     $('#jitsi-remote-container').on('click', '.jitsi-user-container', function() {
       if (self.hasFullscreen) return;
       self.hasFullscreen = true;
-      const focusedParticipantId = $(this).attr('data-id'); // get participant id
+      self.focusedParticipantId = $(this).attr('data-id'); // get participant id
       $(this).find('video').eq(0).appendTo('#jitsi-fullscreen-overlay'); // move the video element to #jitsi-fullscreen-overlay
       self.show(OverlayPosition.LEFT_BOTTOM); // show the overlay
 
       // try to select the participant, so that the video quality would be better.
       try {
-        self.jitsiObj.room.selectParticipant(focusedParticipantId);
+        self.jitsiObj.room.selectParticipant(self.focusedParticipantId);
       } catch (e) {
         console.error("Failed to select the participant", e);
       }
 
-      mainUI.enterFocusMode(self, OverlayPosition.LEFT_BOTTOM, () => {
-        // move the video element back to where it should be
-        $('#jitsi-fullscreen-overlay > video').appendTo(`#jitsi-${focusedParticipantId}-container > .jitsi-user-video`);
-        self.hide();// hide the overlay
-        self.hasFullscreen = false;
-        self.jitsiObj.room.selectParticipant(null); // clear participant selection.
-      });
+      self.jitsiObj.room.on(JitsiMeetJS.events.conference.USER_LEFT, leaveFullScreenEvent);
+      mainUI.enterFocusMode(self, OverlayPosition.LEFT_BOTTOM, leaveFullScreen);
     });
   }
 }
