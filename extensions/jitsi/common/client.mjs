@@ -5,8 +5,10 @@ import JitsiHandler from './jitsi.mjs';
 import ToolbarButton from '/static/sites/game-client/ui/toolbar-button.mjs';
 import Overlay from '/static/sites/game-client/ui/overlay.mjs';
 import OverlayPosition from '/static/sites/game-client/ui/overlay-position.mjs';
+import Modal from '/static/sites/game-client/ui/modal.mjs';
 
 const JITSI_DIV = 'jitsi-container';
+const JITSI_MODAL_DIV = 'jitsi-modal';
 
 class JitsiContainer {
   constructor(mainUI) {
@@ -27,6 +29,22 @@ class JitsiContainer {
     $('#jitsi-remote-container').html('');
   }
 };
+
+class JitsiModal extends Modal {
+  constructor(mainUI, client) {
+    const dom = document.getElementById(JITSI_MODAL_DIV);
+    super(mainUI, dom);
+    this.client = client;
+    $("#jitsi-modal-close-btn").click(() => {
+      this.hide();
+    });
+  }
+
+  onPostShow() {
+    this.setSize('40vw', '70vh');
+    this.setPosition('25vw', '10vh');
+  }
+}
 
 /**
  * This is a temporary overlay to put the Jitsi into fullscreen.
@@ -106,6 +124,12 @@ class Client {
     this.container.hide();
 
     this.overlay = new JitsiFullscreenOverlay(this.helper.mainUI, this.jitsiObj);
+    
+    this.modal = new JitsiModal(this.helper.mainUI, this);
+    this.modalButton = document.querySelector('#jitsi-others-btn');
+    this.modalButton.addEventListener('click', ()=>{
+      this.modal.show();
+    })
 
     // Microphone button
     this.microphoneButton = new ToolbarButton('/static/extensions/jitsi/common/icons/microphone-off.svg', false);
