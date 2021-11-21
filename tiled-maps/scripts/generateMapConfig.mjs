@@ -383,6 +383,18 @@ const conversionConfig = [
     cellsetsConfig: [],
     type: 'single'
   },
+  {
+    srcMapName: 'map06',
+    dstMapName: 'world6',
+    cellsetsConfig: [],
+    type: 'single'
+  },
+  {
+    srcMapName: 'map07',
+    dstMapName: 'world7',
+    cellsetsConfig: [],
+    type: 'single'
+  },
 ];
 
 const newMapsConfig = {};
