@@ -36,7 +36,7 @@ class JitsiHandler {
   /**
    * Create Jitsi connection
    */
-  connect(meetingName, password, userName, hosts) {
+  connect(meetingName, password, userName, connectionInfo) {
     this.meetingName = meetingName;
     this.password = password;
     this.userName = userName;
@@ -63,14 +63,10 @@ class JitsiHandler {
     JitsiMeetJS.init({
       disableAudioLevels: true,
     });
+
     this.connection = new JitsiMeetJS.JitsiConnection(null, null, {
-      // Connection options
-      hosts: hosts,
-      externalConnectUrl: 'https://meet.jit.si/http-pre-bind',
-      serviceUrl: `https://meet.jit.si/http-bind?room=${meetingName}`,
-      websocket: 'wss://meet.jit.si/xmpp-websocket',
-      clientNode: 'http://jitsi.org/jitsimeet',
-      openBridgeChannel: 'websocket'
+      ...connectionInfo,
+      serviceUrl: connectionInfo.serviceUrl + `?room=${meetingName}`
     });
 
     this.connection.addEventListener(

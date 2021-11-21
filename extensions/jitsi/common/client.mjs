@@ -209,7 +209,7 @@ class Client {
   /**
    * Start the Jitsi Meeeting
    */
-  async startMeeting(meetingName, realMeetingName, password, hosts) {
+  async startMeeting(meetingName, realMeetingName, password, connectionInfo) {
     // if this.jitsiObj.isInMeeting is set, the previous meeting has not yet ended.
     // TODO: Probably use Promise instead.
     // We may need to handle the case that `startMeeting` is called multiple times.
@@ -221,7 +221,7 @@ class Client {
       realMeetingName,
       password,
       this.helper.gameClient.playerInfo.displayName,
-      hosts
+      connectionInfo
     );
 
     this.jitsiObj.isMuted.audio = !this.isMicrophoneOn;
@@ -284,10 +284,10 @@ class Client {
       console.warn('Got invalid meeting name from getPassword(): ', realMeetingName, meetingName);
       realMeetingName = meetingName;
     }
-    let hosts = obj.hosts;
+    let connectionInfo = obj.connectionInfo;
 
     // Join meeting
-    this.startMeeting(meetingName, realMeetingName, password, hosts);
+    this.startMeeting(meetingName, realMeetingName, password, connectionInfo);
   }
 
   /**
