@@ -32,6 +32,9 @@ const NOTIFICATION_NUM_LIMIT = 4;
 const ANNOUNCEMENT_ID = 'announcement-text';
 const ANNOUNCEMENT_CONTAINER_ID = 'announcement';
 const ANNOUNCEMENT_NUM_LIMIT = 10;
+const NPC_ID = 'npc';
+const NPCNAME_ID = 'npc-name';
+
 
 const DEFAULT_NOTIFICATION_TIMEOUT = 8000; // ms
 const DEFAULT_ANNOUNCEMENT_TIMEOUT = 30*1000; // ms
@@ -72,6 +75,8 @@ class MainUI {
     this.notificationProgressInnerDom = document.getElementById(NOTIFICATION_PROGRESS_INNER_ID);
     this.announcementDom = document.getElementById(ANNOUNCEMENT_ID);
     this.announcementContDom = document.getElementById(ANNOUNCEMENT_CONTAINER_ID);
+    this.NPCDom = document.getElementById(NPC_ID);
+    this.NPCNameDom = document.getElementById(NPCNAME_ID);
 
     this.utilPanelManager = new UtilPanelManager(this);
     this._notificationList = new Array();
@@ -171,7 +176,18 @@ class MainUI {
       }, timeout);
     }
   };
-
+  /**
+   * Show npc hint.
+   * @param {String} npc name wants to be shown. If null, not show anything.
+   */
+  showNPCHint(name) {
+    const san_name = filterXSS(name);
+    if (name === null) this.NPCDom.classList.add('notification--inactive');
+    else {
+      this.NPCDom.classList.remove('notification--inactive');
+      this.NPCNameDom.textContent = san_name;
+    }
+  }
   /**
    * Show notification in notification area.
    * @param {String} msg The message want to be shown.
