@@ -1,6 +1,20 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="62" height="62" viewBox="0 0 62 62">
-  <g id="Group_134" data-name="Group 134" transform="translate(-619 -353)">
-    <circle id="Ellipse_9" data-name="Ellipse 9" cx="31" cy="31" r="31" transform="translate(619 353)" fill="#939393"/>
-    <path id="Path_116" data-name="Path 116" d="M5.633,25.886h5.752c-.482-4.9,5.863-6.42,5.863-11.578s-3.6-7.348-8.2-7.348a10.8,10.8,0,0,0-8.2,3.9L4.483,14.2a5.185,5.185,0,0,1,3.748-1.93A2.408,2.408,0,0,1,10.9,14.753C10.9,17.8,4.743,20.171,5.633,25.886ZM8.491,36.426a4.1,4.1,0,1,0-3.934-4.119A3.956,3.956,0,0,0,8.491,36.426Z" transform="translate(641.164 362.519)" fill="#fff"/>
-  </g>
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 26.0.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="圖層_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 62 62" style="enable-background:new 0 0 62 62;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:#3C3C3C;}
+	.st1{fill:#FFFFFF;}
+</style>
+<g id="Group_134_00000024002777955050437930000011370243898007630772_" transform="translate(-619 -353)">
+	<circle id="Ellipse_9_00000152255245412911806230000010410637506306629035_" class="st0" cx="650" cy="383.7" r="31"/>
+	<g id="Icon_ionic-md-cube" transform="translate(632.75 366.742)">
+		<path id="Path_131" class="st1" d="M32.9,11.5c-0.1,0-0.2,0-0.4,0.1L20,18h0c-0.5,0.3-0.9,0.9-0.9,1.5v13.1c0,0.5,0.4,0.8,0.9,0.8
+			c0,0,0,0,0,0c0.1,0,0.3,0,0.4-0.1c0,0,0,0,0,0l12.3-6.5l0,0c0.6-0.3,1-0.9,1-1.6V12.3C33.7,11.8,33.3,11.5,32.9,11.5z"/>
+		<path id="Path_132" class="st1" d="M31.9,8L19.2,2.2C18.8,2.1,18.4,2,18,1.9c-0.4,0.1-0.8,0.2-1.2,0.3L4,8c0,0-0.6,0.2-0.6,0.7
+			c0,0.5,0.6,0.8,0.6,0.8l13,6.9c0.6,0.2,1.2,0.2,1.8,0l13-6.9c0.3-0.2,0.5-0.5,0.5-0.8C32.5,8.2,31.9,8,31.9,8z"/>
+		<path id="Path_133" class="st1" d="M16,18L3.5,11.5c-0.1,0-0.2-0.1-0.4-0.1c-0.5,0-0.9,0.3-0.9,0.8c0,0,0,0,0,0v12.9
+			c0,0.7,0.4,1.3,1,1.6l0,0l12.3,6.5c0.1,0.1,0.3,0.1,0.5,0.1c0.5,0,0.9-0.3,0.9-0.8V19.5C16.9,18.9,16.5,18.3,16,18z"/>
+	</g>
+</g>
 </svg>
