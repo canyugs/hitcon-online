@@ -96,6 +96,10 @@ body {
   z-index: 1;
 }
 
+#foregroundcanvas {
+  z-index: 4;
+}
+
 .overlay {
   position: absolute;
   opacity: 85%;
