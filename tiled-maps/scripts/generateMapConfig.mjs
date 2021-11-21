@@ -223,8 +223,13 @@ function convertWorldCombined(newMaps, tilesetDirectory, resultLayerMap, base, c
       },
       {
         ...layerTemplate,
-        data: combineSingleLayer(newMaps, 'foreground', tilesetDirectory, resultLayerMap, base),
+        data: combineSingleLayer(newMaps, 'object', tilesetDirectory, resultLayerMap, base),
         name: 'object',
+      },
+      {
+        ...layerTemplate,
+        data: combineSingleLayer(newMaps, 'foreground', tilesetDirectory, resultLayerMap, base),
+        name: 'foreground1',
       },
       {
         ...layerTemplate,
@@ -299,8 +304,13 @@ function convertWorldSingle(newMaps, tilesetDirectory, resultLayerMap, base, cel
       },
       {
         ...layerTemplate,
-        data: mapSingleLayer(newMaps, mapName, dataCount, 'foreground', tilesetDirectory, resultLayerMap, base),
+        data: mapSingleLayer(newMaps, mapName, dataCount, 'object', tilesetDirectory, resultLayerMap, base),
         name: 'object',
+      },
+      {
+        ...layerTemplate,
+        data: mapSingleLayer(newMaps, mapName, dataCount, 'foreground', tilesetDirectory, resultLayerMap, base),
+        name: 'foreground1',
       },
       {
         ...layerTemplate,
@@ -438,6 +448,7 @@ newAssetsConfig.images = newImageDef;
 newAssetsConfig.layerMap.ground = getAllTileLayerMap();
 newAssetsConfig.layerMap.background = getAllTileLayerMap();
 newAssetsConfig.layerMap.object = getAllTileLayerMap();
+newAssetsConfig.layerMap.foreground1 = getAllTileLayerMap();
 newAssetsConfig.layerMap.bombmanObstacle = {
       "O": [
         "base",
