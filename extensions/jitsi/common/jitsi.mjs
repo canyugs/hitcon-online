@@ -31,6 +31,7 @@ class JitsiHandler {
     };
 
     this.isInMeeting = false;
+    this.connectionLock = false;
   }
 
   /**
@@ -64,6 +65,11 @@ class JitsiHandler {
       disableAudioLevels: true,
     });
 
+    if (this.connectionLock) {
+      return;
+    }
+    this.connectionLock = true;
+
     this.connection = new JitsiMeetJS.JitsiConnection(null, null, {
       ...connectionInfo,
       serviceUrl: connectionInfo.serviceUrl + `?room=${meetingName}`
@@ -90,6 +96,8 @@ class JitsiHandler {
     this.connection.connect();
 
     $('#jitsi-local').empty();
+
+    this.connectionLock = false;
   }
 
   /**
@@ -337,6 +345,11 @@ class JitsiHandler {
    * This is called when connection is established successfully
    */
   onConnectionSuccess() {
+    if (this.connectionLock) {
+      return;
+    }
+    this.connectionLock = true;
+
     this.room = this.connection.initJitsiConference(
       this.meetingName.toLowerCase(),
       {
@@ -357,6 +370,8 @@ class JitsiHandler {
     this.room.setDisplayName(this.userName);
     this.room.setSenderVideoConstraint(720);
     this.room.join(this.password);
+
+    this.connectionLock = false;
   }
 
   /**
@@ -408,10 +423,10 @@ class JitsiHandler {
    */
   async unload() {
     // Prevent unloading multiple times.
-    if (this?.isUnloading) {
+    if (this.connectionLock) {
       return;
     }
-    this.isUnloading = true;
+    this.connectionLock = true;
 
     if (this.localTracks) {
       for (const [type, track] of Object.entries(this.localTracks)) {
@@ -442,7 +457,7 @@ class JitsiHandler {
     }
 
     this.isInMeeting = false;
-    this.isUnloading = false;
+    this.connectionLock = false;
   }
 
   /**
