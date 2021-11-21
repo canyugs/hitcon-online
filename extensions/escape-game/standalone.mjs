@@ -19,7 +19,6 @@ import {getRunPath, getConfigPath} from '../../common/path-util/path.mjs';
 import DataStore from '../../common/rpc-directory/data-store.mjs';
 
 const MAX_PLAYER_PER_TEAM = 5;
-const STORAGE_NAME = 'cat-adventure-redeem-code';
 
 // Bring out the FSM_ERROR for easier reference.
 const FSM_ERROR = InteractiveObjectServerBaseClass.FSM_ERROR;
@@ -97,15 +96,16 @@ class Standalone {
     );
     const rpcProto = grpc.loadPackageDefinition(packageDefinition).TerminalServer;
     this.terminalServerGrpcService = new rpcProto.TerminalServer(TERMINAL_SERVER_GRPC_LOCATION, grpc.credentials.createInsecure());
+
+    // Redeem code
+    this.distributedCodes = {};
   }
 
   /**
    * Initializes the extension.
    */
   async initialize() {
-    // Redeem code
-    this.storage = new DataStore();
-    this.distributedCodes = await this.storage.loadData(STORAGE_NAME);
+    await this._loadFromDisk();
 
     await this.helper.callS2sAPI('iobj-lib', 'reqRegister');
     this.terminalObjects.forEach((v) => {
@@ -684,7 +684,7 @@ class Standalone {
         }
       }
       this.distributedCodes[eventName][playerID] = redeemCode;
-      await this.storage.saveData(STORAGE_NAME, this.distributedCodes);
+      await this.helper.storeData(this._packStoredData());
     } else {
       redeemCode = this.distributedCodes[eventName][playerID];
     }
@@ -695,6 +695,39 @@ class Standalone {
       return nextState;
     }
     return errorState;
+  }
+
+
+  /* Data Store */
+
+  /**
+   * Load the database on disk back to this class.
+   */
+  async _loadFromDisk() {
+    const data = await this.helper.loadData();
+    if (Object.keys(data).length === 0) {
+      // First time loading, we don't need to do anything.
+    } else {
+      this._unpackStoredData(data);
+    }
+  }
+
+  /**
+   * This function packages all the data that need to be stored into a big object
+   * This function is usually called before `this.helper.storeData`
+   */
+  _packStoredData() {
+    return {
+      distributedCodes: this.distributedCodes
+    };
+  }
+
+  /**
+   * This function unpacks a JSON object that is created by _packStoredData() into this.
+   */
+  _unpackStoredData(data) {
+    this.distributedCodes = data?.distributedCodes ?? {};
+    console.log(`this.distributedCodes: ${this.distributedCodes}`);
   }
 }
 
