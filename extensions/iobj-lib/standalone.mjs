@@ -107,7 +107,8 @@ class Standalone {
    * only when the player correctly answers goalPoints of them.
    */
   async s2s_sf_answerProblems(srcExt, playerID, kwargs, sfInfo) {
-    const {problems, goalPoints, nextState, nextStateIncorrect, file} = kwargs;
+    const {problems, goalPoints, nextState, nextStateIncorrect} = kwargs;
+    const file = kwargs.file ? kwargs.file : 'problems.json';
     if (!Number.isInteger(problems)) {
       console.error('Invalid number of problems: ', problems);
       return FSM_ERROR;
