@@ -14,7 +14,8 @@ class IframeOverlay extends Overlay {
 
     const expandBtn  = document.getElementById('iframe-expand');
     expandBtn.onclick = () => {
-      mainUI.enterFocusMode(this, OverlayPosition.LEFT_BOTTOM);
+      mainUI.userOverlay.hide();
+      mainUI.enterFocusMode(this, OverlayPosition.LEFT_BOTTOM, ()=>{mainUI.userOverlay.show();});
     };
   }
 
