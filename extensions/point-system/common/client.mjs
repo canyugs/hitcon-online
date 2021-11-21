@@ -83,6 +83,26 @@ class Client {
   }
 
   /**
+   * Redeem the points to the specific user.
+   * @param {string} redeemCode The redeem code.
+   */
+   async s2c_redeemPoints(redeemCode) {
+    try {
+      let ret = await this.requestApi('/points/redeem-code', 'POST', {
+        code: redeemCode
+      });
+      await this.s2c_updatePoints();
+      if (ret?.success) {
+        this.helper.mainUI.showNotification(`You've get ${ret?.points} points.`, 5000);
+      }
+      return ret?.success;
+    } catch (e) {
+      console.error('Failed to redeem points: ', e);
+      return false;
+    }
+  }
+
+  /**
    * Notify other users to update the points.
    * @param uid User id
    */
