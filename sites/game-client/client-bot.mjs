@@ -15,9 +15,9 @@ class ClientBot {
     constructor(mapRenderer) {
         this.keyMap = {'ArrowUp': 'ArrowUp', 'ArrowLeft': 'ArrowLeft', 'ArrowRight': 'ArrowRight', 'ArrowDown': 'ArrowDown'};
         this.keys = Object.keys(this.keyMap);
-        mapRenderer.canvas.click(); // Focus on the canvas to press keys
+        mapRenderer.getInputEventDOM().click(); // Focus on the canvas to press keys
         setInterval(() => {
-            this.pressKey(mapRenderer.canvas, 1000, this.keys[Math.floor(Math.random() * this.keys.length)]);
+            this.pressKey(mapRenderer.getInputEventDOM(), 1000, this.keys[Math.floor(Math.random() * this.keys.length)]);
         }, 2000);
     }
 

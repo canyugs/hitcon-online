@@ -129,6 +129,13 @@ class MapRenderer {
   }
 
   /**
+   * Return the canvas or DOM that is designed to received events.
+   */
+  getInputEventDOM() {
+    return this.foregroundCanvas;
+  }
+
+  /**
    * This function is a listener of "gameStart" event.
    */
   initializeViewerPosition() {
