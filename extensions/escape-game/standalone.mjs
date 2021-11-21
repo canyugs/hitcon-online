@@ -16,8 +16,10 @@ import {promisify} from 'util';
 import {fileURLToPath} from 'url';
 import InteractiveObjectServerBaseClass from '../../common/interactive-object/server.mjs';
 import {getRunPath, getConfigPath} from '../../common/path-util/path.mjs';
+import DataStore from '../../common/rpc-directory/data-store.mjs';
 
 const MAX_PLAYER_PER_TEAM = 5;
+const STORAGE_NAME = 'cat-adventure-redeem-code';
 
 // Bring out the FSM_ERROR for easier reference.
 const FSM_ERROR = InteractiveObjectServerBaseClass.FSM_ERROR;
@@ -101,6 +103,10 @@ class Standalone {
    * Initializes the extension.
    */
   async initialize() {
+    // Redeem code
+    this.storage = new DataStore();
+    this.distributedCodes = await this.storage.loadData(STORAGE_NAME);
+
     await this.helper.callS2sAPI('iobj-lib', 'reqRegister');
     this.terminalObjects.forEach((v) => {
       v.registerExtStateFunc('showTerminal', 'escape-game', 'sf_showTerminal');
@@ -115,7 +121,7 @@ class Standalone {
     return {
       address: getConfigWithDefault('terminal.publicAddress', '127.0.0.1'),
       path: getConfigWithDefault('terminal.socketioPath', '') + '/socket.io'
-    }
+    };
   }
 
   /**
@@ -651,6 +657,41 @@ class Standalone {
       }
     }
     if (result) {
+      return nextState;
+    }
+    return errorState;
+  }
+
+
+  /**
+   * Give a redeem code to the user.
+   */
+   async s2s_sf_giveRedeemCode(srcExt, playerID, kwargs, sfInfo) {
+    const {nextState, errorState} = kwargs;
+    let {redeemCodes, eventName} = kwargs;
+
+    if (!(eventName in this.distributedCodes)) {
+      this.distributedCodes[eventName] = {};
+    }
+
+    let redeemCode = null;
+
+    if (!(playerID in this.distributedCodes[eventName])) {
+      for (let i = 0; i < redeemCodes.length; i++) {
+        if (!Object.values(this.distributedCodes[eventName]).includes(redeemCodes[i])) {
+          redeemCode = redeemCodes[i];
+          break;
+        }
+      }
+      this.distributedCodes[eventName][playerID] = redeemCode;
+      await this.storage.saveData(STORAGE_NAME, this.distributedCodes);
+    } else {
+      redeemCode = this.distributedCodes[eventName][playerID];
+    }
+
+    if (redeemCode) {
+      await this.helper.callS2cAPI(playerID, 'dialog', 'showDialog', 60*1000, 'Redeem Code', `Your redeem code is ${redeemCode}`);
+      // await this.helper.callS2cAPI(playerID, 'point-system', 'redeemPoints', 60*1000, redeemCode);
       return nextState;
     }
     return errorState;
