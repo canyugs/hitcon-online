@@ -35,7 +35,8 @@ function fetchTextLayer(targetLayer, startIdx, endIdx, mapName, layerName) {
 
   if (targetLayer === undefined) {
     // no text layer here.
-    console.warn(`No text layer ${layerName} in ${mapName}`);
+    // Probably not an issue, some maps are missing some layers.
+    // console.warn(`No text layer ${layerName} in ${mapName}`);
     return result.map((idx) => null);
   }
 
@@ -103,7 +104,8 @@ function combineSingleLayer(childMaps, layerName, tilesetDirectory, resultLayerM
       if (layerName === 'jitsi' || layerName === 'iframe' || layerName === 'portal') data = fetchTextLayer(targetLayer, startIdx, endIdx, mapName, layerName);
       else {
         if (typeof targetLayer === 'undefined' || typeof targetLayer.data !== 'object') {
-          console.warn(`No data for ${layerName}, ${mapName}: `, targetLayer);
+          // Probably not an issue, some maps are missing some layers.
+          // console.warn(`No data for ${layerName}, ${mapName}: `, targetLayer);
           data = Array.from({length: endIdx-startIdx}, (v, i) => null);
         } else {
           data = targetLayer.data.slice(startIdx, endIdx);
@@ -131,7 +133,8 @@ function combineSingleLayer(childMaps, layerName, tilesetDirectory, resultLayerM
       if (layerName === 'jitsi' || layerName === 'iframe' || layerName === 'portal') data = fetchTextLayer(targetLayer, startIdx, endIdx, mapName, layerName);
       else {
         if (typeof targetLayer === 'undefined' || typeof targetLayer.data !== 'object') {
-          console.warn(`No data for ${layerName}, ${mapName}: `, targetLayer);
+          // Probably not an issue, some maps are missing some layers.
+          //console.warn(`No data for ${layerName}, ${mapName}: `, targetLayer);
           data = Array.from({length: endIdx-startIdx}, (v, i) => null);
         } else {
           data = targetLayer.data.slice(startIdx, endIdx);

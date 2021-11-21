@@ -431,7 +431,7 @@ charImages.images.forEach((img) => {
       console.error(`(Error) Duplicate image ${img.name} with different URL: `, img, tmpImagesDef[img.name]);
     } else {
       // Probably not an issue
-      console.warn(`(Warning) Duplicate img ${img.name}: `, img, tmpImagesDef[img.name]);
+      console.warn(`(Warning) Duplicate img ${img.name}.`);
     }
   }
   tmpImagesDef[img.name] = img;
