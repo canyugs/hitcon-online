@@ -6,6 +6,7 @@
 @import url('error-modal.css');
 @import url('avatar-selection.css');
 @import url('loading-screen.css');
+@import url('intro-modal.css');
 
 html, body {
   margin: 0px;
