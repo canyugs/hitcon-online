@@ -3,13 +3,13 @@
 
 import {createRnnoiseProcessor} from './rnnoise/index.js';
 
-const VOICE_INDICATOR_THRESHOLD = 0.4;
+const VOICE_INDICATOR_THRESHOLD = 0.10;
 
 // constant for exponential smoothing, deltaT = 0.1s, fc = 1/30 Hz
 const ALPHA = 0.0205;
 
 // constant for the max amount of remote users able to display in the overlay
-const REMOTE_USER_MAXAMOUNT = 3;
+const REMOTE_USER_MAXAMOUNT = 2;
 
 /**
  * This class is the browser/client side of an extension.
@@ -381,7 +381,6 @@ class JitsiHandler {
     this.room.on(JitsiMeetJS.events.conference.TRACK_MUTE_CHANGED, this.onTrackMute.bind(this));
     // this.room.on(JitsiMeetJS.events.conference.PARTICIPANT_PROPERTY_CHANGED, this.setRemoteVolumeMeter.bind(this));
     this.room.on(JitsiMeetJS.events.conference.TRACK_AUDIO_LEVEL_CHANGED, (participantId, audioLevel) => {
-      console.log(participantId, audioLevel);
       this.participantSounds[participantId] = audioLevel;
     });
 

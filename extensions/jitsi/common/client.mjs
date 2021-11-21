@@ -67,7 +67,6 @@ class JitsiFullscreenOverlay extends Overlay {
 
     const self = this;
     const leaveFullScreen = () => {
-      console.log("leaveFullScreen", self.focusedParticipantId);
       if (!self.focusedParticipantId) {
         return;
       }
@@ -81,7 +80,6 @@ class JitsiFullscreenOverlay extends Overlay {
     };
 
     const leaveFullScreenEvent = (participantId) => {
-      console.log("leaveFullScreenEvent", participantId, self.focusedParticipantId);
       if (participantId === self.focusedParticipantId && self.hasFullscreen) {
         $('#exit-focus').click();
       }
@@ -142,7 +140,7 @@ class Client {
     this.container.hide();
 
     this.overlay = new JitsiFullscreenOverlay(this.helper.mainUI, this.jitsiObj);
-    
+
     this.modal = new JitsiModal(this.helper.mainUI, this);
     this.modalButton = document.querySelector('#jitsi-others-btn');
     this.modalButton.addEventListener('click', ()=>{
