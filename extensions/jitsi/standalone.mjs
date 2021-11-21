@@ -43,10 +43,17 @@ class Standalone {
     if (typeof this.prefix !== 'string') {
       this.prefix = '';
     }
-    this.hosts = getConfigWithDefault('jitsi.hosts',  {
-      "domain": "meet.jit.si",
-      "muc": "conference.meet.jit.si",
-      "focus": "focus.meet.jit.si"
+    this.connectionInfo = getConfigWithDefault('jitsi.connectionInfo',  {
+      "hosts": {
+        "domain": "meet.jit.si",
+        "muc": "conference.meet.jit.si",
+        "focus": "focus.meet.jit.si"
+      },
+      "externalConnectUrl": "https://meet.jit.si/http-pre-bind",
+      "serviceUrl": "https://meet.jit.si/http-bind",
+      "websocket": "wss://meet.jit.si/xmpp-websocket",
+      "clientNode": "http://jitsi.org/jitsimeet",
+      "openBridgeChannel": "websocket"
     });
   }
 
@@ -104,7 +111,7 @@ class Standalone {
       meetingName = c.digest().toString('hex');
     }
     meetingName = this.prefix + meetingName;
-    return {'pass': 'Unimplemented', 'meetingName': meetingName, 'hosts': this.hosts};
+    return {'pass': 'Unimplemented', 'meetingName': meetingName, 'connectionInfo': this.connectionInfo};
   }
 
   /**
