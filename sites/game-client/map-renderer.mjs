@@ -60,6 +60,11 @@ class MapRenderer {
     this.foregroundCtx = foregroundCanvas.getContext('2d');
     this.outOfBoundCtx = outOfBoundCanvas.getContext('2d');
 
+    // Holds the current mapName for each of the canvas.
+    // Clear out items in this object to mark the layer as dirty (to be
+    // re-rendered).
+    this._currentMapName = {};
+
     /**
      * viewerPosition is the **map coordinate** of the center of canvas.
      * It is a real number, which enables smooth moving of the camera;
@@ -122,6 +127,7 @@ class MapRenderer {
     clearCtx(this.ctx);
     clearCtx(this.backgroundCtx);
     clearCtx(this.outOfBoundCtx);
+    clearCtx(this.foregroundCtx);
 
     // Note: The last one is a bit too extreme, if testing fails for any reason
     // try removing the next line.
@@ -336,16 +342,19 @@ class MapRenderer {
     let targetLock;
     let targetCanvas;
     let targetLayers;
+    let targetCtx;
     switch (which) {
       case 'foreground':
         targetLock = this._generateForegroundLock;
         targetCanvas = this.foregroundCanvas;
         targetLayers = this.customizedForegroundLayers;
+        targetCtx = this.foregroundCtx
         break;
       case 'background':
-        targetLock = this._generateForegroundLock;
+        targetLock = this._generateBackgroundLock;
         targetCanvas = this.backgroundCanvas;
         targetLayers = this.customizedBackgroundLayers;
+        targetCtx = this.backgroundCtx;
         break;
       default:
         console.warn(`Invalid target in MapRenderer.generateStaticMap(): \`${which}\``);
@@ -357,9 +366,9 @@ class MapRenderer {
     }
     targetLock.lock = true;
 
-    // If the current map is not changed, no need to rerender.
+    // If the current map is not changed or dirty, no need to rerender.
     const mapName = this.viewerPosition.mapName;
-    if (this._currentBackgroundMapName === mapName) {
+    if (this._currentMapName[which] === mapName) {
       targetLock.lock = false;
       return;
     }
@@ -382,7 +391,7 @@ class MapRenderer {
 
             const canvasX = mapX * MAP_CELL_SIZE;
             const canvasY = targetCanvas.height - renderInfo.srcHeight - mapY * MAP_CELL_SIZE;
-            this.backgroundCtx.drawImage(
+            targetCtx.drawImage(
                 renderInfo.image,
                 renderInfo.srcX,
                 renderInfo.srcY,
@@ -403,7 +412,7 @@ class MapRenderer {
       }
     }
 
-    this._currentBackgroundMapName = mapName;
+    this._currentMapName[which] = mapName;
     targetLock.lock = false;
   }
 
