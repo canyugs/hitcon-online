@@ -117,7 +117,6 @@ class Client {
   onSelfPlayerUpdate(msg) {
     if (typeof this.NPCs === 'object') {
       for (const npc of this.NPCs) {
-        console.log(npc);
         if (msg.mapCoord.distanceTo1(npc[1].mapCoord) <= 1) {
           this.helper.mainUI.showNPCHint(npc[1].npcName);
           return

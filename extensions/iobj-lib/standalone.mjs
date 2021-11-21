@@ -107,12 +107,12 @@ class Standalone {
    * only when the player correctly answers goalPoints of them.
    */
   async s2s_sf_answerProblems(srcExt, playerID, kwargs, sfInfo) {
-    const {problems, goalPoints, nextState, nextStateIncorrect} = kwargs;
+    const {problems, goalPoints, nextState, nextStateIncorrect, file} = kwargs;
     if (!Number.isInteger(problems)) {
       console.error('Invalid number of problems: ', problems);
       return FSM_ERROR;
     }
-    let problemSet = JSON.parse(fs.readFileSync(getRunPath('items/problems.json')));
+    let problemSet = JSON.parse(fs.readFileSync(getRunPath('items/${file}')));
     randomShuffle(problemSet);
     let result, correct = 0, d = '';
     for (let i = 0; i < problems; i++) {
