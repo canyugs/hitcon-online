@@ -8,7 +8,17 @@ const fontStyle = '12px serif';
 
 const LAYER_PLAYER_IMAGE = {zIndex: 10, layerName: 'playerImage'};
 const LAYER_PLAYER_NAME = {zIndex: 15, layerName: 'playerName'};
-const LAYER_OBJECT = {zIndex: 1, layerName: 'object'};
+
+const LAYER_BACKGROUND1 = {zIndex: -100000, layerName: 'ground'};
+const LAYER_BACKGROUND2 = {zIndex: -99999, layerName: 'background'};
+const LAYER_BACKGROUND3 = {zIndex: 1, layerName: 'object'};
+const LAYER_BACKGROUND4 = {zIndex: 2, layerName: 'background4'};
+const LAYER_BACKGROUND5 = {zIndex: 3, layerName: 'background5'};
+
+const LAYER_FOREGROUND1 = {zIndex: 20, layerName: 'foreground1'};
+const LAYER_FOREGROUND2 = {zIndex: 21, layerName: 'foreground2'};
+const LAYER_FOREGROUND3 = {zIndex: 22, layerName: 'foreground3'};
+const LAYER_FOREGROUND4 = {zIndex: 23, layerName: 'foreground4'};
 
 const OUTER_SPACE_TILE = ['ground', 'H']; // the parameters of GraphicAsset.getTile()
 
@@ -30,21 +40,24 @@ const OUTER_SPACE_TILE = ['ground', 'H']; // the parameters of GraphicAsset.getT
 class MapRenderer {
   /**
    * Create a new MapRender.
-   * @param {Canvas} foregroundCanvas - The canvas to draw onto.
+   * @param {Canvas} mainContentCanvas - The canvas to draw onto.
    * @param {Canvas} backgroundCanvas - The background canvas.
+   * @param {Canvas} foregroundCanvas - The foreground canvas.
    * @param {Canvas} outOfBoundCanvas - The canvas to draw out-of-bound tile.
    * @param {GameMap} map - The map object to retrieve the map information.
    * @param {GameState} gameState - The game state.
    */
-  constructor(foregroundCanvas, backgroundCanvas, outOfBoundCanvas, map, gameState) {
-    this.canvas = foregroundCanvas;
+  constructor(mainContentCanvas, backgroundCanvas, foregroundCanvas, outOfBoundCanvas, map, gameState) {
+    this.canvas = mainContentCanvas;
     this.backgroundCanvas = backgroundCanvas;
+    this.foregroundCanvas = foregroundCanvas;
     this.outOfBoundCanvas = outOfBoundCanvas;
     this.map = map;
     this.gameState = gameState;
     this.gameClient = null; // will be initialized in this.setGameClient()
-    this.ctx = foregroundCanvas.getContext('2d');
+    this.ctx = mainContentCanvas.getContext('2d');
     this.backgroundCtx = backgroundCanvas.getContext('2d');
+    this.foregroundCtx = foregroundCanvas.getContext('2d');
     this.outOfBoundCtx = outOfBoundCanvas.getContext('2d');
 
     /**
@@ -59,22 +72,31 @@ class MapRenderer {
     /**
      * @member {Array} customizedLayers - Customized layer that needs to be rendered.
      * Refer to `this.registerCustomizedLayerToDraw()` for more details.
-     */
-    this.customizedLayers = [];
-    /**
      * @member {Array} customizedBackgroundLayers - Customized layer that needs to be rendered to background canvas.
      * Refer to `this.registerCustomizedLayerToDrawBackground()` for more details.
+     * @member {Array} customizedForegroundLayers - Customized layer that needs to be rendered to background canvas.
+     * Refer to `this.registerCustomizedLayerToDrawBackground()` for more details.
      */
+    this.customizedLayers = [];
     this.customizedBackgroundLayers = [];
+    this.customizedForegroundLayers = [];
 
     // 'playerImage' and 'playerName' are layers defined and used only by MapRenderer
     this.registerCustomizedLayerToDraw(LAYER_PLAYER_IMAGE.zIndex, LAYER_PLAYER_IMAGE.layerName, '_drawManyCharacterImage', this.gameState.players);
     this.registerCustomizedLayerToDraw(LAYER_PLAYER_NAME.zIndex, LAYER_PLAYER_NAME.layerName, '_drawManyCharacterName', this.gameState.players);
 
     // other background layers
-    this.registerCustomizedLayerToDrawBackground(-100000, 'ground');
-    this.registerCustomizedLayerToDrawBackground(-99999, 'background');
-    this.registerCustomizedLayerToDrawBackground(LAYER_OBJECT.zIndex, LAYER_OBJECT.layerName);
+    this.registerCustomizedLayerToDrawBackground(LAYER_BACKGROUND1.zIndex, LAYER_BACKGROUND1.layerName);
+    this.registerCustomizedLayerToDrawBackground(LAYER_BACKGROUND2.zIndex, LAYER_BACKGROUND2.layerName);
+    this.registerCustomizedLayerToDrawBackground(LAYER_BACKGROUND3.zIndex, LAYER_BACKGROUND3.layerName);
+    this.registerCustomizedLayerToDrawBackground(LAYER_BACKGROUND4.zIndex, LAYER_BACKGROUND4.layerName);
+    this.registerCustomizedLayerToDrawBackground(LAYER_BACKGROUND5.zIndex, LAYER_BACKGROUND5.layerName);
+
+    // foreground layers
+    this.registerCustomizedLayerToDrawForeground(LAYER_FOREGROUND1.zIndex, LAYER_FOREGROUND1.layerName);
+    this.registerCustomizedLayerToDrawForeground(LAYER_FOREGROUND2.zIndex, LAYER_FOREGROUND2.layerName);
+    this.registerCustomizedLayerToDrawForeground(LAYER_FOREGROUND3.zIndex, LAYER_FOREGROUND2.layerName);
+    this.registerCustomizedLayerToDrawForeground(LAYER_FOREGROUND4.zIndex, LAYER_FOREGROUND2.layerName);
   }
 
   /**
@@ -247,6 +269,19 @@ class MapRenderer {
   }
 
   /**
+   * Similar to registerCustomizedLayerToDraw but draws to foreground canvas.
+   * @param {Number} zIndex - Should be an integer. Refer to the definition of 'z-index' in CSS.
+   * @param {String} layerName - The layer to be drawn.
+   * @param {String} renderFunction - Optional. The rendering function used to render this layer.
+   * @param {any} renderArgs - Optional. The optional argument if renderFunction requires one.
+   */
+  registerCustomizedLayerToDrawForeground(zIndex, layerName, renderFunction, renderArgs) {
+    // TODO: use binary search and Array.prototype.splice() to improve performance
+    this.customizedForegroundLayers.push([zIndex, layerName, renderFunction, renderArgs]);
+    this.customizedForegroundLayers.sort((a, b) => a[0] - b[0]);
+  }
+
+  /**
    * Render the out-of-bound tiles.
    */
   generateOutOfBoundBackground() {
@@ -281,30 +316,54 @@ class MapRenderer {
   }
 
   /**
-   * Render the background map to background canvas.
+   * Render the static part of map to target canvas.
    * This function is not reentrant (guarded by the if-else at the entry of the function).
    */
-  async generateBackground() {
+  async generateStaticMap(which) {
+    // initialize
+    if (this._generateBackgroundLock === undefined) {
+      this._generateBackgroundLock = {lock: false};
+      this._generateForegroundLock = {lock: false};
+    }
+
+    let targetLock;
+    let targetCanvas;
+    let targetLayers;
+    switch (which) {
+      case 'foreground':
+        targetLock = this._generateForegroundLock;
+        targetCanvas = this.foregroundCanvas;
+        targetLayers = this.customizedForegroundLayers;
+        break;
+      case 'background':
+        targetLock = this._generateForegroundLock;
+        targetCanvas = this.backgroundCanvas;
+        targetLayers = this.customizedBackgroundLayers;
+        break;
+      default:
+        console.warn(`Invalid target in MapRenderer.generateStaticMap(): \`${which}\``);
+        return;
+    }
     // There should be at most one thread doing this job in client's browser.
-    if (this._generateBackgroundLock !== undefined) {
+    if (targetLock.lock) {
       return;
     }
-    this._generateBackgroundLock = true;
+    targetLock.lock = true;
 
     // If the current map is not changed, no need to rerender.
     const mapName = this.viewerPosition.mapName;
     if (this._currentBackgroundMapName === mapName) {
-      this._generateBackgroundLock = undefined;
+      targetLock.lock = false;
       return;
     }
 
     // set canvas size
     const mapSize = this.map.getMapSize(mapName);
-    this.backgroundCanvas.width = mapSize.width * MAP_CELL_SIZE;
-    this.backgroundCanvas.height = mapSize.height * MAP_CELL_SIZE;
+    targetCanvas.width = mapSize.width * MAP_CELL_SIZE;
+    targetCanvas.height = mapSize.height * MAP_CELL_SIZE;
 
     // draw background
-    for (const [, layerName, renderFunction, renderArgs] of this.customizedBackgroundLayers) {
+    for (const [, layerName, renderFunction, renderArgs] of targetLayers) {
       if (renderFunction === '_drawWatermark') {
         this._drawWatermark(renderArgs);
       } else {
@@ -315,7 +374,7 @@ class MapRenderer {
             if (renderInfo === null) continue;
 
             const canvasX = mapX * MAP_CELL_SIZE;
-            const canvasY = this.backgroundCanvas.height - renderInfo.srcHeight - mapY * MAP_CELL_SIZE;
+            const canvasY = targetCanvas.height - renderInfo.srcHeight - mapY * MAP_CELL_SIZE;
             this.backgroundCtx.drawImage(
                 renderInfo.image,
                 renderInfo.srcX,
@@ -338,7 +397,7 @@ class MapRenderer {
     }
 
     this._currentBackgroundMapName = mapName;
-    this._generateBackgroundLock = undefined;
+    targetLock.lock = false;
   }
 
   /**
@@ -375,7 +434,7 @@ class MapRenderer {
    * Use CSS transform to improve performance.
    * reference: https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Optimizing_canvas#scaling_canvas_using_css_transforms
    */
-  translateBackground() {
+  translateStaticMaps() {
     if (this._translateBackgroundPreviousX === undefined) {
       this._translateBackgroundPreviousX = Infinity;
       this._translateBackgroundPreviousY = Infinity;
@@ -389,6 +448,7 @@ class MapRenderer {
     const translateX = -Math.floor(mapX * MAP_CELL_SIZE);
     const translateY = -Math.floor(this.backgroundCanvas.height - (mapY * MAP_CELL_SIZE));
     this.backgroundCanvas.style.transform = `translate(${translateX}px, ${translateY}px)`;
+    this.foregroundCanvas.style.transform = `translate(${translateX}px, ${translateY}px)`;
 
     this._translateBackgroundPreviousX = mapX;
     this._translateBackgroundPreviousY = mapY;
@@ -404,11 +464,12 @@ class MapRenderer {
     // update viewer position
     this.updateViewerPosition();
 
-    // draw background
+    // draw static part of map
     this.generateOutOfBoundBackground();
     this.translateOutOfBoundBackground();
-    this.generateBackground();
-    this.translateBackground();
+    this.generateStaticMap('background');
+    this.generateStaticMap('foreground');
+    this.translateStaticMaps();
 
     // draw foreground
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
