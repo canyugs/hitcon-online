@@ -57,6 +57,8 @@ class SingleNPC extends InteractiveObjectClientBaseClass {
     clientInfo.mapCoord = mapCoord;
     const facing = 'D';
 
+    let displayChar = undefined;
+    let displayName = undefined;
     for (const cfg of clientInfo.displayConfig) {
       if (cfg.layerName === 'npcImage') {
         cfg.renderArgs = {
@@ -67,6 +69,7 @@ class SingleNPC extends InteractiveObjectClientBaseClass {
             return {mapCoord: this.mapCoord, displayChar: this.displayChar, facing: this.facing};
           },
         };
+        displayChar = cfg.character;
       } else if (cfg.layerName === 'npcName') {
         cfg.renderArgs = {
           mapCoord: mapCoord,
@@ -75,6 +78,7 @@ class SingleNPC extends InteractiveObjectClientBaseClass {
             return {mapCoord: this.mapCoord, displayName: this.displayName, NPCHighlight: true};
           },
         };
+        displayName = clientInfo.visibleName;
       }
     }
 
@@ -84,6 +88,8 @@ class SingleNPC extends InteractiveObjectClientBaseClass {
 
     super(helper, clientInfo, interactFunction);
     this.npcName = npcName;
+    this.displayChar = displayChar;
+    this.displayName = displayName;
   }
 }
 
@@ -123,9 +129,15 @@ class Client {
     if (typeof this.NPCs === 'object') {
       const NPC_HINT_DIST = 2;
       for (const npc of this.NPCs) {
+        if (!(npc[1].displayChar && npc[1].displayName)) {
+          // NPC should not be obvious.
+          continue;
+        }
         if (msg.mapCoord.distanceTo1(npc[1].mapCoord) <= (npc[1].distanceLimit ?
             Math.min(npc[1].distanceLimit, NPC_HINT_DIST) : NPC_HINT_DIST)) {
-          this.helper.mainUI.showNPCHint(npc[1].npcName);
+          const isrc = this.helper.gameMap.graphicAsset.characterToImageURL(
+            npc[1].displayChar, 'D', 32, 32);
+          this.helper.mainUI.showNPCHint(npc[1].displayName, isrc);
           return
         }
       }

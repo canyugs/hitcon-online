@@ -170,6 +170,10 @@
   margin-right: 20px;
 }
 
+.notification--npc--avatar > img {
+  width: 100%;
+}
+
 .notification--npc--text {
   display: flex;
   flex-direction: column;
