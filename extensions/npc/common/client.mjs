@@ -90,6 +90,10 @@ class SingleNPC extends InteractiveObjectClientBaseClass {
     this.npcName = npcName;
     this.displayChar = displayChar;
     this.displayName = displayName;
+    if (this.displayChar) {
+      this.displayCharImgSrc = helper.gameMap.graphicAsset.characterToImageURL(
+            displayChar, 'D', 32, 32);
+    }
   }
 }
 
@@ -135,9 +139,7 @@ class Client {
         }
         if (msg.mapCoord.distanceTo1(npc[1].mapCoord) <= (npc[1].distanceLimit ?
             Math.min(npc[1].distanceLimit, NPC_HINT_DIST) : NPC_HINT_DIST)) {
-          const isrc = this.helper.gameMap.graphicAsset.characterToImageURL(
-            npc[1].displayChar, 'D', 32, 32);
-          this.helper.mainUI.showNPCHint(npc[1].displayName, isrc);
+          this.helper.mainUI.showNPCHint(npc[1].displayName, npc[1].displayCharImgSrc);
           return
         }
       }
