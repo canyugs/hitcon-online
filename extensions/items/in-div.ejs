@@ -61,7 +61,8 @@
 
 .item-divider {
   border: 1px solid #707070;
-  margin: .5em;
+  margin: 0 1em;
+  height: 100%;
 }
 
 .item-obj {
@@ -75,12 +76,14 @@
 }
 
 .item-icon {
-  padding: 1em;
+  display: flex;
+  flex-basis: 3em;
+  align-items: center;
+  justify-content: center;
 }
 
 .item-block {
   flex-grow: 10;
-  padding-left: 0.5em;
 }
 
 .item-block-name-holder {
@@ -106,13 +109,16 @@
   font-size: 16px;
   font-weight: bold;
   margin: auto;
-  margin-right: 0.3em;
   background: #1465FF 0% 0% no-repeat padding-box;
   border-radius: 15px;
   text-align: center;
   color: #FFFFFF;
   padding: 0.25em 1em;
   border-style: none;
+}
+
+.item-use-button:active {
+  background: #072680;
 }
 
 .item-block--usable .item-use-button {
