@@ -77,6 +77,8 @@ class MainUI {
     this.announcementContDom = document.getElementById(ANNOUNCEMENT_CONTAINER_ID);
     this.NPCDom = document.getElementById(NPC_ID);
     this.NPCNameDom = document.getElementById(NPCNAME_ID);
+    this.NPCPreviousName = null;
+    this.NPCPreviousSrc = null;
 
     this.utilPanelManager = new UtilPanelManager(this);
     this._notificationList = new Array();
@@ -182,13 +184,20 @@ class MainUI {
    */
   showNPCHint(name, displayCharSrc) {
     const san_name = filterXSS(name);
-    if (name === null) this.NPCDom.classList.add('notification--inactive');
-    else {
-      // TODO: Check if the values are the same as before to avoid DOM ops.
-      this.NPCDom.classList.remove('notification--inactive');
-      this.NPCNameDom.textContent = san_name;
-      // TODO: Cache the DOM
-      $(".notification--npc--avatar > img").attr('src', displayCharSrc);
+    if (name === null) {
+      if (this.NPCPreviousName !== null) {
+        this.NPCDom.classList.add('notification--inactive');
+        this.NPCPreviousName = null;
+      }
+    } else {
+      if (this.NPCPreviousName !== san_name || this.NPCPreviousSrc !== displayCharSrc) {
+        this.NPCDom.classList.remove('notification--inactive');
+        this.NPCNameDom.textContent = san_name;
+        // TODO: Cache the DOM
+        $(".notification--npc--avatar > img").attr('src', displayCharSrc);
+        this.NPCPreviousName = san_name;
+        this.NPCPreviousSrc = displayCharSrc;
+      }
     }
   }
   /**
