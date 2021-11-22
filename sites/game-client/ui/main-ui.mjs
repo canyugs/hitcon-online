@@ -180,12 +180,15 @@ class MainUI {
    * Show npc hint.
    * @param {String} npc name wants to be shown. If null, not show anything.
    */
-  showNPCHint(name) {
+  showNPCHint(name, displayCharSrc) {
     const san_name = filterXSS(name);
     if (name === null) this.NPCDom.classList.add('notification--inactive');
     else {
+      // TODO: Check if the values are the same as before to avoid DOM ops.
       this.NPCDom.classList.remove('notification--inactive');
       this.NPCNameDom.textContent = san_name;
+      // TODO: Cache the DOM
+      $(".notification--npc--avatar > img").attr('src', displayCharSrc);
     }
   }
   /**
