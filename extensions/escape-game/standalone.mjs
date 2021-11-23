@@ -727,7 +727,6 @@ class Standalone {
    */
   _unpackStoredData(data) {
     this.distributedCodes = data?.distributedCodes ?? {};
-    console.log(`this.distributedCodes: ${this.distributedCodes}`);
   }
 }
 
