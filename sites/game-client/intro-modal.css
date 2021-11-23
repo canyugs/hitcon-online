@@ -9,7 +9,7 @@
   box-sizing: border-box;
   text-align: center;
   width: 65vw;
-  height: 65vh;
+  max-height: 85vh;
   top: -20%;
   justify-content: space-between !important;
 }
