@@ -113,7 +113,7 @@ class Standalone {
       console.error('Invalid number of problems: ', problems);
       return FSM_ERROR;
     }
-    let problemSet = JSON.parse(fs.readFileSync(getRunPath('items/${file}')));
+    let problemSet = JSON.parse(fs.readFileSync(getRunPath(`items/${file}`)));
     randomShuffle(problemSet);
     let result, correct = 0, d = '';
     for (let i = 0; i < problems; i++) {
