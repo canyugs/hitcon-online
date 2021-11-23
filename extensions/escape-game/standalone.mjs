@@ -16,7 +16,6 @@ import {promisify} from 'util';
 import {fileURLToPath} from 'url';
 import InteractiveObjectServerBaseClass from '../../common/interactive-object/server.mjs';
 import {getRunPath, getConfigPath} from '../../common/path-util/path.mjs';
-import DataStore from '../../common/rpc-directory/data-store.mjs';
 
 const MAX_PLAYER_PER_TEAM = 5;
 
@@ -502,7 +501,7 @@ class Standalone {
 
       const playerList = `
         <ul>
-          ${this.playerToTeam.get(playerID).playerIDs.map(pid => `<li>${pid}</li>`).join('')}
+          ${this.playerToTeam.get(playerID).playerIDs.map(pid => `<li>${this.helper.gameState.getPlayer(pid).displayName}</li>`).join('')}
         </ul>
       `;
       await this.helper.callS2cAPI(playerID, 'dialog', 'showDialog', 60*1000,
@@ -552,8 +551,7 @@ class Standalone {
 
       this.finalizeTeam(playerID, this.playerToTeam.get(playerID).teamId);
 
-      await this.helper.callS2cAPI(playerID, 'dialog', 'showDialog', 60*1000,
-        sfInfo.name, 'Finalized');
+      // await this.helper.callS2cAPI(playerID, 'dialog', 'showDialog', 60*1000, sfInfo.name, 'Finalized');
 
       return nextState;
     } catch (e) {
@@ -676,9 +674,10 @@ class Standalone {
 
     let redeemCode = null;
 
+    const redeemedCodes = new Set(Object.values(this.distributedCodes[eventName]));
     if (!(playerID in this.distributedCodes[eventName])) {
       for (let i = 0; i < redeemCodes.length; i++) {
-        if (!Object.values(this.distributedCodes[eventName]).includes(redeemCodes[i])) {
+        if (!redeemedCodes.has(redeemCodes[i])) {
           redeemCode = redeemCodes[i];
           break;
         }
