@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 const KEYSTROKE_RATE = 30; // keystroke per second
+const CANVAS_AUTO_FOCUS_MS = 200;
 
 /**
  * Input manager deals with all user input.
@@ -67,6 +68,16 @@ class InputManager {
         }
       }
     }, 1000 / KEYSTROKE_RATE);
+    setInterval(() => {
+      const active = document.activeElement;
+      if (active === this.canvas) {
+        return;
+      }
+      if (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.contenteditable === 'true') {
+        return;
+      }
+      this.focusedElement = this.canvas;
+    }, CANVAS_AUTO_FOCUS_MS);
 
     document.addEventListener('click', (event) => {
       this.focusedElement = event.target;
