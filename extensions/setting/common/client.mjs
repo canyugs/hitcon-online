@@ -299,6 +299,14 @@ class Client {
       this.helper.gameClient.movementManager.sendPlayerUpdateInternal(msg);
     }, 0);
 
+    this.tab.addSubsection('general', 'canvas_display', '地圖顯示設定', 0);
+    this.tab.addSwitch('canvas_display', 'player_name_display', '隱藏使用者名稱', false, (value) => {
+      this.helper.mapRenderer.setHidePlayerName(value);
+    }, 0);
+    this.tab.addSwitch('canvas_display', 'NPC_name_display', '隱藏ＮＰＣ名稱', false, (value) => {
+      this.helper.mapRenderer.setHideNPCName(value);
+    }, 0);
+
     this.tab.addSwitch('general', 'data_collect', '去識別化資料蒐集', true, (value) => {
       console.log('general data', value);
     }, 50);
