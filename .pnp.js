@@ -2780,7 +2780,8 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./extensions/point-system/",
           "packageDependencies": [
             ["hitcon-online-point-system", "workspace:extensions/point-system"],
-            ["axios", "npm:0.21.4"]
+            ["axios", "npm:0.21.4"],
+            ["config", "npm:3.3.6"]
           ],
           "linkType": "SOFT",
         }]

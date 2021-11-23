@@ -2096,6 +2096,7 @@ __metadata:
   resolution: "hitcon-online-point-system@workspace:extensions/point-system"
   dependencies:
     axios: ^0.21.4
+    config: ^3.3.6
   languageName: unknown
   linkType: soft
 
