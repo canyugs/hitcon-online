@@ -58,6 +58,7 @@
     "publicAddress": "localhost:5050",
     "socketioPath": ""
   },
+  "pointSystemAddress": "http://ho.zuan.im:4000/api/v1",
   "publicAddress": null,
   "allowedOrigins": []
 }

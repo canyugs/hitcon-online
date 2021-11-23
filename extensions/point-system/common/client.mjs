@@ -1,8 +1,6 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
-const POINT_SYSTEM_LOCATION = 'http://ho.zuan.im:4000/api/v1';
-
 /**
  * This class is the browser/client side of an extension.
  * One instance is created for each connected player.
@@ -19,6 +17,7 @@ class Client {
   }
 
   async gameStart() {
+    this.pointSystemAddress = await this.helper.callC2sAPI('point-system', 'getPointSystemAddress', this.helper.defaultTimeout);
     this.helper.mainUI.contextMenu.addToOthersMenu('Transfer Points', 'https://via.placeholder.com/15x15', async (player) => {
       let points = (await this.helper.getExtObj('dialog')?.modal.displayAsPrompt(
         'Transfer Points',
@@ -119,7 +118,7 @@ class Client {
    */
   requestApi(endpoint, method, data) {
     return $.ajax({
-      url: POINT_SYSTEM_LOCATION + endpoint,
+      url: this.pointSystemAddress + endpoint,
       method: method,
       dataType: "json",
       headers: {

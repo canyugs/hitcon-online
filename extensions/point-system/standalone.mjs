@@ -4,8 +4,8 @@
 import {createRequire} from 'module';
 const require = createRequire(import.meta.url);
 const axios = require('axios');
+const config = require('config');
 
-const POINT_SYSTEM_LOCATION = 'http://ho.zuan.im:4000/api/v1';
 const MESSAGES = {
   TRASNFERRED: 'You\'ve recieved some new points.'
 };
@@ -22,12 +22,21 @@ class Standalone {
    */
   constructor(helper) {
     this.helper = helper;
+    this.pointSystemAddress = config.get('pointSystemAddress');
   }
 
   /**
    * Initializes the extension.
    */
   async initialize() {
+  }
+
+  /**
+   * Send the address of the point system.
+   * @param {Player} player - player information
+   */
+  async c2s_getPointSystemAddress(player) {
+    return this.pointSystemAddress;
   }
 
   /**
@@ -53,7 +62,7 @@ class Standalone {
    */
   requestApi(endpoint, method, data, token) {
     return axios({
-      url: POINT_SYSTEM_LOCATION + endpoint,
+      url: this.pointSystemAddress + endpoint,
       method: method,
       headers: {
         'Content-Type': 'application/json',

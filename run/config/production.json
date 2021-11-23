@@ -76,6 +76,7 @@
     "publicAddress": "online-staging.hitcon.org",
     "socketioPath": "/terminal"
   },
+  "pointSystemAddress": "http://ho.zuan.im:4000/api/v1",
   "publicAddress": "online-staging.hitcon.org",
   "allowedOrigins": ["online-staging.hitcon.org", "onepage-staging.hitcon.org"],
   "movingRequestThreshold": 100
