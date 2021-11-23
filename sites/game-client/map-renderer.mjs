@@ -83,6 +83,9 @@ class MapRenderer {
     this.viewerPosition = new MapCoord('', NaN, NaN);
     this.viewportFollow = null; // will be initialized in this.initializeViewerPosition()
 
+    this._hidePlayerName = false;
+    this._hideNPCName = false;
+
     window.addEventListener('dataReady', this.initializeViewerPosition.bind(this));
 
     /**
@@ -121,6 +124,22 @@ class MapRenderer {
    */
   setGameClient(gameClient) {
     this.gameClient = gameClient;
+  }
+
+  /**
+   * Set the value of `this._hidePlayerName`.
+   * @param {Boolean} value
+   */
+  setHidePlayerName(value) {
+    this._hidePlayerName = value;
+  }
+
+  /**
+   * Set the value of `this._hideNPCName`.
+   * @param {Boolean} value
+   */
+  setHideNPCName(value) {
+    this._hideNPCName = value;
   }
 
   /**
@@ -641,6 +660,11 @@ class MapRenderer {
    */
   _drawOneCharacterName(player) {
     const {mapCoord, displayName, NPCHighlight} = player.getDrawInfo();
+
+    // No need to draw if it is set to be hidden.
+    if ((!NPCHighlight && this._hidePlayerName) || (NPCHighlight && this._hideNPCName)) {
+      return;
+    }
 
     // If we're not on the same map, we don't need to draw it.
     if (mapCoord.mapName !== this.viewerPosition.mapName) return;
