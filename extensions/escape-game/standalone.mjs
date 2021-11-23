@@ -179,7 +179,7 @@ class Standalone {
    * Quit the team
    * @param {string} playerID The player id.
    */
-   async quitTeam(playerID) {
+  async quitTeam(playerID) {
     // Check if the team exists.
     if (!this.playerToTeam.has(playerID)) {
       throw new Error(`Player ${playerID} trys to quit a non-exist team.`);
@@ -666,7 +666,7 @@ class Standalone {
   /**
    * Give a redeem code to the user.
    */
-   async s2s_sf_giveRedeemCode(srcExt, playerID, kwargs, sfInfo) {
+  async s2s_sf_giveRedeemCode(srcExt, playerID, kwargs, sfInfo) {
     const {nextState, errorState} = kwargs;
     let {redeemCodes, eventName} = kwargs;
 
@@ -771,7 +771,7 @@ class Team {
    * @param {string} playerID The player ID.
    */
   removePlayer(playerID) {
-    if (!this.playerIDs.includes(playerID) || this.isFinalized) {
+    if (!this.playerIDs.includes(playerID)) {
       return false;
     }
     this.givenItems.delete(playerID);
