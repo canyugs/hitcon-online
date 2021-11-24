@@ -102,7 +102,7 @@ class AuthServer {
             this.handleAuth(req, res, token);
         });
 
-        this.app.get('/get_test_token', function(req, res) {
+        this.app.get('/get_test_token', (req, res) => {
             if (config.get('debug') !== true) {
               console.warn('Trying to access /get_test_token on non-debug enviroment');
               res.status(403).send('/get_test_token not available on non-debug enviroment');
