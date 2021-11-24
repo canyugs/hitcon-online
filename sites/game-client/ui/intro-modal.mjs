@@ -48,9 +48,12 @@ const introPagesData = [
     description: [
       '大會中有些活動可透過與 NPC 互動參與',
       'NPC 在地圖上會有明顯的名稱標示',
-      '可透過互動按鍵或直接點擊 NPC 進行互動'
+      '可透過直接點擊 NPC 進行互動'
     ],
-    images: ['/static/sites/game-client/intro-5@2x.png'],
+    images: [
+      '/static/sites/game-client/intro-5-1@2x.png',
+      '/static/sites/game-client/intro-5-2@2x.png'
+    ],
   },
     {
     title: '更改設定',
