@@ -13,7 +13,8 @@ class AuthServer {
     */
     constructor(app) {
         this.app = app;
-        this.app.set('secret', config.get('secret'));
+        this.secret = config.get('secret');
+        this.app.set('secret', this.secret);
         this.urlencodedParser = bodyParser.urlencoded({extended: false});
     }
 
@@ -29,11 +30,23 @@ class AuthServer {
             return null;
         }
 
-        try {
-            ret = jwt.verify(token, this.app.get('secret'));
-        } catch (err) {
-            console.error('Failed to verify jwt in verifyToken(): ', err);
-            return null;
+        let secret = this.secret;
+        if (!Array.isArray(secret)) {
+          secret = [secret, ];
+        }
+        let errs = [];
+        for (const s of secret) {
+          try {
+              ret = jwt.verify(token, s);
+          } catch (err) {
+              errs.push(err);
+              ret = null;
+          }
+          if (ret !== null) break;
+        }
+        if (ret === null) {
+          console.error('Failed to verify jwt in verifyToken(): ', errs);
+          return null;
         }
 
         if (typeof ret !== 'object') {
@@ -54,19 +67,18 @@ class AuthServer {
      * Set token into the cookie.
      */
     handleAuth(req, res, token) {
-        const secret = this.app.get('secret');
         if (token) {
-            jwt.verify(token, secret, function(err, decoded) {
-                if (err) {
-                    return res.json({
-                        success: false,
-                        message: 'Failed to authenticate token.'
-                    });
-                } else {
-                    res.cookie('token', token);
-                    res.redirect('/');
-                }
-            });
+            const secret = this.secret;
+            const result = this.verifyToken(token);
+            if (result) {
+                res.cookie('token', token);
+                res.redirect('/');
+            } else {
+                return res.json({
+                    success: false,
+                    message: 'Failed to authenticate token.'
+                });
+            }
         } else {
             return res.status(403).send({
                 success: false,
@@ -80,7 +92,6 @@ class AuthServer {
     * @run
     */
     run() {
-        const secret = this.app.get('secret');
         this.app.post('/auth', this.urlencodedParser, (req, res) => {
             var token = req.body.token || req.body.query || req.headers['x-access-token'];
             this.handleAuth(req, res, token);
@@ -111,6 +122,10 @@ class AuthServer {
             payload.sub = genRandomStr(5);
             payload.iat = Math.floor(Date.now() / 1000);
             payload.scp = (scopeStr==='')?[]:scopeStr.split('|');
+            let secret = this.secret;
+            if (Array.isArray(secret)) {
+              secret = secret[0];
+            }
             const token = jwt.sign(payload, secret, {expiresIn: 60 * 60 * 24 * 365});
             res.cookie('token', token);
             res.json({
