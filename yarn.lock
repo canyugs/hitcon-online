@@ -2009,6 +2009,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"hitcon-online-help-desk@workspace:extensions/help-desk":
+  version: 0.0.0-use.local
+  resolution: "hitcon-online-help-desk@workspace:extensions/help-desk"
+  languageName: unknown
+  linkType: soft
+
 "hitcon-online-iframe@workspace:extensions/iframe":
   version: 0.0.0-use.local
   resolution: "hitcon-online-iframe@workspace:extensions/iframe"

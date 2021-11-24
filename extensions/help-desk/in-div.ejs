@@ -1,0 +1,153 @@
+<style>
+
+.help-desk-overlay {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+}
+
+.help-desk-entry {
+  position: absolute;
+  right: 0;
+}
+
+.help-desk-entry > button {
+  color: #fff;
+  font-weight: bolder;
+  border: 4px solid #fff;
+  background: none;
+  border-radius: 50%;
+  font-size: 20px;
+  padding: 1px 10px;
+}
+
+.help-desk-menu {
+  display: none;
+  position: absolute;
+  width: 167px;
+  box-sizing: border-box;
+  background: #fff;
+  border-radius: 8px;
+  right: 25px;
+  bottom: -15px;
+  overflow: hidden;
+}
+
+.help-desk-menu.visible {
+  display: block;
+}
+
+.help-desk--option {
+  display: flex;
+  justify-content: flex-end;
+  box-sizing: border-box;
+  padding: 10px;
+  padding-right: 20px;
+  cursor: pointer;
+}
+
+.help-desk--option:hover {
+  background: #E5E8FF;
+}
+
+.help-desk--option:hover > .help-desk--text,
+.help-desk--option:hover > .help-desk--option > img,
+.help-desk--option:hover svg {
+  color: #1D34E5;
+}
+
+.help-desk--text {
+  font-size: 1em;
+  flex-grow: 1;
+  text-align: end;
+  font-weight: bolder;
+}
+
+.help-desk--option img {
+  margin-left: 15px;
+  width: 18px;
+  height: 18px;
+  align-self: center;
+}
+
+.help-desk--option a {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.help-desk-modal-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0px 3px 6px #0000006E;
+  border-radius: 25px;
+  background: #fff;
+  padding: 2em;
+  max-width: 50vw;
+  max-height: 50vh;
+}
+
+.help-desk-modal-title {
+  font-size: 1.7em;
+  font-weight: bolder;
+  width: 100%;
+  border-bottom: 1px solid #000;
+  padding-bottom: 0.8em;
+  text-align: center;
+}
+
+.help-desk-modal-description {
+  font-size: 1.3em;
+  margin: 2em;
+}
+
+.help-desk-modal-button {
+  background: #1465FF;
+  font-size: 1em;
+  border: none;
+  border-radius: 18px;
+  padding: 5px 30px;
+  margin: 0 20px;
+}
+
+.help-desk-modal-button.pirmary {
+  color: #fff
+}
+
+.help-desk-modal-button.secondary {
+  color: #1465FF;
+  background: #fff;
+}
+
+
+</style>
+
+<div id="help-desk-overlay" class='help-desk-overlay'>
+  <div id="help-desk-entry" class="help-desk-entry">
+    <button>?</button>
+  </div>
+  <div id="help-desk-menu" class="help-desk-menu">
+    <div id="help-desk--service" class="help-desk--option">
+      <div class="help-desk--text">前往服務台</div>
+      <img src="/static/extensions/help-desk/common/icons/ionic-md-people.svg">
+    </div>
+    <div id="help-desk--report" class="help-desk--option">
+      <div class="help-desk--text">問題回報</div>
+      <img src="/static/extensions/help-desk/common/icons/material-bug-report.svg">
+      <a href="https://forms.gle/BypXswxfKmr3tGq6A" target="_blank"></a>
+    </div>
+  </div>
+</div>
+
+<div id="help-desk-modal" class="help-desk-modal container-center">
+  <div class="help-desk-modal-container">
+    <div class="help-desk-modal-title">確認傳送</div>
+    <div class="help-desk-modal-description">您即將被傳送往 大會服務台</div>
+    <div>
+      <button id="help-desk-modal-cancel" class="help-desk-modal-button secondary">取消</button>
+      <button id="help-desk-modal-confirm" class="help-desk-modal-button pirmary">確認</button>
+    </div>
+  </div>
+</div>
