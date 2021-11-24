@@ -79,6 +79,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         "reference": "workspace:extensions/helloworld"
       },
       {
+        "name": "hitcon-online-help-desk",
+        "reference": "workspace:extensions/help-desk"
+      },
+      {
         "name": "hitcon-online-iframe",
         "reference": "workspace:extensions/iframe"
       },
@@ -164,6 +168,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
       ["hitcon-online-gamelib", ["workspace:common/gamelib"]],
       ["hitcon-online-gateway", ["workspace:services/gateway"]],
       ["hitcon-online-helloworld", ["workspace:extensions/helloworld"]],
+      ["hitcon-online-help-desk", ["workspace:extensions/help-desk"]],
       ["hitcon-online-iframe", ["workspace:extensions/iframe"]],
       ["hitcon-online-interactive-object", ["workspace:common/interactive-object"]],
       ["hitcon-online-iobj-lib", ["workspace:extensions/iobj-lib"]],
@@ -2655,6 +2660,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./extensions/helloworld/",
           "packageDependencies": [
             ["hitcon-online-helloworld", "workspace:extensions/helloworld"]
+          ],
+          "linkType": "SOFT",
+        }]
+      ]],
+      ["hitcon-online-help-desk", [
+        ["workspace:extensions/help-desk", {
+          "packageLocation": "./extensions/help-desk/",
+          "packageDependencies": [
+            ["hitcon-online-help-desk", "workspace:extensions/help-desk"]
           ],
           "linkType": "SOFT",
         }]
