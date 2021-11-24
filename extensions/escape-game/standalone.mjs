@@ -67,7 +67,7 @@ class Standalone {
 
     // Terminals
     this.terminalObjects = new Map();
-    fs.readdirSync(getRunPath('terminal')).forEach((file) => {
+    fs.readdirSync(getRunPath('terminal')).filter(v => v.endsWith('.json')).forEach((file) => {
       const terminalName = file.slice(0, -('.json'.length));
       const terminal = new TerminalObject(helper, terminalName, getRunPath('terminal', file));
       this.terminalObjects.set(terminal.visibleName, terminal);
