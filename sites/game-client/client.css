@@ -107,7 +107,7 @@ body {
 
 .overlay {
   position: absolute;
-  opacity: 85%;
+  opacity: 100%;
   z-index: 5;
 }
 
@@ -187,7 +187,7 @@ body {
 
 .modal-background {
   position: absolute;
-  background-color: Grey;
+  background-color: #141414;
   top: 0px;
   left: 0px;
   width: 100%;
