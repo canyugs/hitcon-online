@@ -41,7 +41,7 @@
   flex-wrap: wrap;
   flex-direction: column;
   overflow: auto;
-  max-height: 180px;
+  max-height: 210px;
 }
 
 .avatar-preview-container-big {
