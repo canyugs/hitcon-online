@@ -6,11 +6,13 @@ import {MapCoord} from '/static/common/maplib/map.mjs';
 const MAP_CELL_SIZE = 32; // pixel
 const fontStyle = '12px "Noto Sans TC"';
 const fontColor = '#000';
+const fontOutlineColor = '#fff';
+const fontOutlineWidth = 2; // px
 const NPCHighlightStyle = 'bold 12px "Noto Sans TC"';
 const NPCHighlightFontColor = '#fff';
 const NPCHighlightBackgroundColor = '#1d52cb';
 const NPCHighlightBorderColor = '#113993';
-const NPCHighlightBorderWidth = '2px';
+const NPCHighlightBorderWidth = 2; // px
 const NPCHighlightPaddingX = 4;
 const NPCHighlightPaddingY = 2;
 
@@ -705,6 +707,11 @@ class MapRenderer {
       this.ctx.strokeRect(boxl, boxu, (boxr - boxl), (boxd - boxu));
 
       this.ctx.restore();
+    } else {
+      // draw an outline of text
+      this.ctx.strokeStyle = fontOutlineColor;
+      this.ctx.lineWidth = fontOutlineWidth;
+      this.ctx.strokeText(displayName, canvasCoordinate.x, canvasCoordinate.y);
     }
 
     // there is no need for out-of-canvas check
