@@ -18,6 +18,7 @@ class InputManager {
     this.mapRenderer = mapRenderer;
     this.canvas = this.mapRenderer.getInputEventDOM();
     this.clickCallbacks = []; // each element is a {DOMElement, callback} object
+    this.rightClickCallbacks = []; // each element is a {DOMElement, callback} object
     this.keydownEveryTickCallbacks = []; // each element is a {DOMElement, callback} object
     this.keydownOnceCallbacks = []; // each element is a {DOMElement, callback} object
     this.keyupCallbacks = []; // each element is a {DOMElement, callback} object
@@ -76,7 +77,17 @@ class InputManager {
           const x = event.clientX - rect.left;
           const y = event.clientY - rect.top;
           callback(x, y);
-          // TODO: preventDefault stopPropagation correctly
+        }
+      }
+    });
+
+    document.addEventListener('contextmenu', (event) => {
+      for (const {DOMElement, callback} of this.rightClickCallbacks) {
+        if (event.target === DOMElement) {
+          const rect = DOMElement.getBoundingClientRect();
+          const x = event.clientX - rect.left;
+          const y = event.clientY - rect.top;
+          callback(x, y);
         }
       }
     });
@@ -98,7 +109,7 @@ class InputManager {
   }
 
   /**
-   * Register a callback function on clicking the canvas of MapRendererer.
+   * Register a callback function on clicking the canvas of MapRenderer.
    * The unit of clicking position is pixel.
    * @param {Function} callback - Takes two arguments: x and y coordinate
    * in canvas coordinate.
@@ -109,12 +120,43 @@ class InputManager {
 
   /**
    * Register a callback function on clicking the canvas of MapRenderer.
-   * The unit of clicking position is pixel.
    * @param {Function} callback - Takes one argument: the clicked map coordinate.
    * Note that the map coordinate is not necessarily in integer.
    */
   registerCanvasOnClickMapCoord(callback) {
     this.registerCanvasOnClickPixel((canvasX, canvasY) => {
+      const mapCoord = this.mapRenderer.canvasToMapCoordinate(canvasX, canvasY);
+      callback(mapCoord);
+    });
+  }
+
+  /**
+   * Register a callback function on right-clicking a DOM element.
+   * @param {Element} DOMElement
+   * @param {Function} callback - Takes two arguments: x and y coordinate
+   * relative to the DOM element.
+   */
+  registerElementOnRightClick(DOMElement, callback) {
+    this.clickCallbacks.push({DOMElement, callback});
+  }
+
+  /**
+   * Register a callback function on right-clicking the canvas of MapRenderer.
+   * The unit of clicking position is pixel.
+   * @param {Function} callback - Takes two arguments: x and y coordinate
+   * in canvas coordinate.
+   */
+  registerCanvasOnRightClickPixel(callback) {
+    this.registerElementOnRightClick(this.canvas, callback);
+  }
+
+  /**
+   * Register a callback function on right-clicking the canvas of MapRenderer.
+   * @param {Function} callback - Takes one argument: the clicked map coordinate.
+   * Note that the map coordinate is not necessarily in integer.
+   */
+  registerCanvasOnRightClickMapCoord(callback) {
+    this.registerCanvasOnRightClickPixel((canvasX, canvasY) => {
       const mapCoord = this.mapRenderer.canvasToMapCoordinate(canvasX, canvasY);
       callback(mapCoord);
     });
