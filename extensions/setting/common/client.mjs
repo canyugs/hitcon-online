@@ -306,19 +306,6 @@ class Client {
     this.tab.addSwitch('canvas_display', 'NPC_name_display', '隱藏ＮＰＣ名稱', false, (value) => {
       this.helper.mapRenderer.setHideNPCName(value);
     }, 0);
-
-    this.tab.addSwitch('general', 'data_collect', '去識別化資料蒐集', true, (value) => {
-      console.log('general data', value);
-    }, 50);
-
-    this.tab.addSection('chat', '聊天設定', 10);
-    this.tab.addDropdown('chat', 'example', '範例下拉選單', (value) => {
-      console.log('chat example', value);
-    }, 0);
-    this.tab.updateDropdownOptions('chat', 'example', {
-      'default': 'Default',
-      'meow': 'Meow',
-    }, 'default');
   }
 }
 
