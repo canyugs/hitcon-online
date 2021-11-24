@@ -14,11 +14,13 @@ class ContextMenu {
    * Initialize the context menu.
    * @param {GameState} gameState The GameState object.
    * @param {MapRenderer} mapRenderer The Map Renderer
+   * @param {InputManager} inputManager
    * @param {GameClient} gameClient The GameClient
    */
-  constructor(gameState, mapRenderer, gameClient) {
+  constructor(gameState, mapRenderer, inputManager, gameClient) {
     this.gameState = gameState;
     this.mapRenderer = mapRenderer;
+    this.inputManager = inputManager;
     this.othersMenu = new Map();
     this.selfMenu = new Map();
 
@@ -26,7 +28,9 @@ class ContextMenu {
     this.gameClient = gameClient;
 
     // bind the contextmenu and click event.
-    $('#mapcanvas').on('contextmenu', this.canvasOnContextMenu.bind(this));
+    // TODO: use input manager to make the code more consistent with other code
+    // $(this.mapRenderer.getInputEventDOM()).on('contextmenu', this.canvasOnContextMenu.bind(this));
+    $('#inputcanvas').on('contextmenu', this.canvasOnContextMenu.bind(this));
     $('body').on('contextmenu', '[data-player-context-menu]', this.elementOnContextMenu.bind(this));
     $('body').on('click', this.hideMenu);
   }

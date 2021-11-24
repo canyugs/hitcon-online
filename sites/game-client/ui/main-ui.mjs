@@ -270,10 +270,11 @@ class MainUI {
    * Initiate the context menu.
    * @param {GameState} gameState The GameState object.
    * @param {MapRenderer} mapRenderer The Map Renderer
+   * @param {InputManager} inputManager
    * @param {GameClient} gameClient The GameClient
    */
-  createContextMenu(gameState, mapRenderer, gameClient) {
-    this.contextMenu = new ContextMenu(gameState, mapRenderer, gameClient);
+  createContextMenu(gameState, mapRenderer, inputManager, gameClient) {
+    this.contextMenu = new ContextMenu(gameState, mapRenderer, inputManager, gameClient);
   }
 
   // If we want to use individual overlay for meeting

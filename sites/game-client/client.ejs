@@ -339,7 +339,7 @@ absolute URL.
         await game.extMan.initialize(game.map, game.gameState, game.gameClient, game.inputManager, game.mapRenderer, game.mainUI);
         await game.extMan.loadAllExtensionClient();
 
-        game.mainUI.createContextMenu(game.gameState, game.mapRenderer, game.gameClient);
+        game.mainUI.createContextMenu(game.gameState, game.mapRenderer, game.inputManager, game.gameClient);
 
         window.dispatchEvent(new CustomEvent(
           'uiReady', {
