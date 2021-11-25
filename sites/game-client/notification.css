@@ -22,6 +22,12 @@
   display: none;
 }
 
+.notification-npc--override {
+  /* This class is added when the notification is active and we want to hide
+   * the NPC hint. */
+  display: none;
+}
+
 .notification-type {
   text-align: center;
   font: normal normal normal 15px/36px Noto Sans CJK TC;

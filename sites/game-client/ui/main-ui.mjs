@@ -127,6 +127,7 @@ class MainUI {
     if (this._notificationList.length === 0) {
       // No more messages.
       this.notificationContDom.classList.add('notification--inactive');
+      this.NPCDom.classList.remove('notification-npc--override');
       // No reflow necessary since we're hiding it.
       this.notificationDom.textContent = '';
       return;
@@ -222,6 +223,7 @@ class MainUI {
     if (this._notificationList.length <= 1) {
       // Nothing was on display at the moment, we can display it directly.
       this.notificationContDom.classList.remove('notification--inactive');
+      this.NPCDom.classList.add('notification-npc--override');
       this._setNotificationText(san_msg, timeout);
       setTimeout(() =>{
         this.updateNotification();
