@@ -171,7 +171,11 @@ class GatewayService {
         socket.stage = ConnectionStages.AUTHED;
 
         const kickIfConnected = (msg.kickIfConnected === true);
-        this.addSocket(socket, kickIfConnected);
+        try {
+          this.addSocket(socket, kickIfConnected);
+        } catch (e) {
+          console.error('Exception in addSocket: ', e, e.stack);
+        }
       });
     });
   }
@@ -287,7 +291,11 @@ class GatewayService {
 
       // notify the client to start the game after his/her avatar is selected
       socket.on('avatarSelect', async (msg) => {
-        await this._onAvatarSelect(socket, msg)
+        try {
+          await this._onAvatarSelect(socket, msg);
+        } catch (e) {
+          console.error('Exception in avatarSelect: ', e, e.stack);
+        }
       });
     });
   }
@@ -299,7 +307,7 @@ class GatewayService {
     // avatarSelect modifies the stage and moves the player.
     await socket.moveLock.acquire('move', async () => {
       if (socket.stage !== ConnectionStages.REGED) {
-        console.warn('Duplicate avatarSelect: ', playerID, socket.stage, socket);
+        console.warn('Duplicate avatarSelect: ', socket.playerData, socket.stage, socket);
         // Kick player for race condition.
         await this.notifyKicked(socket, 'Duplicated avatarSelect');
         return;
