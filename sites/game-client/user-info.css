@@ -26,6 +26,9 @@
   font: normal normal bold 34px/40px Noto Sans CJK TC;
   letter-spacing: 0px;
   color: #151515;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .user-points {
