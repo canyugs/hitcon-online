@@ -41,90 +41,98 @@ class InputManager {
 
     // Maintain a list of pressed key for better user experience (player moving)
     this.pressedKeys = new Map(); // key: event.key, value: event.code
-    document.addEventListener('keydown', (event) => {
-      // We trigger `keydownOnceCallbacks` instead of `keydownEveryTickCallbacks`.
-      // Since the browser will continuously fire keydown event if key remains pressed, we have to check if this is the first event.
-      if (this.pressedKeys.has(event.key)) {
-        return;
-      }
-      // If the game has not started, the keydown event should not be sent to the game.
-      if (!this.hasStarted) {
-        return;
-      }
-      this.pressedKeys.set(event.key, {code: event.code});
-      for (const {DOMElement, callback} of this.keydownOnceCallbacks) {
-        if (this.focusedElement === DOMElement) {
-          callback(event);
+
+    this.gameClient = null;
+    // Input manager only have effect after the game starts.
+    // Therefore, the event listeners are registered after 'dataReady' event.
+    window.addEventListener('dataReady', (event) => {
+      this.gameClient = event.detail.gameClient;
+
+      document.addEventListener('keydown', (event) => {
+        // We trigger `keydownOnceCallbacks` instead of `keydownEveryTickCallbacks`.
+        // Since the browser will continuously fire keydown event if key remains pressed, we have to check if this is the first event.
+        if (this.pressedKeys.has(event.key)) {
+          return;
         }
-      }
-    });
-    document.addEventListener('keyup', (event) => {
-      if (this.pressedKeys.delete(event.key)) {
-        for (const {DOMElement, callback} of this.keyupCallbacks) {
+        this.pressedKeys.set(event.key, {code: event.code});
+        for (const {DOMElement, callback} of this.keydownOnceCallbacks) {
           if (this.focusedElement === DOMElement) {
             callback(event);
           }
         }
-      }
-    });
-    window.addEventListener('blur', (event) => {
-      const keys = new Map(this.pressedKeys); // shallow copy
-      this.pressedKeys.clear(); // Clear in advance just in case if keyup callback uses `this.pressedKeys`.
-      for (const [key, {code}] of keys.entries()) {
-        for (const {callback} of this.keyupCallbacks) {
-          callback(new KeyboardEvent('keyup', {key, code}));
-        }
-      }
-    });
-    setInterval(() => {
-      for (const [key, {code}] of this.pressedKeys.entries()) {
-        for (const {DOMElement, callback} of this.keydownEveryTickCallbacks) {
-          if (this.focusedElement === DOMElement) {
-            callback(new KeyboardEvent('keydown', {key, code}));
+      });
+
+      document.addEventListener('keyup', (event) => {
+        if (this.pressedKeys.delete(event.key)) {
+          for (const {DOMElement, callback} of this.keyupCallbacks) {
+            if (this.focusedElement === DOMElement) {
+              callback(event);
+            }
           }
         }
-      }
-      for (const callback of this.joyStickEveryTickCallbacks) {
-        callback(this.joystick);
-      }
-    }, 1000 / KEYSTROKE_RATE);
-    setInterval(() => {
-      const active = document.activeElement;
-      if (active === this.canvas) {
-        return;
-      }
-      if (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.contenteditable === 'true') {
-        return;
-      }
-      this.focusedElement = this.canvas;
-    }, CANVAS_AUTO_FOCUS_MS);
+      });
 
-    document.addEventListener('click', (event) => {
-      this.focusedElement = event.target;
-      for (const {DOMElement, callback} of this.clickCallbacks) {
-        if (event.target === DOMElement) {
-          const rect = DOMElement.getBoundingClientRect();
-          const x = event.clientX - rect.left;
-          const y = event.clientY - rect.top;
-          callback(x, y);
+      // automatic 'keyup'
+      window.addEventListener('blur', (event) => {
+        const keys = new Map(this.pressedKeys); // shallow copy
+        this.pressedKeys.clear(); // Clear in advance just in case if keyup callback uses `this.pressedKeys`.
+        for (const [key, {code}] of keys.entries()) {
+          for (const {callback} of this.keyupCallbacks) {
+            callback(new KeyboardEvent('keyup', {key, code}));
+          }
         }
-      }
-    });
+      });
 
-    document.addEventListener('contextmenu', (event) => {
-      for (const {DOMElement, callback} of this.rightClickCallbacks) {
-        if (event.target === DOMElement) {
-          const rect = DOMElement.getBoundingClientRect();
-          const x = event.clientX - rect.left;
-          const y = event.clientY - rect.top;
-          callback(x, y);
+      // automatic 'keydown'
+      setInterval(() => {
+        for (const [key, {code}] of this.pressedKeys.entries()) {
+          for (const {DOMElement, callback} of this.keydownEveryTickCallbacks) {
+            if (this.focusedElement === DOMElement) {
+              callback(new KeyboardEvent('keydown', {key, code}));
+            }
+          }
         }
-      }
-    });
+        for (const callback of this.joyStickEveryTickCallbacks) {
+          callback(this.joystick);
+        }
+      }, 1000 / KEYSTROKE_RATE);
 
-    this.gameClient = null;
-    window.addEventListener('dataReady', (event) => {
-      this.gameClient = event.detail.gameClient;
+      // automatically focus the input canvas
+      setInterval(() => {
+        const active = document.activeElement;
+        if (active === this.canvas) {
+          return;
+        }
+        if (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.contenteditable === 'true') {
+          return;
+        }
+        this.focusedElement = this.canvas;
+      }, CANVAS_AUTO_FOCUS_MS);
+
+      // catch click
+      document.addEventListener('click', (event) => {
+        this.focusedElement = event.target;
+        for (const {DOMElement, callback} of this.clickCallbacks) {
+          if (event.target === DOMElement) {
+            const rect = DOMElement.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            callback(x, y);
+          }
+        }
+      });
+
+      // catch right click
+      document.addEventListener('contextmenu', (event) => {
+        for (const {DOMElement, callback} of this.rightClickCallbacks) {
+          if (event.target === DOMElement) {
+            const rect = DOMElement.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            callback(x, y);
+          }
+        }
+      });
     });
   }
 
