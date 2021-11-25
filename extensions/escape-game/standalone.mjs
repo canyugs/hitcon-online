@@ -128,6 +128,8 @@ class Standalone {
    * @param {string} playerID The player ID.
    */
   async createTeam(playerID) {
+    // check _unpackStoredData(), it should mirror this function.
+
     // Check if the player is already in a team.
     if (this.playerToTeam.has(playerID)) {
       throw new Error(`Player ${playerID} is already in a team.`);
@@ -137,6 +139,7 @@ class Standalone {
     let teamId = randomBytes(32).toString('hex');
     this.teams.set(teamId, new Team(teamId, this.terminalServerGrpcService, this.defaultTerminals));
     this.teams.get(teamId).startContainers(); // do not wait for the container to start.
+    await this.saveData();
     return teamId;
   }
 
@@ -161,6 +164,7 @@ class Standalone {
 
     if (ret) {
       this.playerToTeam.set(playerID, this.teams.get(teamId));
+      await this.saveData();
 
       // Notify other team members.
       const displayName = this.helper.gameState.getPlayer(playerID).displayName;
@@ -169,6 +173,9 @@ class Standalone {
           this.helper.callS2cAPI(pid, 'notification', 'showNotification', 5000, `${displayName} has join the team.`);
         }
       }
+    } else {
+      // Just to be safe.
+      await this.saveData();
     }
 
     return ret;
@@ -197,6 +204,7 @@ class Standalone {
 
     // Remove the player from the team.
     ret = ret && team.removePlayer(playerID);
+    await this.saveData();
 
     if (ret) {
       this.playerToTeam.delete(playerID);
@@ -235,7 +243,8 @@ class Standalone {
 
     // Destroy the team.
     await this.teams.get(teamId).destroy();
-    delete this.teams.get(teamId);
+    this.teams.delete(teamId);
+    await this.saveData();
   }
 
   /**
@@ -250,6 +259,7 @@ class Standalone {
     }
 
     this.teams.get(teamId).isFinalized = true;
+    await this.saveData();
 
     // Notify other team members.
     const displayName = this.helper.gameState.getPlayer(playerID).displayName;
@@ -654,6 +664,7 @@ class Standalone {
         team.givenItems.get(team.playerIDs[i]).set(itemName, orig + rlist[i].amount);
       }
     }
+    await this.saveData();
     if (result) {
       return nextState;
     }
@@ -683,7 +694,7 @@ class Standalone {
         }
       }
       this.distributedCodes[eventName][playerID] = redeemCode;
-      await this.helper.storeData(this._packStoredData());
+      this.saveData();
     } else {
       redeemCode = this.distributedCodes[eventName][playerID];
     }
@@ -698,6 +709,10 @@ class Standalone {
 
 
   /* Data Store */
+
+  async saveData() {
+    await this.helper.storeData(this._packStoredData());
+  }
 
   /**
    * Load the database on disk back to this class.
@@ -716,7 +731,9 @@ class Standalone {
    * This function is usually called before `this.helper.storeData`
    */
   _packStoredData() {
+    const teams = Array.from(this.teams.keys()).map((k) => this.teams.get(k).serialize());
     return {
+      teams: teams,
       distributedCodes: this.distributedCodes
     };
   }
@@ -726,6 +743,20 @@ class Standalone {
    */
   _unpackStoredData(data) {
     this.distributedCodes = data?.distributedCodes ?? {};
+    if (data.teams) {
+      this.teams = new Map();
+      this.playerToTeam = new Map();
+
+      data.teams.forEach((tobj) => {
+        // Check createTeam(), this should mirror it.
+        const t = Team.deserialize(tobj, this.terminalServerGrpcService, this.defaultTerminals);
+        this.teams.set(t.teamId, t);
+        t.playerIDs.forEach((pid) => {
+          this.playerToTeam.set(pid, t);
+        });
+        t.startContainers();
+      });
+    }
   }
 }
 
@@ -749,6 +780,33 @@ class Team {
     this.givenItems = new Map();
 
     this.defaultTerminals = defaultTerminals;
+  }
+
+  serialize() {
+    const result = {};
+    result.teamId = this.teamId;
+    result.invitationCode = this.invitationCode;
+    result.playerIDs = this.playerIDs;
+    result.isFinalized = this.isFinalized;
+    result.givenItems = {};
+    Array.from(this.givenItems.keys()).forEach((k) => {
+      const m = this.givenItems.get(k);
+      result.givenItems[k] = Object.fromEntries(m);
+    });
+    return result;
+  }
+
+  static deserialize(obj, terminalServerGrpcService, defaultTerminals) {
+    const result = new Team(obj.teamId, terminalServerGrpcService, defaultTerminals);
+    result.invitationCode = obj.invitationCode;
+    result.playerIDs = obj.playerIDs;
+    result.isFinalized = obj.isFinalized;
+    result.givenItems = new Map(Object.entries(obj.givenItems));
+    Array.from(result.givenItems.keys()).forEach((k) => {
+      const m = result.givenItems.get(k);
+      result.givenItems.set(k, new Map(Object.entries(m)));
+    });
+    return result;
   }
 
   /**
