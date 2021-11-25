@@ -52,12 +52,22 @@ class Standalone {
       return;
     }
     let target = null;
+    let perm = null;
     try {
       if (typeof cellVal === 'string') {
         // Decode it into the target MapCoord.
-        target = MapCoord.fromSerializedStr(cellVal);
+        const vals = cellVal.split('@');
+        if (vals.length === 1) {
+          target = MapCoord.fromSerializedStr(vals[0]);
+        } else if (vals.length === 2) {
+          perm = vals[0].split(',');
+          target = MapCoord.fromSerializedStr(vals[1]);
+        }
       } else if (typeof cellVal === 'object' && cellVal !== null) {
         target = MapCoord.fromObject(cellVal);
+        if (typeof cellVal.perm === 'object' && Array.isArray(cellVal.perm)) {
+          perm = cellVal.perm;
+        }
       }
     } catch (e) {
       console.warn('Failed to decode cell value in map-portal.onPlayerUpdate()', cellVal, e, e.stack);
@@ -65,6 +75,21 @@ class Standalone {
     if (target === null || typeof target === 'undefined') {
       // Not target, no need to teleport.
       return;
+    }
+    // If permission is required, check it.
+    if (perm !== null) {
+      let allowed = false;
+      const permission = await this.helper.getToken(msg.playerID);
+      for (const p of perm) {
+        if (permission.scp.includes(p)) {
+          allowed = true;
+          break;
+        }
+      }
+      if (!allowed) {
+        this.helper.callS2cAPI(msg.playerID, 'notification', 'showNotification', 5000, 'No permission');
+        return;
+      }
     }
     await this.helper.teleport(msg.playerID, target, true);
   }
