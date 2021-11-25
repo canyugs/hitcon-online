@@ -158,9 +158,18 @@ class Standalone {
   async s2s_sf_checkPermission(srcExt, playerID, kwargs, sfInfo) {
     const permission = await this.helper.getToken(playerID);
     const {options} = kwargs;
-    for (const [identity, nextState] of Object.entries(options)) {
-      if (permission.scp.includes(identity)) {
-        return nextState;
+    let scp = permission.scp;
+    if (!Array.isArray(scp)) {
+      scp = permission.scope;
+    }
+    if (typeof scp === 'string') {
+      scp = scp.split(' ');
+    }
+    if (Array.isArray(scp)) {
+      for (const [identity, nextState] of Object.entries(options)) {
+        if (permission.scp.includes(identity)) {
+          return nextState;
+        }
       }
     }
     // No identity match and return default next state

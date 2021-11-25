@@ -212,7 +212,14 @@ class ExtensionHelperBase {
    */
   async checkPerm(playerID, scope) {
     const token = await this.getToken(playerID);
-    if (!Array.isArray(token.scp)) return false;
+    let scp = token.scp;
+    if (!Array.isArray(scp)) {
+      scp = token.scope;
+    }
+    if (typeof scp === 'string') {
+      scp = scp.split(' ');
+    }
+    if (!Array.isArray(scp)) return false;
     if (token.scp.includes(scope)) return true;
     return false;
   }
