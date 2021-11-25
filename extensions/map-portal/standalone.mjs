@@ -23,7 +23,11 @@ class Standalone {
    */
   async initialize() {
     this.helper.gameState.registerOnPlayerUpdate((msg) => {
-      this.onPlayerUpdate(msg);
+      try {
+        this.onPlayerUpdate(msg);
+      } catch (e) {
+        console.error('map-portal failure: ', e, e.stack);
+      }
     });
   }
 
@@ -80,11 +84,19 @@ class Standalone {
     if (perm !== null) {
       let allowed = false;
       const permission = await this.helper.getToken(msg.playerID);
-      for (const p of perm) {
-        if (permission.scp.includes(p)) {
-          allowed = true;
-          break;
+      let scp = permission.scp;
+      if (!Array.isArray(scp)) {
+        scp = permission.scope;
+      }
+      if (Array.isArray(scp)) {
+        for (const p of perm) {
+          if (scp.includes(p)) {
+            allowed = true;
+            break;
+          }
         }
+      } else {
+        console.warn('jwt no scope: ', permission);
       }
       if (!allowed) {
         this.helper.callS2cAPI(msg.playerID, 'notification', 'showNotification', 5000, 'No permission');
