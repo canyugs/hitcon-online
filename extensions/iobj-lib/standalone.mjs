@@ -167,7 +167,7 @@ class Standalone {
     }
     if (Array.isArray(scp)) {
       for (const [identity, nextState] of Object.entries(options)) {
-        if (permission.scp.includes(identity)) {
+        if (scp.includes(identity)) {
           return nextState;
         }
       }
