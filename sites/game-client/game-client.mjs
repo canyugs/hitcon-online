@@ -145,7 +145,6 @@ class GameClient {
     game.mapRendererOverlay.show(OverlayPosition.MAIN_VIEW);
     this.avatarSelectionPage.hide();
     this.inputManager.focusedElement = this.mapRenderer.getInputEventDOM();
-    this.inputManager.hasStarted = true;
     this.mainUI.introModal.show();
 
     // Start the browser side of all extensions.
