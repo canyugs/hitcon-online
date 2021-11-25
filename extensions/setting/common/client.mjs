@@ -97,17 +97,23 @@ class SettingTab extends UtilPanelTab {
       for (const name in this.sections[section]) {
         const row = this.sections[section][name];
         const elem = document.getElementById('setting-item-' + section + '-' + name);
-        if (row.currentValue === elem.value) {
+        if ((row.type !== 'switch' && row.currentValue === elem.value) ||
+            (row.type === 'switch' && row.currentValue === elem.checked)) {
           continue;
         }
 
-        const re = new RegExp(row.validation);
-        if (!elem.value.match(re)) {
-          console.warn('Input ' + name + ' doesn\'t match RegEx');
-        }
+        if (row.type === 'switch') {
+          row.saveCallback(elem.checked);
+          row.currentValue = elem.checked;
+        } else {
+          const re = new RegExp(row.validation);
+          if (!elem.value.match(re)) {
+            console.warn('Input ' + name + ' doesn\'t match RegEx');
+          }
 
-        row.saveCallback(elem.value);
-        row.currentValue = elem.value;
+          row.saveCallback(elem.value);
+          row.currentValue = elem.value;
+        }
       }
     }
   }
