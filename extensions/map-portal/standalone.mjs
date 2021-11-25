@@ -88,6 +88,9 @@ class Standalone {
       if (!Array.isArray(scp)) {
         scp = permission.scope;
       }
+      if (typeof scp === 'string') {
+        scp = scp.split(' ');
+      }
       if (Array.isArray(scp)) {
         for (const p of perm) {
           if (scp.includes(p)) {
