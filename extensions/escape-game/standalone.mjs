@@ -10,6 +10,7 @@ const randomBytes = require('crypto').randomBytes;
 const path = require('path');
 const jwt = require('jsonwebtoken');
 const config = require('config');
+const QRCode = require('qrcode');
 
 import fs from 'fs';
 import {promisify} from 'util';
@@ -700,7 +701,19 @@ class Standalone {
     }
 
     if (redeemCode) {
-      await this.helper.callS2cAPI(playerID, 'dialog', 'showDialog', 60*1000, 'Redeem Code', `Your redeem code is ${redeemCode}`);
+      const url = await (new Promise((res) => {
+        const jobj = {code: redeemCode};
+        QRCode.toDataURL(JSON.stringify(jobj), function (err, url) {
+          if (err) {
+            res('');
+          } else {
+            res(url);
+          }
+        });
+      }));
+      // We need to disable XSS because img data url is filtered.
+      // TODO: Deal with this properly.
+      await this.helper.callS2cAPI(playerID, 'dialog', 'showDialog', 60*1000, 'Redeem Code', `Your redeem code is ${redeemCode}: <br><img src="${url}" />`, 'OK', {disableXSS: true});
       // await this.helper.callS2cAPI(playerID, 'point-system', 'redeemPoints', 60*1000, redeemCode);
       return nextState;
     }

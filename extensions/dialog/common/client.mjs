@@ -55,14 +55,18 @@ class DialogModal extends Modal {
   /**
    * Call to set the dialog to display a single choice dialog.
    */
-  async displayAsSingleChoice(subject, message, buttonText) {
+  async displayAsSingleChoice(subject, message, buttonText, options) {
     const result = await this._displayDialogInternal(() => {
       // Sanitize to prevent XSS
       const san_buttonText = filterXSS(buttonText);
       const san_message = filterXSS(message);
 
       this.subjectDOM.innerHTML = subject;
-      this.msgDOM.innerHTML = san_message;
+      if (typeof options === 'object' && options.disableXSS === true) {
+        this.msgDOM.innerHTML = message;
+      } else {
+        this.msgDOM.innerHTML = san_message;
+      }
 
       this.btnContDOM.innerHTML = `<button class="dialog-btn-OK">${san_buttonText}</button>`;
       const btnOK = document.getElementsByClassName('dialog-btn-OK');
@@ -190,7 +194,7 @@ class Client {
    * the user clicked OK. Otherwise, it'll contain 'cancelled' attribute to
    * denote that the dialog was cancelled.
    */
-  async s2c_showDialog(subject, message, btnText) {
+  async s2c_showDialog(subject, message, btnText, options) {
     console.log(`[Dialog] Single Choice Dialog`);
 
     if (!btnText) {
@@ -200,7 +204,7 @@ class Client {
       subject = 'Message';
     }
     return await this.modal.displayAsSingleChoice(
-      subject, message, btnText);
+      subject, message, btnText, options);
   }
 
   /**
