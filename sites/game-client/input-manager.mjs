@@ -23,6 +23,7 @@ class InputManager {
     this.keydownEveryTickCallbacks = []; // each element is a {DOMElement, callback} object
     this.keydownOnceCallbacks = []; // each element is a {DOMElement, callback} object
     this.keyupCallbacks = []; // each element is a {DOMElement, callback} object
+    this.hasStarted = false; // if the game has started
 
     // TODO: Better way of maintaining focused element.
     this.focusedElement = document.activeElement;
@@ -33,6 +34,10 @@ class InputManager {
       // We trigger `keydownOnceCallbacks` instead of `keydownEveryTickCallbacks`.
       // Since the browser will continuously fire keydown event if key remains pressed, we have to check if this is the first event.
       if (this.pressedKeys.has(event.key)) {
+        return;
+      }
+      // If the game has not started, the keydown event should not be sent to the game.
+      if (!this.hasStarted) {
         return;
       }
       this.pressedKeys.set(event.key, {code: event.code});
