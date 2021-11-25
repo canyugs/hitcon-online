@@ -220,7 +220,7 @@ class ExtensionHelperBase {
       scp = scp.split(' ');
     }
     if (!Array.isArray(scp)) return false;
-    if (token.scp.includes(scope)) return true;
+    if (scp.includes(scope)) return true;
     return false;
   }
 
