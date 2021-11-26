@@ -221,10 +221,20 @@ class MapRenderer {
    * Converts canvas coordinate to map coordinate.
    * @param {Number} x - The x coordinate in the canvas.
    * @param {Number} y - The y coordinate in the canvas.
+   * @param {Canvas} targetCanvas
    * @return {Object} coordinate - The map coordinate. coordinate.x and
    * coordinate.y is available. Both x and y are floating numbers.
    */
-  canvasToMapCoordinate(x, y) {
+  canvasToMapCoordinate(x, y, targetCanvas) {
+    targetCanvas ??= this.canvas;
+
+    if (targetCanvas !== this.canvas) {
+      // absolute coordinate
+      const newX = x / MAP_CELL_SIZE;
+      const newY = (targetCanvas.height - y) / MAP_CELL_SIZE;
+      return new MapCoord(this.viewerPosition.mapName, newX, newY);
+    }
+
     const canvasCenter = {x: this.canvas.width / 2, y: this.canvas.height / 2};
     const newX = this.viewerPosition.x + (x - canvasCenter.x) / MAP_CELL_SIZE;
     const newY = this.viewerPosition.y - (y - canvasCenter.y) / MAP_CELL_SIZE;
@@ -234,10 +244,22 @@ class MapRenderer {
   /**
    * Converts map coordinate to canvas coordinate.
    * @param {MapCoord} coord - The map coordinate.
+   * @param {Canvas} targetCanvas
    * @return {Object} coordinate - The canvas coordinate. coordinate.x and
    * coordinate.y is available. Both x and y are integer.
    */
-  mapToCanvasCoordinate(coord) {
+  mapToCanvasCoordinate(coord, targetCanvas) {
+    targetCanvas ??= this.canvas;
+
+    if (targetCanvas !== this.canvas) {
+      // absolute coordinate
+      return {
+        x: Math.floor(coord.x * MAP_CELL_SIZE),
+        y: Math.floor(targetCanvas.height - coord.y * MAP_CELL_SIZE),
+      }
+    }
+
+    // relative coordinate
     const {x, y} = coord;
     const canvasCenter = {x: this.canvas.width / 2, y: this.canvas.height / 2};
     return {
@@ -502,6 +524,45 @@ class MapRenderer {
     this._translateBackgroundPreviousY = mapY;
   }
 
+  _drawStaticPartOfMap() {
+    // draw static part of map
+    this.generateOutOfBoundBackground();
+    this.translateOutOfBoundBackground();
+    this.generateStaticMap('background');
+    this.generateStaticMap('foreground');
+    this.translateStaticMaps();
+  }
+
+  /**
+   * @param {Canvas} targetCanvas
+   */
+  _drawDynamicPartOfMap(targetCanvas) {
+    // draw dynamic part of map
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    for (const [, layerName, renderFunction, renderArgs] of this.customizedLayers) {
+      switch (renderFunction) {
+        case '_drawManyCharacterImage':
+          this._drawManyCharacterImage(targetCanvas, renderArgs);
+          break;
+
+        case '_drawManyCharacterName':
+          this._drawManyCharacterName(targetCanvas, renderArgs);
+          break;
+
+        case '_drawOneCharacterImage':
+          this._drawOneCharacterImage(targetCanvas, renderArgs);
+          break;
+
+        case '_drawOneCharacterName':
+          this._drawOneCharacterName(targetCanvas, renderArgs);
+          break;
+
+        default:
+          this._drawEveryCellWrapper(targetCanvas, this._drawLayer.bind(this, targetCanvas, layerName));
+      }
+    }
+  }
+
   /**
    * Draw everything onto the canvas.
    */
@@ -509,59 +570,49 @@ class MapRenderer {
     // if not initialized
     if (this.viewportFollow === null) return;
 
-    // update viewer position
     this.updateViewerPosition();
+    this._drawStaticPartOfMap();
+    this._drawDynamicPartOfMap(this.canvas);
+  }
 
-    // draw static part of map
-    this.generateOutOfBoundBackground();
-    this.translateOutOfBoundBackground();
-    this.generateStaticMap('background');
-    this.generateStaticMap('foreground');
-    this.translateStaticMaps();
+  currentMapFullSizeSnapshot() {
+    const tempCanvas = document.createElement('canvas');
+    const tempCtx = tempCanvas.getContext('2d');
+    tempCanvas.width = this.backgroundCanvas.width;
+    tempCanvas.height = this.backgroundCanvas.height;
 
-    // draw foreground
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    for (const [, layerName, renderFunction, renderArgs] of this.customizedLayers) {
-      switch (renderFunction) {
-        case '_drawManyCharacterImage':
-          this._drawManyCharacterImage(renderArgs);
-          break;
+    tempCtx.drawImage(this.backgroundCanvas, 0, 0);
+    this._drawDynamicPartOfMap(tempCanvas);
+    tempCtx.drawImage(this.foregroundCanvas, 0, 0);
 
-        case '_drawManyCharacterName':
-          this._drawManyCharacterName(renderArgs);
-          break;
+    return tempCanvas.toDataURL();
+  }
 
-        case '_drawOneCharacterImage':
-          this._drawOneCharacterImage(renderArgs);
-          break;
-
-        case '_drawOneCharacterName':
-          this._drawOneCharacterName(renderArgs);
-          break;
-
-        default:
-          this._drawEveryCellWrapper(this._drawLayer.bind(this, layerName));
-      }
-    }
+  createImageOfCurrentMapFullSizeSnapshot() {
+    const img = document.createElement('img');
+    img.src = this.currentMapFullSizeSnapshot();
+    img.style.zIndex = 1025;
+    document.body.appendChild(img);
   }
 
   /**
-   * This function is the argument of _drawEveryCellWrapper(fn).
+   * This function is the argument of _drawEveryCellWrapper(targetCanvas, fn).
    * @callback drawOneCellFunction
    * @param {MapCoord} mapCoord - The map coordinate to be drawn.
    * @return {Boolean} success - Return true if successful.
    */
   /**
    * This is a wrapper function that calls fn to draw every cell on screen.
+   * @param {Canvas} targetCanvas
    * @param {drawOneCellFunction} fn - The function that draws a given cell.
    */
-  _drawEveryCellWrapper(fn) {
-    const firstCellMapCoordFloat = this.canvasToMapCoordinate(0, this.canvas.height);
+  _drawEveryCellWrapper(targetCanvas, fn) {
+    const firstCellMapCoordFloat = this.canvasToMapCoordinate(0, this.canvas.height, targetCanvas);
     const firstCellMapCoordInt = {
       x: Math.floor(firstCellMapCoordFloat.x),
       y: Math.floor(firstCellMapCoordFloat.y),
     };
-    const lastCellMapCoordFloat = this.canvasToMapCoordinate(this.canvas.width, 0);
+    const lastCellMapCoordFloat = this.canvasToMapCoordinate(this.canvas.width, 0, targetCanvas);
     const lastCellMapCoordInt = {
       x: Math.floor(lastCellMapCoordFloat.x),
       y: Math.floor(lastCellMapCoordFloat.y),
@@ -581,10 +632,11 @@ class MapRenderer {
 
   /**
    * Draw layer "ground" of mapCoord onto the canvas.
+   * @param {Canvas} targetCanvas
    * @param {String} layerName - The layer to be drawn.
    * @param {MapCoord} mapCoord - The map coordinate to be drawn.
    */
-  _drawLayer(layerName, mapCoord) {
+  _drawLayer(targetCanvas, layerName, mapCoord) {
     let renderInfo;
     try {
       renderInfo = this.map.getCellRenderInfo(mapCoord, layerName);
@@ -594,8 +646,9 @@ class MapRenderer {
     }
     if (renderInfo === null) return;
 
-    const canvasCoordinate = this.mapToCanvasCoordinate(mapCoord);
-    this.ctx.drawImage(
+    const canvasCoordinate = this.mapToCanvasCoordinate(mapCoord, targetCanvas);
+    const targetCtx = targetCanvas.getContext('2d');
+    targetCtx.drawImage(
         renderInfo.image,
         renderInfo.srcX,
         renderInfo.srcY,
@@ -610,22 +663,23 @@ class MapRenderer {
 
   /**
    * Draw the image of one player or NPC onto the canvas.
+   * @param {Canvas} targetCanvas
    * @param {Object} player - The players to be drawn. `player.getDrawInfo()`
    * would be called to get the information for drawing.
    */
-  _drawOneCharacterImage(player) {
+  _drawOneCharacterImage(targetCanvas, player) {
     const {mapCoord, displayChar, facing, ghostMode, opacity} = player.getDrawInfo();
 
     // If we're not on the same map, we don't need to draw it.
     if (mapCoord.mapName !== this.viewerPosition.mapName) return;
 
-    const canvasCoordinate = this.mapToCanvasCoordinate(mapCoord);
+    const canvasCoordinate = this.mapToCanvasCoordinate(mapCoord, targetCanvas);
     const topLeftCanvasCoord = {x: canvasCoordinate.x, y: canvasCoordinate.y - MAP_CELL_SIZE};
     // check if this player is out of viewport
     if (topLeftCanvasCoord.x < -MAP_CELL_SIZE ||
-        topLeftCanvasCoord.x >= this.canvas.width ||
+        topLeftCanvasCoord.x >= targetCanvas.width ||
         topLeftCanvasCoord.y < -MAP_CELL_SIZE ||
-        topLeftCanvasCoord.y >= this.canvas.height) {
+        topLeftCanvasCoord.y >= targetCanvas.height) {
       return;
     }
     const renderInfo = this.map.graphicAsset.getCharacter(displayChar,
@@ -634,14 +688,15 @@ class MapRenderer {
       // Not info, just pass.
       return;
     }
-    const oldOpacity = this.ctx.globalAlpha;
+    const targetCtx = targetCanvas.getContext('2d');
+    const oldOpacity = targetCtx.globalAlpha;
     if (ghostMode) {
-      this.ctx.globalAlpha = 0.4;
+      targetCtx.globalAlpha = 0.4;
     }
     if (typeof opacity === 'number') {
-      this.ctx.globalAlpha *= opacity;
+      targetCtx.globalAlpha *= opacity;
     }
-    this.ctx.drawImage(
+    targetCtx.drawImage(
         renderInfo.image,
         renderInfo.srcX,
         renderInfo.srcY,
@@ -652,15 +707,16 @@ class MapRenderer {
         MAP_CELL_SIZE,
         MAP_CELL_SIZE,
     );
-    this.ctx.globalAlpha = oldOpacity;
+    targetCtx.globalAlpha = oldOpacity;
   }
 
   /**
    * Draw the name of one player or NPC onto the canvas.
+   * @param {Canvas} targetCanvas
    * @param {Object} player - The players to be drawn. `player.getDrawInfo()`
    * would be called to get the information for drawing.
    */
-  _drawOneCharacterName(player) {
+  _drawOneCharacterName(targetCanvas, player) {
     const {mapCoord, displayName, NPCHighlight} = player.getDrawInfo();
 
     // No need to draw if it is set to be hidden.
@@ -671,27 +727,28 @@ class MapRenderer {
     // If we're not on the same map, we don't need to draw it.
     if (mapCoord.mapName !== this.viewerPosition.mapName) return;
 
-    // TODO: If mapCoord is too far from the canvas, this.ctx.restore() and return;
+    // TODO: If mapCoord is too far from the canvas, targetCtx.restore() and return;
+    const targetCtx = targetCanvas.getContext('2d');
     const {x, y} = mapCoord;
-    const canvasCoordinate = this.mapToCanvasCoordinate(new MapCoord(this.viewerPosition.mapName, x + 0.5, y + 1));
+    const canvasCoordinate = this.mapToCanvasCoordinate(new MapCoord(this.viewerPosition.mapName, x + 0.5, y + 1), targetCanvas);
 
     // TODO: Remember whether the previous call of `this.draw()` renders text.
     // If so, no need to save and restore the context. May improve performance.
-    this.ctx.save();
-    this.ctx.textAlign = 'center';
-    this.ctx.textBaseline = 'bottom';
-    this.ctx.font = (NPCHighlight) ? NPCHighlightStyle : fontStyle;
-    this.ctx.fillStyle = (NPCHighlight) ? NPCHighlightFontColor : fontColor;
+    targetCtx.save();
+    targetCtx.textAlign = 'center';
+    targetCtx.textBaseline = 'bottom';
+    targetCtx.font = (NPCHighlight) ? NPCHighlightStyle : fontStyle;
+    targetCtx.fillStyle = (NPCHighlight) ? NPCHighlightFontColor : fontColor;
 
     // highlight NPCs
     if (NPCHighlight) {
-      this.ctx.save();
+      targetCtx.save();
       const {
         actualBoundingBoxLeft: l,
         actualBoundingBoxRight: r,
         actualBoundingBoxAscent: u, // up
         actualBoundingBoxDescent: d, // down
-      } = this.ctx.measureText(displayName);
+      } = targetCtx.measureText(displayName);
 
       const boxl = Math.floor(canvasCoordinate.x - l) - NPCHighlightPaddingX;
       const boxr = Math.ceil(canvasCoordinate.x + r) + NPCHighlightPaddingX;
@@ -700,45 +757,47 @@ class MapRenderer {
 
       // background color and border
       // TODO: rounded rectangle
-      this.ctx.fillStyle = NPCHighlightBackgroundColor;
-      this.ctx.strokeStyle = NPCHighlightBorderColor;
-      this.ctx.lineWidth = NPCHighlightBorderWidth;
-      this.ctx.fillRect(boxl, boxu, (boxr - boxl), (boxd - boxu));
-      this.ctx.strokeRect(boxl, boxu, (boxr - boxl), (boxd - boxu));
+      targetCtx.fillStyle = NPCHighlightBackgroundColor;
+      targetCtx.strokeStyle = NPCHighlightBorderColor;
+      targetCtx.lineWidth = NPCHighlightBorderWidth;
+      targetCtx.fillRect(boxl, boxu, (boxr - boxl), (boxd - boxu));
+      targetCtx.strokeRect(boxl, boxu, (boxr - boxl), (boxd - boxu));
 
-      this.ctx.restore();
+      targetCtx.restore();
     } else {
       // draw an outline of text
-      this.ctx.strokeStyle = fontOutlineColor;
-      this.ctx.lineWidth = fontOutlineWidth;
-      this.ctx.strokeText(displayName, canvasCoordinate.x, canvasCoordinate.y);
+      targetCtx.strokeStyle = fontOutlineColor;
+      targetCtx.lineWidth = fontOutlineWidth;
+      targetCtx.strokeText(displayName, canvasCoordinate.x, canvasCoordinate.y);
     }
 
     // there is no need for out-of-canvas check
-    this.ctx.fillText(displayName, canvasCoordinate.x, canvasCoordinate.y);
+    targetCtx.fillText(displayName, canvasCoordinate.x, canvasCoordinate.y);
 
-    this.ctx.restore();
+    targetCtx.restore();
   }
 
   /**
    * Draw the images of players or NPCs onto the canvas.
+   * @param {Canvas} targetCanvas
    * @param {Map} players - The players to be drawn. For every `player` in `players`,
    * `player.getDrawInfo()` would be called to get the information for drawing.
    */
-  _drawManyCharacterImage(players) {
+  _drawManyCharacterImage(targetCanvas, players) {
     for (const player of players.values()) {
-      this._drawOneCharacterImage(player);
+      this._drawOneCharacterImage(targetCanvas, player);
     }
   }
 
   /**
    * Draw the names of players or NPCs onto the canvas.
+   * @param {Canvas} targetCanvas
    * @param {Map} players - The players to be drawn. For every `player` in `players`,
    * `player.getDrawInfo()` would be called to get the information for drawing.
    */
-  _drawManyCharacterName(players) {
+  _drawManyCharacterName(targetCanvas, players) {
     for (const player of players.values()) {
-      this._drawOneCharacterName(player);
+      this._drawOneCharacterName(targetCanvas, player);
     }
   }
 
