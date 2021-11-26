@@ -591,8 +591,30 @@ class MapRenderer {
   createImageOfCurrentMapFullSizeSnapshot() {
     const img = document.createElement('img');
     img.src = this.currentMapFullSizeSnapshot();
-    img.style.zIndex = 1025;
     document.body.appendChild(img);
+  }
+
+  createFullMapMonitor() {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    document.body.appendChild(canvas);
+
+    const drawFullMap = async () => {
+      const img = new Image();
+      img.src = this.currentMapFullSizeSnapshot();
+      await new Promise((resolve) => {
+        img.onload = () => {
+          canvas.width = img.width;
+          canvas.height = img.height;
+          ctx.drawImage(img, 0, 0);
+          resolve();
+        };
+      });
+
+      drawFullMap();
+    };
+
+    drawFullMap();
   }
 
   /**
