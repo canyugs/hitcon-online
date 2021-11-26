@@ -214,7 +214,7 @@ class Standalone {
    *   !/announce <msg>
    */
   async c2s_cmdAnnounce(player, cmd) {
-    if (cmd.msg.trim().length === 0) {
+    if (cmd.trim().length === 0) {
       return;
     }
 
@@ -228,7 +228,7 @@ class Standalone {
     resultArgs['msg'] = msg;
     resultArgs['type'] = 'announcement';
     resultArgs['timeout'] = 25000;
-    resultArgs['msg_from_name'] = args.msg_from_name;
+    resultArgs['msg_from_name'] = player.playerID;
     
     await this.helper.broadcastToAllUser(resultArgs);
 
