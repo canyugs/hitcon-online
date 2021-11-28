@@ -37,3 +37,32 @@ In Progress
   - Character displayName / displayChar setting
 - Greeting Screen (Character/displayName selection)
 - XSS Sanitization Library and Refactor
+
+
+---
+
+Below is added by chiffoncake:
+* [code cleaning]
+gateway-service.mjs move teleport into movement-manager.mjs
+* [feature]
+add `event.preventDefault()` or something like this to 'keydown' and 'keyup' if there are registered event listeners
+* [feature]
+moving cooldown after teleportation (better UX)
+* [feature]
+(server side) if moving fails, clear the pending moving request of the same player
+* [feature]
+MapRenderer.generateBackground()
+render 到隱藏 canvas 上，全部 render 完之後才統一畫回真正的 canvas
+這樣可以避免 client 看到畫到一半的 canvas
+還有載入畫面（轉圈圈）
+* [feature]
+MapRenderer.generateBackground()
+讓 cellset 有辦法可以註冊成 background。可能畫在不同的 canvas layer？
+如此一來 bombman 的 arena 就可以畫成背景，超大 arena 也不會有 rendering 效能問題
+* [feature]
+有一個 endpoint 專門顯示全地圖畫面（/monitor.html）
+可以有其他功能（放大縮小）
+* [feature]
+大逃殺 extension
+會有一個邊界愈來愈縮小，碰到邊界的人就斷線，重導向到全地圖預覽的網站（/monitor.html）
+
