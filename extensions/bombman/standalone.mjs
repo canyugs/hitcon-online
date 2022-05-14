@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 import CellSet from '../../common/maplib/cellset.mjs';
-import {LAYER_BOMB} from './common/client.mjs';
+import {LAYER_BOMB, BOMB_COOLDOWN} from './common/client.mjs';
 
 const BOMB_COUNTDOWN = 3000; // millisecond
 
@@ -18,6 +18,7 @@ class Standalone {
    */
   constructor(helper) {
     this.helper = helper;
+    this.cooldown = false;
   }
 
   /**
@@ -70,6 +71,12 @@ class Standalone {
     }
     if (!inside) return;
 
+    // TODO: check if the player can set a bomb or not
+    if (this.cooldown) return;
+    this.cooldown = true;
+    setTimeout(()=>{
+      this.cooldown = false;
+    }, BOMB_COOLDOWN);
     const bombID = this.bombID++;
     this.bombCells.set(bombID, {x: mapCoord.x, y: mapCoord.y});
     await this.helper.broadcastCellSetUpdateToAllUser(
@@ -94,7 +101,6 @@ class Standalone {
       );
     }, BOMB_COUNTDOWN, bombID);
 
-    // TODO: check if the player can set a bomb or not
     return true;
   }
 }
