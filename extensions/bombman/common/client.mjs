@@ -3,6 +3,7 @@
 
 const LAYER_BOMB = {zIndex: 5, layerName: 'bombmanHasBomb'};
 const LAYER_OBSTACLE = {zIndex: 1, layerName: 'bombmanObstacle'};
+const BOMB_COOLDOWN = 3000;
 
 const keyboardMapping = {
   place: ' ',
@@ -21,6 +22,7 @@ class Client {
    */
   constructor(helper) {
     this.helper = helper;
+    this.cooldown = false;
   }
 
   /**
@@ -41,10 +43,15 @@ class Client {
    */
   async placeBomb(event) {
     if (event.key === keyboardMapping.place) {
+      if (this.cooldown) return;
       // TODO: reduce latency using the same mechanism of player moving
       const success = await this.helper.callC2sAPI('bombman', 'placeBomb', this.helper.defaultTimeout, this.helper.gameClient.playerInfo.mapCoord);
       if (success) {
         // TODO: update player cool down
+        this.cooldown = true;
+        setTimeout(()=>{
+          this.cooldown = false;
+        }, BOMB_COOLDOWN);
       }
     }
   }
@@ -55,4 +62,5 @@ export default Client;
 export {
   LAYER_BOMB,
   LAYER_OBSTACLE,
+  BOMB_COOLDOWN,
 };
