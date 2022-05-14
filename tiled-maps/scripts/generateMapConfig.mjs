@@ -481,7 +481,13 @@ newAssetsConfig.layerMap.bombmanHasBomb = {
         14
       ]
     };
-
+newAssetsConfig.layerMap.bombmanBombExplode = {
+      "BE": [
+        "base",
+        1,
+        11
+      ]
+    };
 
 writeFileToJSON(assetsConfigPath, newAssetsConfig);
 

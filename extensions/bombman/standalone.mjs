@@ -2,9 +2,18 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 import CellSet from '../../common/maplib/cellset.mjs';
-import {LAYER_BOMB, BOMB_COOLDOWN} from './common/client.mjs';
+import {LAYER_BOMB, BOMB_COOLDOWN, LAYER_BOMB_EXPLODE} from './common/client.mjs';
 
 const BOMB_COUNTDOWN = 3000; // millisecond
+const BOMB_EXPLODE_TIME = 500; // millisecond
+
+const BOMB_EXPLODE_RANGE = [
+  {x: 0, y: 0, w: 1, h: 1},
+  {x: 0, y: 1, w: 1, h: 1},
+  {x: 0, y: -1, w: 1, h: 1},
+  {x: 1, y: 0, w: 1, h: 1},
+  {x: -1, y: 0, w: 1, h: 1},
+];
 
 /**
  * This represents the standalone extension service for this extension.
@@ -18,7 +27,6 @@ class Standalone {
    */
   constructor(helper) {
     this.helper = helper;
-    this.cooldown = false;
   }
 
   /**
@@ -32,6 +40,8 @@ class Standalone {
     // set dynamic cell set: bombmanHasBomb
     this.bombCells = new Map(); // key: a unique bomb ID; value: the cell
     this.bombID = 0;
+    this.explodeCells = new Map();
+
     for (const mapName of this.arenaOfMaps.keys()) {
       await this.helper.broadcastCellSetUpdateToAllUser(
           'set', // operation type
@@ -45,6 +55,28 @@ class Standalone {
           }),
       );
     }
+
+    // set cooldown
+    this.cooldown = false; // TODO: Cooldown Manager
+  }
+
+  /**
+   * Given a bomb, return cellCoord
+   * @param {Object} cellCoord - The cell position {x:x,y:y}.
+   * @return {Array} the explode range array
+   */
+  formExplodeCells(cellCoord) { // TODO: detect is battle field and not obstacle
+    const cells = [];
+
+    for (const range of BOMB_EXPLODE_RANGE) {
+      cells.push({
+        x: cellCoord.x+range.x,
+        y: cellCoord.y+range.y,
+        w: range.w,
+        h: range.h,
+      });
+    }
+    return cells;
   }
 
   /**
@@ -90,6 +122,9 @@ class Standalone {
 
     // setTimeout to remove bomb
     setTimeout(async (bombID) => {
+      let explodeCell = this.bombCells.get(bombID);
+      explodeCell = this.formExplodeCells(explodeCell);
+      this.explodeCells.set(bombID, {explodeCell});
       this.bombCells.delete(bombID);
       await this.helper.broadcastCellSetUpdateToAllUser(
           'update', // operation type
@@ -99,6 +134,28 @@ class Standalone {
             cells: Array.from(this.bombCells.values()),
           }),
       );
+      await this.helper.broadcastCellSetUpdateToAllUser(
+          'set', // operation type
+          mapCoord.mapName,
+          CellSet.fromObject({
+            name: LAYER_BOMB_EXPLODE.layerName,
+            priority: 3,
+            cells: Array.from(explodeCell.values()),
+            layers: {[LAYER_BOMB_EXPLODE.layerName]: 'BE'},
+            dynamic: true,
+          }),
+      );
+      setTimeout(async (bombID)=>{
+        this.explodeCells.delete(bombID);
+        await this.helper.broadcastCellSetUpdateToAllUser(
+            'update',
+            mapCoord.mapName,
+            CellSet.fromObject({
+              name: LAYER_BOMB_EXPLODE.layerName,
+              cells: Array.from(this.explodeCells.values()),
+            }),
+        );
+      }, BOMB_EXPLODE_TIME, bombID);
     }, BOMB_COUNTDOWN, bombID);
 
     return true;
