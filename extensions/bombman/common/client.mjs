@@ -3,7 +3,8 @@
 
 const LAYER_BOMB = {zIndex: 5, layerName: 'bombmanHasBomb'};
 const LAYER_OBSTACLE = {zIndex: 1, layerName: 'bombmanObstacle'};
-const BOMB_COOLDOWN = 3000;
+const LAYER_BOMB_EXPLODE = {zIndex: 3, layerName: 'bombmanBombExplode'};
+const BOMB_COOLDOWN = 2000; // millisecond
 
 const keyboardMapping = {
   place: ' ',
@@ -22,7 +23,6 @@ class Client {
    */
   constructor(helper) {
     this.helper = helper;
-    this.cooldown = false;
   }
 
   /**
@@ -30,10 +30,13 @@ class Client {
    */
   async gameStart() {
     this.helper.inputManager.registerKeydownOnce(this.helper.mapRenderer.getInputEventDOM(), this.placeBomb.bind(this));
-    // TODO: player cool down
 
     this.helper.mapRenderer.registerCustomizedLayerToDraw(LAYER_OBSTACLE.zIndex, LAYER_OBSTACLE.layerName);
     this.helper.mapRenderer.registerCustomizedLayerToDraw(LAYER_BOMB.zIndex, LAYER_BOMB.layerName);
+    this.helper.mapRenderer.registerCustomizedLayerToDraw(LAYER_BOMB_EXPLODE.zIndex, LAYER_BOMB_EXPLODE.layerName);
+
+    // set cooldown
+    this.cooldown = false; // TODO: cooldown Manager
   }
 
   /**
@@ -62,5 +65,6 @@ export default Client;
 export {
   LAYER_BOMB,
   LAYER_OBSTACLE,
+  LAYER_BOMB_EXPLODE,
   BOMB_COOLDOWN,
 };
