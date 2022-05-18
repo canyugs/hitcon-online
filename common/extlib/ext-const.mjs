@@ -13,6 +13,10 @@ class ExtConst {
   static C2S_RPC_FUNC_PREFIX() {
     return 'c2s_';
   }
+
+  static E2S_RPC_FUNC_PREFIX() {
+    return 'e2s_';
+  }
 };
 
 export default ExtConst;

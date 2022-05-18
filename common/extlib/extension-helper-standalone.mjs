@@ -38,6 +38,7 @@ class ExtensionHelperStandalone extends ExtensionHelperBase {
     await this.rpcHandler.registerAsExtension(this.name);
     this.rpcHandler.registerRPC('callS2s', this.onCallS2s.bind(this));
     this.rpcHandler.registerRPC('callC2s', this.onCallC2s.bind(this));
+    this.rpcHandler.registerRPC('callE2s', this.onCallE2s.bind(this));
     await super.asyncConstructor(ext);
   }
 
@@ -76,6 +77,24 @@ class ExtensionHelperStandalone extends ExtensionHelperBase {
     const player = this.extMan.getPlayerObj(playerID);
     try {
       return await this.ext[actualMethodName](player, ...args);
+    } catch (e) {
+      console.error(`Exception "${e}" when calling standalone[${actualMethodName}]`);
+      // Full exception detailed NOT provided for security reason.
+      return {'error': 'exception'};
+    }
+  }
+
+  /**
+   * This is called when an external service/client calls the E2s RPC API
+   * of this extension.
+   */
+  async onCallE2s(serviceName, methodName, args) {
+    const actualMethodName = ExtConst.E2S_RPC_FUNC_PREFIX() + methodName;
+    if (typeof this.ext[actualMethodName] != 'function') {
+      return {'error': `Extension ${this.name} doesn't have ${methodName}`};
+    }
+    try {
+      return await this.ext[actualMethodName](...args);
     } catch (e) {
       console.error(`Exception "${e}" when calling standalone[${actualMethodName}]`);
       // Full exception detailed NOT provided for security reason.

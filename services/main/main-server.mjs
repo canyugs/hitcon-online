@@ -68,7 +68,7 @@ async function mainServer() {
   const broadcaster = new AllAreaBroadcaster(rpcDirectory, gameMap, gameState);
   const extensionManager = new ExtensionManager(rpcDirectory, broadcaster, gameMap, gameState);
   const gatewayService = new GatewayService(rpcDirectory, gameMap, authServer,
-    broadcaster, io, extensionManager, movementManager);
+    broadcaster, io, extensionManager, movementManager, app);
   const assetServer = new AssetServer(app, extensionManager, null);
   await extensionManager.ensureClass('blank');
   for (const extName of extensionManager.listExtensions()) {
