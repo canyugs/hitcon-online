@@ -247,6 +247,17 @@ class Standalone {
     return FSM_ERROR;
   }
 
+  /**
+   * Allow external party to set a variable for example.
+   */
+  async e2s_writeVar(varName, val, playerID, objID) {
+    // Example for triggering:
+    // curl -X POST http://127.0.0.1:5000/e2s/iobj-lib/writeVar \
+    // -H 'Content-Type: application/json' \
+    // -d '{"apiKey": "secret2", "args": ["@test1", 3, null, null]}'
+    return await this.helper.varUtils.writeVar(varName, playerID, objID, val);
+  }
+
   async s2s_sf_testBooleanExpr(srcExt, playerID, kwargs, sfInfo) {
     const {booleanVars, expr, trueState, falseState} = kwargs;
     let thisObj = {};

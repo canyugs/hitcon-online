@@ -6,6 +6,8 @@ import {createRequire} from 'module';
 const require = createRequire(import.meta.url);
 
 const AsyncLock = require('async-lock');
+const bodyParser = require('body-parser');
+const config = require('config');
 
 import {MapCoord} from '../../common/maplib/map.mjs';
 import {PlayerSyncMessage} from '../../common/gamelib/player.mjs';
@@ -36,7 +38,7 @@ class GatewayService {
    * @param {MovementManagerServer} movementManager - Handles PlayerSyncMessage.
    * and player locations.
    */
-  constructor(dir, gameMap, authServer, broadcaster, io, extMan, movementManager) {
+  constructor(dir, gameMap, authServer, broadcaster, io, extMan, movementManager, app) {
     this.dir = dir;
     this.gameMap = gameMap;
     this.authServer = authServer;
@@ -47,6 +49,38 @@ class GatewayService {
     // A map that tracks the current connected clients.
     // key is the player ID. value is the socket.
     this.socks = {};
+
+    this.setupE2s(app);
+  }
+
+  /**
+   * Setup the callbacks for handling E2S API calls.
+   */
+  setupE2s(app) {
+    const urlencodedParser = bodyParser.json();
+    app.post('/e2s/:extId/:apiName', urlencodedParser, (req, res) => {
+      this.handleE2s(res, req.params.extId, req.params.apiName, req.body);
+    });
+  }
+
+  /**
+   * Handle E2s call.
+   */
+  async handleE2s(res, extId, apiName, reqContent) {
+    try {
+      if (typeof reqContent !== 'object' || typeof reqContent.apiKey !== 'string' || reqContent.apiKey !== config.get('e2sApiKey')) {
+        res.json({'error': 'Not authorized'});
+        return;
+      }
+      const ret = await this.extMan.onE2sCalled(extId, apiName, reqContent.args);
+      if (typeof msg === 'object' && msg !== null && 'error' in msg && typeof msg.error === 'string') {
+        console.error(`e2s call error: ${msg.error}`);
+      }
+      res.json(ret);
+    } catch (e) {
+      console.error(`e2s call exception: ${e}`);
+      res.json({'error': 'exception'});
+    }
   }
 
   /**

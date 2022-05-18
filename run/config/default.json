@@ -15,6 +15,7 @@
   },
   "multiprocess": false,
   "secret": "secret",
+  "e2sApiKey": "secret2",
   "ext": {
     "enabled": [
       "chat",
