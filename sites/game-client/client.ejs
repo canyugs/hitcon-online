@@ -83,6 +83,10 @@ absolute URL.
           <canvas id="mapcanvas"></canvas>
           <canvas id="foregroundcanvas"></canvas>
           <canvas id="inputcanvas"></canvas>
+          <div id="joystick-container">
+            <!-- TODO: styling -->
+            <div id="joystick-control-point"></div>
+          </div>
         </div>
         <div id="error-modal">
           <div>
@@ -316,7 +320,7 @@ absolute URL.
         }
 
         game.avatarSelectionPage = new AvatarSelectionPage(game.socket, game.graphicAsset);
-        game.inputManager = new InputManager(game.mapRenderer);
+        game.inputManager = new InputManager(game.mapRenderer, true);
         game.movementManager = new MovementManagerClient(game.socket, game.gameState, game.inputManager, game.mapRenderer);
         game.gameClient = new GameClient(game.socket, game.map, game.gameState, game.mapRenderer, game.inputManager, game.movementManager, game.extMan, game.mainUI, game.avatarSelectionPage, game.loadingScreenPage);
 

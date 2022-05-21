@@ -4,6 +4,9 @@
 const KEYSTROKE_RATE = 30; // keystroke per second
 const CANVAS_AUTO_FOCUS_MS = 200;
 
+const JOYSTICK_CONTAINER_ID = 'joystick-container';
+const JOYSTICK_CONTROL_POINT_ID = 'joystick-control-point';
+
 /**
  * Input manager deals with all user input.
  */
@@ -14,8 +17,9 @@ class InputManager {
    * @param {MapRenderer} mapRenderer - The MapRenderer object for retrieving the
    * canvas object for registering input events on it and mapping the
    * coordinates in the event to the map coordinate.
+   * @param {Boolean} enableJoyStick
    */
-  constructor(mapRenderer) {
+  constructor(mapRenderer, enableJoyStick) {
     this.mapRenderer = mapRenderer;
     this.canvas = this.mapRenderer.getInputEventDOM();
     this.clickCallbacks = []; // each element is a {DOMElement, callback} object
@@ -24,6 +28,11 @@ class InputManager {
     this.keydownOnceCallbacks = []; // each element is a {DOMElement, callback} object
     this.keyupCallbacks = []; // each element is a {DOMElement, callback} object
     this.hasStarted = false; // if the game has started
+    this.joystick = new JoyStick(document.getElementById(JOYSTICK_CONTAINER_ID), document.getElementById(JOYSTICK_CONTROL_POINT_ID));
+
+    if (enableJoyStick !== true) {
+      this.joystick.disable();
+    }
 
     // TODO: Better way of maintaining focused element.
     this.focusedElement = document.activeElement;
@@ -264,5 +273,42 @@ class InputManager {
     });
   }
 }
+
+
+/**
+ * The panel for player moving on mobile device.
+ * Can also be enabled when using desktop device.
+ */
+class JoyStick {
+  /**
+   * @constructor
+   * @param {Element} containerDiv - The container of the joystick.
+   * @param {Element} controlPointDiv - The div to display the stick of the joystick.
+   */
+  constructor(containerDiv, controlPointDiv) {
+    this.containerDiv = containerDiv;
+    this.controlPointDiv = controlPointDiv;
+
+    this.centerTheControlPoint();
+  }
+
+  /**
+   * Disable the JoyStick.
+   */
+  disable() {
+    this.containerDiv.hidden = true;
+    this.controlPointDiv.hidden = true;
+  }
+
+  /**
+   * Reset the position of the control point.
+   */
+  centerTheControlPoint() {
+    this.controlPointDiv.style.top = '50%';
+    this.controlPointDiv.style.left = '50%';
+    this.controlPointDiv.style.transform = 'translate(-50%, -50%)';
+  }
+}
+
 
 export default InputManager;
