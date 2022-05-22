@@ -6,6 +6,7 @@ const CANVAS_AUTO_FOCUS_MS = 200;
 
 const JOYSTICK_CONTAINER_ID = 'joystick-container';
 const JOYSTICK_CONTROL_POINT_ID = 'joystick-control-point';
+const JOYSTICK_EFFECTIVE_RADIUS = 0.3;
 
 /**
  * Input manager deals with all user input.
@@ -24,6 +25,7 @@ class InputManager {
     this.canvas = this.mapRenderer.getInputEventDOM();
     this.clickCallbacks = []; // each element is a {DOMElement, callback} object
     this.rightClickCallbacks = []; // each element is a {DOMElement, callback} object
+    this.joyStickEveryTickCallbacks = []; // each element is a callback object
     this.keydownEveryTickCallbacks = []; // each element is a {DOMElement, callback} object
     this.keydownOnceCallbacks = []; // each element is a {DOMElement, callback} object
     this.keyupCallbacks = []; // each element is a {DOMElement, callback} object
@@ -81,6 +83,9 @@ class InputManager {
             callback(new KeyboardEvent('keydown', {key, code}));
           }
         }
+      }
+      for (const callback of this.joyStickEveryTickCallbacks) {
+        callback(this.joystick);
       }
     }, 1000 / KEYSTROKE_RATE);
     setInterval(() => {
@@ -207,6 +212,15 @@ class InputManager {
   }
 
   /**
+   * Register a callback function on JoyStick.
+   * The callback will be triggered every tick.
+   * @param {Function} callback - Takes the joystick object as argument.
+   */
+  registerJoyStickEveryTick(callback) {
+    this.joyStickEveryTickCallbacks.push(callback);
+  }
+
+  /**
    * Register a callback function on keydown.
    * The callback will be triggered every tick.
    * @param {Element} DOMElement
@@ -237,10 +251,11 @@ class InputManager {
   }
 
   /**
-   * Register a callback function on keydown if it is a player movement.
+   * Register a callback function on player's movement.
    * @param {Function} callback - Takes the movement direction as argument.
    */
   registerMapMove(callback) {
+    // keyboard
     this.registerKeydownEveryTick(this.canvas, (event) => {
       let direction;
       switch (event.key) {
@@ -271,6 +286,20 @@ class InputManager {
         callback(direction);
       }
     });
+
+    // joystick
+    this.registerJoyStickEveryTick((joystick) => {
+      const {x, y} = joystick.status;
+      const r = Math.sqrt(x * x + y * y);
+      if (r >= JOYSTICK_EFFECTIVE_RADIUS) {
+        let direction;
+        if (x >= Math.abs(y)) direction = 'R';
+        else if (x < -Math.abs(y)) direction = 'L';
+        else if (y >= Math.abs(x)) direction = 'D';
+        else direction = 'U';
+        callback(direction);
+      }
+    });
   }
 }
 
@@ -293,6 +322,7 @@ class JoyStick {
       console.warn(`Joystick container should be a square! (currently ${this.containerDiv.offsetWidth}px*${this.containerDiv.offsetHeight}px)`);
     }
 
+    this._status = {x: 0, y: 0};
     this.centerTheControlPoint();
 
     if ('ontouchstart' in document.documentElement) {
@@ -320,6 +350,17 @@ class JoyStick {
   centerTheControlPoint() {
     this.controlPointDiv.style.top = '50%';
     this.controlPointDiv.style.left = '50%';
+    this._status.x = 0;
+    this._status.y = 0;
+  }
+
+  /**
+   * Return current coordinate of the joystick. Is an object like {x, y}.
+   * The joystick is a polar coordinate where x=r*cos(t) and y=r*sin(t).
+   * Therefore, -1 <= x <= 1 and -1 <= y <= 1 and 0 <= x*x + y*y <= 1.
+   */
+  get status() {
+    return this._status;
   }
 
   /**
@@ -361,6 +402,8 @@ class JoyStick {
     const r = Math.sqrt(_joystickX * _joystickX + _joystickY * _joystickY) / (containerSizeHalf);
     const joystickX = _joystickX / Math.max(1, r);
     const joystickY = _joystickY / Math.max(1, r);
+    this._status.x = joystickX / containerSizeHalf;
+    this._status.y = joystickY / containerSizeHalf;
 
     // TODO: use joystickX and joystickY to determine the moving direction
 
