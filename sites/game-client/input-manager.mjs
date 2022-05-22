@@ -289,7 +289,21 @@ class JoyStick {
     this.containerDiv = containerDiv;
     this.controlPointDiv = controlPointDiv;
 
+    if (this.containerDiv.offsetWidth !== this.containerDiv.offsetHeight) {
+      console.warn(`Joystick container should be a square! (currently ${this.containerDiv.offsetWidth}px*${this.containerDiv.offsetHeight}px)`);
+    }
+
     this.centerTheControlPoint();
+
+    if ('ontouchstart' in document.documentElement) {
+      this.containerDiv.addEventListener('touchstart', this.startMoving.bind(this));
+      window.addEventListener('touchmove', this.onMoving.bind(this));
+      window.addEventListener('touchend', this.endMoving.bind(this));
+    } else {
+      this.containerDiv.addEventListener('mousedown', this.startMoving.bind(this));
+      window.addEventListener('mousemove', this.onMoving.bind(this));
+      window.addEventListener('mouseup', this.endMoving.bind(this));
+    }
   }
 
   /**
@@ -306,7 +320,52 @@ class JoyStick {
   centerTheControlPoint() {
     this.controlPointDiv.style.top = '50%';
     this.controlPointDiv.style.left = '50%';
-    this.controlPointDiv.style.transform = 'translate(-50%, -50%)';
+  }
+
+  /**
+   * Called when the user starts using the joystick.
+   * @param {Event} event - the 'touchstart' or 'mousestart' event object
+   */
+  startMoving(event) {
+    this._touched = true;
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  /**
+   * Called when the user stops using the joystick.
+   * @param {Event} event - the 'touchend' or 'mouseend' event object
+   */
+  endMoving(event) {
+    this._touched = false;
+    this.centerTheControlPoint();
+  }
+
+  /**
+   * Called when the user is using the joystick.
+   * @param {Event} event - the 'touchmove' or 'mousemove' event object
+   */
+  onMoving(event) {
+    if (!this._touched) return;
+    event.preventDefault();
+    event.stopPropagation();
+
+    // const borderWidth = this.containerDiv.style.borderWidth
+    const {x: topLeftX, y: topLeftY} = this.containerDiv.getBoundingClientRect();
+    const borderWidth = getComputedStyle(this.containerDiv).getPropertyValue('border-left-width').replace('px', '');
+    const containerSizeHalf = this.containerDiv.offsetWidth / 2;
+    const touchClientX = (event instanceof TouchEvent) ? event.targetTouches[0].clientX : event.clientX;
+    const touchClientY = (event instanceof TouchEvent) ? event.targetTouches[0].clientY : event.clientY;
+    const _joystickX = touchClientX - topLeftX - containerSizeHalf; // before clamping
+    const _joystickY = touchClientY - topLeftY - containerSizeHalf; // before clamping
+    const r = Math.sqrt(_joystickX * _joystickX + _joystickY * _joystickY) / (containerSizeHalf);
+    const joystickX = _joystickX / Math.max(1, r);
+    const joystickY = _joystickY / Math.max(1, r);
+
+    // TODO: use joystickX and joystickY to determine the moving direction
+
+    this.controlPointDiv.style.left = `${joystickX + containerSizeHalf - borderWidth}px`;
+    this.controlPointDiv.style.top = `${joystickY + containerSizeHalf - borderWidth}px`;
   }
 }
 
