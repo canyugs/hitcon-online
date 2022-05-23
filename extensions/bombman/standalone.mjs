@@ -3,16 +3,17 @@
 
 import CellSet from '../../common/maplib/cellset.mjs';
 import {LAYER_BOMB, BOMB_COOLDOWN, LAYER_BOMB_EXPLODE} from './common/client.mjs';
+import {MapCoord} from '../../common/maplib/map.mjs';
 
 const BOMB_COUNTDOWN = 3000; // millisecond
 const BOMB_EXPLODE_TIME = 500; // millisecond
 
 const BOMB_EXPLODE_RANGE = [
-  {x: 0, y: 0, w: 1, h: 1},
-  {x: 0, y: 1, w: 1, h: 1},
-  {x: 0, y: -1, w: 1, h: 1},
-  {x: 1, y: 0, w: 1, h: 1},
-  {x: -1, y: 0, w: 1, h: 1},
+  {dx: 0, dy: 0, w: 1, h: 1},
+  {dx: 0, dy: 1, w: 1, h: 1},
+  {dx: 0, dy: -1, w: 1, h: 1},
+  {dx: 1, dy: 0, w: 1, h: 1},
+  {dx: -1, dy: 0, w: 1, h: 1},
 ];
 
 /**
@@ -59,22 +60,48 @@ class Standalone {
     // set cooldown
     this.cooldown = false; // TODO: Cooldown Manager
   }
+  /**
+   * Given a Coordinate, return inside bombman arena or not
+   * @param {MapCoord} cellCoord - The cell position.
+   * @return {Boolean} inside or not
+   */
+  insideMap(cellCoord) {
+    for (const {cells} of this.arenaOfMaps.get(cellCoord.mapName)) {
+      for (const cell of cells) {
+        const width = cell.w ?? 1;
+        const height = cell.h ?? 1;
+        if (cell.x <= cellCoord.x && cellCoord.x < cell.x + width &&
+            cell.y <= cellCoord.y && cellCoord.y < cell.y + height) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
 
   /**
-   * Given a bomb, return cellCoord
-   * @param {Object} cellCoord - The cell position {x:x,y:y}.
+   * Given a bomb, return bombCoord
+   * @param {MapCoord} cellCoord - The bomb position.
    * @return {Array} the explode range array
    */
-  formExplodeCells(cellCoord) { // TODO: detect is battle field and not obstacle
+  formExplodeCells(cellCoord) {
     const cells = [];
 
-    for (const range of BOMB_EXPLODE_RANGE) {
-      cells.push({
-        x: cellCoord.x+range.x,
-        y: cellCoord.y+range.y,
-        w: range.w,
-        h: range.h,
-      });
+    for (const {dx, dy, w, h} of BOMB_EXPLODE_RANGE) {
+      const bombcell = cellCoord.copy();
+      bombcell.x += dx;
+      bombcell.y += dy;
+      const isWall = this.helper.gameMap.getCell(bombcell, 'wall');
+      const inside = this.insideMap(bombcell);
+
+      if (isWall === false && inside) {
+        cells.push({
+          x: bombcell.x,
+          y: bombcell.y,
+          w: w,
+          h: h,
+        });
+      }
     }
     return cells;
   }
@@ -83,24 +110,15 @@ class Standalone {
    * Client tries to place a bomb at mapCoord.
    * The server returns true on success.
    * @param {Object} player - (TODO: needs docs)
-   * @param {MapCoord} mapCoord - The bomb position.
+   * @param {Object} mapCoord - The bomb position.
    * @return {Boolean} success or not
    */
   async c2s_placeBomb(player, mapCoord) {
+    mapCoord = MapCoord.fromObject(mapCoord);
+
     // mapCoord has to be inside an arena
     // TODO: use the utility function in maplib if there is such function
-    let inside = false;
-    for (const {cells} of this.arenaOfMaps.get(mapCoord.mapName)) {
-      for (const cell of cells) {
-        const width = cell.w ?? 1;
-        const height = cell.h ?? 1;
-        if (cell.x <= mapCoord.x && mapCoord.x < cell.x + width &&
-            cell.y <= mapCoord.y && mapCoord.y < cell.y + height) {
-          inside = true;
-        }
-      }
-      if (inside) break;
-    }
+    const inside = this.insideMap(mapCoord);
     if (!inside) return;
 
     // TODO: check if the player can set a bomb or not
@@ -110,7 +128,7 @@ class Standalone {
       this.cooldown = false;
     }, BOMB_COOLDOWN);
     const bombID = this.bombID++;
-    this.bombCells.set(bombID, {x: mapCoord.x, y: mapCoord.y});
+    this.bombCells.set(bombID, mapCoord);
     await this.helper.broadcastCellSetUpdateToAllUser(
         'update', // operation type
         mapCoord.mapName,
