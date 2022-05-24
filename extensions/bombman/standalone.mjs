@@ -55,7 +55,27 @@ class Standalone {
             dynamic: true,
           }),
       );
+      await this.helper.broadcastCellSetUpdateToAllUser(
+          'set', // operation type
+          mapName,
+          CellSet.fromObject({
+            name: LAYER_BOMB_EXPLODE.layerName,
+            priority: 3,
+            cells: Array.from(this.explodeCells.values()),
+            layers: {[LAYER_BOMB_EXPLODE.layerName]: 'BE'},
+            dynamic: true,
+          }),
+      );
     }
+
+    // detect bomb explsion
+    this.helper.gameState.registerOnPlayerUpdate((msg) => {
+      try {
+        this.onPlayerUpdate(msg);
+      } catch (e) {
+        console.error('bombman register player update listener failed: ', e, e.stack);
+      }
+    });
 
     // set cooldown
     this.cooldown = false; // TODO: Cooldown Manager
@@ -144,6 +164,7 @@ class Standalone {
       explodeCell = this.formExplodeCells(explodeCell);
       this.explodeCells.set(bombID, {explodeCell});
       this.bombCells.delete(bombID);
+      // clean bomb
       await this.helper.broadcastCellSetUpdateToAllUser(
           'update', // operation type
           mapCoord.mapName,
@@ -152,17 +173,30 @@ class Standalone {
             cells: Array.from(this.bombCells.values()),
           }),
       );
+      // add explosion
       await this.helper.broadcastCellSetUpdateToAllUser(
-          'set', // operation type
+          'update', // operation type
           mapCoord.mapName,
           CellSet.fromObject({
             name: LAYER_BOMB_EXPLODE.layerName,
-            priority: 3,
             cells: Array.from(explodeCell.values()),
-            layers: {[LAYER_BOMB_EXPLODE.layerName]: 'BE'},
-            dynamic: true,
           }),
       );
+      // detect explode people
+      const players = this.helper.gameState.getPlayers();
+      players.forEach((player, playerID) => {
+        for (const cell of explodeCell) {
+          if (player.mapCoord.x == cell.x && player.mapCoord.y == cell.y) {
+            const target = player.mapCoord.copy();
+            target.x += 5;
+            target.y += 5;
+            this.helper.teleport(playerID, target, true);
+            break;
+          }
+        }
+      });
+
+      // clean explosion
       setTimeout(async (bombID)=>{
         this.explodeCells.delete(bombID);
         await this.helper.broadcastCellSetUpdateToAllUser(
@@ -177,6 +211,33 @@ class Standalone {
     }, BOMB_COUNTDOWN, bombID);
 
     return true;
+  }
+
+  /**
+   * called when player update
+   * detect touch explosion
+   * @param {Object} msg // player move message
+   * @return {} // no return
+   */
+  async onPlayerUpdate(msg) {
+    const {mapCoord, playerID} = msg;
+
+    if (typeof playerID !== 'string') {
+      console.warn('Invalid PlayerSyncMessage with non-string msg.playerID', msg, msg.playerID);
+      return;
+    }
+    if (mapCoord === 'undefined') {
+      // No location? Just skip.
+      return;
+    }
+    const explodeCell = this.helper.gameMap.getCell(mapCoord, LAYER_BOMB_EXPLODE.layerName);
+    if (explodeCell) { // if walk into bomb => teleport to somewhere
+      const target = mapCoord.copy();
+      target.x += 5;
+      target.y += 5;
+      this.helper.teleport(msg.playerID, target, true);
+    }
+    return;
   }
 }
 
