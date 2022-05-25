@@ -267,17 +267,17 @@ class ExtensionManager {
    * It'll call the standalone E2s APIs directly.
    */
   async onE2sCalled(extName, apiName, args) {
-    if (!(typeof extName === 'string')) {
+    if (typeof extName !== 'string') {
       return {'error': 'extName not string'};
     }
-    if (!(typeof apiName === 'string')) {
+    if (typeof apiName !== 'string') {
       return {'error': 'apiName not string'};
     }
-    if (!(typeof args === 'object') || !Array.isArray(args)) {
+    if (typeof args !== 'object' || !Array.isArray(args)) {
       return {'error': 'args not array'};
     }
     const extService = await this.dir.getExtensionServiceName(extName);
-    if (typeof extService != 'string') {
+    if (typeof extService !== 'string') {
       console.error(`Service '${extName}' unavailable in onE2sCalled, got '${extService}'`);
       return {'error': 'Service unavailable'};
     }

@@ -90,7 +90,7 @@ class ExtensionHelperStandalone extends ExtensionHelperBase {
    */
   async onCallE2s(serviceName, methodName, args) {
     const actualMethodName = ExtConst.E2S_RPC_FUNC_PREFIX() + methodName;
-    if (typeof this.ext[actualMethodName] != 'function') {
+    if (typeof this.ext[actualMethodName] !== 'function') {
       return {'error': `Extension ${this.name} doesn't have ${methodName}`};
     }
     try {
