@@ -69,12 +69,12 @@ async function mainServer() {
   };
 
   /* Create the http service */
-  const app = express();
+  const expressHttpApp = express();
 
-  app.use(require('cors')({
+  expressHttpApp.use(require('cors')({
     origin: corsValidation
   }));
-  const server = http.createServer(app);
+  const server = http.createServer(expressHttpApp);
   const io = new Server(server, {
     cors: true,
     origin: corsValidation
@@ -98,12 +98,12 @@ async function mainServer() {
   const movementManager = new MovementManagerServer();
 
   /* Create all services */
-  const authServer = new AuthServer(app);
+  const authServer = new AuthServer(expressHttpApp);
   const broadcaster = new AllAreaBroadcaster(rpcDirectory, gameMap, gameState);
   const extensionManager = new ExtensionManager(rpcDirectory, broadcaster, gameMap, gameState);
   const gatewayService = new GatewayService(rpcDirectory, gameMap, authServer,
-    broadcaster, io, extensionManager, movementManager, app);
-  const assetServer = new AssetServer(app, extensionManager, null);
+    broadcaster, io, extensionManager, movementManager, expressHttpApp);
+  const assetServer = new AssetServer(expressHttpApp, extensionManager, null);
 
   /* Initialize static asset server */
   await assetServer.initialize();
