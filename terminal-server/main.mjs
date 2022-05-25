@@ -187,13 +187,13 @@ class TerminalServer {
   }
 }
 
-const app = express();
-const server = http.createServer(app);
+const expressHttpApp = express();
+const server = http.createServer(expressHttpApp);
 const io = new Server(server, {
   cors: {
     origin: "*"
   }
 });
-const terminalServer = new TerminalServer(app, io);
+const terminalServer = new TerminalServer(expressHttpApp, io);
 
 server.listen(config.get('serverPort'));

@@ -14,15 +14,15 @@ import ExtensionManager from '../../common/extlib/extension-manager.mjs';
 
 async function mainServer() {
   /* Create the http service */
-  const app = express();
-  const server = http.createServer(app);
+  const expressHttpApp = express();
+  const server = http.createServer(expressHttpApp);
 
   /* Create services */
   const extensionManager = new ExtensionManager(null, null, null, null);
   const gatewayAddresses = config.get('publicAddress') ?
                           [config.get('publicAddress')] :
                           Object.values(config.get('gatewayServers')).map((v) => v.httpAddress);
-  const assetServer = new AssetServer(app, extensionManager, gatewayAddresses);
+  const assetServer = new AssetServer(expressHttpApp, extensionManager, gatewayAddresses);
 
   /* Initialize static asset server */
   await assetServer.initialize();

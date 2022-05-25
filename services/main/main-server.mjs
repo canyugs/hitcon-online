@@ -35,8 +35,8 @@ async function mainServer() {
   console.log('Running from: ', getRunPath());
 
   /* Create the http service */
-  const app = express();
-  const server = http.createServer(app);
+  const expressHttpApp = express();
+  const server = http.createServer(expressHttpApp);
   const io = new Server(server);
 
   /* Check if main-server should be used & warn the developer of the special (and possibly unexpected) behavior. */
@@ -64,12 +64,12 @@ async function mainServer() {
   const movementManager = new MovementManagerServer();
 
   /* Create all services */
-  const authServer = new AuthServer(app);
+  const authServer = new AuthServer(expressHttpApp);
   const broadcaster = new AllAreaBroadcaster(rpcDirectory, gameMap, gameState);
   const extensionManager = new ExtensionManager(rpcDirectory, broadcaster, gameMap, gameState);
   const gatewayService = new GatewayService(rpcDirectory, gameMap, authServer,
-    broadcaster, io, extensionManager, movementManager, app);
-  const assetServer = new AssetServer(app, extensionManager, null);
+    broadcaster, io, extensionManager, movementManager, expressHttpApp);
+  const assetServer = new AssetServer(expressHttpApp, extensionManager, null);
   await extensionManager.ensureClass('blank');
   for (const extName of extensionManager.listExtensions()) {
     await extensionManager.createExtensionService(extName);
