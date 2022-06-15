@@ -368,8 +368,8 @@ const conversionConfig = [
   {
     srcMapName: 'map01',
     dstMapName: 'world1',
-    cellsetsConfig: cellsetsConfig,
-    type: 'combined'
+    cellsetsConfig: [],
+    type: 'single'
   },
   {
     srcMapName: 'map03',
