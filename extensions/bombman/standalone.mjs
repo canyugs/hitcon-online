@@ -78,8 +78,9 @@ class Standalone {
     });
 
     // set cooldown
-    this.cooldown = false; // TODO: Cooldown Manager
+    this.cooldown = new Set(); // TODO: Cooldown Manager
   }
+
   /**
    * Given a Coordinate, return inside bombman arena or not
    * @param {MapCoord} cellCoord - The cell position.
@@ -142,10 +143,10 @@ class Standalone {
     if (!inside) return;
 
     // TODO: check if the player can set a bomb or not
-    if (this.cooldown) return;
-    this.cooldown = true;
+    if (this.cooldown.has(player.playerID)) return;
+    this.cooldown.add(player.playerID);
     setTimeout(()=>{
-      this.cooldown = false;
+      this.cooldown.delete(player.playerID);
     }, BOMB_COOLDOWN);
     const bombID = this.bombID++;
     this.bombCells.set(bombID, mapCoord);
@@ -188,8 +189,8 @@ class Standalone {
         for (const cell of explodeCell) {
           if (player.mapCoord.x == cell.x && player.mapCoord.y == cell.y) {
             const target = player.mapCoord.copy();
-            target.x += 5;
-            target.y += 5;
+            target.x = 1;
+            target.y = 1;
             this.helper.teleport(playerID, target, true);
             break;
           }
@@ -233,8 +234,8 @@ class Standalone {
     const explodeCell = this.helper.gameMap.getCell(mapCoord, LAYER_BOMB_EXPLODE.layerName);
     if (explodeCell) { // if walk into bomb => teleport to somewhere
       const target = mapCoord.copy();
-      target.x += 5;
-      target.y += 5;
+      target.x = 1;
+      target.y = 1;
       this.helper.teleport(msg.playerID, target, true);
     }
     return;
