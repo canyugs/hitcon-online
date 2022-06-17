@@ -391,7 +391,6 @@ class JoyStick {
     event.preventDefault();
     event.stopPropagation();
 
-    // const borderWidth = this.containerDiv.style.borderWidth
     const {x: topLeftX, y: topLeftY} = this.containerDiv.getBoundingClientRect();
     const borderWidth = getComputedStyle(this.containerDiv).getPropertyValue('border-left-width').replace('px', '');
     const containerSizeHalf = this.containerDiv.offsetWidth / 2;
