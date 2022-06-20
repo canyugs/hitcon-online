@@ -51,6 +51,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         "reference": "workspace:extensions/MapWatermark"
       },
       {
+        "name": "hitcon-online-battleroyale",
+        "reference": "workspace:extensions/battleroyale"
+      },
+      {
         "name": "hitcon-online-blank",
         "reference": "workspace:extensions/blank"
       },
@@ -157,6 +161,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
       ["hitcon-online", ["workspace:."]],
       ["hitcon-online-MapWatermark", ["workspace:extensions/MapWatermark"]],
       ["hitcon-online-asset-server", ["workspace:services/assets"]],
+      ["hitcon-online-battleroyale", ["workspace:extensions/battleroyale"]],
       ["hitcon-online-blank", ["workspace:extensions/blank"]],
       ["hitcon-online-bombman", ["workspace:extensions/bombman"]],
       ["hitcon-online-cellsettest", ["workspace:extensions/cellsettest"]],
@@ -2591,6 +2596,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["minimist", "npm:1.2.5"],
             ["redis", "npm:3.1.2"],
             ["socket.io", "npm:4.1.2"]
+          ],
+          "linkType": "SOFT",
+        }]
+      ]],
+      ["hitcon-online-battleroyale", [
+        ["workspace:extensions/battleroyale", {
+          "packageLocation": "./extensions/battleroyale/",
+          "packageDependencies": [
+            ["hitcon-online-battleroyale", "workspace:extensions/battleroyale"]
           ],
           "linkType": "SOFT",
         }]

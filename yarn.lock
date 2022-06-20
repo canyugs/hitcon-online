@@ -1963,6 +1963,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"hitcon-online-battleroyale@workspace:extensions/battleroyale":
+  version: 0.0.0-use.local
+  resolution: "hitcon-online-battleroyale@workspace:extensions/battleroyale"
+  languageName: unknown
+  linkType: soft
+
 "hitcon-online-blank@workspace:extensions/blank":
   version: 0.0.0-use.local
   resolution: "hitcon-online-blank@workspace:extensions/blank"

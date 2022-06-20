@@ -1,0 +1,8 @@
+{
+  "name": "hitcon-online-battleroyale",
+  "version": "0.0.0",
+  "exports": {
+    "standalone": "./standalone.mjs",
+    "in-gateway": "./in-gateway.mjs"
+  }
+}
