@@ -527,6 +527,13 @@ newAssetsConfig.layerMap.escapeGameDoor = {
         19
       ]
     };
+newAssetsConfig.layerMap.battleroyaleObstacle = {
+      "O": [
+        "base",
+        6,
+        12
+      ]
+    };
 
 writeFileToJSON(assetsConfigPath, newAssetsConfig);
 
