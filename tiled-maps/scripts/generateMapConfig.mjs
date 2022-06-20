@@ -484,6 +484,13 @@ newAssetsConfig.layerMap.bombmanBombExplode = {
         11
       ]
     };
+newAssetsConfig.layerMap.battleroyaleObstacle = {
+      "O": [
+        "base",
+        6,
+        12
+      ]
+    };
 
 writeFileToJSON(assetsConfigPath, newAssetsConfig);
 

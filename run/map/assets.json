@@ -8752,6 +8752,11 @@
         "base",
         11,
         4
+      ],
+      "BR": [
+        "base",
+        27,
+        3
       ]
     },
     "bombmanObstacle": {
@@ -8773,6 +8778,13 @@
         "base",
         1,
         11
+      ]
+    },
+    "battleroyaleObstacle": {
+      "O": [
+        "base",
+        6,
+        12
       ]
     },
     "object": {
