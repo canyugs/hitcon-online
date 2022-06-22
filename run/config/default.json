@@ -32,7 +32,8 @@
       "ping",
       "playerlist",
       "escape-game",
-      "iframe"
+      "iframe",
+      "battleroyale"
     ],
     "standalone": {
     }
