@@ -49,11 +49,12 @@ class MainUI {
   *
   * Create a MainUI.
   */
-  constructor() {
+  constructor(clientType) {
     this.state = UIState.NORMAL_UI;
     this.overlays = new Map();
     this.activeModal = undefined;
     this.mapRenderer = undefined;
+    this.clientType = clientType;
 
     window.addEventListener('resize', (evt) => { this._onResize(evt); });
     window.addEventListener('uiReady', (evt) => { this._onResize(evt); });

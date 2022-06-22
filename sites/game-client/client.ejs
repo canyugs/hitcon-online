@@ -13,201 +13,15 @@ absolute URL.
 <html lang="zh-tw">
   <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>HITCON Online</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700">
-    <link rel="stylesheet" href="/static/sites/game-client/client.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.2/socket.io.min.js" integrity="sha512-2ho+gY0H62N4Z9oxD422L2ZYXiOMq9l+Aub1QNz4Z4UDOtDVxz4vk6O6R3Hqqc9Y7qSvZFl7cy3+eZ/ITnUrLA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/js-xss/0.3.3/xss.min.js" integrity="sha512-M9w45qyI/KVHcxTODUsdwWip284UJBj2e6st1Ub6tXXO4nJAP3aIVN2Wkgd15CmJL6eJRFBSUssVyKtZX1v1Fg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <%- include(headerContent); %>
   </head>
   <body>
-    <div id="rootdiv" class="container-center">
-
-      <div id="loading-screen-div" class="loading-screen-div container-center">
-        <img class="loading-screen-image" src="/static/sites/game-client/hat.svg">
-        <div class="loading-screen-container">
-          <ul id="loading-screen-text" class="loading-screen-text">
-          </ul>
-          <div class="loading-screen-footer">[0] 0: HITCON Online</div>
-        </div>
-      </div>
-
-      <div id="avatar-selection-div" style="background-color: #000E26;" class="container-center">
-        <div class="avatar-selection-background container-center-column">
-          <div class="avatar-selection-title">Welcome to HITCON Online<br>Choose Avatar</div>
-          <div id="avatar-preview-container" class="container-center"></div>
-          <label class="avatar-display-name container-center">
-            Display Name:
-            <input id="display-name" type="text" name="display-name" class="avatar-display-name-text">
-            <div class="tooltip">
-              <img src="/static/sites/game-client/question-mark.svg" class="avatar-display-name-desc" alt="naming description">
-              <span class="tooltip-text">
-                暱稱將會顯示在公眾場合<br>
-                不可使用冒犯他人的詞彙<br>
-                詳細情形可查看<a href="https://hitcon.org/2021/coc/" target="_blank">大會行為守則</a>
-              </span>
-            </div>
-          </label>
-          <button name="submit" class="avatar-confirm-button">Join HITCON Online!</button>
-        </div>
-      </div>
-
-      <div id="intro-modal" class="intro-modal container-center">
-        <div id="intro-pages" class="intro-pages"></div>
-        <div class="intro-action">
-          <div class="intro-left">
-            <span id='intro-current-page'>-</span>/<span id='intro-max-page'>-</span>
-          </div>
-          <div class="intro-middle">
-            <button id='intro-next-page'>Next</button>
-          </div>
-          <div class="intro-right">
-            <button id='intro-skip'>Skip</button>
-          </div>
-        </div>
-      </div>
-
-      <div id="ruler-helper-div" class="ruler-helper">
-        <span id="ruler-helper-text">Coord: </span>
-      </div>
-
-      <div id="staging-div">
-        <!--
-        This div is for stuff that's not yet being displayed.
-        It is currently semi-transparent for debugging purpose.
-        -->
-        <div id="maprender-overlay">
-          <canvas id="outofboundcanvas"></canvas>
-          <canvas id="backgroundcanvas"></canvas>
-          <canvas id="mapcanvas"></canvas>
-          <canvas id="foregroundcanvas"></canvas>
-          <canvas id="inputcanvas"></canvas>
-          <div id="joystick-container">
-            <!-- TODO: styling -->
-            <div id="joystick-control-point"></div>
-          </div>
-        </div>
-        <div id="error-modal">
-          <div>
-            <img src="/static/sites/game-client/warning.svg" alt="">
-            <p id="error-message"></p>
-          </div>
-          <p id="error-handler-message"></p>
-        </div>
-        <% inDiv.forEach((i) => { %>
-          <%- include(i); %>
-        <% }); %>
-      </div>
-
-      <div class="notification notification--overlay notification--inactive" id="notification">
-        <div class="notification-type">遊戲通知</div>
-        <div class="notification-text" id="notification-text"></div>
-        <div class="notification-progress-bar" id="notification-progress-bar">
-          <span style="width: 100%" id="notification-progress-bar-inner"></span>
-        </div>
-      </div>
-
-      <div class="notification notification--overlay notification--card notification--inactive" id="npc">
-        <div class="notification--npc--border"></div>
-        <div class="notification--npc-type">
-          <div class="notification--npc--avatar">
-            <!-- TODO remove this <img> after implement avatar -->
-            <img src="https://via.placeholder.com/53x72">
-          </div>
-          <div class="notification--npc--text">
-            <div class="notification--npc--name" id="npc-name">NPC Name</div>
-            <div class="notification--npc--usage">
-              <!-- 按 <span>F</span> 跟 NPC 對話
-              // Uncomment when keypress interaction for NPC is implemented.
-              -->
-              Click the NPC to interact. 點選NPC以互動。
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="announcement announcement--overlay announcement--inactive" id="announcement">
-        <div class="announcement-type">公告類別</div>
-        <div class="announcement-gap"></div>
-        <div class="announcement-marquee-container">
-          <span class="announcement-marquee-inner announcement-text" id="announcement-text"></span>
-        </div>
-        <button class="announcement-close">X</button>
-      </div>
-
-      <!-- TODO add `collapse` in class toggle style for child element (close toolbar)-->
-      <div class="utilpanel utilpanel--overlay collapse" id="utilpanel">
-        <div class="utilpanel-tabs" id="utilpanel-tabs"></div>
-        <button class="utilpanel-divider" id="utilpanel-divider">
-          <span class="utilpanel-divider"><img src="/static/sites/game-client/triangle.svg"></span>
-        </button>
-       <div class="utilpanel-content" id="utilpanel-content">
-        <div>
-        <div class="utilpanel-viewer">setup information</div>
-        <div class="utilpanel-actions">setup action here</div>
-        </div>
-       </div>
-      </div>
-
-      <div id="overlay-topleft" class="overlay overlay--inactive"></div>
-      <div id="overlay-bottomleft" class="overlay overlay--inactive"></div>
-      <div id="overlay-right" class="overlay overlay--inactive"></div>
-      <div id="overlay-centertop" class="overlay overlay--inactive"></div>
-      <div id="main-view"></div>
-      <button id="exit-focus">Exit Fullscreen <img src="/static/sites/game-client/fullscreen-exit.svg" style="width: 1.5em; height: 1.5em;"></button>
-      <!-- used to block out the rest of the stuffs when model is visible -->
-      <div id="modal-background" class="modal-background"></div>
-      <div id="modal-container" class="modal-container"></div>
-
-      <!-- context menu -->
-      <div class="context-menu" id="context-menu-other">
-        <div class="context-menu-user">
-          <img class="context-menu-picture" src="https://via.placeholder.com/56x61">
-          <div class="context-menu-user-info">
-            <div class="context-menu-user-name" id="context-menu-other-name"></div>
-            <div class="context-menu-user-role" id="context-menu-other-role"></div>
-          </div>
-        </div>
-        <div class="context-menu-actions" id="context-menu-other-actions"></div>
-      </div>
-
-      <div class="context-menu" id="context-menu-self">
-        <div class="context-menu-user">
-          <img class="context-menu-picture" src="https://via.placeholder.com/56x61">
-          <div class="context-menu-user-info">
-            <div class="context-menu-user-name" id="context-menu-self-name"></div>
-            <div class="context-menu-user-role" id="context-menu-self-role"></div>
-          </div>
-        </div>
-        <div class="context-menu-actions" id="context-menu-self-actions"></div>
-      </div>
-
-      <!-- User overlay -->
-      <div id="user-overlay" class="user user--overlay">
-        <div class="user-profile">
-          <div class="user-name" id="user-name">Username</div>
-          <div class="user-points">
-            <span class="user-point" id="user-point">----</span>
-            <span class="user-point-unit">P</span>
-          </div>
-        </div>
-        <div class="user-actions">
-          <button class="user-action" id="jitsi-microphone">
-            <img src="" alt="microphone">
-          </button>
-          <button class="user-action" id="jitsi-camera">
-            <img src="" alt="video">
-          </button>
-          <button class="user-action" id="jitsi-screen">
-            <img src="" alt="screen">
-          </button>
-          <button class="user-action" id="items-inventory-btn">
-            <img src="" alt="inventory">
-          </button>
-        </div>
-      </div>
-    </div>
+    <%- include(bodyContent); %>
 
     <script type="module">
       import ClientBot from '/static/sites/game-client/client-bot.mjs';
@@ -242,6 +56,8 @@ absolute URL.
 
       // Create the various essential game classes.
       const game = window.game = {};
+
+      game.clientType = '<%- clientType %>';
 
       // Prepare the query parameters.
       const urlSearchParams = new URLSearchParams(window.location.search);
@@ -291,7 +107,7 @@ absolute URL.
         }
         game.token = testToken;
 
-        game.mainUI = new MainUI();
+        game.mainUI = new MainUI(game.clientType);
         game.mainUI.errorModal = new ErrorModal(game.mainUI);
         game.mainUI.introModal = new IntroModal(game.mainUI);
         game.mapRendererOverlay = new MapRendererOverlay(game.mainUI);
@@ -313,7 +129,7 @@ absolute URL.
         game.socketURL = ("<%= gatewayAddress %>" || "");
         game.socket = game.io(game.socketURL, {reconnection: false});
 
-        game.extMan = new ClientExtensionManager(game.socket, game.extensionList);
+        game.extMan = new ClientExtensionManager(game.socket, game.extensionList, game.clientType);
         game.mapRenderer = new MapRenderer(document.querySelector('#mapcanvas'), document.querySelector('#backgroundcanvas'), document.querySelector('#foregroundcanvas'), document.querySelector('#outofboundcanvas'), document.querySelector('#inputcanvas'), game.map, game.gameState);
         if (window.query.disableRender) {
           game.mapRenderer.disableRenderForTesting();
