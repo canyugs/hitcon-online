@@ -8799,6 +8799,13 @@
         12
       ]
     },
+    "battleroyaleBullet": {
+      "BB": [
+        "base",
+        5,
+        13
+      ]
+    },
     "object": {
       "1": [
         "base",
