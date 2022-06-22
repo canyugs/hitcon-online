@@ -3,6 +3,7 @@
 
 import path from 'path';
 import url from 'url';
+import * as fsp from 'node:fs/promises';
 
 // Boilerplate for getting require() in es module.
 import {createRequire} from 'module';
@@ -198,12 +199,33 @@ class ExtensionManager {
   }
 
   /**
+   * Return the full path to files in an extension.
+   */
+  _getExtFilePath(extName, p) {
+    return path.resolve(__dirname + `/../../extensions/${extName}/${p}`);
+  }
+
+  /**
+   * Helper to check if a file exists under an extension.
+   */
+  async _extFileExists(extName, p) {
+    const fpath = this._getExtFilePath(extName, p);
+    try {
+      const st = await fsp.stat(fpath);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /**
    * Collect and return the partials from all the extensions listed.
    * @param {Object} names - An array of extension name.
+   * @param {String} clientType - 'desktop' or 'mobile'.
    * @return {Object} partials - An object, each element is the array of paths
    * for each location.
    */
-  async collectPartials(names) {
+  async collectPartials(names, clientType) {
     let result = {};
     for (const name of names) {
       // Load the classes if they are not loaded.
@@ -211,9 +233,14 @@ class ExtensionManager {
       let p = {inDiv: 'in-div.ejs'};
       if (typeof this.ext[name].standaloneClass.getPartials === 'undefined') {
         // Not defined, use the default.
+        if (!await this._extFileExists(name, p.inDiv)) {
+          // in-div.ejs doesn't exist, no generic variant, try specific variant.
+          p.inDiv = `in-div-${clientType}.ejs`;
+          console.assert(await this._extFileExists(name, p.inDiv), `${p.inDiv} doesn't exist, neither does the generic variant for ${name} extension.`);
+        }
       } else {
         try {
-          p = this.ext[name].standaloneClass.getPartials();
+          p = this.ext[name].standaloneClass.getPartials(clientType);
         } catch (e) {
           console.error(`Unable to get partials for ${name}`, e.stack);
           // Use the default again.
@@ -223,7 +250,7 @@ class ExtensionManager {
         if (!(loc in result)) {
           result[loc] = [];
         }
-        result[loc].push(path.resolve(__dirname + `/../../extensions/${name}/${p[loc]}`));
+        result[loc].push(this._getExtFilePath(name, p[loc]));
       }
     }
     return result;

@@ -57,6 +57,34 @@ class AssetServer {
   }
 
   /**
+   * Return the path for assets in game-client directory.
+   */
+  _getGameClientPath(p) {
+    return path.resolve(__dirname, '../../sites/game-client/'+p);
+  }
+
+  /**
+   * Helper for creating client parameters.
+   * @param {string} clientType - 'desktop' or 'mobile'
+   */
+  async _createClientParams(clientType) {
+    console.assert(clientType === 'desktop' || clientType === 'mobile',
+                   "clientType must be desktop or mobile in _createClientParams");
+    const result = {};
+    result.inDiv = []
+
+    let partials = await this.extMan.collectPartials(this.extMan.listExtensions(), clientType);
+    result.inDiv = [];
+    if (typeof partials.inDiv == 'object') {
+      result.inDiv = partials.inDiv;
+    }
+    result.headerContent = this._getGameClientPath(`header-${clientType}.ejs`);
+    result.bodyContent = this._getGameClientPath(`body-${clientType}.ejs`);
+    result.clientType = clientType;
+    return result;
+  }
+
+  /**
    * Prepare the route for serving the client.
    */
   async clientRoutes() {
@@ -69,17 +97,21 @@ class AssetServer {
     });
 
     // Prepare the client params beforehand.
-    this.clientParams = {};
-    let partials = await this.extMan.collectPartials(this.extMan.listExtensions());
-    this.clientParams.inDiv = [];
-    if (typeof partials.inDiv == 'object') {
-      this.clientParams.inDiv = partials.inDiv;
-    }
+    this.clientParamsDesktop = await this._createClientParams('desktop');
+    this.clientParamsMobile = await this._createClientParams('mobile');
+
     this.app.get('/client.html', (req, res) => {
       // TODO: workaround for development, in production we should fetch the unique endpoint from the config.
-      this.clientParams.gatewayAddress = this.gatewayAddresses ? this.gatewayAddresses[Math.floor(Math.random() * this.gatewayAddresses.length)] : null;
-      res.render(path.resolve(__dirname, '../../sites/game-client/client.ejs'), this.clientParams);
+      const clientParams = JSON.parse(JSON.stringify(this.clientParamsDesktop));
+      clientParams.gatewayAddress = this.gatewayAddresses ? this.gatewayAddresses[Math.floor(Math.random() * this.gatewayAddresses.length)] : null;
+      res.render(this._getGameClientPath('client.ejs'), clientParams);
     });
+    this.app.get('/mobile.html', (req, res) => {
+      const clientParams = JSON.parse(JSON.stringify(this.clientParamsMobile));
+      clientParams.gatewayAddress = this.gatewayAddresses ? this.gatewayAddresses[Math.floor(Math.random() * this.gatewayAddresses.length)] : null;
+      res.render(this._getGameClientPath('client.ejs'), clientParams);
+    });
+
     this.app.get('/health', (req, res) => {
       res.status(200).send('OK');
     });

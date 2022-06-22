@@ -16,12 +16,13 @@ class ClientExtensionManager {
    * active extensions.
    * @constructor
    */
-  constructor(socket, extNameList) {
+  constructor(socket, extNameList, clientType) {
     this.socket = socket;
     this.extNameList = extNameList;
     this.extModules = {};
     this.extObjects = {};
     this.extHelpers = {};
+    this.clientType = clientType;
 
     // This promise will become available once we've finished loading all
     // extensions. It is used to avoid race condition between
