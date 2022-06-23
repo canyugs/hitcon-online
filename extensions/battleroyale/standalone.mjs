@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 import {MapCoord} from '../../common/maplib/map.mjs';
-import {LAYER_BULLET, BULLET_COOLDOWN} from './common/client.mjs';
+import {LAYER_BULLET, LAYER_FIRE, BULLET_COOLDOWN} from './common/client.mjs';
 import CellSet from '../../common/maplib/cellset.mjs';
 
 const BULLET_SPEED = 100; // ms per block (lower -> quicker)
 const BULLET_LIFE = 5; // five blocks
-// const MAP_UPDATE_PERIOD = 10000; // ms per update
+const MAP_UPDATE_PERIOD = 5000; // ms per update
 
 const Facing2Direction = {
   'U': [0, 1],
@@ -41,6 +41,8 @@ class Standalone {
     this.bullets = new Map(); // key: bullet ID; value: bullet info
     this.bulletID = 0;
 
+    this.fires = new Set();
+
     for (const mapName of this.arenaOfMaps.keys()) {
       await this.helper.broadcastCellSetUpdateToAllUser(
           'set',
@@ -53,14 +55,42 @@ class Standalone {
             dynamic: true,
           }),
       );
+      await this.helper.broadcastCellSetUpdateToAllUser(
+          'set',
+          mapName,
+          CellSet.fromObject({
+            name: LAYER_FIRE.layerName,
+            priority: LAYER_FIRE.zIndex,
+            cells: Array.from(this.bullets.values()),
+            layers: {[LAYER_FIRE.layerName]: 'BF'},
+            dynamic: true,
+          }),
+      );
     }
 
     this.cooldown = new Set();
-
-    // TODO: update the map edge
-    /* let updateMap = setInterval( async () => {
-
-    }, MAP_UPDATE_PERIOD); */
+    this.fireCounter = 0;
+    const updateMap = setInterval( async () => {
+      this.fireCounter++;
+      this.fires.clear();
+      for (const mapName of this.arenaOfMaps.keys()) {
+        const needUpdate = this.updateEdge(
+            this.fires, this.arenaOfMaps.get(mapName), this.fireCounter,
+        );
+        if (!needUpdate) {
+          clearInterval(updateMap);
+          return;
+        }
+        await this.helper.broadcastCellSetUpdateToAllUser(
+            'update',
+            mapName,
+            CellSet.fromObject({
+              name: LAYER_FIRE.layerName,
+              cells: Array.from(this.fires),
+            }),
+        );
+      }
+    }, MAP_UPDATE_PERIOD);
   }
 
   /**
@@ -99,6 +129,7 @@ class Standalone {
 
     if (this.cooldown.has(player.playerID)) return;
     this.cooldown.add(player.playerID);
+    console.log(player);
     setTimeout(() => {
       this.cooldown.delete(player.playerID);
     }, BULLET_COOLDOWN);
@@ -162,6 +193,31 @@ class Standalone {
     // TODO: player get hit -> teleport
 
     return true;
+  }
+  /**
+   * Given a gameMap return all edge
+   * @param {Set} fires the fire Set
+   * @param {Map} cellSets the maps
+   * @param {Number} fireCounter count edge width
+   * @return {Boolean} need update or not
+   */
+  updateEdge(fires, cellSets, fireCounter) {
+    let noUpdateCounter = 0; let totalCell = 0;
+    for (const {cells} of cellSets) {
+      for (const {x, y, w, h} of cells) {
+        const wbound = Math.min(fireCounter, Math.floor(w/2));
+        const hbound = Math.min(fireCounter, Math.floor(h/2));
+        totalCell++;
+        if (wbound === Math.floor(w/2) && hbound === Math.floor(h/2)) {
+          noUpdateCounter++;
+        }
+        fires.add({x, y, w, h: hbound});
+        fires.add({x, y: y+h-hbound, w, h: hbound});
+        fires.add({x, y, w: wbound, h});
+        fires.add({x: x+w-wbound, y, w: wbound, h});
+      }
+    }
+    return noUpdateCounter != totalCell;
   }
 }
 
