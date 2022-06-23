@@ -485,18 +485,26 @@ newAssetsConfig.layerMap.bombmanBombExplode = {
       ]
     };
 newAssetsConfig.layerMap.battleroyaleObstacle = {
-  "O": [
-    "base",
-    6,
-    12
-  ]
-};
+      "O": [
+        "base",
+        6,
+        12
+      ]
+    };
 
 newAssetsConfig.layerMap.battleroyaleBullet = {
       "BB": [
         "base",
         5,
         13
+      ]
+    };
+
+newAssetsConfig.layerMap.battleroyaleFire = {
+      "BF": [
+        "base",
+        7,
+        6
       ]
     };
 

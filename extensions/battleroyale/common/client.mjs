@@ -3,6 +3,7 @@
 
 const LAYER_OBSTACLE = {zIndex: 1, layerName: 'battleroyaleObstacle'};
 const LAYER_BULLET = {zIndex: 5, layerName: 'battleroyaleBullet'};
+const LAYER_FIRE = {zIndex: 3, layerName: 'battleroyaleFire'};
 const BULLET_COOLDOWN = 2000; // millisecond
 
 const keyboardMapping = {
@@ -33,6 +34,7 @@ class Client {
 
     this.helper.mapRenderer.registerCustomizedLayerToDraw(LAYER_OBSTACLE.zIndex, LAYER_OBSTACLE.layerName);
     this.helper.mapRenderer.registerCustomizedLayerToDraw(LAYER_BULLET.zIndex, LAYER_BULLET.layerName);
+    this.helper.mapRenderer.registerCustomizedLayerToDraw(LAYER_FIRE.zIndex, LAYER_FIRE.layerName);
 
     // set cooldown
     this.cooldown = false;
@@ -70,5 +72,6 @@ export default Client;
 export {
   LAYER_OBSTACLE,
   LAYER_BULLET,
+  LAYER_FIRE,
   BULLET_COOLDOWN,
 };

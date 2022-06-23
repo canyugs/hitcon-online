@@ -8794,6 +8794,13 @@
         13
       ]
     },
+    "battleroyaleFire": {
+      "BF": [
+        "base",
+        7,
+        6
+      ]
+    },
     "object": {
       "1": [
         "base",
