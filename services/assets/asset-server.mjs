@@ -69,7 +69,7 @@ class AssetServer {
    */
   async _createClientParams(clientType) {
     console.assert(clientType === 'desktop' || clientType === 'mobile',
-                   "clientType must be desktop or mobile in _createClientParams");
+                   'clientType must be desktop or mobile in _createClientParams');
     const result = {};
     result.inDiv = []
 
