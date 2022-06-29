@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 import {MapCoord} from '../../common/maplib/map.mjs';
-import {LAYER_BULLET, LAYER_FIRE, BULLET_COOLDOWN} from './common/client.mjs';
+import {LAYER_BULLET, LAYER_OBSTACLE, LAYER_FIRE, BULLET_COOLDOWN} from './common/client.mjs';
 import CellSet from '../../common/maplib/cellset.mjs';
 
 const BULLET_SPEED = 100; // ms per block (lower -> quicker)
 const BULLET_LIFE = 5; // five blocks
-const MAP_UPDATE_PERIOD = 5000; // ms per update
+const MAP_UPDATE_PERIOD = 20000; // ms per update
 
 const Facing2Direction = {
   'U': [0, 1],
@@ -89,8 +89,22 @@ class Standalone {
               cells: Array.from(this.fires),
             }),
         );
+        const players = this.helper.gameState.getPlayers();
+        players.forEach((player, playerID) => {
+          if (this.helper.gameMap.getCell(player.mapCoord, LAYER_FIRE.layerName)) {
+            this.teleport(player.mapCoord, playerID);
+          }
+        });
       }
     }, MAP_UPDATE_PERIOD);
+
+    await this.helper.gameState.registerOnPlayerUpdate((msg) => {
+      try {
+        this.onPlayerUpdate(msg);
+      } catch (e) {
+        console.error('battleroyale register player update listener failed: ', e, e.stack);
+      }
+    });
   }
 
   /**
@@ -129,7 +143,6 @@ class Standalone {
 
     if (this.cooldown.has(player.playerID)) return;
     this.cooldown.add(player.playerID);
-    console.log(player);
     setTimeout(() => {
       this.cooldown.delete(player.playerID);
     }, BULLET_COOLDOWN);
@@ -157,11 +170,12 @@ class Standalone {
     // setInterval to update bullet
     const updateBullet = setInterval(async (bulletID) => {
       const bullet = this.bullets.get(bulletID);
-      // console.log(bullet, bulletID)
       bullet.bulletCoord.x += Facing2Direction[bullet.facing][0];
       bullet.bulletCoord.y += Facing2Direction[bullet.facing][1];
       bullet.duration += 1;
-      if (bullet.duration >= BULLET_LIFE) {
+      if (bullet.duration >= BULLET_LIFE ||
+          !this.insideMap(bullet.bulletCoord) ||
+          this.helper.gameMap.getCell(bullet.bulletCoord, LAYER_OBSTACLE.layerName)) {
         clearInterval(updateBullet);
         this.bullets.delete(bulletID);
         await this.helper.broadcastCellSetUpdateToAllUser(
@@ -176,6 +190,18 @@ class Standalone {
             }),
         );
       } else {
+        const players = this.helper.gameState.getPlayers();
+        players.forEach((player, playerID) => {
+          for (const [bulletID, bullet] of this.bullets) {
+            if (player.mapCoord.x == bullet.bulletCoord.x &&
+              player.mapCoord.y == bulletCoord.y) {
+              this.teleport(player.mapCoord, playerID);
+              clearInterval(updateBullet); // haven't check if clear interval clear all
+              this.bullets.delete(bulletID);
+              break;
+            }
+          }
+        });
         await this.helper.broadcastCellSetUpdateToAllUser(
             'update',
             mapCoord.mapName,
@@ -190,7 +216,6 @@ class Standalone {
       }
     }, BULLET_SPEED, bulletID);
 
-    // TODO: player get hit -> teleport
 
     return true;
   }
@@ -218,6 +243,51 @@ class Standalone {
       }
     }
     return noUpdateCounter != totalCell;
+  }
+
+  /**
+   *
+   * @param {Object} msg
+   * @return {undefined}
+   */
+  async onPlayerUpdate(msg) {
+    const {mapCoord, playerID} = msg;
+
+    if (typeof playerID !== 'string') {
+      console.warn('Invalid PlayerSyncMessage with non-string msg.playerID', msg, msg.playerID);
+      return;
+    }
+    if (mapCoord === 'undefined') {
+      // No location? Just skip.
+      return;
+    }
+
+    const bullets = this.helper.gameMap.getCell(mapCoord, LAYER_BULLET.layerName);
+    if (bullets) {
+      this.teleport(mapCoord, playerID);
+      return;
+    }
+
+    const fire = this.helper.gameMap.getCell(mapCoord, LAYER_FIRE.layerName);
+    if (fire) {
+      this.teleport(mapCoord, playerID);
+      return;
+    }
+
+    return;
+  }
+
+  /**
+   *
+   * @param {MapCoord} mapCoord
+   * @param {String} playerID
+   * @return {undefined}
+   */
+  teleport(mapCoord, playerID) {
+    const target = mapCoord.copy();
+    target.x = 1;
+    target.y = 1;
+    this.helper.teleport(playerID, target, true);
   }
 }
 
