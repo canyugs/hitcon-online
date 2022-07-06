@@ -255,6 +255,18 @@
   padding: .25em 0;
 }
 
+/* Disable jitsi buttons on mobile clients. */
+[data-clienttype=mobile] #jitsi-microphone {
+  display: none;
+}
+
+[data-clienttype=mobile] #jitsi-camera {
+  display: none;
+}
+[data-clienttype=mobile] #jitsi-screen {
+  display: none;
+}
+
 </style>
 <div class="jitsi-container jitsi-container--inactive" id='jitsi-container'>
   <div class='jitsi-local-container' id='jitsi-local-container'>
