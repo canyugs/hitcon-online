@@ -246,6 +246,11 @@ body {
   height: 50%;
 }
 
+[data-clienttype=mobile] .modal-container {
+  width: 80%;
+  left: 10%;
+}
+
 .modal-container.visible {
   z-index: 110;
 }

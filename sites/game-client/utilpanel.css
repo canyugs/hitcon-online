@@ -16,6 +16,11 @@
   z-index: 10; /* TODO tmp style, make utilpanel visible */
 }
 
+[data-clienttype=mobile] .utilpanel {
+  /* No utilpanel in mobile. */
+  display: none;
+}
+
 #rootdiv.focus-mode .utilpanel {
   top: 0;
   left: 0;

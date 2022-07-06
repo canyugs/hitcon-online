@@ -16,11 +16,20 @@ class Modal {
   constructor(mainUI, dom) {
     this.mainUI = mainUI;
     this.dom = dom;
+
     // Some sensible default value.
-    this.width = '60%';
-    this.height = '50%';
-    this.top = '25%';
-    this.left = '20%';
+    if (this.mainUI.getClientType() === 'desktop') {
+      this.width = '60%';
+      this.left = '20%';
+      this.height = '50%';
+      this.top = '25%';
+    } else {
+      this.width = '80%';
+      this.left = '10%';
+      this.height = '60%';
+      this.top = '20%';
+    }
+
 
     this.toolbarButton = undefined;
     this.toolbarButtonIconSrc = undefined;

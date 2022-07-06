@@ -14,6 +14,10 @@
   justify-content: space-between !important;
 }
 
+[data-clienttype=mobile] .intro-modal {
+  padding: 10px;
+}
+
 .intro-pages {
   width: 100%;
 }
@@ -45,11 +49,19 @@
   padding-bottom: 20px;
 }
 
+[data-clienttype=mobile] .intro-title {
+  font-size: 1.2em;
+}
+
 .intro-description {
   margin-top: 1em;
   margin-bottom: 1em;
   font-size: 1.1em;
   line-height: 2em;
+}
+
+[data-clienttype=mobile] .intro-description {
+  font-size: 0.8em;
 }
 
 .intro-images {

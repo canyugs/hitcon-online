@@ -1,18 +1,33 @@
 .user--overlay {
   position: absolute;
+}
+
+[data-clienttype=desktop] .user--overlay {
   top: 65px;
   right: 5%;
 }
 
+[data-clienttype=mobile] .user--overlay {
+  bottom: 0px;
+  left: 0px;
+}
+
 .user {
   background: #FFFFFF 0% 0% no-repeat padding-box;
+  padding: 14px 24px 14px 21px;
+  opacity: 100%;
+  z-index: 10; /* TODO tmp style, make toolbar visible */
+}
+
+[data-clienttype=desktop] .user {
   box-shadow: 0px 3px 6px #00000029;
   border-radius: 16px;
   width: 339px;
   border-left: 15px solid #1F436F;
-  padding: 14px 24px 14px 21px;
-  opacity: 100%;
-  z-index: 10; /* TODO tmp style, make toolbar visible */
+}
+
+[data-clienttype=mobile] .user {
+  width: 100vw;
 }
 
 .user-profile {
