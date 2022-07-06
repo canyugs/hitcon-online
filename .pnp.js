@@ -111,6 +111,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         "reference": "workspace:extensions/npc"
       },
       {
+        "name": "hitcon-online-ping",
+        "reference": "workspace:extensions/ping"
+      },
+      {
         "name": "hitcon-online-playerlist",
         "reference": "workspace:extensions/playerlist"
       },
@@ -180,6 +184,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
       ["hitcon-online-notification", ["workspace:extensions/notification"]],
       ["hitcon-online-npc", ["workspace:extensions/npc"]],
       ["hitcon-online-path-util", ["workspace:common/path-util"]],
+      ["hitcon-online-ping", ["workspace:extensions/ping"]],
       ["hitcon-online-playerlist", ["workspace:extensions/playerlist"]],
       ["hitcon-online-point-system", ["workspace:extensions/point-system"]],
       ["hitcon-online-rpc-directory", ["workspace:common/rpc-directory"]],
@@ -2864,6 +2869,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./common/path-util/",
           "packageDependencies": [
             ["hitcon-online-path-util", "workspace:common/path-util"]
+          ],
+          "linkType": "SOFT",
+        }]
+      ]],
+      ["hitcon-online-ping", [
+        ["workspace:extensions/ping", {
+          "packageLocation": "./extensions/ping/",
+          "packageDependencies": [
+            ["hitcon-online-ping", "workspace:extensions/ping"]
           ],
           "linkType": "SOFT",
         }]
