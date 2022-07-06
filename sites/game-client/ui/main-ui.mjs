@@ -455,6 +455,12 @@ class MainUI {
       overlay.onResize(event);
     }
   }
+
+  /**
+   */
+  getClientType() {
+    return this.clientType;
+  }
 }
 
 export default MainUI;

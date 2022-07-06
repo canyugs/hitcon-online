@@ -162,6 +162,13 @@ class ClientExtensionHelper {
     }
     return p.mapCoord;
   }
+
+  /**
+   * Return the client type, 'mobile' or 'desktop'.
+   */
+  getClientType() {
+    return this.extMan.clientType;
+  }
 };
 
 export default ClientExtensionHelper;
