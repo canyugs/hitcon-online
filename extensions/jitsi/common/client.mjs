@@ -128,6 +128,8 @@ class Client {
     this.audioDevice = null;
     this.videoDevice = null;
 
+    if (this.helper.getClientType() !== 'desktop') return;
+
     this.jitsiObj = new JitsiHandler(
       this.getDevices,
       this.setSettingDeviceOptions.bind(this),
@@ -136,6 +138,11 @@ class Client {
   }
 
   async gameStart() {
+    if (this.helper.getClientType() !== 'desktop') {
+      // Jitsi is only available on desktop.
+      return;
+    }
+
     this.container = new JitsiContainer(this.helper.mainUI);
     this.container.hide();
 
@@ -335,6 +342,8 @@ class Client {
    * @param {PlayerSyncMessage} msg - The update message.
    */
   onSelfPlayerUpdate(msg) {
+    if (this.helper.getClientType() !== 'desktop') return;
+
     const map = this.helper.getMap();
     if (typeof map === 'object') {
       let m = map.getCell(msg.mapCoord, 'jitsi');
