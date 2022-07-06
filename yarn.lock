@@ -2173,6 +2173,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"hitcon-online-ping@workspace:extensions/ping":
+  version: 0.0.0-use.local
+  resolution: "hitcon-online-ping@workspace:extensions/ping"
+  languageName: unknown
+  linkType: soft
+
 "hitcon-online-playerlist@workspace:extensions/playerlist":
   version: 0.0.0-use.local
   resolution: "hitcon-online-playerlist@workspace:extensions/playerlist"
