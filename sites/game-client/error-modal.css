@@ -31,12 +31,20 @@
     margin-bottom: 1em;
 }
 
+[data-clienttype=desktop] #error-message {
+    font: normal normal 900 30px/30px Helvetica;
+}
+
 #error-handler-message {
     text-align: center;
     font: normal normal bold 24px/40px Noto Sans CJK TC;
     letter-spacing: 0px;
     color: #151010;
     opacity: 1;
+}
+
+[data-clienttype=desktop] #error-handler-message {
+    font: normal normal bold 16px/20px Noto Sans CJK TC;
 }
 
 /*

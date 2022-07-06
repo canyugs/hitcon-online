@@ -27,6 +27,10 @@
   padding: 30px 0;
 }
 
+[data-clienttype=mobile] .avatar-selection-background {
+  width: 95%;
+}
+
 .avatar-selection-title {
   margin-bottom: 2%;
   text-align: center;
@@ -75,6 +79,10 @@
   border-radius: 26px;
   font-size: 22px;
   font-weight: bolder;
+}
+
+[data-clienttype=mobile] #avatar-selection-div .avatar-confirm-button {
+  font-size: 16px;
 }
 
 .avatar-display-name {

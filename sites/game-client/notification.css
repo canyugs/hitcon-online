@@ -3,6 +3,10 @@
   bottom: 10%;
 }
 
+[data-clienttype=mobile] .notification--overlay {
+  bottom: 20%;
+}
+
 .notification {
   display: flex;
   flex-direction: column;
@@ -16,6 +20,10 @@
   padding-top: 10px;
   color: #000000;
   z-index: 10; /* TODO tmp style, make toolbar visible */
+}
+
+[data-clienttype=mobile] .notification {
+  width: 90vw;
 }
 
 .notification--inactive {
