@@ -152,6 +152,7 @@ class SettingTab extends UtilPanelTab {
     input.id = 'setting-item-' + section + '-' + name;
     input.className = 'setting-item-input';
     input.value = value;
+    input.addEventListener('change', event => saveCallback(event.target.value));
 
     div.append(label);
     div.append(input);
@@ -192,6 +193,7 @@ class SettingTab extends UtilPanelTab {
     input.className = 'setting-item-input';
     input.type = 'checkbox';
     input.checked = value;
+    input.addEventListener('change', event => saveCallback(event.target.checked));
 
     div.append(label);
     div.append(input);
@@ -229,6 +231,7 @@ class SettingTab extends UtilPanelTab {
 
     select.id = 'setting-item-' + section + '-' + name;
     select.className = 'setting-item-input';
+    select.addEventListener('change', event => saveCallback(event.target.value));
 
     div.append(label);
     div.append(select);

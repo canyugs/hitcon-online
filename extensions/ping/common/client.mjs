@@ -33,11 +33,21 @@ class Client {
    * Initialize the layer and send the watermark data as a parameter from json file
    */
   async gameStart() {
-    // TODO: can toggle display in settings
+    // insert the element for displaying
     const displayTextDOM = document.createElement('span');
     Object.assign(displayTextDOM.style, displayTextStyle);
     document.getElementById('maprender-overlay').appendChild((displayTextDOM));
 
+    // hide it by default
+    displayTextDOM.style.visibility = 'hidden';
+
+    // enable toggling display in settings
+    const settings = this.helper.getExtObj('setting');
+    settings.tab.addSwitch('canvas_display', 'ping_display', '顯示網路延遲', displayTextDOM.style.visibility !== 'hidden', (value) => {
+      displayTextDOM.style.visibility = (value) ? 'visible' : 'hidden';
+    }, 0);
+
+    // start the timer
     setInterval(async () => {
       const pingTime = Date.now();
       const result = await this.helper.callC2sAPI('ping', 'ping', PING_INTERVAL_MS);
