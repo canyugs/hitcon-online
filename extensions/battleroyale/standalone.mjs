@@ -16,6 +16,54 @@ const Facing2Direction = {
   'L': [-1, 0],
 };
 
+class Bullet {
+  /**
+   * @constructor
+   * @param {Number} ID
+   * @param {String} facing
+   * @param {MapCoord} mapCoord
+   */
+  constructor(ID, facing, mapCoord) {
+    this.ID = ID;
+    this.facing = facing;
+    this.mapCoord = mapCoord;
+    this.duration = 0;
+    this.intervalID = undefined;
+    this.mapCoord.x += Facing2Direction[this.facing][0]; // move one
+    this.mapCoord.y += Facing2Direction[this.facing][1];
+  }
+
+  /**
+   * update the bullet coord
+   * @return {undefined}
+   */
+  updateCoord() {
+    this.mapCoord.x += Facing2Direction[this.facing][0];
+    this.mapCoord.y += Facing2Direction[this.facing][1];
+    this.duration += 1;
+  }
+
+  /**
+   * retrun bullet in this coord
+   * @param {MapCoord} coord
+   * @return {Boolean}
+   */
+  atCoord(coord) {
+    return this.mapCoord.x == coord.x &&
+     this.mapCoord.y == coord.y;
+  }
+
+  /**
+   * delete the interval
+   * @return {undefined}
+   */
+  deleteInterval() {
+    if (this.intervalID !== undefined) {
+      clearInterval(this.intervalID);
+    }
+  }
+}
+
 /**
  * This represents the standalone extension service for this extension.
  */
@@ -61,7 +109,7 @@ class Standalone {
           CellSet.fromObject({
             name: LAYER_FIRE.layerName,
             priority: LAYER_FIRE.zIndex,
-            cells: Array.from(this.bullets.values()),
+            cells: Array.from(this.fires),
             layers: {[LAYER_FIRE.layerName]: 'BF'},
             dynamic: true,
           }),
@@ -148,11 +196,10 @@ class Standalone {
     }, BULLET_COOLDOWN);
 
     // create bullet
+
     const bulletID = this.bulletID++;
-    const bulletCoord = mapCoord.copy();
-    bulletCoord.x += Facing2Direction[facing][0];
-    bulletCoord.y += Facing2Direction[facing][1];
-    this.bullets.set(bulletID, {facing, bulletCoord, duration: 0});
+    const newBullet = new Bullet(bulletID, facing, mapCoord);
+    this.bullets.set(bulletID, newBullet);
 
     // render
     await this.helper.broadcastCellSetUpdateToAllUser(
@@ -162,21 +209,19 @@ class Standalone {
           name: LAYER_BULLET.layerName,
           cells: Array.from(
               this.bullets,
-              ([_, v]) => v['bulletCoord'],
+              ([_, v]) => v['mapCoord'],
           ),
         }),
     );
 
     // setInterval to update bullet
-    const updateBullet = setInterval(async (bulletID) => {
+    newBullet.intervalID = setInterval(async (bulletID) => {
       const bullet = this.bullets.get(bulletID);
-      bullet.bulletCoord.x += Facing2Direction[bullet.facing][0];
-      bullet.bulletCoord.y += Facing2Direction[bullet.facing][1];
-      bullet.duration += 1;
+      bullet.updateCoord();
       if (bullet.duration >= BULLET_LIFE ||
-          !this.insideMap(bullet.bulletCoord) ||
-          this.helper.gameMap.getCell(bullet.bulletCoord, LAYER_OBSTACLE.layerName)) {
-        clearInterval(updateBullet);
+          !this.insideMap(bullet.mapCoord) ||
+          this.helper.gameMap.getCell(bullet.mapCoord, LAYER_OBSTACLE.layerName)) {
+        bullet.deleteInterval();
         this.bullets.delete(bulletID);
         await this.helper.broadcastCellSetUpdateToAllUser(
             'update',
@@ -185,7 +230,7 @@ class Standalone {
               name: LAYER_BULLET.layerName,
               cells: Array.from(
                   this.bullets,
-                  ([_, v]) => v['bulletCoord'],
+                  ([_, v]) => v['mapCoord'],
               ),
             }),
         );
@@ -193,10 +238,9 @@ class Standalone {
         const players = this.helper.gameState.getPlayers();
         players.forEach((player, playerID) => {
           for (const [bulletID, bullet] of this.bullets) {
-            if (player.mapCoord.x == bullet.bulletCoord.x &&
-              player.mapCoord.y == bulletCoord.y) {
+            if (bullet.atCoord(player.mapCoord)) {
               this.teleport(player.mapCoord, playerID);
-              clearInterval(updateBullet); // haven't check if clear interval clear all
+              bullet.deleteInterval();
               this.bullets.delete(bulletID);
               break;
             }
@@ -209,7 +253,7 @@ class Standalone {
               name: LAYER_BULLET.layerName,
               cells: Array.from(
                   this.bullets,
-                  ([_, v]) => v['bulletCoord'],
+                  ([_, v]) => v['mapCoord'],
               ),
             }),
         );
