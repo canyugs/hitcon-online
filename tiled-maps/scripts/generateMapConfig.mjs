@@ -15,12 +15,12 @@ function getEnvWithDefault(name, def) {
   return def;
 }
 
-const TILED_PROJECT_DIR = getEnvWithDefault('TILED_IN', '../../../hitcon-cat-adventure/tiled_maps');
+const TILED_PROJECT_DIR = getEnvWithDefault('TILED_IN', '../../../hitcon-cat-adventure/tiled-maps/2022');
 const ONLINE_MAP_CONFIG_DIR = getEnvWithDefault('MAP_OUT', '../../../hitcon-cat-adventure/run/map');
 
 
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
-const mapsDir = path.join(__dirname, `${TILED_PROJECT_DIR}/maps`);
+const mapsDir = path.join(__dirname, `${TILED_PROJECT_DIR}`);
 const tilesetsDir = path.join(__dirname, `${TILED_PROJECT_DIR}/tilesets`);
 const fixedsetsDir = path.join(__dirname, `${TILED_PROJECT_DIR}/fixedsets`);
 const charactersConfig = readFileFromJSON(`${fixedsetsDir}/characters.json`);
@@ -34,27 +34,31 @@ const mapNameList = [];
 const tmpLayerMap = {};
 const tmpImagesDef = {};
 const tilesetDirectory = {};
+let tilesetIndex = 0;
+
+function loadTilesetData(data, name, cwd) {
+    // Copy source image to online
+    const imageRealSrc = path.join(cwd, data.image);
+    const {ext: destExt} = path.parse(imageRealSrc);
+    const imageRealDest = path.resolve(path.join(__dirname, ONLINE_MAP_CONFIG_DIR, `${data.name}${destExt}`));
+    fs.copyFileSync(imageRealSrc, imageRealDest);
+
+    // export image and tiles definition
+    const prefix = String.fromCharCode('a'.charCodeAt()+tilesetIndex);
+    tilesetIndex++;
+    const {imageSrc, tiles} = tilesetTransform(data, prefix);
+    tmpLayerMap[name] = tiles;
+    tmpImagesDef[imageSrc.name] = imageSrc;
+    tilesetDirectory[name] = {tiles: tiles, imageSrc: imageSrc, prefix: prefix};
+}
 
 console.log(`read tilesets from ${tilesetsDir}`);
 fs.readdirSync(tilesetsDir).forEach((file, index) => {
   const pathData = path.parse(file);
   const {ext, name} = pathData;
   if (ext === '.json') {
-    //console.log(` > add ${file}`);
     const data = readFileFromJSON(`${tilesetsDir}/${file}`);
-
-    // Copy source image to online
-    const imageRealSrc = path.join(tilesetsDir, data.image);
-    const {ext: destExt} = path.parse(imageRealSrc);
-    const imageRealDest = path.resolve(path.join(__dirname, ONLINE_MAP_CONFIG_DIR, `${data.name}${destExt}`));
-    fs.copyFileSync(imageRealSrc, imageRealDest);
-
-    // export image and tiles definition
-    const prefix = String.fromCharCode('a'.charCodeAt()+index);
-    const {imageSrc, tiles} = tilesetTransform(data, prefix);
-    tmpLayerMap[name] = tiles;
-    tmpImagesDef[imageSrc.name] = imageSrc;
-    tilesetDirectory[name] = {tiles: tiles, imageSrc: imageSrc, prefix: prefix};
+    loadTilesetData(data, name, tilesetsDir);
   }
 });
 
@@ -156,7 +160,7 @@ function getAllTileLayerMap() {
   return res;
 }
 
-const resultLayerMap = getAllTileLayerMap();
+let resultLayerMap = getAllTileLayerMap();
 
 //////////////////////////////////////////
 
@@ -169,28 +173,42 @@ function loadWorld(mapsDir, mapName) {
   result.mapData = {};
   result.base = base;
   console.log(`read maps from ${targetMap}`);
-  fs.readdirSync(targetMap).forEach((file) => {
-    const {ext, name:mapName} = path.parse(file);
-    if (ext === '.json') {
-      //console.log(` > add ${file}`);
-      const data = readFileFromJSON(`${targetMap}/${file}`);
 
-      mapNameList.push(mapName);
-      const gidRange = [];
-      data.tilesets.forEach((tileset) => {
-        const {source} = tileset;
-        if (source === undefined) {
-          console.error('embed tileset unsupport');
-        }
+  const loadFile = (filePath, mapName) => {
+    const data = readFileFromJSON(filePath);
+
+    mapNameList.push(mapName);
+    const gidRange = [];
+    data.tilesets.forEach((tileset) => {
+      console.log(tileset);
+      const {source} = tileset;
+      if (source === undefined) {
+        console.error('embed tileset unsupport');
+        const tilesetName = `${mapName}_embed`;
+        loadTilesetData(tileset, tilesetName, path.dirname(filePath));
+        gidRange.push({...tileset, name: tilesetName});
+      } else {
         const {name: tilesetName} = path.parse(source);
         // Tileset source for all maps;
         gidRange.push({...tileset, name: tilesetName});
-      });
-      gidRange.sort((a, b) => { return a-b; });
-      data.gidRange = gidRange;
-      result.mapData[mapName] = data;
-    }
-  });
+      }
+    });
+    gidRange.sort((a, b) => { return a-b; });
+    data.gidRange = gidRange;
+    result.mapData[mapName] = data;
+  };
+  if (fs.statSync(targetMap+'.json').isFile()) {
+    // If the target map is a JSON file.
+    loadFile(`${targetMap}.json`, mapName);
+  } else {
+    // If it's a directory.
+    fs.readdirSync(targetMap).forEach((file) => {
+      const {ext, name:mapName} = path.parse(file);
+      if (ext === '.json') {
+        loadFile(`${targetMap}/${file}`, mapName);
+      }
+    });
+  }
 
   return result;
 }
@@ -358,6 +376,8 @@ function loadAndConvertWorld(mapName, mapsDir, tilesetDirectory, resultLayerMap,
     return convertWorldCombined(result.mapData, tilesetDirectory, resultLayerMap, result.base, cellsetsConfig);
   }
   if (type === 'single') {
+    // update resultLayerMap because embedded tileset may have been introduced.
+    resultLayerMap = getAllTileLayerMap();
     return convertWorldSingle(result.mapData, tilesetDirectory, resultLayerMap, result.base, cellsetsConfig);
   }
   console.assert(false, 'Unknown type: ', type);
@@ -366,33 +386,9 @@ function loadAndConvertWorld(mapName, mapsDir, tilesetDirectory, resultLayerMap,
 
 const conversionConfig = [
   {
-    srcMapName: 'map01',
+    srcMapName: 'HITCON2022',
     dstMapName: 'world1',
     cellsetsConfig: cellsetsConfig,
-    type: 'combined'
-  },
-  {
-    srcMapName: 'map03',
-    dstMapName: 'world3',
-    cellsetsConfig: [],
-    type: 'combined'
-  },
-  {
-    srcMapName: 'map05',
-    dstMapName: 'world5',
-    cellsetsConfig: [],
-    type: 'single'
-  },
-  {
-    srcMapName: 'map06',
-    dstMapName: 'world6',
-    cellsetsConfig: [],
-    type: 'single'
-  },
-  {
-    srcMapName: 'map07',
-    dstMapName: 'world7',
-    cellsetsConfig: [],
     type: 'single'
   },
 ];
