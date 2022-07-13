@@ -479,7 +479,7 @@ class GatewayService {
 
     // if the player moves
     if (updateMsg.mapCoord !== undefined) {
-      this.movementManager.handlePlayerMove(this, socket, updateMsg, failOnPlayerUpdate.bind(this));
+      this.movementManager.recvPlayerMoveMessage(this, socket, updateMsg, failOnPlayerUpdate.bind(this));
       return;
     } else {
       // If the player didn't move, still update everyone.
@@ -499,6 +499,11 @@ class GatewayService {
    */
   async _teleportPlayerInternal(socket, msg, allowOverlap=false) {
     const res = await socket.moveLock.acquire('move', async () => {
+      // If the player doesn't move at all, just return true.
+      if (socket.playerData.mapCoord.equalsTo(msg.mapCoord)) {
+        return true;
+      }
+
       const ret = await this._enterCoord(msg.mapCoord);
 
       // If the player was in ghost mode, ignore the occupation check.
