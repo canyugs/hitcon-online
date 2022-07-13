@@ -500,7 +500,7 @@ class GatewayService {
   async _teleportPlayerInternal(socket, msg, allowOverlap=false) {
     const res = await socket.moveLock.acquire('move', async () => {
       // If the player doesn't move at all, just return true.
-      if (socket.playerData.mapCoord.equalsTo(msg.mapCoord)) {
+      if (socket.playerData.mapCoord.equalsTo(msg.mapCoord) && socket.playerData.ghostMode === msg.ghostMode) {
         return true;
       }
 
