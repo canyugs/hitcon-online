@@ -15,7 +15,8 @@ class MovementManagerServer {
    * TODO: jsdoc
    */
   constructor() {
-    this.playerMovingTimer = new Map();
+    this.messageCounter = 0;
+    this.pendingMessages = new Map();
   }
 
   /**
@@ -25,34 +26,91 @@ class MovementManagerServer {
    * @param {PlayerSyncMessage} updateMsg
    * @param {Function} failOnPlayerUpdate
    */
-  async handlePlayerMove(gs, socket, updateMsg, failOnPlayerUpdate) {
+  recvPlayerMoveMessage(gs, socket, updateMsg, failOnPlayerUpdate) {
     const player = socket.playerData;
+    // make sure there is an entry
+    if (!this.pendingMessages.has(player.playerID)) {
+      this.pendingMessages.set(player.playerID, []);
+    }
 
-    // If the update message comes too early, handles it later.
-    if (getPlayerMoveCooldown(player) > 0) {
-      // We reserve only one moving request per player.
-      if (this.playerMovingTimer.has(player.playerID)) {
-        clearTimeout(this.playerMovingTimer.get(player.playerID));
+    const queue = this.pendingMessages.get(player.playerID);
+    const args = [this.messageCounter++, gs, socket, updateMsg, failOnPlayerUpdate];
+    queue.push(args);
+
+    // If there is only one message pending, process it now.
+    // Otherwise, the processing of this updateMsg will be launched by this.processPlayerMoveMessage().
+    if (queue.length === 1) {
+      this.processPlayerMoveMessage(...args);
+    }
+  }
+
+  /**
+   * TODO: jsdoc
+   * @param {Number} messageCounter
+   * @param {GateWayService} gs
+   * @param {Socket} socket
+   * @param {PlayerSyncMessage} updateMsg
+   * @param {Function} failOnPlayerUpdate
+   * @param {Boolean} postponed - a debugging information indicating whether this function is called by setTimeout
+   */
+  async processPlayerMoveMessage(messageCounter, gs, socket, updateMsg, failOnPlayerUpdate, postponed=false) {
+    // We need to make this section atomic. Otherwise, the (await gs._teleportPlayerInternal) will
+    // have race condition when multiple updateMsg come simultaneously.
+    await socket.moveLock.acquire('handlePlayerMove', async () => {
+      const player = socket.playerData;
+
+      // If the update message comes too early, handle it later.
+      if (getPlayerMoveCooldown(player) > 0) {
+        setTimeout((messageCounter, gs, socket, updateMsg, failOnPlayerUpdate, postponed) => {
+          this.processPlayerMoveMessage(messageCounter, gs, socket, updateMsg, failOnPlayerUpdate, postponed);
+        }, Math.max(getPlayerMoveCooldown(player), 0), messageCounter, gs, socket, updateMsg, failOnPlayerUpdate, true);
+        return;
       }
-      // Handle the moving request later.
-      setTimeout((gs, socket, updateMsg, failOnPlayerUpdate) => {
-        this.handlePlayerMove(gs, socket, updateMsg, failOnPlayerUpdate);
-      }, Math.max(getPlayerMoveCooldown(player), 0), gs, socket, updateMsg, failOnPlayerUpdate);
-      return;
-    }
 
-    // clean up the timer
-    this.playerMovingTimer.delete(player.playerID);
+      // Otherwise, handle the message now.
 
-    if (!checkPlayerMove(player, updateMsg, gs.gameMap)) {
-      failOnPlayerUpdate();
-      return;
-    }
+      let success = true;
+      if (!checkPlayerMove(player, updateMsg, gs.gameMap)) {
+        failOnPlayerUpdate();
+        success = false;
+      }
 
-    if (!(await gs._teleportPlayerInternal(socket, updateMsg, false))) {
-      failOnPlayerUpdate();
-      return;
-    }
+      if (success && !(await gs._teleportPlayerInternal(socket, updateMsg, false))) {
+        failOnPlayerUpdate();
+        success = false;
+      }
+
+      const pending = this.pendingMessages.get(player.playerID);
+      if (success) {
+        // If the message is processed successfully, delete it from pending array.
+        // TODO: test if the performance is better when using object/map/set
+        // (though I believe that array would be the fastest since pending.length is likely
+        // to be very small, say, smaller than 3)
+        for (let i = 0; i < pending.length; ++i) {
+          if (pending[i][0] === messageCounter) {
+            pending.splice(i, 1);
+            break;
+          }
+        }
+      } else {
+        // If the message fails to be processed, clear the pending array since
+        // the pending messages may turn out to be errors.
+        pending.length = 0;
+      }
+
+      // If there is still any element in pending array, pick the one which comes first and process it.
+      if (pending.length > 0) {
+        let mini = 0;
+        for (let i = 1; i < pending.length; ++i) {
+          if (pending[i][0] < pending[mini][0]) {
+            mini = i;
+          }
+        }
+        setTimeout((messageCounter, gs, socket, updateMsg, failOnPlayerUpdate, postponed) => {
+          this.processPlayerMoveMessage(messageCounter, gs, socket, updateMsg, failOnPlayerUpdate, postponed);
+        }, Math.max(getPlayerMoveCooldown(player), 0), ...pending[mini]);
+      }
+    });
   }
 }
 
