@@ -498,6 +498,18 @@ newAssetsConfig.layerMap.bombmanBombExplode = {
         11
       ]
     };
+newAssetsConfig.layerMap.escapeGameDoor = {
+      "B": [
+        "base",
+        10,
+        4
+      ],
+      "O": [
+        "base",
+        8,
+        19
+      ]
+    };
 
 writeFileToJSON(assetsConfigPath, newAssetsConfig);
 
