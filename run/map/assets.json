@@ -8768,6 +8768,18 @@
         14
       ]
     },
+    "escapeGameDoor": {
+      "B": [
+        "base",
+        10,
+        4
+      ],
+      "O": [
+        "base",
+        8,
+        19
+      ]
+    },
     "bombmanBombExplode": {
       "BE": [
         "base",
