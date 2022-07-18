@@ -112,6 +112,7 @@ class Standalone {
     this.terminalObjects.forEach((v) => {
       v.registerExtStateFunc('showTerminal', 'escape-game', 'sf_showTerminal');
       v.registerExtStateFunc('checkIsInFinalizedTeam', 'escape-game', 'sf_checkIsInFinalizedTeam');
+      v.registerExtStateFunc('forceFinalizeTeam', 'escape-game', 'sf_forceFinalizeTeam');
     });
     this.doorCells = [{'x': 9, 'y': 12, 'h': 1, 'w': 1}];
     const mapName = "world1";
@@ -433,6 +434,30 @@ class Standalone {
    */
   async c2s_getListOfTerminals(player) {
     return Array.from(this.terminalObjects.keys());
+  }
+
+  /**
+   * Make sure the player is in a finalized team. If not, create
+   * a team and finalize it immediately.
+   * This function will not notify any other teammates as it assumes all
+   * teams to have only one member.
+   */
+  async s2s_sf_forceFinalizeTeam(srcExt, playerID, kwargs, sfInfo) {
+    const {nextState} = kwargs;
+
+    if (!this.playerToTeam.has(playerID)) {
+      // Create a team.
+      const teamID = await this.createTeam(playerID);
+      await this.joinTeam(playerID, teamID);
+    }
+
+    if (!this.playerToTeam.get(playerID).isFinalized) {
+      // Finalize the team.
+      this.playerToTeam.get(playerID).isFinalized = true;
+      await this.saveData();
+    }
+
+    return nextState;
   }
 
   /**
