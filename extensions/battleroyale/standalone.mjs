@@ -7,7 +7,7 @@ import CellSet from '../../common/maplib/cellset.mjs';
 
 const BULLET_SPEED = 100; // ms per block (lower -> quicker)
 const BULLET_LIFE = 5; // five blocks
-const MAP_UPDATE_PERIOD = 20000; // ms per update
+const MAP_UPDATE_PERIOD = 25000; // ms per update
 
 const Facing2Direction = {
   'U': [0, 1],
@@ -60,6 +60,7 @@ class Bullet {
   deleteInterval() {
     if (this.intervalID !== undefined) {
       clearInterval(this.intervalID);
+      this.intervalID = undefined;
     }
   }
 }
@@ -86,10 +87,10 @@ class Standalone {
     this.arenaOfMaps = this.helper.gameMap.getOriginalCellSetStartWith('battleroyaleArena');
     this.obstaclesOfMaps = this.helper.gameMap.getOriginalCellSetStartWith('battleroyaleObstacles');
 
-    this.bullets = new Map(); // key: bullet ID; value: bullet info
+    this.bullets = new Map(); // key: bullet ID; value: Bullet
     this.bulletID = 0;
 
-    this.fires = new Set();
+    this.fires = new Set(); // {x,y,w,h} objects
 
     for (const mapName of this.arenaOfMaps.keys()) {
       await this.helper.broadcastCellSetUpdateToAllUser(
@@ -175,7 +176,7 @@ class Standalone {
   }
 
   /**
-   * Client tries to place a bomb at mapCoord.
+   * Client tries to shoot bullet in front(depends on facing) of mapCoord.
    * The server returns true on success.
    * @param {Object} player - (TODO: needs docs)
    * @param {MapCoord} mapCoord - The bullet position.
@@ -187,9 +188,9 @@ class Standalone {
     // mapCoord has to be inside an arena
     // TODO: use the utility function in maplib if there is such function
     const inside = this.insideMap(mapCoord);
-    if (!inside) return;
+    if (!inside) return false;
 
-    if (this.cooldown.has(player.playerID)) return;
+    if (this.cooldown.has(player.playerID)) return false;
     this.cooldown.add(player.playerID);
     setTimeout(() => {
       this.cooldown.delete(player.playerID);
@@ -236,16 +237,21 @@ class Standalone {
         );
       } else {
         const players = this.helper.gameState.getPlayers();
+        const playerMap = new Map();
         players.forEach((player, playerID) => {
-          for (const [bulletID, bullet] of this.bullets) {
-            if (bullet.atCoord(player.mapCoord)) {
-              this.teleport(player.mapCoord, playerID);
-              bullet.deleteInterval();
-              this.bullets.delete(bulletID);
-              break;
-            }
-          }
+          const {world, x, y} = player.mapCoord;
+          playerMap.set(String(world)+'#'+String(x)+'#'+String(y), playerID);
         });
+        for (const [bulletID, bullet] of this.bullets) {
+          const {world, x, y} = bullet.mapCoord;
+          const str = String(world)+'#'+String(x)+'#'+String(y);
+          if (playerMap.has(str)) {
+            this.teleport(bullet.mapCoord, playerMap.get(str));
+            bullet.deleteInterval();
+            this.bullets.delete(bulletID);
+            playerMap.delete(bullet.mapCoord);
+          }
+        }
         await this.helper.broadcastCellSetUpdateToAllUser(
             'update',
             mapCoord.mapName,
