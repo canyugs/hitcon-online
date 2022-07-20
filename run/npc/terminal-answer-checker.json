@@ -1,0 +1,57 @@
+{
+  "enabled": true,
+  "initialPosition": {"mapName": "world1", "x": 10, "y": 9},
+  "display": [
+    {
+      "zIndex": 11,
+      "layerName": "npcImage",
+      "renderFunction": "_drawOneCharacterImage",
+      "renderArgs": null,
+      "character": "char1"
+    },
+    {
+      "zIndex": 16,
+      "layerName": "npcName",
+      "renderFunction": "_drawOneCharacterName",
+      "renderArgs": null
+    }
+  ],
+  "FSM": {
+    "initialState": "s1",
+    "states": {
+      "s1": {
+        "func": "showDialogAndCheckKey",
+        "kwargs": {
+          "dialog": "Figured out the attacker?",
+          "nextState": "s2",
+          "nextStateIncorrect": "s3",
+          "key": "192.168.87.87"
+        }
+      },
+      "s2": {
+        "func": "showDialog",
+        "kwargs": {
+          "dialogs": "Correct answer!",
+          "options": {
+            "ok": "s4"
+          }
+        }
+      },
+      "s3": {
+        "func": "showDialog",
+        "kwargs": {
+          "dialogs": "Incorrect answer!",
+          "options": {
+            "ok": "s4"
+          }
+        }
+      },
+      "s4": {
+        "func": "exit",
+        "kwargs": {
+          "next": "s1"
+        }
+      }
+    }
+  }
+}

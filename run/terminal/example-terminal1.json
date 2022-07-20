@@ -2,7 +2,7 @@
   "enabled": true,
   "initialPosition": {"mapName": "world1", "x": 10, "y": 10},
   "terminalInfo": {
-    "imageName": "debian:stable"
+    "imageName": "aoaaceai/victim"
   },
   "display": [
     {
