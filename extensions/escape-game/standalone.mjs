@@ -388,15 +388,10 @@ class Standalone {
   }
 
   /**
-   * Make sure the player is in a finalized team. If not, create
-   * a team and finalize it immediately.
-   * This function will not notify any other teammates as it assumes all
-   * teams to have only one member.
+   * Try to create a team for the player and finalize the team.
+   * Assumes that there's only one member.
    */
-
-  async s2s_sf_forceFinalizeTeam(srcExt, playerID, kwargs, sfInfo) {
-    const {nextState} = kwargs;
-
+  async _tryCreateAndFinalize(playerID) {
     if (!this.playerToTeam.has(playerID)) {
       // Create a team.
       const teamID = await this.createTeam(playerID);
@@ -408,6 +403,18 @@ class Standalone {
       this.playerToTeam.get(playerID).isFinalized = true;
       await this.saveData();
     }
+  }
+
+  /**
+   * Make sure the player is in a finalized team. If not, create
+   * a team and finalize it immediately.
+   * This function will not notify any other teammates as it assumes all
+   * teams to have only one member.
+   */
+  async s2s_sf_forceFinalizeTeam(srcExt, playerID, kwargs, sfInfo) {
+    const {nextState} = kwargs;
+
+    await this._tryCreateAndFinalize(playerID);
 
     return nextState;
   }
@@ -416,6 +423,8 @@ class Standalone {
    * Check if the player is in a finalized team and therefore can access the game.
    */
   async s2s_sf_checkIsInFinalizedTeam(srcExt, playerID, kwargs, sfInfo) {
+    await this._finalizeIfNeeded(playerID);
+
     const {nextState, errorState} = kwargs;
 
     if (this.playerToTeam.has(playerID) && this.playerToTeam.get(playerID).isFinalized) {
@@ -426,9 +435,25 @@ class Standalone {
   }
 
   /**
+   * Helper function that will check if we're in single-player team mode,
+   * if so, create and finalize the team if there's no team for the player.
+   */
+  async _finalizeIfNeeded(playerID) {
+    // Attempt to finalize the player if the player is not in a team and the
+    // configuration is set to auto-finalize/single player team.
+    if (config.has('escape-game.autoFinalize') &&
+      config.get('escape-game.autoFinalize')) {
+      // Auto finalize the player.
+      await this._tryCreateAndFinalize(playerID);
+    }
+  }
+
+  /**
    * Show terminal object, called by the interactive object.
    */
   async s2s_sf_showTerminal(srcExt, playerID, kwargs, sfInfo) {
+    await this._finalizeIfNeeded(playerID);
+
     const {nextState} = kwargs;
     const token = await this.getAccessToken(playerID, sfInfo.visibleName);
     await this.helper.callS2cAPI(playerID, 'escape-game', 'showTerminalModal', 60*1000, token);

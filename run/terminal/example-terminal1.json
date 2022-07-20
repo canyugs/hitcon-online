@@ -23,18 +23,28 @@
     "initialState": "baseState",
     "states": {
       "baseState": {
-        "func": "forceFinalizeTeam",
+        "func": "checkIsInFinalizedTeam",
         "kwargs": {
-          "nextState": "s1"
+          "nextState": "s1",
+          "errorState": "s2"
         }
       },
       "s1": {
         "func": "showTerminal",
         "kwargs": {
-          "nextState": "s2"
+          "nextState": "s3"
         }
       },
       "s2": {
+        "func": "showDialog",
+        "kwargs": {
+          "dialogs": "You are not in a finalized team, maybe join the team first?",
+          "options": {
+            "Bye": "s3"
+          }
+        }
+      },
+      "s3": {
         "func": "exit",
         "kwargs": {
           "next": "baseState"
