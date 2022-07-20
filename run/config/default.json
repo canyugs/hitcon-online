@@ -59,6 +59,9 @@
     "publicAddress": "localhost:5050",
     "socketioPath": ""
   },
+  "escape-game": {
+    "autoFinalize": true
+  },
   "publicAddress": null,
   "allowedOrigins": []
 }
