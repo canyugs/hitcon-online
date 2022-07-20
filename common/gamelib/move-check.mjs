@@ -15,6 +15,7 @@ const PLAYER_MOVE_DISTANCE_LIMIT = 1; // cell
 function checkPlayerMove(oldPlayerData, updateMessage, gameMap, clientSide=false) {
   let canMove = true;
   canMove = canMove && _speedCheck(oldPlayerData, updateMessage, clientSide);
+  if (!canMove) console.debug('- speed check failed');
   canMove = canMove && _borderAndWallCheck(oldPlayerData, updateMessage, gameMap);
   return canMove;
 }

@@ -58,9 +58,14 @@ class MovementManagerServer {
     // have race condition when multiple updateMsg come simultaneously.
     await socket.moveLock.acquire('handlePlayerMove', async () => {
       const player = socket.playerData;
+      console.debug('----------------------------');
+      console.debug(`receives player move${postponed ? ' postponed' : ''}`);
+      console.debug(player.mapCoord.toJSON());
+      console.debug(updateMsg.mapCoord.toJSON());
 
       // If the update message comes too early, handle it later.
       if (getPlayerMoveCooldown(player) > 0) {
+        console.debug(`- comes too early by ${getPlayerMoveCooldown(player)} ms`);
         setTimeout((messageCounter, gs, socket, updateMsg, failOnPlayerUpdate, postponed) => {
           this.processPlayerMoveMessage(messageCounter, gs, socket, updateMsg, failOnPlayerUpdate, postponed);
         }, Math.max(getPlayerMoveCooldown(player), 0), messageCounter, gs, socket, updateMsg, failOnPlayerUpdate, true);
@@ -71,11 +76,13 @@ class MovementManagerServer {
 
       let success = true;
       if (!checkPlayerMove(player, updateMsg, gs.gameMap)) {
+        console.debug('- error on check player move');
         failOnPlayerUpdate();
         success = false;
       }
 
       if (success && !(await gs._teleportPlayerInternal(socket, updateMsg, false))) {
+        console.debug('- error on teleport internal');
         failOnPlayerUpdate();
         success = false;
       }
@@ -110,6 +117,8 @@ class MovementManagerServer {
           this.processPlayerMoveMessage(messageCounter, gs, socket, updateMsg, failOnPlayerUpdate, postponed);
         }, Math.max(getPlayerMoveCooldown(player), 0), ...pending[mini]);
       }
+
+      console.debug('end');
     });
   }
 }
