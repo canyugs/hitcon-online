@@ -5,6 +5,8 @@ import Modal from '/static/sites/game-client/ui/modal.mjs';
 import {MapCoord} from '/static/common/maplib/map.mjs';
 import InteractiveObjectClientBaseClass from '/static/common/interactive-object/client.mjs';
 
+const LAYER_DOOR = {zIndex: 6, layerName: 'escapeGameDoor'};
+
 const TERMINAL_CONTAINER = 'terminal-container';
 const TERMINAL_DIV = 'terminal';
 
@@ -74,6 +76,8 @@ class Client {
   async gameStart() {
     this.modal = new TerminalModal(this.helper.mainUI);
     this.modal.registerCallbacks(this.setupPty.bind(this), this.cleanup.bind(this));
+
+    this.helper.mapRenderer.registerCustomizedLayerToDraw(LAYER_DOOR.zIndex, LAYER_DOOR.layerName);
 
     const listOfTerminals = await this.helper.callC2sAPI('escape-game', 'getListOfTerminals', this.helper.defaultTimeout);
     for (const terminalId of listOfTerminals) {
