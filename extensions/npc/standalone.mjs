@@ -40,9 +40,10 @@ class Standalone {
    * Initializes the extension.
    */
   async initialize() {
-    await this.helper.callS2sAPI('iobj-lib', 'reqRegister');
-    await this.helper.callS2sAPI('items', 'reqRegister');
-    await this.helper.callS2sAPI('escape-game', 'reqRegister');
+    // allow NPC to call the state functions provided by other extensions
+    await this.helper.callS2sAPI('iobj-lib', 'provideStateFunc', 'registerStateFuncToNPCs');
+    await this.helper.callS2sAPI('items', 'provideStateFunc', 'registerStateFuncToNPCs');
+    await this.helper.callS2sAPI('escape-game', 'provideStateFunc', 'registerStateFuncToNPCs');
   }
 
   /**
@@ -87,12 +88,12 @@ class Standalone {
   }
 
   /**
-   * Allow other ext to add state func.
+   * Called by other extensions. Make their state functions available to the NPCs.
    */
-  async s2s_registerStateFunc(srcExt, fnName, extName, methodName) {
-    this.NPCs.forEach((v) => {
-      v.registerExtStateFunc(fnName, extName, methodName);
-    });
+  async s2s_registerStateFuncToNPCs(srcExt, fnNames) {
+    for (const npc of this.NPCs.values()) {
+      npc.registerExtStateFuncAll(srcExt, fnNames);
+    }
   }
 }
 

@@ -107,11 +107,12 @@ class Standalone {
   async initialize() {
     await this._loadFromDisk();
 
-    await this.helper.callS2sAPI('iobj-lib', 'reqRegister');
+    await this.helper.callS2sAPI('iobj-lib', 'provideStateFunc', 'registerStateFuncToTerminals');
     this.terminalObjects.forEach((v) => {
-      v.registerExtStateFunc('showTerminal', 'escape-game', 'sf_showTerminal');
-      v.registerExtStateFunc('checkIsInFinalizedTeam', 'escape-game', 'sf_checkIsInFinalizedTeam');
-      v.registerExtStateFunc('forceFinalizeTeam', 'escape-game', 'sf_forceFinalizeTeam');
+      v.registerExtStateFuncAll(
+          'escape-game',
+          ['showTerminal', 'checkIsInFinalizedTeam', 'forceFinalizeTeam'],
+      );
     });
   }
 
@@ -309,36 +310,20 @@ class Standalone {
   // Interactive Object (general)
 
   /**
-   * Register the state func with the extension given.
+   * Provide the state functions in this extension to other interactive object.
    */
-  async _registerWith(ext) {
-    const propList = Object.getOwnPropertyNames(Object.getPrototypeOf(this));
-    for (const p of propList) {
-      if (typeof this[p] !== 'function') continue;
-      if (!p.startsWith(SF_PREFIX)) continue;
-      const fnName = p.substr(SF_PREFIX.length);
-      this.helper.callS2sAPI(ext, 'registerStateFunc', fnName, this.helper.name, `sf_${fnName}`);
+  async s2s_provideStateFunc(srcExt, registerFunc) {
+    this.helper.callS2sAPI(srcExt, registerFunc, this.helper.getListOfStateFunctions(this));
+  }
+
+  /**
+   * Allow other ext to add state function to terminal
+   */
+  async s2s_registerStateFuncToTerminals(srcExt, fnNames) {
+    for (const term of this.terminalObjects.values()) {
+      term.registerExtStateFuncAll(srcExt, fnNames);
     }
   }
-
-  /**
-   * Register all state func available in this extension with the given
-   * extension.
-   */
-  async s2s_reqRegister(srcExt, ext) {
-    if (!ext) ext = srcExt;
-    await this._registerWith(ext);
-  }
-
-  /**
-   * Allow other ext to add state func.
-   */
-  async s2s_registerStateFunc(srcExt, fnName, extName, methodName) {
-    this.terminalObjects.forEach((v) => {
-      v.registerExtStateFunc(fnName, extName, methodName);
-    });
-  }
-
 
   // Terminal Interactive Object
 

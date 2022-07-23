@@ -160,9 +160,8 @@ class Standalone {
       console.warn(e);
     }
 
-    // Make sure we've the various state functions.
-    await this.helper.callS2sAPI('iobj-lib', 'reqRegister');
-    await this.helper.callS2sAPI('items', 'reqRegister');
+    // allow items to call the state functions provided by other extensions
+    await this.helper.callS2sAPI('iobj-lib', 'provideStateFunc', 'registerStateFuncToItems');
   }
 
   /**
@@ -862,25 +861,10 @@ class Standalone {
   // ============= Interactive Object related =============
 
   /**
-   * Register the state func with the extension given.
+   * Provide the state functions in this extension to other interactive object.
    */
-  async _registerWith(ext) {
-    const propList = Object.getOwnPropertyNames(Object.getPrototypeOf(this));
-    for (const p of propList) {
-      if (typeof this[p] !== 'function') continue;
-      if (!p.startsWith(SF_PREFIX)) continue;
-      const fnName = p.substr(SF_PREFIX.length);
-      this.helper.callS2sAPI(ext, 'registerStateFunc', fnName, this.helper.name, `sf_${fnName}`);
-    }
-  }
-
-  /**
-   * Register all state func available in this extension with the given
-   * extension.
-   */
-  async s2s_reqRegister(srcExt, ext) {
-    if (!ext) ext = srcExt;
-    await this._registerWith(ext);
+  async s2s_provideStateFunc(srcExt, registerFunc) {
+    this.helper.callS2sAPI(srcExt, registerFunc, this.helper.getListOfStateFunctions(this));
   }
 
   /**
@@ -982,10 +966,9 @@ class Standalone {
   /**
    * Allow other ext to add state func.
    */
-  async s2s_registerStateFunc(srcExt, fnName, extName, methodName) {
-    for (const itemName in this.itemInstances) {
-      const v = this.itemInstances[itemName];
-      v.registerExtStateFunc(fnName, extName, methodName);
+  async s2s_registerStateFuncToItems(srcExt, fnNames) {
+    for (const item of Object.values(this.itemInstances)) {
+      item.registerExtStateFuncAll(srcExt, fnNames);
     }
   }
 }
