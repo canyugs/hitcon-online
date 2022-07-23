@@ -37,25 +37,10 @@ class Standalone {
   }
 
   /**
-   * Register the state func with the extension given.
+   * Provide the state functions in this extension to other interactive object.
    */
-  async _registerWith(ext) {
-    const propList = Object.getOwnPropertyNames(Object.getPrototypeOf(this));
-    for (const p of propList) {
-      if (typeof this[p] !== 'function') continue;
-      if (!p.startsWith(SF_PREFIX)) continue;
-      const fnName = p.substr(SF_PREFIX.length);
-      this.helper.callS2sAPI(ext, 'registerStateFunc', fnName, this.helper.name, `sf_${fnName}`);
-    }
-  }
-
-  /**
-   * Register all state func available in this extension with the given
-   * extension.
-   */
-  async s2s_reqRegister(srcExt, ext) {
-    if (!ext) ext = srcExt;
-    await this._registerWith(ext);
+  async s2s_provideStateFunc(srcExt, registerFunc) {
+    this.helper.callS2sAPI(srcExt, registerFunc, this.helper.getListOfStateFunctions(this));
   }
 
   // ==================== State Functions ====================

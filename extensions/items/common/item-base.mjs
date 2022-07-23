@@ -24,10 +24,19 @@ class ItemBase {
   }
 
   /**
-   * See FSMExecutor.registerExtStateFunc.
+   * See FSMExecutor.registerExtStateFuncOne.
    */
-  registerExtStateFunc(fnName, extName, methodName) {
-    this.fsmExecutor.registerExtStateFunc(fnName, extName, methodName);
+  registerExtStateFuncOne(fnName, extName, methodName) {
+    this.fsmExecutor.registerExtStateFuncOne(fnName, extName, methodName);
+  }
+
+  /**
+   * See FSMExecutor.registerExtStateFuncAll.
+   */
+  registerExtStateFuncAll(extName, fnNames) {
+    for (const fnName of fnNames) {
+      this.registerExtStateFuncOne(extName, fnName);
+    }
   }
 
   async getImage() {

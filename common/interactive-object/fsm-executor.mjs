@@ -3,6 +3,7 @@
 
 import {InClassStateFuncProvider, ExtStateFuncProvider, StackStateFuncProvider} from './state-func-provider.mjs';
 
+const STATE_FUNCTION_PREFIX = 'sf_';
 const FSM_ERROR = '__fsm_error';
 
 /**
@@ -49,12 +50,22 @@ class FSMExecutor {
    * Register an s2s func as a state func.
    * The s2s API should have the following signature:
    * (srcExt, playerID, kwargs, sfInfo)
-   * @param {String} fnName - The state function name.
    * @param {String} extName - The s2s ext name.
-   * @param {String} methodName - The s2s method name.
+   * @param {String} fnName - The state function name.
    */
-  registerExtStateFunc(fnName, extName, methodName) {
-    this.stateFuncProviderExt.registerStateFunc(fnName, extName, methodName);
+  registerExtStateFuncOne(extName, fnName) {
+    this.stateFuncProviderExt.registerStateFunc(fnName, extName, STATE_FUNCTION_PREFIX + fnName);
+  }
+
+  /**
+   * Register all the state functions of an extension.
+   * @param {String} extName - The name of the extension providing the state functions.
+   * @param {Array} fnNames - The list of all state functions
+   */
+  registerExtStateFuncAll(extName, fnNames) {
+    for (const fnName of fnNames) {
+      this.registerExtStateFuncOne(extName, fnName);
+    }
   }
 
   /**
@@ -134,5 +145,6 @@ class FSMExecutor {
 }
 
 FSMExecutor.FSM_ERROR = FSM_ERROR;
+FSMExecutor.STATE_FUNCTION_PREFIX = STATE_FUNCTION_PREFIX;
 
 export default FSMExecutor;

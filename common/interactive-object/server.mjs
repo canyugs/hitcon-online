@@ -122,10 +122,17 @@ class InteractiveObjectServerBaseClass {
   }
 
   /**
-   * See FSMExecutor.registerExtStateFunc.
+   * See FSMExecutor.registerExtStateFuncOne.
    */
-  registerExtStateFunc(fnName, extName, methodName) {
-    this.fsmExecutor.registerExtStateFunc(fnName, extName, methodName);
+  registerExtStateFuncOne(extName, fnName) {
+    this.fsmExecutor.registerExtStateFuncOne(extName, fnName);
+  }
+
+  /**
+   * See FSMExecutor.registerExtStateFuncAll.
+   */
+  registerExtStateFuncAll(extName, fnNames) {
+    this.fsmExecutor.registerExtStateFuncAll(extName, fnNames);
   }
 
   /**

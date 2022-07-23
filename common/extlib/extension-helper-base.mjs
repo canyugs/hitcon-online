@@ -4,6 +4,8 @@
 import assert from 'assert';
 import VarUtils from '../../common/interactive-object/var-utils.mjs';
 
+const SF_PREFIX = 's2s_sf_';
+
 /**
  * This is the base class for ExtensionHelper.
  * It supports common functionalities shared between the InGateway and
@@ -180,7 +182,7 @@ class ExtensionHelperBase {
 
   /**
    * Return true if the given extension is running.
-   * 
+   *
    * @param {String} extName - The name of the extension.
    */
   async isExtRunning(extName) {
@@ -234,6 +236,17 @@ class ExtensionHelperBase {
       return undefined;
     }
     return p.mapCoord;
+  }
+
+  /**
+   * TODO: jsdoc
+   */
+  getListOfStateFunctions(ext) {
+    const propList = Object.getOwnPropertyNames(Object.getPrototypeOf(ext));
+    const sfNames = propList
+      .filter(prop => (typeof ext[prop] === 'function') && (prop.startsWith(SF_PREFIX)))
+      .map(prop => prop.substring((SF_PREFIX.length)));
+    return sfNames;
   }
 }
 
