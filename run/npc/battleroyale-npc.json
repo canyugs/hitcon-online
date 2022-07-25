@@ -22,20 +22,34 @@
         "s1": {
           "func": "showDialog",
           "kwargs": {
-            "dialogs": "Do you want to start a new battleroyale game ?",
+            "dialogs": "What do you want to do battleroyale game ?",
             "options": {
-              "OK!": "s2",
-              "Bye!": "s3"
+              "Start Game": "s2",
+              "Reset Game": "s3",
+              "Pause/Resume Game": "s4",
+              "Bye!": "s5"
             }
           }
         },
         "s2": {
-            "func": "startBattleRoyale",
+            "func": "startBattleroyale",
             "kwargs": {
-                "next": "s3"
+                "next": "s5"
             }
         },
         "s3": {
+            "func": "resetBattleroyale",
+            "kwargs": {
+                "next": "s5"
+            }
+        },
+        "s4": {
+            "func": "pauseBattleroyale",
+            "kwargs": {
+                "next": "s5"
+            }
+        },
+        "s5": {
             "func": "exit",
             "kwargs": {
                 "next": "s1"
