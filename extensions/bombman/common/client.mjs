@@ -29,7 +29,12 @@ class Client {
    * The initialization function.
    */
   async gameStart() {
-    this.helper.inputManager.registerKeydownOnce(this.helper.mapRenderer.getInputEventDOM(), this.placeBomb.bind(this));
+    this.helper.inputManager.registerKeydownOnce(this.helper.mapRenderer.getInputEventDOM(), async (event) => {
+      if (event.key === keyboardMapping.place) {
+        await this.placeBomb();
+      }
+    });
+    this.helper.inputManager.registerJoyStickGameButton(this.placeBomb.bind(this));
 
     this.helper.mapRenderer.registerCustomizedLayerToDraw(LAYER_OBSTACLE.zIndex, LAYER_OBSTACLE.layerName);
     this.helper.mapRenderer.registerCustomizedLayerToDraw(LAYER_BOMB.zIndex, LAYER_BOMB.layerName);
@@ -42,20 +47,17 @@ class Client {
   /**
    * Callback function of map keydown.
    * Place a bomb if key is `keyboardMapping.place`.
-   * @param {KeyboardEvent} event - the keydown event
    */
-  async placeBomb(event) {
-    if (event.key === keyboardMapping.place) {
-      if (this.cooldown) return;
-      // TODO: reduce latency using the same mechanism of player moving
-      const success = await this.helper.callC2sAPI('bombman', 'placeBomb', this.helper.defaultTimeout, this.helper.gameClient.playerInfo.mapCoord);
-      if (success) {
-        // TODO: update player cool down
-        this.cooldown = true;
-        setTimeout(()=>{
-          this.cooldown = false;
-        }, BOMB_COOLDOWN);
-      }
+  async placeBomb() {
+    if (this.cooldown) return;
+    // TODO: reduce latency using the same mechanism of player moving
+    const success = await this.helper.callC2sAPI('bombman', 'placeBomb', this.helper.defaultTimeout, this.helper.gameClient.playerInfo.mapCoord);
+    if (success) {
+      // TODO: update player cool down
+      this.cooldown = true;
+      setTimeout(() => {
+        this.cooldown = false;
+      }, BOMB_COOLDOWN);
     }
   }
 }
