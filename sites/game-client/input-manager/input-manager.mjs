@@ -5,7 +5,11 @@ const KEYSTROKE_RATE = 30; // keystroke per second
 const CANVAS_AUTO_FOCUS_MS = 200;
 
 const JOYSTICK_CONTAINER_ID = 'joystick-container';
+const JOYSTICK_CONTROL_POINT_CONTAINER_ID = 'joystick-control-point-container';
 const JOYSTICK_CONTROL_POINT_ID = 'joystick-control-point';
+const JOYSTICK_GHOST_MODE_BUTTON_ID = 'joystick-ghost-mode-button';
+const JOYSTICK_GAME_BUTTON_ID = 'joystick-game-button';
+
 const JOYSTICK_EFFECTIVE_RADIUS = 0.3;
 
 /**
@@ -30,7 +34,14 @@ class InputManager {
     this.keydownOnceCallbacks = []; // each element is a {DOMElement, callback} object
     this.keyupCallbacks = []; // each element is a {DOMElement, callback} object
     this.hasStarted = false; // if the game has started
-    this.joystick = new JoyStick(document.getElementById(JOYSTICK_CONTAINER_ID), document.getElementById(JOYSTICK_CONTROL_POINT_ID));
+    this.joystick = new JoyStick(
+        this,
+        document.getElementById(JOYSTICK_CONTAINER_ID),
+        document.getElementById(JOYSTICK_CONTROL_POINT_CONTAINER_ID),
+        document.getElementById(JOYSTICK_CONTROL_POINT_ID),
+        document.getElementById(JOYSTICK_GHOST_MODE_BUTTON_ID),
+        document.getElementById(JOYSTICK_GAME_BUTTON_ID),
+    );
 
     if (enableJoyStick !== true) {
       this.joystick.disable();
@@ -113,7 +124,7 @@ class InputManager {
       document.addEventListener('click', (event) => {
         this.focusedElement = event.target;
         for (const {DOMElement, callback} of this.clickCallbacks) {
-          if (event.target === DOMElement) {
+          if (DOMElement.contains(event.target)) {
             const rect = DOMElement.getBoundingClientRect();
             const x = event.clientX - rect.left;
             const y = event.clientY - rect.top;
@@ -125,7 +136,7 @@ class InputManager {
       // catch right click
       document.addEventListener('contextmenu', (event) => {
         for (const {DOMElement, callback} of this.rightClickCallbacks) {
-          if (event.target === DOMElement) {
+          if (DOMElement.contains(event.target)) {
             const rect = DOMElement.getBoundingClientRect();
             const x = event.clientX - rect.left;
             const y = event.clientY - rect.top;
@@ -229,6 +240,22 @@ class InputManager {
   }
 
   /**
+   * Register a callback on the ghost mode button of JoyStick.
+   * @param {Function} callback - Takes the state of the button as argument. (true|false)
+   */
+  registerJoyStickGhostModeButton(callback) {
+    this.joystick.registerGhostModeButtonCallback(callback);
+  }
+
+  /**
+   * Register a callback on the game button of JoyStick.
+   * @param {Function} callback - Takes the click event as argument.
+   */
+  registerJoyStickGameButton(callback) {
+    this.joystick.registerGameButtonCallback(callback);
+  }
+
+  /**
    * Register a callback function on keydown.
    * The callback will be triggered every tick.
    * @param {Element} DOMElement
@@ -319,29 +346,56 @@ class InputManager {
 class JoyStick {
   /**
    * @constructor
-   * @param {Element} containerDiv - The container of the joystick.
+   * @param {InputManager} inputManager - The input manager which this joystick belongs to.
+   * @param {Element} containerDiv - The outer container of the joystick.
+   * @param {Element} controlPointContainerDiv - The container of the joystick control point.
    * @param {Element} controlPointDiv - The div to display the stick of the joystick.
+   * @param {Element} ghostModeDiv - The div to switch on/off ghost mode.
+   * @param {Element} gameButtonDiv - The div used by game (usually by extensions).
    */
-  constructor(containerDiv, controlPointDiv) {
+  constructor(inputManager, containerDiv, controlPointContainerDiv, controlPointDiv, ghostModeDiv, gameButtonDiv) {
+    this.inputManager = inputManager;
     this.containerDiv = containerDiv;
+    this.controlPointContainerDiv = controlPointContainerDiv;
     this.controlPointDiv = controlPointDiv;
+    this.ghostModeDiv = ghostModeDiv;
+    this.gameButtonDiv = gameButtonDiv;
 
-    if (this.containerDiv.offsetWidth !== this.containerDiv.offsetHeight) {
-      console.warn(`Joystick container should be a square! (currently ${this.containerDiv.offsetWidth}px*${this.containerDiv.offsetHeight}px)`);
+    this.ghostModeCallback = [];
+    this.gameButtonCallback = [];
+
+    if (this.controlPointContainerDiv.offsetWidth !== this.controlPointContainerDiv.offsetHeight) {
+      console.warn(`Joystick container should be a square! (currently ${this.controlPointContainerDiv.offsetWidth}px*${this.controlPointContainerDiv.offsetHeight}px)`);
     }
 
     this._status = {x: 0, y: 0};
     this.centerTheControlPoint();
 
     if ('ontouchstart' in document.documentElement) {
-      this.containerDiv.addEventListener('touchstart', this.startMoving.bind(this));
+      this.controlPointContainerDiv.addEventListener('touchstart', this.startMoving.bind(this));
       window.addEventListener('touchmove', this.onMoving.bind(this));
       window.addEventListener('touchend', this.endMoving.bind(this));
     } else {
-      this.containerDiv.addEventListener('mousedown', this.startMoving.bind(this));
+      this.controlPointContainerDiv.addEventListener('mousedown', this.startMoving.bind(this));
       window.addEventListener('mousemove', this.onMoving.bind(this));
       window.addEventListener('mouseup', this.endMoving.bind(this));
     }
+
+    this.ghostModeStatus = false;
+    this.updateGhostModeButtonStyle();
+
+    this.inputManager.registerElementOnClick(this.ghostModeDiv, () => {
+      this.ghostModeStatus ^= true;
+      this.updateGhostModeButtonStyle();
+      for (const cb of this.ghostModeCallback) {
+        cb(this.ghostModeStatus);
+      }
+    });
+    this.inputManager.registerElementOnClick(this.gameButtonDiv, () => {
+      for (const cb of this.gameButtonCallback) {
+        cb();
+      }
+    });
   }
 
   /**
@@ -349,7 +403,26 @@ class JoyStick {
    */
   disable() {
     this.containerDiv.hidden = true;
+    this.controlPointContainerDiv.hidden = true;
     this.controlPointDiv.hidden = true;
+    this.ghostModeDiv.hidden = true;
+    this.gameButtonDiv.hidden = true;
+  }
+
+  /**
+   * Register a callback when ghost mode button is pressed.
+   * @param {Function} callback - Takes the status of ghost mode as argument.
+   */
+  registerGhostModeButtonCallback(callback) {
+    this.ghostModeCallback.push(callback);
+  }
+
+  /**
+   * Register a callback when game button is pressed.
+   * @param {Function} callback - Takes no argument.
+   */
+  registerGameButtonCallback(callback) {
+    this.gameButtonCallback.push(callback);
   }
 
   /**
@@ -360,6 +433,14 @@ class JoyStick {
     this.controlPointDiv.style.left = '50%';
     this._status.x = 0;
     this._status.y = 0;
+  }
+
+  /**
+   * Set ghost mode button's style.
+   */
+  updateGhostModeButtonStyle() {
+    // TODO: minor bug, this should be called when ghost mode is switched by keyboard
+    this.ghostModeDiv.style.border = this.ghostModeStatus ? '3px solid #c0c' : '';
   }
 
   /**
@@ -399,9 +480,9 @@ class JoyStick {
     event.preventDefault();
     event.stopPropagation();
 
-    const {x: topLeftX, y: topLeftY} = this.containerDiv.getBoundingClientRect();
-    const borderWidth = getComputedStyle(this.containerDiv).getPropertyValue('border-left-width').replace('px', '');
-    const containerSizeHalf = this.containerDiv.offsetWidth / 2;
+    const {x: topLeftX, y: topLeftY} = this.controlPointContainerDiv.getBoundingClientRect();
+    const borderWidth = getComputedStyle(this.controlPointContainerDiv).getPropertyValue('border-left-width').replace('px', '');
+    const containerSizeHalf = this.controlPointContainerDiv.offsetWidth / 2;
     const touchClientX = (event instanceof TouchEvent) ? event.targetTouches[0].clientX : event.clientX;
     const touchClientY = (event instanceof TouchEvent) ? event.targetTouches[0].clientY : event.clientY;
     const _joystickX = touchClientX - topLeftX - containerSizeHalf; // before clamping

@@ -1,8 +1,6 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
-import {} from '../input-manager.mjs';
-
 const DOM_ID = 'loading-screen-div';
 const DOM_INACTIVE = 'loading-screen--inactive';
 const MESSAGE_OFFSET = 150;

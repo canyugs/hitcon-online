@@ -141,6 +141,10 @@ class MovementManagerClient {
     this.gameState = gameState;
     this.inputManager = inputManager;
     this.mapRenderer = mapRenderer;
+    // The below attribute is different from GameClient.playerInfo.ghostMode.
+    // GameClient stores the server's status and only updates by the messages from the server.
+    // The this.ghostMode here stores the client's status and is modified on InputManager's message.
+    this.ghostMode = false;
 
     this.gameClient = null;
     window.addEventListener('dataReady', (event) => {
@@ -150,19 +154,26 @@ class MovementManagerClient {
         const dx = {'U': 0, 'D': 0, 'L': -1, 'R': 1}[direction];
         const dy = {'U': 1, 'D': -1, 'L': 0, 'R': 0}[direction];
         const {x, y} = this.gameClient.playerInfo.mapCoord;
-        this.moveTo(x + dx, y + dy, direction, inputManager.pressedKeys.has('g'));
+        this.moveTo(x + dx, y + dy, direction, this.ghostMode);
       });
 
       // ghost mode
       this.inputManager.registerKeydownOnce(mapRenderer.getInputEventDOM(), (event) => {
         if (event.key !== 'g') return;
+        this.ghostMode = true;
         const {mapCoord: {x, y}, facing} = this.gameClient.playerInfo;
-        this.moveTo(x, y, facing, true);
+        this.moveTo(x, y, facing, this.ghostMode);
       });
       this.inputManager.registerKeyup(mapRenderer.getInputEventDOM(), (event) => {
         if (event.key !== 'g') return;
+        this.ghostMode = false;
         const {mapCoord: {x, y}, facing} = this.gameClient.playerInfo;
-        this.moveTo(x, y, facing, false);
+        this.moveTo(x, y, facing, this.ghostMode);
+      });
+      this.inputManager.registerJoyStickGhostModeButton((ghostMode) => {
+        this.ghostMode = ghostMode;
+        const {mapCoord: {x, y}, facing} = this.gameClient.playerInfo;
+        this.moveTo(x, y, facing, this.ghostMode);
       });
     });
 
