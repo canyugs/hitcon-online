@@ -1,7 +1,7 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
-import {checkPlayerMove, getPlayerMoveCooldown, checkOccupationOnClient} from './move-check.mjs';
+import {checkPlayerMove, getPlayerMoveCooldown, checkOccupationOnClient, movementLogger} from './move-check.mjs';
 import {PlayerSyncMessage} from './player.mjs';
 import {MapCoord} from '../maplib/map.mjs';
 
@@ -58,14 +58,14 @@ class MovementManagerServer {
     // have race condition when multiple updateMsg come simultaneously.
     await socket.moveLock.acquire('handlePlayerMove', async () => {
       const player = socket.playerData;
-      console.debug('----------------------------');
-      console.debug(`receives player move${postponed ? ' postponed' : ''}`);
-      console.debug(player.mapCoord.toJSON());
-      console.debug(updateMsg.mapCoord.toJSON());
+      movementLogger.debug('----------------------------');
+      movementLogger.debug(`receives player move${postponed ? ' postponed' : ''}`);
+      movementLogger.debug(player.mapCoord.toJSON());
+      movementLogger.debug(updateMsg.mapCoord.toJSON());
 
       // If the update message comes too early, handle it later.
       if (getPlayerMoveCooldown(player) > 0) {
-        console.debug(`- comes too early by ${getPlayerMoveCooldown(player)} ms`);
+        movementLogger.debug(`- comes too early by ${getPlayerMoveCooldown(player)} ms`);
         setTimeout((messageCounter, gs, socket, updateMsg, failOnPlayerUpdate, postponed) => {
           this.processPlayerMoveMessage(messageCounter, gs, socket, updateMsg, failOnPlayerUpdate, postponed);
         }, Math.max(getPlayerMoveCooldown(player), 0), messageCounter, gs, socket, updateMsg, failOnPlayerUpdate, true);
@@ -76,13 +76,13 @@ class MovementManagerServer {
 
       let success = true;
       if (!checkPlayerMove(player, updateMsg, gs.gameMap)) {
-        console.debug('- error on check player move');
+        movementLogger.debug('- error on check player move');
         failOnPlayerUpdate();
         success = false;
       }
 
       if (success && !(await gs._teleportPlayerInternal(socket, updateMsg, false))) {
-        console.debug('- error on teleport internal');
+        movementLogger.debug('- error on teleport internal');
         failOnPlayerUpdate();
         success = false;
       }
@@ -118,7 +118,7 @@ class MovementManagerServer {
         }, Math.max(getPlayerMoveCooldown(player), 0), ...pending[mini]);
       }
 
-      console.debug('end');
+      movementLogger.debug('end');
     });
   }
 }
