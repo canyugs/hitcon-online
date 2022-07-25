@@ -4,6 +4,9 @@
 const PLAYER_MOVE_TIME_INTERVAL = 100; // ms
 const PLAYER_MOVE_DISTANCE_LIMIT = 1; // cell
 
+// const movementLogger = console;
+const movementLogger = {debug: () => {}};
+
 /**
  * TODO
  * @param {Player} oldPlayerData - TODO
@@ -13,11 +16,15 @@ const PLAYER_MOVE_DISTANCE_LIMIT = 1; // cell
  * @return {Boolean}
  */
 function checkPlayerMove(oldPlayerData, updateMessage, gameMap, clientSide=false) {
-  let canMove = true;
-  canMove = canMove && _speedCheck(oldPlayerData, updateMessage, clientSide);
-  if (!canMove) console.debug('- speed check failed');
-  canMove = canMove && _borderAndWallCheck(oldPlayerData, updateMessage, gameMap);
-  return canMove;
+  if (!_speedCheck(oldPlayerData, updateMessage, clientSide)) {
+    movementLogger.debug('- speed check failed');
+    return false;
+  }
+  if (!_borderAndWallCheck(oldPlayerData, updateMessage, gameMap)) {
+    movementLogger.debug('- border and wall check failed');
+    return false;
+  }
+  return true;
 }
 
 /**
@@ -120,6 +127,7 @@ function checkOccupationOnClient(coord, gameState) {
 }
 
 export {
+  movementLogger,
   checkPlayerMove,
   checkPlayerMoveOnlyBorderAndWall,
   checkPlayerMoveOnlySpeed,
