@@ -3,6 +3,7 @@
 
 import {MapCoord} from '../../common/maplib/map.mjs';
 import {LAYER_BULLET, LAYER_OBSTACLE, LAYER_FIRE, BULLET_COOLDOWN} from './common/client.mjs';
+import InteractiveObjectServerBaseClass from '../../common/interactive-object/server.mjs';
 import CellSet from '../../common/maplib/cellset.mjs';
 
 const BULLET_SPEED = 100; // ms per block (lower -> quicker)
@@ -15,6 +16,9 @@ const Facing2Direction = {
   'R': [1, 0],
   'L': [-1, 0],
 };
+
+// Bring out the FSM_ERROR for easier reference.
+const FSM_ERROR = InteractiveObjectServerBaseClass.FSM_ERROR;
 
 /**
  * This represents the bullet of battleroyale extension.
@@ -123,6 +127,8 @@ class Standalone {
     this.cooldown = new Set();
     this.fireCounter = 0;
     this.gameStart = false;
+    this.gameUpdate = false;
+    this.updateMapIntervalIDs = [];
 
     await this.helper.gameState.registerOnPlayerUpdate((msg) => {
       try {
@@ -168,7 +174,7 @@ class Standalone {
     // mapCoord has to be inside an arena
     // TODO: use the utility function in maplib if there is such function
     const inside = this.insideMap(mapCoord);
-    if (!inside) return false;
+    if (!inside || this.gameStart) return false;
 
     if (this.cooldown.has(player.playerID)) return false;
     this.cooldown.add(player.playerID);
@@ -254,9 +260,10 @@ class Standalone {
    * @param {Set} fires the fire Set
    * @param {Map} cellSets the maps
    * @param {Number} fireCounter count edge width
-   * @return {Boolean} need update or not
+   * @return {Boolean} need further update or not
    */
   updateEdge(fires, cellSets, fireCounter) {
+    if (!this.gameUpdate) return true;
     let noUpdateCounter = 0; let totalCell = 0;
     for (const {cells} of cellSets) {
       for (const {x, y, w, h} of cells) {
@@ -322,39 +329,43 @@ class Standalone {
 
   /**
    * Start the game and update edge
-   * @return {bool} successfully start or not
+   * @return {Boolean} successfully start or not
    */
   startGame() {
     if (this.gameStart) {
       return false;
     }
     const updateMap = setInterval( async () => {
-      this.fireCounter++;
-      this.fires.clear();
-      for (const mapName of this.arenaOfMaps.keys()) {
+      for (const mapName of this.arenaOfMaps.keys()) { // maybe not multi-map friendly
         const needUpdate = this.updateEdge(
             this.fires, this.arenaOfMaps.get(mapName), this.fireCounter,
         );
-        if (!needUpdate) {
-          clearInterval(updateMap);
-          return;
-        }
-        await this.helper.broadcastCellSetUpdateToAllUser(
-            'update',
-            mapName,
-            CellSet.fromObject({
-              name: LAYER_FIRE.layerName,
-              cells: Array.from(this.fires),
-            }),
-        );
-        const players = this.helper.gameState.getPlayers();
-        players.forEach((player, playerID) => {
-          if (this.helper.gameMap.getCell(player.mapCoord, LAYER_FIRE.layerName)) {
-            this.teleport(player.mapCoord, playerID);
+        if (this.gameUpdate) {
+          if (!needUpdate) {
+            clearInterval(updateMap);
+            this.gameUpdate = false;
+            return;
           }
-        });
+          await this.helper.broadcastCellSetUpdateToAllUser(
+              'update',
+              mapName,
+              CellSet.fromObject({
+                name: LAYER_FIRE.layerName,
+                cells: Array.from(this.fires),
+              }),
+          );
+          const players = this.helper.gameState.getPlayers();
+          players.forEach((player, playerID) => {
+            if (this.helper.gameMap.getCell(player.mapCoord, LAYER_FIRE.layerName)) {
+              this.teleport(player.mapCoord, playerID);
+            }
+          });
+          this.fireCounter++;
+          this.fires.clear();
+        }
       }
     }, MAP_UPDATE_PERIOD);
+    this.updateMapIntervalIDs.push(updateMap);
 
     return true;
   }
@@ -368,16 +379,21 @@ class Standalone {
    * @param {Object} kwargs - TODO
    * @return {String} - the next state
    */
-  async s2s_sf_startBattleRoyale(srcExt, playerID, kwargs, sfInfo) {
+  async s2s_sf_startBattleroyale(srcExt, playerID, kwargs, sfInfo) {
     const {next} = kwargs;
     console.log('called');
     if (this.gameStart) {
       console.log('game have already started');
       return next;
     }
-    this.startGame();
-    this.gameStart = true;
     try {
+      const success = this.startGame();
+      if (!success) {
+        console.log('Game start fail');
+        return next;
+      }
+      this.gameStart = true;
+      this.gameUpdate = true;
       return next;
     } catch (e) {
       console.error(e);
@@ -385,6 +401,84 @@ class Standalone {
     }
   }
 
+  // TODO: authority check
+
+  /**
+   * reset the game
+   * @param {*} srcExt
+   * @param {String} playerID
+   * @param {Object} kwargs
+   * @param {*} sfInfo
+   * @return {String} - the next state
+   */
+  async s2s_sf_resetBattleroyale(srcExt, playerID, kwargs, sfInfo) {
+    const {next} = kwargs;
+    try {
+      this.fires = new Set();
+      this.cooldown = new Set();
+      this.fireCounter = 0;
+      this.gameStart = false;
+      this.gameUpdate = false;
+      for (const mapName of this.arenaOfMaps.keys()) {
+        await this.helper.broadcastCellSetUpdateToAllUser(
+            'update',
+            mapName,
+            CellSet.fromObject({
+              name: LAYER_FIRE.layerName,
+              cells: Array.from(this.fires),
+            }),
+        );
+        await this.helper.broadcastCellSetUpdateToAllUser(
+            'update',
+            mapName,
+            CellSet.fromObject({
+              name: LAYER_BULLET.layerName,
+              cells: Array.from(
+                  this.bullets,
+                  ([_, v]) => v['mapCoord'],
+              ),
+            }),
+        );
+      }
+      for (const ID of this.updateMapIntervalIDs) {
+        clearInterval(ID);
+      }
+      this.updateMapIntervalIDs = [];
+
+      return next;
+    } catch (e) {
+      console.error(e);
+      return FSM_ERROR;
+    }
+  }
+
+  /**
+   * reset the game
+   * @param {*} srcExt
+   * @param {String} playerID
+   * @param {Object} kwargs
+   * @param {*} sfInfo
+   * @return {String} - the next state
+   */
+  async s2s_sf_pauseBattleroyale(srcExt, playerID, kwargs, sfInfo) {
+    const {next} = kwargs;
+    try {
+      if (!this.gameStart) {
+        console.log('The game has not started yet');
+      }
+      this.gameUpdate = !this.gameUpdate;
+      return next;
+    } catch (e) {
+      console.error(e);
+      return FSM_ERROR;
+    }
+  }
+
+  /**
+   * provide state function to npc
+   * @param {*} srcExt
+   * @param {*} registerFunc
+   */
   async s2s_provideStateFunc(srcExt, registerFunc) {
     this.helper.callS2sAPI(srcExt, registerFunc, this.helper.getListOfStateFunctions(this));
   }
