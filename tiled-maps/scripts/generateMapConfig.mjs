@@ -386,8 +386,20 @@ function loadAndConvertWorld(mapName, mapsDir, tilesetDirectory, resultLayerMap,
 
 const conversionConfig = [
   {
-    srcMapName: 'HITCON2022',
+    srcMapName: 'HITCON2022-main',
     dstMapName: 'world1',
+    cellsetsConfig: cellsetsConfig,
+    type: 'single'
+  },
+  {
+    srcMapName: 'HITCON2022-bombman',
+    dstMapName: 'world2',
+    cellsetsConfig: cellsetsConfig,
+    type: 'single'
+  },
+  {
+    srcMapName: 'HITCON2022-royale',
+    dstMapName: 'world3',
     cellsetsConfig: cellsetsConfig,
     type: 'single'
   },
