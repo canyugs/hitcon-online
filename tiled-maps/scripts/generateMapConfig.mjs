@@ -25,6 +25,8 @@ const tilesetsDir = path.join(__dirname, `${TILED_PROJECT_DIR}/tilesets`);
 const fixedsetsDir = path.join(__dirname, `${TILED_PROJECT_DIR}/fixedsets`);
 const charactersConfig = readFileFromJSON(`${fixedsetsDir}/characters.json`);
 const cellsetsConfig = readFileFromJSON(`${fixedsetsDir}/cellsets.json`);
+const bombmanCellsetsConfig = readFileFromJSON(`${fixedsetsDir}/bombmanCellsets.json`);
+const royaleCellsetsConfig = readFileFromJSON(`${fixedsetsDir}/royaleCellsets.json`);
 
 const mapsConfigPath = path.join(__dirname, `${ONLINE_MAP_CONFIG_DIR}/map.json`);
 const assetsConfigPath = path.join(__dirname, `${ONLINE_MAP_CONFIG_DIR}/assets.json`);
@@ -394,13 +396,13 @@ const conversionConfig = [
   {
     srcMapName: 'HITCON2022-bombman',
     dstMapName: 'world2',
-    cellsetsConfig: cellsetsConfig,
+    cellsetsConfig: bombmanCellsetsConfig,
     type: 'single'
   },
   {
     srcMapName: 'HITCON2022-royale',
     dstMapName: 'world3',
-    cellsetsConfig: cellsetsConfig,
+    cellsetsConfig: royaleCellsetsConfig,
     type: 'single'
   },
 ];
