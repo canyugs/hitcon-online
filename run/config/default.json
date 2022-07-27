@@ -63,7 +63,8 @@
     "socketioPath": ""
   },
   "escape-game": {
-    "autoFinalize": true
+    "autoFinalize": true,
+    "certificateC2sToken": "1_4m_c3271f1c473_m45732"
   },
   "publicAddress": null,
   "allowedOrigins": []
