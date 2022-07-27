@@ -25,9 +25,20 @@
             "dialogs": "Hello!\nNice to meet you!",
             "options": {
               "Magic!": "s2",
+              "I've an OTP!": "o1",
               "Bye!": "s4"
             }
           }
+        },
+        "o1": {
+            "func": "showDialogAndCheckTOTP",
+            "kwargs": {
+              "dialog": "Give me your key!",
+              "nextState": "s3",
+              "nextStateIncorrect" : "s4",
+              "secret": "TEST",
+              "otpWindow": 2
+            }
         },
         "s2": {
             "func": "showDialogAndCheckKey",
