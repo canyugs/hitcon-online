@@ -391,6 +391,13 @@ class Standalone {
   }
 
   /**
+   * The secret function to give a "certificate" item to the player
+   */
+   async c2s_getCertificateItem(player) {
+    return await this.helper.callS2sAPI('items', 'AddItem', player.playerID, 'certificate', 1, 1);
+  }
+
+  /**
    * Make sure the player is in a finalized team. If not, create
    * a team and finalize it immediately.
    * This function will not notify any other teammates as it assumes all
