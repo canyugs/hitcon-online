@@ -3,10 +3,15 @@
 
 import assert from 'assert';
 import fs from 'fs';
-
 import {randomShuffle, randomChoice} from '../../common/utility/random-tool.mjs';
 import InteractiveObjectServerBaseClass from '../../common/interactive-object/server.mjs';
 import {getRunPath, getConfigPath} from '../../common/path-util/path.mjs';
+
+// Boilerplate for getting require() in es module.
+import {createRequire} from 'module';
+const require = createRequire(import.meta.url);
+
+const otplib = require('otplib');
 
 // Bring out the FSM_ERROR for easier reference.
 const FSM_ERROR = InteractiveObjectServerBaseClass.FSM_ERROR;
@@ -82,6 +87,27 @@ class Standalone {
     const res = await this.helper.callS2cAPI(playerID, 'dialog',
     'showDialogWithPrompt', 60*1000, sfInfo.visibleName, dialog);
     if (res.msg === key) return nextState;
+
+    //The key is wrong,
+    return nextStateIncorrect;
+  }
+
+  /**
+   * Show an open-ended dialog and check if the entered value is
+   * correct, interpreting the entered values as an totp.
+   */
+  async s2s_sf_showDialogAndCheckTOTP(srcExt, playerID, kwargs, sfInfo) {
+    const {nextState, nextStateIncorrect, dialog, secret, otpWindow} = kwargs;
+    const res = await this.helper.callS2cAPI(playerID, 'dialog',
+    'showDialogWithPrompt', 60*1000, sfInfo.visibleName, dialog);
+
+    if (typeof otpWindow === 'undefined') {
+      // Defaults to 60 seconds of leniency.
+      otplib.totp.options = {window: 2};
+    } else {
+      otplib.totp.options = {window: otpWindow};
+    }
+    if (otplib.totp.check(res.msg, secret)) return nextState;
 
     //The key is wrong,
     return nextStateIncorrect;
