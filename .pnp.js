@@ -368,6 +368,60 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD",
         }]
       ]],
+      ["@otplib/core", [
+        ["npm:12.0.1", {
+          "packageLocation": "./.yarn/cache/@otplib-core-npm-12.0.1-4b9787d379-c4a6f3f0c5.zip/node_modules/@otplib/core/",
+          "packageDependencies": [
+            ["@otplib/core", "npm:12.0.1"]
+          ],
+          "linkType": "HARD",
+        }]
+      ]],
+      ["@otplib/plugin-crypto", [
+        ["npm:12.0.1", {
+          "packageLocation": "./.yarn/cache/@otplib-plugin-crypto-npm-12.0.1-d0dc5d1d98-e319991527.zip/node_modules/@otplib/plugin-crypto/",
+          "packageDependencies": [
+            ["@otplib/plugin-crypto", "npm:12.0.1"],
+            ["@otplib/core", "npm:12.0.1"]
+          ],
+          "linkType": "HARD",
+        }]
+      ]],
+      ["@otplib/plugin-thirty-two", [
+        ["npm:12.0.1", {
+          "packageLocation": "./.yarn/cache/@otplib-plugin-thirty-two-npm-12.0.1-b85109b20e-52f6d5208b.zip/node_modules/@otplib/plugin-thirty-two/",
+          "packageDependencies": [
+            ["@otplib/plugin-thirty-two", "npm:12.0.1"],
+            ["@otplib/core", "npm:12.0.1"],
+            ["thirty-two", "npm:1.0.2"]
+          ],
+          "linkType": "HARD",
+        }]
+      ]],
+      ["@otplib/preset-default", [
+        ["npm:12.0.1", {
+          "packageLocation": "./.yarn/cache/@otplib-preset-default-npm-12.0.1-77f04f54c4-8b702af09b.zip/node_modules/@otplib/preset-default/",
+          "packageDependencies": [
+            ["@otplib/preset-default", "npm:12.0.1"],
+            ["@otplib/core", "npm:12.0.1"],
+            ["@otplib/plugin-crypto", "npm:12.0.1"],
+            ["@otplib/plugin-thirty-two", "npm:12.0.1"]
+          ],
+          "linkType": "HARD",
+        }]
+      ]],
+      ["@otplib/preset-v11", [
+        ["npm:12.0.1", {
+          "packageLocation": "./.yarn/cache/@otplib-preset-v11-npm-12.0.1-df44c202c1-2dac0d8df2.zip/node_modules/@otplib/preset-v11/",
+          "packageDependencies": [
+            ["@otplib/preset-v11", "npm:12.0.1"],
+            ["@otplib/core", "npm:12.0.1"],
+            ["@otplib/plugin-crypto", "npm:12.0.1"],
+            ["@otplib/plugin-thirty-two", "npm:12.0.1"]
+          ],
+          "linkType": "HARD",
+        }]
+      ]],
       ["@protobufjs/aspromise", [
         ["npm:1.1.2", {
           "packageLocation": "./.yarn/cache/@protobufjs-aspromise-npm-1.1.2-71d00b938f-83ced0798a.zip/node_modules/@protobufjs/aspromise/",
@@ -2796,7 +2850,8 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         ["workspace:extensions/iobj-lib", {
           "packageLocation": "./extensions/iobj-lib/",
           "packageDependencies": [
-            ["hitcon-online-iobj-lib", "workspace:extensions/iobj-lib"]
+            ["hitcon-online-iobj-lib", "workspace:extensions/iobj-lib"],
+            ["otplib", "npm:12.0.1"]
           ],
           "linkType": "SOFT",
         }]
@@ -3977,6 +4032,18 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD",
         }]
       ]],
+      ["otplib", [
+        ["npm:12.0.1", {
+          "packageLocation": "./.yarn/cache/otplib-npm-12.0.1-77263e8084-afb790659a.zip/node_modules/otplib/",
+          "packageDependencies": [
+            ["otplib", "npm:12.0.1"],
+            ["@otplib/core", "npm:12.0.1"],
+            ["@otplib/preset-default", "npm:12.0.1"],
+            ["@otplib/preset-v11", "npm:12.0.1"]
+          ],
+          "linkType": "HARD",
+        }]
+      ]],
       ["p-limit", [
         ["npm:2.3.0", {
           "packageLocation": "./.yarn/cache/p-limit-npm-2.3.0-94a0310039-5f20492a25.zip/node_modules/p-limit/",
@@ -5073,6 +5140,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/text-table-npm-0.2.0-d92a778b59-373904ce70.zip/node_modules/text-table/",
           "packageDependencies": [
             ["text-table", "npm:0.2.0"]
+          ],
+          "linkType": "HARD",
+        }]
+      ]],
+      ["thirty-two", [
+        ["npm:1.0.2", {
+          "packageLocation": "./.yarn/cache/thirty-two-npm-1.0.2-9d9270aa34-81c46a540b.zip/node_modules/thirty-two/",
+          "packageDependencies": [
+            ["thirty-two", "npm:1.0.2"]
           ],
           "linkType": "HARD",
         }]
