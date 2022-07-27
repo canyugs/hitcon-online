@@ -387,6 +387,13 @@ class Standalone {
   }
 
   /**
+   * The secret function to give a "certificate" item to the player
+   */
+  async c2s_getCertificateItem(player) {
+    return await this.helper.callS2sAPI('items', 'AddItem', player.playerID, 'certificate', 1, 1);
+  }
+
+  /**
    * Check if the player is in a finalized team and therefore can access the game.
    */
   async s2s_sf_checkIsInFinalizedTeam(srcExt, playerID, kwargs, sfInfo) {
