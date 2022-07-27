@@ -394,12 +394,13 @@ class Standalone {
    * The secret function to give a "certificate" item to the player
    */
    async c2s_getCertificateItem(player, token) {
-    if (config.has('escape-game.certificateC2sToken') &&
-      config.get('escape-game.certificateC2sToken') == token) {
+    if (!config.has('escape-game.certificateC2sToken')) {
+      return "Server error. Please contact devs."
+    } else if (config.get('escape-game.certificateC2sToken') === token) {
         return await this.helper.callS2sAPI('items', 'AddItem', player.playerID, 'certificate', 1, 1);
-      } else {
-        return {'ok': false, 'amount': 1};
-      }
+    } else {
+      return "Incorrect token!";
+    }
   }
 
   /**
