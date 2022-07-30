@@ -113,12 +113,15 @@ function _borderAndWallCheck(oldPlayerData, updateMessage, gameMap) {
 /**
  * This check is used only on client side.
  * Check if the target position contains other players.
- * @param {MapCoord} coord
+ * @param {Player} player - The player who wants to move.
+ * @param {MapCoord} coord - The target position.
  * @param {GameState} gameState
- * @return {Boolean}
+ * @return {Boolean} - Whether we can move to the target position.
  */
-function checkOccupationOnClient(coord, gameState) {
+function checkOccupationOnClient(player, coord, gameState) {
   for (const op of gameState.getPlayers().values()) {
+    if (player.playerID === op.playerID) continue;
+    if (op.ghostMode) continue;
     if (coord.equalsTo(op.mapCoord)) {
       return false;
     }
