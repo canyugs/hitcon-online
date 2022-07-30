@@ -33,10 +33,12 @@ class GatewayService {
    * @param {Directory} dir - The RPCDirectory for calling other services.
    * @param {GameMap} gameMap - The world map for this game.
    * @param {AuthServer} authServer - Auth server for verifying the token.
+   * @param {AllAreaBroadcaster} broadcaster
    * @param {io} io - Socket.io object.
    * @param {ExtensionManager} extMan - Extension Manager object.
    * @param {MovementManagerServer} movementManager - Handles PlayerSyncMessage.
    * and player locations.
+   * @param {Express.Express} app
    */
   constructor(dir, gameMap, authServer, broadcaster, io, extMan, movementManager, app) {
     this.dir = dir;
@@ -139,10 +141,10 @@ class GatewayService {
         const timeoutTimer = setTimeout(() => {
           resolve({error: 'timeout'});
         }, timeout);
-        let callArgs = {
+        const callArgs = {
           extName: extName,
           methodName: methodName,
-          args: args
+          args: args,
         };
         this.socks[playerID].emit('callS2cAPI', callArgs, (result) => {
           clearTimeout(timeoutTimer);
@@ -193,7 +195,7 @@ class GatewayService {
           socket.emit('unauthorized', {data: 'Token is not string'});
           return;
         }
-        let verified = this.authServer.verifyToken(msg.token);
+        const verified = this.authServer.verifyToken(msg.token);
         if (verified === null) {
           socket.emit('unauthorized', {data: 'Token verification failed'});
           return;
@@ -221,7 +223,7 @@ class GatewayService {
     const playerService = await this.dir.getPlayerGatewayService(playerID);
     if (typeof playerService === 'string') {
       return await this.rpcHandler.callRPC(playerService, 'kickPlayer',
-        playerID, reason);
+          playerID, reason);
     }
     console.warn('Failed to kick player, no service: ', playerID);
     return false;
@@ -232,7 +234,7 @@ class GatewayService {
    */
   async kickPlayer(playerID, reason) {
     if (typeof playerID !== 'string' || !(playerID in this.socks)) {
-      console.error("Can't kick player: ", playerID);
+      console.error('Can\'t kick player: ', playerID);
       return false;
     }
     return await this.notifyKicked(this.socks[playerID], reason);
@@ -247,7 +249,7 @@ class GatewayService {
     socket.emit('kicked', reason);
     await new Promise((r) => setTimeout(r, 5000));
     socket.disconnect();
-  };
+  }
 
   /**
    * Accept an authorized user's socket.
@@ -285,7 +287,7 @@ class GatewayService {
         // Try kick player.
         await this.kickRemotePlayer(playerID);
         // Try again in 0.5s.
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise((resolve) => setTimeout(resolve, 500));
         ret = await this.rpcHandler.registerPlayer(playerID);
         if (!ret) {
           await this.notifyKicked(socket, 'Duplicate connection');
@@ -499,26 +501,34 @@ class GatewayService {
    */
   async _teleportPlayerInternal(socket, msg, allowOverlap=false) {
     const res = await socket.moveLock.acquire('move', async () => {
+      const player = socket.playerData;
+
       // If the player doesn't move at all, just return true.
-      if (socket.playerData.mapCoord.equalsTo(msg.mapCoord) && socket.playerData.ghostMode === msg.ghostMode) {
+      if (player.mapCoord.equalsTo(msg.mapCoord) && player.ghostMode === msg.ghostMode) {
         return true;
       }
 
-      const ret = await this._enterCoord(msg.mapCoord);
+      // If the player wants his/her next status is in ghost mode, ignore occupation check and no need to enterCoord().
+      if (msg.ghostMode) {
+        // empty
+      } else {
+        // Teleport the player to the target position anyhow.
+        const ret = await this._enterCoord(msg.mapCoord);
 
-      // If the player was in ghost mode, ignore the occupation check.
-      if (!(socket.playerData.ghostMode || allowOverlap)) {
-        // If the player moves in normal mode, check the occupation.
-        if (!msg.ghostMode && !ret) {
+        // If overlap is not allowed, check if the moving is legal.
+        if (!allowOverlap && !ret) {
           await this._leaveCoord(msg.mapCoord);
           return false;
         }
       }
 
-      // Leave the previous location.
-      await this._leaveCoord(socket.playerData.mapCoord);
+      // If the previous status is in ghost mode, no need to leave coord.
+      // Otherwise, release the previous coordination.
+      if (!player.ghostMode) {
+        await this._leaveCoord(socket.playerData.mapCoord);
+      }
 
-      // Everything seems well, update everyone on our new location.
+      // Everything seems well. Broadcast new location.
       await this._broadcastPlayerUpdate(msg);
       return true;
     });
