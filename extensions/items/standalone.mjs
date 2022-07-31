@@ -754,6 +754,23 @@ class Standalone {
   }
 
   /**
+   * Return the number of given items owned by the player.
+   * @param String playerID - ID of the player.
+   * @param {Array.<string>} items - The list of items to query.
+   * @return Object result - result.amounts is an object mapping from item
+   *   name to the amounts.
+   */
+  async s2s_CountMultiItems(srcExtName, playerID, items) {
+    const result = {}
+    result.amounts = {};
+    for (const itm of items) {
+      result.amounts[itm] = this._countItem(playerID, itm);
+    }
+    result.ok = true;
+    return result;
+  }
+
+  /**
    * Return the item infos for all items.
    */
   async s2s_GetItemInfos(srcExtName) {
@@ -947,6 +964,42 @@ class Standalone {
       return kwargs.haveItem;
     } else {
       return kwargs.noItem;
+    }
+  }
+
+  /**
+   * Count the total number of items in the given list of items, that is
+   * owned by the player.
+   * @param {Object} kwargs - kwargs.items is an array of string
+   *     representing the items.
+   *   kwargs.haveItems specifies the state to go to if the player have the
+   *     amount of specified items.
+   *   kwargs.noItems specifies the state to go to if the player doesn't have
+   *     the amount of specified items.
+   *   kwargs.amount is the minimum total count to go to "haveItems" state.
+   * @return {String} nextState - The next state.
+   */
+  async s2s_sf_haveMultiItems(srcExt, playerID, kwargs, sfInfo) {
+    let amount = kwargs.amount;
+    let items = kwargs.items;
+
+    if (!Number.isInteger(amount)) amount = 1;
+
+    const result = await this.helper.callS2sAPI('items', 'CountMultiItems', playerID, items);
+    if (typeof result.error !== 'undefined') {
+      // Extension not running?
+      console.error('items.CountMultiItems() failed, maybe items ext is not running?');
+      return FSM_ERROR;
+    }
+
+    let total = 0;
+    for (const itm in result.amounts) {
+      total += result.amounts[itm];
+    }
+    if (total >= amount) {
+      return kwargs.haveItems;
+    } else {
+      return kwargs.noItems;
     }
   }
 

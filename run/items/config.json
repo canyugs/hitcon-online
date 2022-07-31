@@ -51,6 +51,27 @@
             "desc": "Fuzzer for software",
             "imagePath": "./items/ticket/ticket.jpg",
             "fsm": true
+        },
+        "round1Medal":
+        {
+            "baseClass": "token",
+            "visibleName": "Medal for passing round 1",
+            "desc": "Congrats, you passed round 1",
+            "imagePath":  "./items/ticket/ticket.jpg"
+        },
+        "round2Medal":
+        {
+            "baseClass": "token",
+            "visibleName": "Medal for passing round 2",
+            "desc": "Congrats, you passed round 2",
+            "imagePath":  "./items/ticket/ticket.jpg"
+        },
+        "round3Medal":
+        {
+            "baseClass": "token",
+            "visibleName": "Medal for passing round 3",
+            "desc": "Congrats, you passed round 3",
+            "imagePath":  "./items/ticket/ticket.jpg"
         }
     }
 }
