@@ -31,22 +31,22 @@
           }
         },
         "s2": {
-            "func": "startBombman",
-            "kwargs": {
-                "next": "s4"
-            }
+          "func": "startBombman",
+          "kwargs": {
+            "next": "s4"
+          }
         },
         "s3": {
-            "func": "resetBombman",
-            "kwargs": {
-                "next": "s4"
-            }
+          "func": "resetBombman",
+          "kwargs": {
+            "next": "s4"
+          }
         },
         "s4": {
-            "func": "exit",
-            "kwargs": {
-                "next": "s1"
-            }
+          "func": "exit",
+          "kwargs": {
+            "next": "s1"
+          }
         }
       }
     }
