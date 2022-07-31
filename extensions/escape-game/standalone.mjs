@@ -100,6 +100,8 @@ class Standalone {
 
     // Redeem code
     this.distributedCodes = {};
+
+    this.doorOpenPressedCount = 0;
   }
 
   /**
@@ -147,7 +149,11 @@ class Standalone {
   }
 
   async e2s_openDoor(duration) {
-    this.doorOpenPressedCount = (this.doorOpenPressedCount === undefined) ? 1 : this.doorOpenPressedCount + 1;
+    if (typeof duration !== "number") {
+      return false;
+    }
+
+    ++this.doorOpenPressedCount;
     await this.helper.broadcastCellSetUpdateToAllUser(
       'update',
       "world1",
@@ -158,7 +164,6 @@ class Standalone {
     );
     setTimeout(async function(obj) {
       if (--obj.doorOpenPressedCount == 0) {        
-        console.log("door closed");
         await obj.helper.broadcastCellSetUpdateToAllUser(
           'update',
           "world1",
