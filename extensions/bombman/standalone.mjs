@@ -250,7 +250,7 @@ class Standalone {
    * @param {*} sfInfo
    * @return {String} - the next state
    */
-   async s2s_sf_startBombman(srcExt, playerID, kwargs, sfInfo) {
+  async s2s_sf_startBombman(srcExt, playerID, kwargs, sfInfo) {
     const {next} = kwargs;
     if (this.gameStart) {
       console.log('game have already started');
@@ -268,35 +268,35 @@ class Standalone {
    * @param {*} sfInfo
    * @return {String} - the next state
    */
-   async s2s_sf_resetBombman(srcExt, playerID, kwargs, sfInfo) {
+  async s2s_sf_resetBombman(srcExt, playerID, kwargs, sfInfo) {
     const {next} = kwargs;
     if (!this.gameStart) {
       console.log('The game has not started yet');
       return next;
     }
-    try{
+    try {
       this.gameStart = false;
       this.bombCells = new Map();
       this.explodeCells = new Map();
-      
+
       // clean bomb
       for (const mapName of this.arenaOfMaps.keys()) {
         await this.helper.broadcastCellSetUpdateToAllUser(
-          'update', // operation type
-          mapName,
-          CellSet.fromObject({
-            name: LAYER_BOMB.layerName,
-            cells: Array.from(this.bombCells.values()),
-          }),
+            'update', // operation type
+            mapName,
+            CellSet.fromObject({
+              name: LAYER_BOMB.layerName,
+              cells: Array.from(this.bombCells.values()),
+            }),
         );
         // clean explosion
         await this.helper.broadcastCellSetUpdateToAllUser(
-          'update', // operation type
-          mapName,
-          CellSet.fromObject({
-            name: LAYER_BOMB_EXPLODE.layerName,
-            cells: Array.from(this.explodeCells.values()),
-          }),
+            'update', // operation type
+            mapName,
+            CellSet.fromObject({
+              name: LAYER_BOMB_EXPLODE.layerName,
+              cells: Array.from(this.explodeCells.values()),
+            }),
         );
       }
     } catch (e) {
@@ -312,7 +312,7 @@ class Standalone {
    * @param {*} srcExt
    * @param {*} registerFunc
    */
-   async s2s_provideStateFunc(srcExt, registerFunc) {
+  async s2s_provideStateFunc(srcExt, registerFunc) {
     this.helper.callS2sAPI(srcExt, registerFunc, this.helper.getListOfStateFunctions(this));
   }
 }
