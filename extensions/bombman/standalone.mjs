@@ -142,8 +142,6 @@ class Standalone {
     // TODO: use the utility function in maplib if there is such function
     const inside = this.insideMap(mapCoord);
     if (!inside || !this.gameStarted) return false;
-    // ghost mode no attack
-    // if (this.helper.gameState.getPlayer(player.playerID).ghostMode) return false;
 
     // TODO: check if the player can set a bomb or not
     if (this.cooldown.has(player.playerID)) return false;
