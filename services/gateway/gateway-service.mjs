@@ -360,8 +360,8 @@ class GatewayService {
         return;
       }
 
-      // Occupy the player's current location so the player enters the game.
-      await this._enterCoord(firstLocation.mapCoord);
+      // Occupy the player's current location .
+      if (!firstLocation.ghostMode) await this._enterCoord(firstLocation.mapCoord);
       await this._broadcastPlayerUpdate(firstLocation);
 
       // Note that it is required that we do not have any away between
@@ -438,7 +438,7 @@ class GatewayService {
         // and is still waiting for avatar select.
         if (socket.stage === ConnectionStages.RUNNING) {
           // release grid after disconnection
-          await this._leaveCoord(socket.playerData.mapCoord);
+          if (!socket.playerData.ghostMode) await this._leaveCoord(socket.playerData.mapCoord);
         }
 
         // Try to unregister the player.
@@ -570,6 +570,7 @@ class GatewayService {
   }
 
   /**
+   * Warning: A player in ghost mode SHOULD NOT occupy any coordinate!
    * Move a player into the target map coordinate.
    * Return true if the map coordinate was not occupied by any player.
    * @param {MapCoord} mapCoord
@@ -581,6 +582,7 @@ class GatewayService {
   }
 
   /**
+   * Warning: A player in ghost mode SHOULD NOT call this function when moving!
    * Clear a player's occupation record of the mapCoord.
    * @param {MapCoord} mapCoord
    */
