@@ -141,10 +141,12 @@ class Standalone {
     // mapCoord has to be inside an arena
     // TODO: use the utility function in maplib if there is such function
     const inside = this.insideMap(mapCoord);
-    if (!inside || !this.gameStart) return;
+    if (!inside || !this.gameStart) return false;
+    // ghost mode no attack
+    if (this.helper.gameState.getPlayer(player.playerID).ghostMode) return false;
 
     // TODO: check if the player can set a bomb or not
-    if (this.cooldown.has(player.playerID)) return;
+    if (this.cooldown.has(player.playerID)) return false;
     this.cooldown.add(player.playerID);
     setTimeout(()=>{
       this.cooldown.delete(player.playerID);
