@@ -29,8 +29,97 @@
             "I want a face mask": "f1",
             "I don't want my face mask": "t1",
             "I want a fuzzer": "u1",
+            "I've gone through all the rounds": "a1",
+            "I want to go through the rounds": "r1",
             "Bye~": "d"
           }
+        }
+      },
+      "a1": {
+        "func": "haveMultiItems",
+        "kwargs": {
+          "items": ["round1Medal", "round2Medal", "round3Medal"],
+          "haveItems": "a2",
+          "noItems": "a3",
+          "amount": 2
+        }
+      },
+      "a2": {
+        "func": "showDialog",
+        "kwargs": {
+          "dialogs": "We found enough items.",
+          "options": {
+            "Done": "d"
+          }
+        }
+      },
+      "a3": {
+        "func": "showDialog",
+        "kwargs": {
+          "dialogs": "You don't have the items.",
+          "options": {
+            "Done": "d"
+          }
+        }
+      },
+      "r1": {
+        "func": "showDialog",
+        "kwargs": {
+          "dialogs": "Which round do you want to finish?",
+          "options": {
+            "Round 1": "r2",
+            "Round 2": "r3",
+            "Round 3": "r4",
+            "Remove All": "r5"
+          }
+        }
+      },
+      "r2": {
+        "func": "giveItem", "kwargs": {
+          "amount": 1,
+          "maxAmount": 1,
+          "itemName": "round1Medal",
+          "nextState": "d"
+        }
+      },
+      "r3": {
+        "func": "giveItem", "kwargs": {
+          "amount": 1,
+          "maxAmount": 1,
+          "itemName": "round2Medal",
+          "nextState": "d"
+        }
+      },
+      "r4": {
+        "func": "giveItem", "kwargs": {
+          "amount": 1,
+          "maxAmount": 1,
+          "itemName": "round3Medal",
+          "nextState": "d"
+        }
+      },
+      "r5": {
+        "func": "takeItem", "kwargs": {
+          "amount": 1,
+          "itemName": "round1Medal",
+          "haveItem": "r6",
+          "noItem": "r6"
+        }
+      },
+      "r6": {
+        "func": "takeItem", "kwargs": {
+          "amount": 1,
+          "itemName": "round2Medal",
+          "haveItem": "r7",
+          "noItem": "r7"
+        }
+      },
+      "r7": {
+        "func": "takeItem", "kwargs": {
+          "amount": 1,
+          "itemName": "round3Medal",
+          "haveItem": "d",
+          "noItem": "d"
         }
       },
       "j1": {
