@@ -41,7 +41,7 @@ class Standalone {
     // set dynamic cell set: bombmanHasBomb
     this.bombCells = new Map(); // key: a unique bomb ID; value: the cell
     this.bombID = 0;
-    this.gameStart = false;
+    this.gameStarted = false;
     this.explodeCells = new Map();
 
     for (const mapName of this.arenaOfMaps.keys()) {
@@ -141,7 +141,7 @@ class Standalone {
     // mapCoord has to be inside an arena
     // TODO: use the utility function in maplib if there is such function
     const inside = this.insideMap(mapCoord);
-    if (!inside || !this.gameStart) return false;
+    if (!inside || !this.gameStarted) return false;
     // ghost mode no attack
     if (this.helper.gameState.getPlayer(player.playerID).ghostMode) return false;
 
@@ -254,11 +254,11 @@ class Standalone {
    */
   async s2s_sf_startBombman(srcExt, playerID, kwargs, sfInfo) {
     const {next} = kwargs;
-    if (this.gameStart) {
-      console.log('game have already started');
+    if (this.gameStarted) {
+      console.log('[bombman] The game has already started');
       return next;
     }
-    this.gameStart = true;
+    this.gameStarted = true;
     return next;
   }
 
@@ -272,12 +272,12 @@ class Standalone {
    */
   async s2s_sf_resetBombman(srcExt, playerID, kwargs, sfInfo) {
     const {next} = kwargs;
-    if (!this.gameStart) {
-      console.log('The game has not started yet');
+    if (!this.gameStarted) {
+      console.log('[bombman] The game has not started yet');
       return next;
     }
     try {
-      this.gameStart = false;
+      this.gameStarted = false;
       this.bombCells = new Map();
       this.explodeCells = new Map();
 
