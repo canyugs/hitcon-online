@@ -12,4 +12,7 @@ parserOptions:
   sourceType: module
 plugins:
   - '@typescript-eslint'
-rules: {}
+rules: {
+  max-len: ["warn", { "code": 100 }],
+  "@typescript-eslint/explicit-module-boundary-types": "off"
+}
