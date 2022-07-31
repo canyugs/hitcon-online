@@ -22,7 +22,7 @@
         "s1": {
           "func": "showDialog",
           "kwargs": {
-            "dialogs": "What do you want to do battleroyale game ?",
+            "dialogs": "What do you want to do with battleroyale game ?",
             "options": {
               "Start Game": "s2",
               "Reset Game": "s3",
