@@ -53,6 +53,9 @@
       "openBridgeChannel": "websocket"
     }
   },
+  "escape-game": {
+    "doorPosition": {"x": 9, "y": 12, "h": 1, "w": 1}
+  },
   "terminal": {
     "internalAddress": "localhost",
     "grpcPort": 5051,

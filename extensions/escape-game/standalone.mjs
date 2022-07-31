@@ -115,7 +115,7 @@ class Standalone {
           ['showTerminal', 'checkIsInFinalizedTeam', 'forceFinalizeTeam'],
       );
     });
-    this.doorCells = [{'x': 9, 'y': 12, 'h': 1, 'w': 1}];
+    this.doorCells = [config.get('escape-game.doorPosition')];
     const mapName = "world1";
     await this.helper.broadcastCellSetUpdateToAllUser(
       'set',
@@ -148,8 +148,8 @@ class Standalone {
     };
   }
 
-  async e2s_openDoor() {
-    var res = await this.helper.varUtils.writeVar("@doorLastOpen", null, null, Date.now().toString());
+  async e2s_openDoor(duration) {
+    this.doorOpenPressedCount = (this.doorOpenPressedCount === undefined) ? 1 : this.doorOpenPressedCount + 1;
     await this.helper.broadcastCellSetUpdateToAllUser(
       'update',
       "world1",
@@ -159,9 +159,8 @@ class Standalone {
       }),
     );
     setTimeout(async function(obj) {
-      var lastOpen = await obj.helper.varUtils.readVar("@doorLastOpen", null, null);
-      lastOpen = parseInt(lastOpen);
-      if (lastOpen + 3000 <= Date.now()) {        
+      if (--obj.doorOpenPressedCount == 0) {        
+        console.log("door closed");
         await obj.helper.broadcastCellSetUpdateToAllUser(
           'update',
           "world1",
@@ -171,8 +170,8 @@ class Standalone {
           }),
         );  
       }
-    }, 3000, this);
-    return res;
+    }, duration, this);
+    return true;
   }
 
   /**
