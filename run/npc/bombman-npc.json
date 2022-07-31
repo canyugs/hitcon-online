@@ -1,0 +1,53 @@
+{
+    "enabled": true,
+    "initialPosition": {"mapName": "world1", "x": 1, "y": 1},
+    "display": [
+      {
+        "zIndex": 11,
+        "layerName": "npcImage",
+        "renderFunction": "_drawOneCharacterImage",
+        "renderArgs": null,
+        "character": "char1"
+      },
+      {
+        "zIndex": 16,
+        "layerName": "npcName",
+        "renderFunction": "_drawOneCharacterName",
+        "renderArgs": null
+      }
+    ],
+    "FSM": {
+      "initialState": "s1",
+      "states": {
+        "s1": {
+          "func": "showDialog",
+          "kwargs": {
+            "dialogs": "What do you want to do with bombman game ?",
+            "options": {
+              "Start Game": "s2",
+              "Reset Game": "s3",
+              "Bye!": "s4"
+            }
+          }
+        },
+        "s2": {
+            "func": "startBombman",
+            "kwargs": {
+                "next": "s4"
+            }
+        },
+        "s3": {
+            "func": "resetBombman",
+            "kwargs": {
+                "next": "s4"
+            }
+        },
+        "s4": {
+            "func": "exit",
+            "kwargs": {
+                "next": "s1"
+            }
+        }
+      }
+    }
+  }

@@ -41,6 +41,7 @@ class Standalone {
     // set dynamic cell set: bombmanHasBomb
     this.bombCells = new Map(); // key: a unique bomb ID; value: the cell
     this.bombID = 0;
+    this.gameStart = false;
     this.explodeCells = new Map();
 
     for (const mapName of this.arenaOfMaps.keys()) {
@@ -140,7 +141,7 @@ class Standalone {
     // mapCoord has to be inside an arena
     // TODO: use the utility function in maplib if there is such function
     const inside = this.insideMap(mapCoord);
-    if (!inside) return;
+    if (!inside || !this.gameStart) return;
 
     // TODO: check if the player can set a bomb or not
     if (this.cooldown.has(player.playerID)) return;
@@ -239,6 +240,80 @@ class Standalone {
       this.helper.teleport(msg.playerID, target, true);
     }
     return;
+  }
+
+  /**
+   * start the game
+   * @param {*} srcExt
+   * @param {String} playerID
+   * @param {Object} kwargs
+   * @param {*} sfInfo
+   * @return {String} - the next state
+   */
+   async s2s_sf_startBombman(srcExt, playerID, kwargs, sfInfo) {
+    const {next} = kwargs;
+    if (this.gameStart) {
+      console.log('game have already started');
+      return next;
+    }
+    this.gameStart = true;
+    return next;
+  }
+
+  /**
+   * reset the game
+   * @param {*} srcExt
+   * @param {String} playerID
+   * @param {Object} kwargs
+   * @param {*} sfInfo
+   * @return {String} - the next state
+   */
+   async s2s_sf_resetBombman(srcExt, playerID, kwargs, sfInfo) {
+    const {next} = kwargs;
+    if (!this.gameStart) {
+      console.log('The game has not started yet');
+      return next;
+    }
+    try{
+      this.gameStart = false;
+      this.bombCells = new Map();
+      this.explodeCells = new Map();
+      
+      // clean bomb
+      for (const mapName of this.arenaOfMaps.keys()) {
+        await this.helper.broadcastCellSetUpdateToAllUser(
+          'update', // operation type
+          mapName,
+          CellSet.fromObject({
+            name: LAYER_BOMB.layerName,
+            cells: Array.from(this.bombCells.values()),
+          }),
+        );
+        // clean explosion
+        await this.helper.broadcastCellSetUpdateToAllUser(
+          'update', // operation type
+          mapName,
+          CellSet.fromObject({
+            name: LAYER_BOMB_EXPLODE.layerName,
+            cells: Array.from(this.explodeCells.values()),
+          }),
+        );
+      }
+    } catch (e) {
+      console.error(e);
+      return FSM_ERROR;
+    }
+    return next;
+  }
+
+
+  /**
+   * provide state function to npc
+   * @param {*} srcExt
+   * @param {*} registerFunc
+   */
+   async s2s_provideStateFunc(srcExt, registerFunc) {
+    this.helper.callS2sAPI(srcExt, registerFunc, this.helper.getListOfStateFunctions(this));
   }
 }
 
