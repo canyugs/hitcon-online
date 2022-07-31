@@ -174,7 +174,7 @@ class Standalone {
     // mapCoord has to be inside an arena
     // TODO: use the utility function in maplib if there is such function
     const inside = this.insideMap(mapCoord);
-    if (!inside || this.gameStart) return false;
+    if (!inside || !this.gameUpdate) return false;
 
     if (this.cooldown.has(player.playerID)) return false;
     this.cooldown.add(player.playerID);
@@ -381,7 +381,6 @@ class Standalone {
    */
   async s2s_sf_startBattleroyale(srcExt, playerID, kwargs, sfInfo) {
     const {next} = kwargs;
-    console.log('called');
     if (this.gameStart) {
       console.log('game have already started');
       return next;
