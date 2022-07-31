@@ -11,6 +11,7 @@ const path = require('path');
 const jwt = require('jsonwebtoken');
 const config = require('config');
 const QRCode = require('qrcode');
+const AsyncLock = require('async-lock');
 
 import fs from 'fs';
 import {promisify} from 'util';
@@ -117,7 +118,12 @@ class Standalone {
           ['showTerminal', 'checkIsInFinalizedTeam', 'forceFinalizeTeam'],
       );
     });
-    this.doorCells = [config.get('escape-game.doorPosition')];
+    if (config.has('escape-game.doorPosition')) {
+      this.doorCells = [config.get('escape-game.doorPosition')];
+    } else {
+      console.warn('No escape-game.doorPosition defined');
+      this.doorCells = []
+    }
     const mapName = "world1";
     await this.helper.broadcastCellSetUpdateToAllUser(
       'set',
@@ -334,7 +340,7 @@ class Standalone {
    * @returns
    */
   async getAccessToken(playerID, terminalName) {
-    return this.playerToTeam.get(playerID).getAccessToken(terminalName);
+    return await this.playerToTeam.get(playerID).getAccessToken(terminalName);
   }
 
   /**
@@ -893,6 +899,7 @@ class Team {
     this.isFinalized = false;
     this.terminals = new Map(); // Mapping the terminal id to the container id in the terminal server.
     this.givenItems = new Map();
+    this.containerLocks = new AsyncLock();
 
     this.defaultTerminals = defaultTerminals;
   }
@@ -954,21 +961,23 @@ class Team {
    * Start all containers
    */
   async startContainers() {
-    for (const defaultTerminal of this.defaultTerminals) {
-      try {
-        let ret = await promisify(this.terminalServerGrpcService.CreateContainer.bind(this.terminalServerGrpcService))({
-          imageName: defaultTerminal.imageName
-        }, {deadline: new Date(Date.now() + 20000)});
+    return await this.containerLocks.acquire('containers', async () => {
+      for (const defaultTerminal of this.defaultTerminals) {
+        try {
+          let ret = await promisify(this.terminalServerGrpcService.CreateContainer.bind(this.terminalServerGrpcService))({
+            imageName: defaultTerminal.imageName
+          }, {deadline: new Date(Date.now() + 20000)});
 
-        if (!ret.success) {
-          console.error(`Fail to start container with image ${defaultTerminal.imageName}.`);
-          return false;
+          if (!ret.success) {
+            console.error(`Fail to start container with image ${defaultTerminal.imageName}.`);
+            return false;
+          }
+          this.terminals.set(defaultTerminal.terminalId, ret.containerId);
+        } catch (e) {
+          console.error('Failed to start container: ', e);
         }
-        this.terminals.set(defaultTerminal.terminalId, ret.containerId);
-      } catch (e) {
-        console.error('Failed to start container: ', e);
       }
-    }
+    });
   }
 
   /**
@@ -997,17 +1006,19 @@ class Team {
    * Get JWT for the terminal server.
    * @param {string} terminalId The identifier of the terminal.
    */
-  getAccessToken(terminalId) {
-    if (!this.isFinalized) {
-      throw new Error(`Can't access terminal ${terminalId} if the team is not finalized.`);
-    }
-    if (!this.terminals.has(terminalId)) {
-      throw new Error(`Terminal ${terminalId} doesn't exist.`);
-    }
-    return jwt.sign({
-      containerId: this.terminals.get(terminalId)
-    }, 'secret', {expiresIn: 10});
-   }
+  async getAccessToken(terminalId) {
+    return await this.containerLocks.acquire('containers', async () => {
+      if (!this.isFinalized) {
+        throw new Error(`Can't access terminal ${terminalId} if the team is not finalized.`);
+      }
+      if (!this.terminals.has(terminalId)) {
+        throw new Error(`Terminal ${terminalId} doesn't exist.`);
+      }
+      return jwt.sign({
+        containerId: this.terminals.get(terminalId)
+      }, 'secret', {expiresIn: 10});
+    });
+  }
 }
 
 /**
