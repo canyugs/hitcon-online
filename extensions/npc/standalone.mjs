@@ -44,6 +44,7 @@ class Standalone {
     await this.helper.callS2sAPI('iobj-lib', 'provideStateFunc', 'registerStateFuncToNPCs');
     await this.helper.callS2sAPI('items', 'provideStateFunc', 'registerStateFuncToNPCs');
     await this.helper.callS2sAPI('escape-game', 'provideStateFunc', 'registerStateFuncToNPCs');
+    await this.helper.callS2sAPI('bombman', 'provideStateFunc', 'registerStateFuncToNPCs');
   }
 
   /**
