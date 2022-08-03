@@ -980,10 +980,8 @@ class Standalone {
    * @return {String} nextState - The next state.
    */
   async s2s_sf_haveMultiItems(srcExt, playerID, kwargs, sfInfo) {
-    let amount = kwargs.amount;
-    let items = kwargs.items;
-
-    if (!Number.isInteger(amount)) amount = 1;
+    const amount = Number.isInteger(kwargs.amount) ? kwargs.amount : 1;
+    const {items, haveItems, noItems} = kwargs;
 
     const result = await this.helper.callS2sAPI('items', 'CountMultiItems', playerID, items);
     if (typeof result.error !== 'undefined') {
@@ -996,11 +994,7 @@ class Standalone {
     for (const itm in result.amounts) {
       total += result.amounts[itm];
     }
-    if (total >= amount) {
-      return kwargs.haveItems;
-    } else {
-      return kwargs.noItems;
-    }
+    return (total >= amount) ? haveItems : noItems;
   }
 
   /**
