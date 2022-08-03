@@ -16,8 +16,11 @@ class AvatarSelectionPage {
    * @param {Socket} socket
    * @param {GraphicAsset} graphicAsset
    */
-  constructor(socket, graphicAsset) {
-    this.socket = socket;
+  constructor(graphicAsset) {
+    this.onSelectAvatar = null;
+    this.onSelectAvatarSet = new Promise((resolve) => {
+      this.onSelectAvatarSetResolve = resolve;
+    });
     this.graphicAsset = graphicAsset;
     this.DOM = document.getElementById(DOM_ID);
     this.selectedAvatar = [null, null]; // [displayChar, DOMElement]
@@ -26,6 +29,15 @@ class AvatarSelectionPage {
     this.DOM.querySelector('button[name="submit"]').addEventListener('click', this.submit.bind(this));
 
     this.renderAvatars();
+  }
+
+  /**
+   * Set the onSelectAvatar.
+   */
+  setOnSelectAvatar(callback) {
+    console.assert(this.onSelectAvatar === null, 'Duplicate call to setOnSelectAvatar');
+    this.onSelectAvatar = callback;
+    this.onSelectAvatarSetResolve(true);
   }
 
   /**
@@ -90,8 +102,9 @@ class AvatarSelectionPage {
   /**
    * Send the selection to gateway server.
    */
-  _submit(displayName, displayChar) {
-    this.socket.emit('avatarSelect', {displayName, displayChar});
+  async _submit(displayName, displayChar) {
+    await this.onSelectAvatarSet;
+    this.onSelectAvatar(displayName, displayChar);
   }
 
   /**

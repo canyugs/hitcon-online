@@ -135,7 +135,7 @@ absolute URL.
           game.mapRenderer.disableRenderForTesting();
         }
 
-        game.avatarSelectionPage = new AvatarSelectionPage(game.socket, game.graphicAsset);
+        game.avatarSelectionPage = new AvatarSelectionPage(game.graphicAsset);
         game.inputManager = new InputManager(game.mapRenderer, true);
         game.movementManager = new MovementManagerClient(game.socket, game.gameState, game.inputManager, game.mapRenderer);
         game.gameClient = new GameClient(game.socket, game.map, game.gameState, game.mapRenderer, game.inputManager, game.movementManager, game.extMan, game.mainUI, game.avatarSelectionPage, game.loadingScreenPage);

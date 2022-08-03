@@ -33,6 +33,13 @@ class ClientExtensionManager {
   }
 
   /**
+   * Wait for all extensions to be loaded.
+   */
+  async waitForAllExtLoaded() {
+    await this.allLoadedPromise;
+  }
+
+  /**
    * Initialize the ClientExtensionManager.
    * @param {GameMap} gameMap - The GameMap object.
    * @param {GameState} gameState - The GameState object.
@@ -100,6 +107,8 @@ class ClientExtensionManager {
    */
   async startAllExtensionClient() {
     // Can't start before everything is loaded.
+    // Note: This should be a no-op because waitForAllExtLoaded() should've
+    // been called by GameClient during avatarSelect, before this is called.
     await this.allLoadedPromise;
 
     let p = [];

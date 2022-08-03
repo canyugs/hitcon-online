@@ -690,6 +690,7 @@ class MapRenderer {
    * would be called to get the information for drawing.
    */
   _drawOneCharacterImage(targetCanvas, player) {
+    console.log(player);
     const {mapCoord, displayChar, facing, ghostMode, opacity} = player.getDrawInfo();
 
     // If we're not on the same map, we don't need to draw it.

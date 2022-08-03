@@ -28,7 +28,11 @@ class GameClient {
     this.movementManager = movementManager;
     this.extMan = extMan;
     this.mainUI = mainUI;
+    this.avatarSelectEmitted = false;
     this.avatarSelectionPage = avatarSelectionPage;
+    this.avatarSelectionPage.setOnSelectAvatar((displayName, displayChar) => {
+      this.onSelectAvatar(displayName, displayChar);
+    });
     this.loadingScreenPage = loadingScreenPage;
     this.gameStarted = false;
     // playerInfo stores information regarding the current player.
@@ -179,6 +183,22 @@ class GameClient {
       return undefined;
     }
     return this.playerInfo.playerID;
+  }
+
+  async onSelectAvatar(displayName, displayChar) {
+    // We need to wait for extensions to fully load before we send
+    // avatarSelect, otherwise, when gameStart event comes, some
+    // extensions might not be fully loaded, and
+    // this.extMan.startAllExtensionClient() will await at allLoadedPromise,
+    // causing race conditions, as in, some socket.io message could reach
+    // extensions before startAllExtensionClient() finishes.
+    await this.extMan.waitForAllExtLoaded();
+    if (this.avatarSelectEmitted === true) {
+      console.warn('Duplicate call to GameClient.onSelectAvatar()');
+    } else {
+      this.avatarSelectEmitted = true;
+      this.socket.emit('avatarSelect', {displayName, displayChar});
+    }
   }
 }
 
