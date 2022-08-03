@@ -317,6 +317,10 @@ class MapRenderer {
    * @param {any} renderArgs - Optional. The optional argument if renderFunction requires one.
    */
   registerCustomizedLayerToDraw(zIndex, layerName, renderFunction, renderArgs) {
+    console.assert(renderFunction !== '_drawOneCharacterImage' ||
+                     renderArgs !== null,
+                   'No render args for _drawOneCharacterImage',
+                   [zIndex, layerName, renderFunction, renderArgs]);
     // TODO: use binary search and Array.prototype.splice() to improve performance
     this.customizedLayers.push([zIndex, layerName, renderFunction, renderArgs]);
     this.customizedLayers.sort((a, b) => a[0] - b[0]);
