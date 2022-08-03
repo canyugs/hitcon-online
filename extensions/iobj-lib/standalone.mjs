@@ -99,7 +99,7 @@ class Standalone {
   async s2s_sf_showDialogAndCheckTOTP(srcExt, playerID, kwargs, sfInfo) {
     const {nextState, nextStateIncorrect, dialog, secret, otpWindow} = kwargs;
     const res = await this.helper.callS2cAPI(playerID, 'dialog',
-    'showDialogWithPrompt', 60*1000, sfInfo.visibleName, dialog);
+        'showDialogWithPrompt', 60*1000, sfInfo.visibleName, dialog);
 
     if (typeof otpWindow === 'undefined') {
       // Defaults to 60 seconds of leniency.
