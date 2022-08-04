@@ -37,7 +37,7 @@ class TerminalModal extends Modal {
   onPostShow() {
     // Set the size.
     this.setSize('80%', '25%');
-    this.setPosition('10%', '55%');
+    this.setPosition('10%', '7%');
     this.customOnPostShow();
     return true;
   }

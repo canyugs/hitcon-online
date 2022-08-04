@@ -1,14 +1,20 @@
 <style>
-#terminal-container {
-    height: auto;
-}
+    #terminal-container {
+        height: auto;
+    }
 </style>
-
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@4.13.0/css/xterm.css" />
 <script src="https://cdn.jsdelivr.net/npm/xterm@4.13.0/lib/xterm.min.js"></script>
 
 <div id="terminal-container" class="dialog">
-    <div id="terminal-btn-container">
-        <button id="terminal-close-btn">Close</button>
+    <div class="dialog-left">
+        <h3 class="dialog-subject"></h3>
     </div>
-    <div id="terminal"></div>
+    <div class="dialog-right">
+        <h3 class="dialog-subject" id="dialog-subject">Here is a Termianl!</h3>
+        <div id="terminal"></div>
+        <div id="terminal-btn-container">
+            <button id="terminal-close-btn">Close</button>
+        </div>
+    </div>
 </div>
