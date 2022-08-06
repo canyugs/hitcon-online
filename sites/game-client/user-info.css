@@ -27,7 +27,11 @@
 }
 
 [data-clienttype=mobile] .user {
-  width: 100vw;
+  background: #575757;
+  display: flex;
+  width: 100%;
+  width: -webkit-fill-available;
+  justify-content: space-between;
 }
 
 .user-profile {
@@ -44,6 +48,11 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+[data-clienttype=mobile] .user-name {
+  font-size: 1.2em;
+  color: white;
 }
 
 .user-points {
@@ -79,6 +88,11 @@
   border-style: none;
 }
 
+[data-clienttype=mobile] .user-action {
+  background: #777777 0% 0% no-repeat padding-box;
+  padding: 10px;
+}
+
 .user-action:active {
   box-shadow: none;
 }
@@ -87,4 +101,9 @@
   width: 28px;
   height: 28px;
   display:block;
+}
+
+[data-clienttype=mobile] .user-action > img {
+  width: 20px;
+  height: 20px;
 }

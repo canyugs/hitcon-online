@@ -12,8 +12,24 @@
   border-radius: 40px;
 }
 
+[data-clienttype=mobile] #item-modal {
+  border-radius: 17px;
+  padding: 10px;
+  background: #6A6A6A;
+}
+
 .item-inv-text {
   font-size: 2em;
+}
+
+[data-clienttype=mobile] .item-inv-text {
+  display: flex;
+  justify-content: space-bewteen;
+  align-items: center;
+  color: #FFFFFF;
+  font-size: 1.5em;
+  font-weight: bolder;
+  margin-left: 0.5em
 }
 
 #item-modal-close-btn {
@@ -26,6 +42,13 @@
   font-weight: bold;
 }
 
+[data-clienttype=mobile] #item-modal-close-btn {
+  font-size: 1.5em;
+  position: unset;
+  right: unset;
+  color: #FFFFFF
+}
+
 #item-modal-close-btn:hover {
   color: #000000;
 }
@@ -36,12 +59,24 @@
   margin: 1.5em 0;
 }
 
+[data-clienttype=mobile] .item-modal-divider {
+  display: none;
+}
+
 .item-container {
   overflow-y: scroll;
   display: flex;
   flex-direction: column;
   flex-grow: 10;
   /* margin: 2.5%; */
+}
+
+[data-clienttype=mobile] .item-container {
+  overflow-y: scroll;
+  display: flex;
+  flex-direction: column;
+  background: #A7A7A7;
+  border-radius: 17px;
 }
 
 .item-container::-webkit-scrollbar {
@@ -59,6 +94,19 @@
   background-color: #AEC1F7;
 }
 
+[data-clienttype=mobile] .item-container::-webkit-scrollbar {
+  border-radius: 5px;
+  background-color: #454545;
+}
+[data-clienttype=mobile] .item-container::-webkit-scrollbar-thumb {
+  border-radius: 5px;
+  background-color: #454545;
+}
+[data-clienttype=mobile] .item-container::-webkit-scrollbar-track {
+  border-radius: 5px;
+  background-color: #454545;
+}
+
 .item-divider {
   border: 1px solid #707070;
   margin: 0 1em;
@@ -74,6 +122,21 @@
   box-shadow: 0px 3px 8px #1E378972;
   border-radius: 16px;
 }
+
+
+[data-clienttype=mobile] .item-obj {
+  display: flex;
+  flex-direction: row;
+  margin: 1em;
+  padding: 0;
+  border-bottom: 1px solid;
+  padding-bottom: 1em;
+  box-shadow: unset;
+  background: unset;
+  border-radius: unset;
+}
+
+
 
 .item-icon {
   display: flex;
@@ -123,6 +186,13 @@
 
 .item-block--usable .item-use-button {
   display: inline-block;
+}
+
+[data-clienttype=mobile] .item-use-button {
+  color: #262626;
+  background: #E8E8E8;
+  border-radius: 15px;
+  font-size: 1em;
 }
 
 </style>
