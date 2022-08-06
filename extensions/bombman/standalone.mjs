@@ -87,6 +87,7 @@ class Standalone {
     this.cooldown = new Set(); // TODO: Cooldown Manager
 
     this.participatePlayerIDs = new Set(); // store playerID
+    this.playerOldPosition = new Map(); // [string, mapCoord] store player's position before tp to game
 
     const initTime = new Date();
     const startTime = new Date(Math.floor((+initTime + START_GAME_INTERVAL - 1) / START_GAME_INTERVAL) * START_GAME_INTERVAL);
@@ -110,12 +111,14 @@ class Standalone {
     }
     if (this.participatePlayerIDs.size < 3) {
       for (const playerID of this.participatePlayerIDs) {
-        await this.callS2cAPI(playerID, 'notification', 'showNotification', 3000, '[bombman] player not enough to start (< 3)');
+        await this.helper.callS2cAPI(playerID, 'notification', 'showNotification', 3000, '[bombman] player not enough to start (less than 3)');
       }
       return false;
     }
     for (const playerID of this.participatePlayerIDs) {
-      await this.callS2cAPI(playerID, 'notification', 'showNotification', 3000, '[bombman] Game Start!');
+      const playerloc = await this.helper.getPlayerLocation(playerID);
+      this.playerOldPosition.set(playerID, playerloc);
+      await this.helper.callS2cAPI(playerID, 'notification', 'showNotification', 3000, '[bombman] Game Start!');
       await this.teleportPlayer(playerID);
     }
     this.gameStarted = true;
@@ -230,7 +233,7 @@ class Standalone {
       players.forEach((player, playerID) => {
         for (const cell of explodeCell) {
           if (player.mapCoord.x == cell.x && player.mapCoord.y == cell.y) {
-            this.killPlayer(playerID);
+            await this.killPlayer(playerID);
             break;
           }
         }
@@ -257,7 +260,7 @@ class Standalone {
    * called when player update
    * detect touch explosion
    * @param {Object} msg // player move message
-   * @return {} // no return
+   * @return {undefined} // no return
    */
   async onPlayerUpdate(msg) {
     const {mapCoord, playerID} = msg;
@@ -272,7 +275,7 @@ class Standalone {
     }
     const explodeCell = this.helper.gameMap.getCell(mapCoord, LAYER_BOMB_EXPLODE.layerName);
     if (explodeCell) { // if walk into bomb => teleport to somewhere
-      this.killPlayer(playerID);
+      await this.killPlayer(playerID);
     }
     return;
   }
@@ -288,7 +291,7 @@ class Standalone {
   async s2s_sf_joinBombman(srcExt, playerID, kwargs, sfInfo) {
     const {next} = kwargs;
     this.participatePlayerIDs.add(playerID);
-    await this.callS2cAPI(playerID, 'notification', 'showNotification', 3000, '[bombman] Join game successfully!');
+    await this.helper.callS2cAPI(playerID, 'notification', 'showNotification', 3000, '[bombman] Join game successfully!');
     return next;
   }
 
@@ -324,11 +327,19 @@ class Standalone {
    * @param {Boolean} endGame kill player and terminate ... ?
    */
   async killPlayer(playerID, endGame = false) {
-    const player = this.helper.gameState.getPlayer(playerID);
-    const target = player.mapCoord.copy();
-    target.x = 1;
-    target.y = 1;
-    this.helper.teleport(playerID, target, true);
+    let target;
+    if (this.playerOldPosition.has(playerID)) {
+      target = this.playerOldPosition.get(playerID);
+      this.playerOldPosition.delete(playerID);
+    } else { // default
+      const player = this.helper.gameState.getPlayer(playerID);
+      target = player.mapCoord.copy();
+      target.x = 10;
+      target.y = 5;
+      this.playerOldPosition.get(playerID);
+    }
+
+    await this.helper.teleport(playerID, target, true);
     this.participatePlayerIDs.delete(playerID);
     if (this.participatePlayerIDs.size <= 1 && !endGame) {
       await this.terminateGame();
@@ -343,7 +354,7 @@ class Standalone {
     const target = player.mapCoord.copy();
     target.x = 10;
     target.y = 5;
-    await this.helper.teleport(player.playerID, target, true);
+    await this.helper.teleport(playerID, target, true);
   }
 
   /**
@@ -351,15 +362,16 @@ class Standalone {
    */
   async terminateGame() {
     for (const playerID of this.participatePlayerIDs) {
-      console.log(playerID, 'Win');
+      await this.helper.callS2cAPI(playerID, 'notification', 'showNotification', 3000, '[bombman] You Win!');
       // TODO: give item
       // this.helper.callS2sAPI('item', 'giveItem', playerID, 'bombman_trophy', 1);
     }
-    await this.resetGame();
 
     for (const playerID of this.participatePlayerIDs) {
-      this.killPlayer(playerID, true);
+      await this.killPlayer(playerID, true);
     }
+
+    await this.resetGame();
   }
 
   /**
@@ -370,6 +382,7 @@ class Standalone {
     this.bombCells = new Map();
     this.explodeCells = new Map();
     this.participatePlayerIDs = new Set();
+    this.playerOldPosition = new Map();
 
     // clean bomb
     for (const mapName of this.arenaOfMaps.keys()) {
