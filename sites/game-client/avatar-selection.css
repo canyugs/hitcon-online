@@ -12,6 +12,48 @@
   background-size: contain;
 }
 
+[data-clienttype=mobile] #avatar-selection-div {
+  display: flex;
+  flex-direction: column;
+}
+
+[data-clienttype=mobile] .avatar-name-edit {
+  display: flex;
+  flex-direction: column;
+  width: 70vw;
+}
+
+[data-clienttype=mobile] .welcome-title {
+  color: #FFFFFF;
+  font-size: 1.2em;
+  text-align: center;
+}
+
+[data-clienttype=mobile] .avatar-name-input {
+  text-align: end;
+  font-size: 1.2em;
+  margin: 2em 0 2em 0;
+  background: none;
+  color: white;
+  outline: 0;
+  border-width: 0 0 3px;
+}
+
+[data-clienttype=mobile] .avatar-name-input:focus {
+  border-color: #7393BE;
+}
+
+[data-clienttype=mobile] .avatar-name-input::placeholder {
+  color: #52578D;
+}
+
+[data-clienttype=mobile] .avatar-name-rules {
+  color: #D0D0D0;
+  font-size: 0.9em;
+  text-align: center;
+  line-height: 2em;
+}
+
 @media(min-width: 1920px) {
   #avatar-selection-div {
     background-image: url('./avatar-bg-2x.png');

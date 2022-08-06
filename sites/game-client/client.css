@@ -276,6 +276,10 @@ body {
   z-index: 100;
 }
 
+[data-clienttype=mobile] .modal-background.visible {
+  opacity: 0%;
+}
+
 .modal-container {
   position: absolute;
   z-index: 0;
@@ -286,8 +290,9 @@ body {
 }
 
 [data-clienttype=mobile] .modal-container {
-  width: 80%;
-  left: 10%;
+  /* should not use important */
+  width: 85vw !important;
+  left: 5vw !important;
 }
 
 .modal-container.visible {
