@@ -532,6 +532,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"alarm@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "alarm@npm:2.0.0"
+  checksum: 5de3d731097ad92bad2cd35597d44195160ad583a33d4d65aaf9ee7556fb71b1b1950bc9e47e95ed8c20b8c9c04d8250a8cc8ebf68736ff35f902dc66cc3f971
+  languageName: node
+  linkType: hard
+
 "ansi-colors@npm:^4.1.1":
   version: 4.1.1
   resolution: "ansi-colors@npm:4.1.1"
@@ -2068,6 +2075,8 @@ __metadata:
 "hitcon-online-bombman@workspace:extensions/bombman":
   version: 0.0.0-use.local
   resolution: "hitcon-online-bombman@workspace:extensions/bombman"
+  dependencies:
+    alarm: ^2.0.0
   languageName: unknown
   linkType: soft
 

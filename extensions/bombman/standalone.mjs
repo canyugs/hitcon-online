@@ -3,10 +3,19 @@
 
 import CellSet from '../../common/maplib/cellset.mjs';
 import {LAYER_BOMB, BOMB_COOLDOWN, LAYER_BOMB_EXPLODE} from './common/client.mjs';
+import InteractiveObjectServerBaseClass from '../../common/interactive-object/server.mjs';
 import {MapCoord} from '../../common/maplib/map.mjs';
+import {createRequire} from 'module';
+const require = createRequire(import.meta.url);
+const alarm = require('alarm');
 
 const BOMB_COUNTDOWN = 3000; // millisecond
 const BOMB_EXPLODE_TIME = 500; // millisecond
+const START_GAME_INTERVAL = 3600_000; // millisecond
+
+// Bring out the FSM_ERROR for easier reference.
+const FSM_ERROR = InteractiveObjectServerBaseClass.FSM_ERROR;
+
 
 const BOMB_EXPLODE_RANGE = [
   {dx: 0, dy: 0, w: 1, h: 1},
@@ -80,6 +89,46 @@ class Standalone {
 
     // set cooldown
     this.cooldown = new Set(); // TODO: Cooldown Manager
+
+    this.playerIDs = new Set(); // store playerID
+
+    const initTime = new Date();
+    const startTime = new Date(Math.floor((+initTime + START_GAME_INTERVAL - 1) / START_GAME_INTERVAL) * START_GAME_INTERVAL);
+    alarm(startTime, this.setGameInterval.bind(this));
+  }
+
+  /**
+   * @param {Object} player The player object
+   */
+  joinGame(player) {
+    this.playerIDs.add(player.playerID);
+  }
+
+  /**
+   * Game internal
+   */
+  setGameInterval() {
+    alarm.recurring(START_GAME_INTERVAL, this.startGame.bind(this));
+  }
+
+  /**
+   * start Game
+   * @return {Boolean} success or not
+   */
+  async startGame() {
+    // TODO:start Game
+    if (this.gameStarted) {
+      await this.resetGame();
+    }
+    if (this.playerIDs.size < 2) {
+      console.log('[bombman] player not enough to start (< 3)');
+      return false;
+    }
+    for (const playerID of this.playerIDs) {
+      this.teleportPlayer(playerID);
+    }
+    this.gameStarted = true;
+    return true;
   }
 
   /**
@@ -93,7 +142,7 @@ class Standalone {
         const width = cell.w ?? 1;
         const height = cell.h ?? 1;
         if (cell.x <= cellCoord.x && cellCoord.x < cell.x + width &&
-            cell.y <= cellCoord.y && cellCoord.y < cell.y + height) {
+          cell.y <= cellCoord.y && cellCoord.y < cell.y + height) {
           return true;
         }
       }
@@ -136,6 +185,7 @@ class Standalone {
    * @return {Boolean} success or not
    */
   async c2s_placeBomb(player, mapCoord) {
+    if (!this.playerIDs.has(player.playerID)) return;
     mapCoord = MapCoord.fromObject(mapCoord);
 
     // mapCoord has to be inside an arena
@@ -146,7 +196,7 @@ class Standalone {
     // TODO: check if the player can set a bomb or not
     if (this.cooldown.has(player.playerID)) return false;
     this.cooldown.add(player.playerID);
-    setTimeout(()=>{
+    setTimeout(() => {
       this.cooldown.delete(player.playerID);
     }, BOMB_COOLDOWN);
     const bombID = this.bombID++;
@@ -189,17 +239,14 @@ class Standalone {
       players.forEach((player, playerID) => {
         for (const cell of explodeCell) {
           if (player.mapCoord.x == cell.x && player.mapCoord.y == cell.y) {
-            const target = player.mapCoord.copy();
-            target.x = 1;
-            target.y = 1;
-            this.helper.teleport(playerID, target, true);
+            this.killPlayer(playerID);
             break;
           }
         }
       });
 
       // clean explosion
-      setTimeout(async (bombID)=>{
+      setTimeout(async (bombID) => {
         this.explodeCells.delete(bombID);
         await this.helper.broadcastCellSetUpdateToAllUser(
             'update',
@@ -234,10 +281,7 @@ class Standalone {
     }
     const explodeCell = this.helper.gameMap.getCell(mapCoord, LAYER_BOMB_EXPLODE.layerName);
     if (explodeCell) { // if walk into bomb => teleport to somewhere
-      const target = mapCoord.copy();
-      target.x = 1;
-      target.y = 1;
-      this.helper.teleport(msg.playerID, target, true);
+      this.killPlayer(playerID);
     }
     return;
   }
@@ -250,13 +294,9 @@ class Standalone {
    * @param {*} sfInfo
    * @return {String} - the next state
    */
-  async s2s_sf_startBombman(srcExt, playerID, kwargs, sfInfo) {
+  async s2s_sf_joinBombman(srcExt, playerID, kwargs, sfInfo) {
     const {next} = kwargs;
-    if (this.gameStarted) {
-      console.log('[bombman] The game has already started');
-      return next;
-    }
-    this.gameStarted = true;
+    this.playerIDs.add(playerID);
     return next;
   }
 
@@ -268,40 +308,10 @@ class Standalone {
    * @param {*} sfInfo
    * @return {String} - the next state
    */
-  async s2s_sf_resetBombman(srcExt, playerID, kwargs, sfInfo) {
+  async s2s_sf_quitBombman(srcExt, playerID, kwargs, sfInfo) {
     const {next} = kwargs;
-    if (!this.gameStarted) {
-      console.log('[bombman] The game has not started yet');
-      return next;
-    }
-    try {
-      this.gameStarted = false;
-      this.bombCells = new Map();
-      this.explodeCells = new Map();
-
-      // clean bomb
-      for (const mapName of this.arenaOfMaps.keys()) {
-        await this.helper.broadcastCellSetUpdateToAllUser(
-            'update', // operation type
-            mapName,
-            CellSet.fromObject({
-              name: LAYER_BOMB.layerName,
-              cells: Array.from(this.bombCells.values()),
-            }),
-        );
-        // clean explosion
-        await this.helper.broadcastCellSetUpdateToAllUser(
-            'update', // operation type
-            mapName,
-            CellSet.fromObject({
-              name: LAYER_BOMB_EXPLODE.layerName,
-              cells: Array.from(this.explodeCells.values()),
-            }),
-        );
-      }
-    } catch (e) {
-      console.error(e);
-      return FSM_ERROR;
+    if (this.playerIDs.has(playerID)) {
+      this.playerIDs.delete(playerID);
     }
     return next;
   }
@@ -314,6 +324,74 @@ class Standalone {
    */
   async s2s_provideStateFunc(srcExt, registerFunc) {
     this.helper.callS2sAPI(srcExt, registerFunc, this.helper.getListOfStateFunctions(this));
+  }
+
+  /**
+   * kill player and tp
+   * @param {String} playerID
+   */
+  async killPlayer(playerID, endGame = false) {
+    const player = this.helper.gameState.getPlayer(playerID);
+    const target = player.mapCoord.copy();
+    target.x = 1;
+    target.y = 1;
+    this.helper.teleport(playerID, target, true);
+    this.playerIDs.delete(playerID);
+    if (this.playerIDs.size <= 1 && !endGame) {
+      await this.terminateGame();
+    }
+  }
+
+  /**
+   * @param {String} playerID playerID
+   */
+  teleportPlayer(playerID) {
+    const player = this.helper.gameState.getPlayer(playerID);
+    const target = player.mapCoord.copy();
+    target.x = 10;
+    target.y = 5;
+    this.helper.teleport(player.playerID, target, true);
+  }
+
+  async terminateGame() {
+    for (const playerID of this.playerIDs) {
+      console.log(playerID, 'Win');
+      // TODO: give item
+      // this.helper.callS2sAPI('item', 'giveItem', playerID, 'bombman_trophy', 1);
+    }
+    await this.resetGame();
+
+    for (const playerID of this.playerIDs) {
+      this.killPlayer(playerID, true);
+    }
+  }
+
+  async resetGame() {
+    this.gameStarted = false;
+    this.bombCells = new Map();
+    this.explodeCells = new Map();
+    this.playerIDs = new Set();
+
+    // clean bomb
+    for (const mapName of this.arenaOfMaps.keys()) {
+      await this.helper.broadcastCellSetUpdateToAllUser(
+          'update', // operation type
+          mapName,
+          CellSet.fromObject({
+            name: LAYER_BOMB.layerName,
+            cells: Array.from(this.bombCells.values()),
+          }),
+      );
+      // clean explosion
+      await this.helper.broadcastCellSetUpdateToAllUser(
+          'update', // operation type
+          mapName,
+          CellSet.fromObject({
+            name: LAYER_BOMB_EXPLODE.layerName,
+            cells: Array.from(this.explodeCells.values()),
+          }),
+      );
+    }
   }
 }
 
