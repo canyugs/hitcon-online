@@ -205,7 +205,7 @@ class TerminalServer {
           this._destroyContainer(containerId);
         }
       }
-    }, 3000, this);
+    }, config.get('secondChanceReaperInterval'), this);
   }
 }
 

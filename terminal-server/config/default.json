@@ -1,4 +1,5 @@
 {
     "serverPort": 5050,
-    "secret": "secret"
+    "secret": "secret",
+    "secondChanceReaperInterval": 300000
 }
