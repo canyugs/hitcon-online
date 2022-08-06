@@ -325,14 +325,27 @@ class GatewayService {
       socket.playerData.lastMovingTime = Date.now();
       socket.playerData.ghostMode = false;
 
-      // notify the client to start the game after his/her avatar is selected
-      socket.on('avatarSelect', async (msg) => {
+      // notify the client to start the game after
+      // 1) his/her avatar is selected
+      // 2) his/her extensions are all loaded
+      (async () => {
+        let avatarSelectMsg = undefined;
+        const pAvatarSelect = new Promise((resolve) => {
+          socket.on('avatarSelect', async (msg) => {
+            avatarSelectMsg = msg;
+            resolve();
+          });
+        });
+        const pClientExtensionLoaded = new Promise((resolve) => {
+          socket.on('clientExtensionLoaded', resolve);
+        });
+        await Promise.all([pAvatarSelect, pClientExtensionLoaded]);
         try {
-          await this._onAvatarSelect(socket, msg);
+          await this._onAvatarSelect(socket, avatarSelectMsg);
         } catch (e) {
           console.error('Exception in avatarSelect: ', e, e.stack);
         }
-      });
+      })();
     });
   }
 
@@ -415,11 +428,11 @@ class GatewayService {
         // Should not happen, nobody calls it twice.
         console.error('Concurrent onDisconnect(): ', socket);
       } else if (socket.stage === ConnectionStages.UNAUTH ||
-                 socket.stage === ConnectionStages.AUTHED) {
+        socket.stage === ConnectionStages.AUTHED) {
         console.info('Player disconnected without joining the game: ', socket);
         // Nothing needs to be done, they've not yet registered.
       } else if (socket.stage === ConnectionStages.REGED ||
-                 socket.stage === ConnectionStages.RUNNING) {
+        socket.stage === ConnectionStages.RUNNING) {
         const playerID = socket.decoded_token.sub;
         if (!(playerID in this.socks)) {
           // This should not happen.
