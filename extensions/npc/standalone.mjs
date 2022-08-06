@@ -3,7 +3,7 @@
 
 import fs from 'fs';
 import InteractiveObjectServerBaseClass from '../../common/interactive-object/server.mjs';
-import { getRunPath, getConfigPath } from '../../common/path-util/path.mjs';
+import {getRunPath, getConfigPath} from '../../common/path-util/path.mjs';
 
 /**
  * TODO: jsdoc
