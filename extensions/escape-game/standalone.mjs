@@ -124,6 +124,12 @@ class Standalone {
       console.warn('No escape-game.doorPosition defined');
       this.doorCells = []
     }
+    if (config.has('escape-game.terminalLifetime')) {
+      this.terminalLifetime = config.get('escape-game.terminalLifetime');
+    } else {
+      console.warn('No escape-game.terminalLifetime defined');
+      this.terminalLifetime = 600000;
+    }
     const mapName = "world1";
     await this.helper.broadcastCellSetUpdateToAllUser(
       'set',
@@ -514,7 +520,7 @@ class Standalone {
     const {nextState} = kwargs;
     const token = await this.getAccessToken(playerID, sfInfo.visibleName);
     await this.helper.callS2cAPI(playerID, 'escape-game', 'showTerminalModal', 60*1000, token);
-    this.playerToTeam.get(playerID).suspendContainerAfterTimeout(3000);
+    this.playerToTeam.get(playerID).suspendContainerAfterTimeout(this.terminalLifetime);
     return nextState;
   }
 
