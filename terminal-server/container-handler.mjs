@@ -76,10 +76,10 @@ class ContainerHandler {
    */
   async destroyContainer() {
     try {
-      let ret = await exec(`docker stop ${this.containerName}`);
+      let ret = await exec(`docker kill ${this.containerName}`);
       return !!ret.stderr;
     } catch (err) {
-      console.error(`Failed to stop ${this.containerName}: `, err);
+      console.error(`Failed to kill ${this.containerName}: `, err);
     }
   }
 }

@@ -84,11 +84,6 @@ class TerminalServer {
     socket.on('disconnect', () => {
       this.handlers[socket.containerId].destroyPty(socket);
     });
-
-    socket.on('destroyPty', () => {
-      this.handlers[socket.containerId].destroyPty(socket);
-      socket.close();
-    });
   }
 
   /**
@@ -132,7 +127,7 @@ class TerminalServer {
       }
 
       await this.handlers[containerId].destroyContainer();
-      for (const socket in this.container2sockets[containerId]) {
+      for (const socket of this.container2sockets[containerId]) {
         try {
           socket.disconnect(true);
         } catch (e) {
