@@ -906,7 +906,6 @@ class Team {
     this.terminals = new Map(); // Mapping the terminal id to the container id in the terminal server.
     this.givenItems = new Map();
     this.containerLocks = new AsyncLock();
-    this.containerUsedTimeLocks = new AsyncLock();
 
     this.defaultTerminals = defaultTerminals;
     this.containerUsedTime = 0;
