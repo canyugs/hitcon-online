@@ -230,7 +230,7 @@ class Standalone {
       );
       // detect explode people
       const players = this.helper.gameState.getPlayers();
-      players.forEach((player, playerID) => {
+      players.forEach(async (player, playerID) => {
         for (const cell of explodeCell) {
           if (player.mapCoord.x == cell.x && player.mapCoord.y == cell.y) {
             await this.killPlayer(playerID);
