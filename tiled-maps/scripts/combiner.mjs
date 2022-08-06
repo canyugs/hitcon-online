@@ -20,6 +20,9 @@ function mapGid(gid, childMaps, tilesetDirectory, resultLayerMap, mapName, layer
 
   const r = getGidRange(childMaps[mapName].gidRange, gid);
   if (typeof r === 'undefined') return null;
+  if (!(r.name in tilesetDirectory)) {
+    console.warn(`Tileset ${r.name} not found while mapping ${gid} in ${mapName} layer ${layerName}`);
+  }
   const cell = tilesetDirectory[r.name].prefix + (gid-(r.firstgid));
 
   if (!(cell in resultLayerMap)) {
