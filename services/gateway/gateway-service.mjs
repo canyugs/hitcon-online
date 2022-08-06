@@ -428,11 +428,11 @@ class GatewayService {
         // Should not happen, nobody calls it twice.
         console.error('Concurrent onDisconnect(): ', socket);
       } else if (socket.stage === ConnectionStages.UNAUTH ||
-        socket.stage === ConnectionStages.AUTHED) {
+                 socket.stage === ConnectionStages.AUTHED) {
         console.info('Player disconnected without joining the game: ', socket);
         // Nothing needs to be done, they've not yet registered.
       } else if (socket.stage === ConnectionStages.REGED ||
-        socket.stage === ConnectionStages.RUNNING) {
+                 socket.stage === ConnectionStages.RUNNING) {
         const playerID = socket.decoded_token.sub;
         if (!(playerID in this.socks)) {
           // This should not happen.
