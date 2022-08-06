@@ -34,6 +34,8 @@ class TerminalServer {
 
     this.defineServerMethods();
     this.createGrpcServer();
+
+    this.setupContainerReaper();
   }
 
   /**
@@ -78,6 +80,7 @@ class TerminalServer {
   }
 
   /**
+   * Register event listeners of the socket
    * @param {Socket} socket
    */
   addSocket(socket) {
@@ -114,14 +117,12 @@ class TerminalServer {
   }
 
   /**
-   * Destroy container and kill all related socket.
-   * @param {Object} call - The gRPC message object <DestroyContainerRequest>.
-   * @param {Function} callback - Callback function.
+   * Destroy a container and kill all related socket.
+   * This method is called internally.
+   * @param {string} containerId 
    */
-  async destroyContainer(call, callback) {
+  async _destroyContainer(containerId) {
     try {
-      const containerId = call.request.containerId;
-
       if (!(containerId in this.handlers) || !(containerId in this.container2sockets)) {
         throw new Error(`Container ${containerId} not found.`);
       }
@@ -138,16 +139,25 @@ class TerminalServer {
       delete this.container2sockets[containerId];
       console.log('delete container: ', containerId);
 
-      callback(null, {
-        success: true
-      });
+      return true;
     } catch (e) {
       console.error(`Failed to destroy container${call.request.containerId}`, e);
-      callback(null, {
-        success: false
-      });
+      return false;
     }
+  }
 
+  /**
+   * Destroy container and kill all related socket.
+   * This method is exported as a service, and should be called via gRPC
+   * @param {Object} call - The gRPC message object <DestroyContainerRequest>.
+   * @param {Function} callback - Callback function.
+   */
+  async destroyContainer(call, callback) {
+    const containerId = call.request.containerId;
+    const res = await this._destroyContainer(containerId);
+    callback(null, {
+      success: res
+    });
   }
 
   /**
@@ -179,6 +189,23 @@ class TerminalServer {
         process.exit();
       }
     });
+  }
+
+  /**
+   * Implements a second-chance algorithm.
+   * If the player doesn't interact with the container for too long, destroy the container.
+   */
+  setupContainerReaper() {
+    setInterval(obj => {
+      for (const containerId in obj.handlers) {
+        const handler = obj.handlers[containerId];
+        if (handler.hasSecondChance) {
+          handler.hasSecondChance = false;
+        } else {
+          this._destroyContainer(containerId);
+        }
+      }
+    }, 3000, this);
   }
 }
 

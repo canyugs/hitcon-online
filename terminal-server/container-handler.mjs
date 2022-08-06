@@ -20,6 +20,8 @@ class ContainerHandler {
     this.containerName = containerPrefix + randomBytes(32).toString('hex');
     this.imageName = imageName;
     this.ptys = {};
+    // Set the essential property for the container reaper
+    this.hasSecondChance = true;
   }
 
   /**
@@ -48,7 +50,9 @@ class ContainerHandler {
     }
 
     // Redirect the input to pty.
+    // And prevent it from being cleaned by the reaper
     socket.on('ptyDataInput', (data) => {
+      this.hasSecondChance = true;
       this.ptys[socket.id].write(data);
     });
 
