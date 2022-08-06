@@ -49,13 +49,11 @@ class ContainerHandler {
 
     // Redirect the input to pty.
     socket.on('ptyDataInput', (data) => {
-      console.log("interacting1");
       this.ptys[socket.id].write(data);
     });
 
     // Redirect the output to socket io.
     this.ptys[socket.id].onData((data) => {
-      console.log("interacting2");
       socket.emit('ptyDataOutput', data);
     });
   }
@@ -78,10 +76,10 @@ class ContainerHandler {
    */
   async destroyContainer() {
     try {
-      let ret = await exec(`docker stop ${this.containerName}`);
+      let ret = await exec(`docker kill ${this.containerName}`);
       return !!ret.stderr;
     } catch (err) {
-      console.error(`Failed to stop ${this.containerName}: `, err);
+      console.error(`Failed to kill ${this.containerName}: `, err);
     }
   }
 }

@@ -514,7 +514,6 @@ class Standalone {
     const {nextState} = kwargs;
     const token = await this.getAccessToken(playerID, sfInfo.visibleName);
     await this.helper.callS2cAPI(playerID, 'escape-game', 'showTerminalModal', 60*1000, token);
-    console.log("returned");
     this.playerToTeam.get(playerID).suspendContainerAfterTimeout(3000);
     return nextState;
   }
@@ -1021,7 +1020,6 @@ class Team {
 
   suspendContainerAfterTimeout(timeout) {
     setTimeout(async (obj) => {
-      console.log("trying to kill\n");
       return await obj.containerLocks.acquire('containerUsedTime', async() => {
         if (--obj.containerUsedTime != 0) {
           return;
