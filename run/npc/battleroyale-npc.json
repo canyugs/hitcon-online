@@ -1,0 +1,46 @@
+{
+    "enabled": true,
+    "initialPosition": {"mapName": "world1", "x": 25, "y": 18},
+    "display": [
+      {
+        "zIndex": 11,
+        "layerName": "npcImage",
+        "renderFunction": "_drawOneCharacterImage",
+        "renderArgs": null,
+        "character": "char1"
+      },
+      {
+        "zIndex": 16,
+        "layerName": "npcName",
+        "renderFunction": "_drawOneCharacterName",
+        "renderArgs": null
+      }
+    ],
+    "FSM": {
+      "initialState": "s1",
+      "states": {
+        "s1": {
+          "func": "showDialog",
+          "kwargs": {
+            "dialogs": "Do you want to start a new battleroyale game ?",
+            "options": {
+              "OK!": "s2",
+              "Bye!": "s3"
+            }
+          }
+        },
+        "s2": {
+            "func": "startBattleRoyale",
+            "kwargs": {
+                "next": "s3"
+            }
+        },
+        "s3": {
+            "func": "exit",
+            "kwargs": {
+                "next": "s1"
+            }
+        }
+      }
+    }
+  }
