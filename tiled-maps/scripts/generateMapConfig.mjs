@@ -21,7 +21,12 @@ const ONLINE_MAP_CONFIG_DIR = getEnvWithDefault('MAP_OUT', '../../../hitcon-cat-
 
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const mapsDir = path.join(__dirname, `${TILED_PROJECT_DIR}`);
-const tilesetsDir = path.join(__dirname, `${TILED_PROJECT_DIR}/tilesets`);
+const tilesetsDir = [
+  path.join(__dirname, `${TILED_PROJECT_DIR}/tilesets`),
+  path.join(__dirname, `${TILED_PROJECT_DIR}/packages/Modern_Inter`),
+  path.join(__dirname, `${TILED_PROJECT_DIR}/packages/Office_Set`),
+  path.join(__dirname, `${TILED_PROJECT_DIR}/packages/ROOM_Builder`)
+]
 const fixedsetsDir = path.join(__dirname, `${TILED_PROJECT_DIR}/fixedsets`);
 const charactersConfig = readFileFromJSON(`${fixedsetsDir}/characters.json`);
 const cellsetsConfig = readFileFromJSON(`${fixedsetsDir}/cellsets.json`);
@@ -54,15 +59,25 @@ function loadTilesetData(data, name, cwd) {
     tilesetDirectory[name] = {tiles: tiles, imageSrc: imageSrc, prefix: prefix};
 }
 
-console.log(`read tilesets from ${tilesetsDir}`);
-fs.readdirSync(tilesetsDir).forEach((file, index) => {
-  const pathData = path.parse(file);
-  const {ext, name} = pathData;
-  if (ext === '.json') {
-    const data = readFileFromJSON(`${tilesetsDir}/${file}`);
-    loadTilesetData(data, name, tilesetsDir);
-  }
-});
+
+function loadTilesetDirectory(tsDir) {
+  console.log(`read tilesets from ${tsDir}`);  
+  fs.readdirSync(tsDir).forEach((file, index) => {
+    const pathData = path.parse(file);
+    const {ext, name} = pathData;
+    if (ext === '.json' || ext === '.tsj') {
+      console.log(`Loading ${tsDir}/${file} tileset`);
+      const data = readFileFromJSON(`${tsDir}/${file}`);
+      loadTilesetData(data, name, tsDir);
+    } else {
+      console.warn(`Ignoring ${file} while parsing tiles`);
+    }
+  });
+}
+
+for (const tsDir of tilesetsDir) {
+  loadTilesetDirectory(tsDir);
+}
 
 function createCharImages(srcDir, dstDir) {
   let images = [];
@@ -185,13 +200,15 @@ function loadWorld(mapsDir, mapName) {
       console.log(tileset);
       const {source} = tileset;
       if (source === undefined) {
-        console.error('embed tileset unsupport');
+        console.warn('Using embed tileset...');
         const tilesetName = `${mapName}_embed`;
         loadTilesetData(tileset, tilesetName, path.dirname(filePath));
+        console.log(`Got embedded tileset ${tilesetName}`);
         gidRange.push({...tileset, name: tilesetName});
       } else {
         const {name: tilesetName} = path.parse(source);
         // Tileset source for all maps;
+        console.log(`Got normal tileset ${tilesetName}`);
         gidRange.push({...tileset, name: tilesetName});
       }
     });
