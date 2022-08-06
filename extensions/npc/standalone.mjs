@@ -3,12 +3,12 @@
 
 import fs from 'fs';
 import InteractiveObjectServerBaseClass from '../../common/interactive-object/server.mjs';
-import {getRunPath, getConfigPath} from '../../common/path-util/path.mjs';
+import { getRunPath, getConfigPath } from '../../common/path-util/path.mjs';
 
 /**
  * TODO: jsdoc
  */
-class SingleNPC extends InteractiveObjectServerBaseClass {}
+class SingleNPC extends InteractiveObjectServerBaseClass { }
 
 /**
  * TODO: jsdoc
@@ -45,6 +45,7 @@ class Standalone {
     await this.helper.callS2sAPI('items', 'provideStateFunc', 'registerStateFuncToNPCs');
     await this.helper.callS2sAPI('escape-game', 'provideStateFunc', 'registerStateFuncToNPCs');
     await this.helper.callS2sAPI('bombman', 'provideStateFunc', 'registerStateFuncToNPCs');
+    await this.helper.callS2sAPI('battleroyale', 'provideStateFunc', 'registerStateFuncToNPCs');
   }
 
   /**

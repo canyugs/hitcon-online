@@ -7,7 +7,7 @@ import CellSet from '../../common/maplib/cellset.mjs';
 
 const BULLET_SPEED = 100; // ms per block (lower -> quicker)
 const BULLET_LIFE = 5; // five blocks
-const MAP_UPDATE_PERIOD = 25000; // ms per update
+const MAP_UPDATE_PERIOD = 3000; // ms per update
 
 const Facing2Direction = {
   'U': [0, 1],
@@ -16,6 +16,9 @@ const Facing2Direction = {
   'L': [-1, 0],
 };
 
+/**
+ * This represents the bullet of battleroyale extension.
+ */
 class Bullet {
   /**
    * @constructor
@@ -119,33 +122,7 @@ class Standalone {
 
     this.cooldown = new Set();
     this.fireCounter = 0;
-    const updateMap = setInterval( async () => {
-      this.fireCounter++;
-      this.fires.clear();
-      for (const mapName of this.arenaOfMaps.keys()) {
-        const needUpdate = this.updateEdge(
-            this.fires, this.arenaOfMaps.get(mapName), this.fireCounter,
-        );
-        if (!needUpdate) {
-          clearInterval(updateMap);
-          return;
-        }
-        await this.helper.broadcastCellSetUpdateToAllUser(
-            'update',
-            mapName,
-            CellSet.fromObject({
-              name: LAYER_FIRE.layerName,
-              cells: Array.from(this.fires),
-            }),
-        );
-        const players = this.helper.gameState.getPlayers();
-        players.forEach((player, playerID) => {
-          if (this.helper.gameMap.getCell(player.mapCoord, LAYER_FIRE.layerName)) {
-            this.teleport(player.mapCoord, playerID);
-          }
-        });
-      }
-    }, MAP_UPDATE_PERIOD);
+    this.gameStart = false;
 
     await this.helper.gameState.registerOnPlayerUpdate((msg) => {
       try {
@@ -154,6 +131,9 @@ class Standalone {
         console.error('battleroyale register player update listener failed: ', e, e.stack);
       }
     });
+
+    // register state functions for NPC
+    await this.helper.callS2sAPI('npc', 'registerStateFunc');
   }
 
   /**
@@ -338,6 +318,75 @@ class Standalone {
     target.x = 1;
     target.y = 1;
     this.helper.teleport(playerID, target, true);
+  }
+
+  /**
+   * Start the game and update edge
+   * @return {bool} successfully start or not
+   */
+  startGame() {
+    if (this.gameStart) {
+      return false;
+    }
+    const updateMap = setInterval( async () => {
+      this.fireCounter++;
+      this.fires.clear();
+      for (const mapName of this.arenaOfMaps.keys()) {
+        const needUpdate = this.updateEdge(
+            this.fires, this.arenaOfMaps.get(mapName), this.fireCounter,
+        );
+        if (!needUpdate) {
+          clearInterval(updateMap);
+          return;
+        }
+        await this.helper.broadcastCellSetUpdateToAllUser(
+            'update',
+            mapName,
+            CellSet.fromObject({
+              name: LAYER_FIRE.layerName,
+              cells: Array.from(this.fires),
+            }),
+        );
+        const players = this.helper.gameState.getPlayers();
+        players.forEach((player, playerID) => {
+          if (this.helper.gameMap.getCell(player.mapCoord, LAYER_FIRE.layerName)) {
+            this.teleport(player.mapCoord, playerID);
+          }
+        });
+      }
+    }, MAP_UPDATE_PERIOD);
+
+    return true;
+  }
+  // ----------------------------------
+  // State function for NPC
+  // ----------------------------------
+
+  /**
+   * Show a dialog overlay in client browser.
+   * @param {String} playerID
+   * @param {Object} kwargs - TODO
+   * @return {String} - the next state
+   */
+  async s2s_sf_startBattleRoyale(srcExt, playerID, kwargs, sfInfo) {
+    const {next} = kwargs;
+    console.log('called');
+    if (this.gameStart) {
+      console.log('game have already started');
+      return next;
+    }
+    this.startGame();
+    this.gameStart = true;
+    try {
+      return next;
+    } catch (e) {
+      console.error(e);
+      return FSM_ERROR;
+    }
+  }
+
+  async s2s_provideStateFunc(srcExt, registerFunc) {
+    this.helper.callS2sAPI(srcExt, registerFunc, this.helper.getListOfStateFunctions(this));
   }
 }
 
