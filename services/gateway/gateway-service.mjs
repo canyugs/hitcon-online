@@ -75,8 +75,8 @@ class GatewayService {
         return;
       }
       const ret = await this.extMan.onE2sCalled(extId, apiName, reqContent.args);
-      if (typeof msg === 'object' && msg !== null && 'error' in msg && typeof msg.error === 'string') {
-        console.error(`e2s call error: ${msg.error}`);
+      if (typeof ret === 'object' && ret !== null && 'error' in ret && typeof ret.error === 'string') {
+        console.error(`e2s call error: ${ret.error}`);
       }
       res.json(ret);
     } catch (e) {
