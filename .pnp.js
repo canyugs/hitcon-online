@@ -891,6 +891,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD",
         }]
       ]],
+      ["alarm", [
+        ["npm:2.0.0", {
+          "packageLocation": "./.yarn/cache/alarm-npm-2.0.0-04d05bb387-5de3d73109.zip/node_modules/alarm/",
+          "packageDependencies": [
+            ["alarm", "npm:2.0.0"]
+          ],
+          "linkType": "HARD",
+        }]
+      ]],
       ["ansi-colors", [
         ["npm:4.1.1", {
           "packageLocation": "./.yarn/cache/ansi-colors-npm-4.1.1-97ad42f223-50d8dfbce2.zip/node_modules/ansi-colors/",
@@ -2714,7 +2723,8 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         ["workspace:extensions/bombman", {
           "packageLocation": "./extensions/bombman/",
           "packageDependencies": [
-            ["hitcon-online-bombman", "workspace:extensions/bombman"]
+            ["hitcon-online-bombman", "workspace:extensions/bombman"],
+            ["alarm", "npm:2.0.0"]
           ],
           "linkType": "SOFT",
         }]
