@@ -24,12 +24,7 @@ class ClientExtensionManager {
     this.extHelpers = {};
     this.clientType = clientType;
 
-    // This promise will become available once we've finished loading all
-    // extensions. It is used to avoid race condition between
-    // loadAllExtensionClient() and startAllExtensionClient().
-    this.allLoadedPromise = new Promise((resolve) => {
-      this.allLoadedResolve = resolve;
-    });
+    this.allExtensionLoadedCallbacks = [];
   }
 
   /**
@@ -48,6 +43,10 @@ class ClientExtensionManager {
     this.inputManager = inputManager;
     this.mapRenderer = mapRenderer;
     this.mainUI = mainUI;
+
+    this.registerAllExtensionLoadedCallback(() => {
+      this.socket.emit('clientExtensionLoaded');
+    });
   }
 
   /**
@@ -58,6 +57,14 @@ class ClientExtensionManager {
     return this.extNameList;
   }
 
+  /**
+   * jsdoc: TODO
+   * @param {Function} callback
+   */
+  registerAllExtensionLoadedCallback(callback) {
+    this.allExtensionLoadedCallbacks.push(callback);
+  }
+
   async loadAllExtensionClient() {
     let p = [];
     for (let extName of this.extNameList) {
@@ -66,7 +73,9 @@ class ClientExtensionManager {
     await Promise.all(p);
 
     // Notify that we're done.
-    this.allLoadedResolve(true);
+    for (const callback of this.allExtensionLoadedCallbacks) {
+      callback();
+    }
   }
 
   /**

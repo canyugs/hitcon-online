@@ -91,6 +91,7 @@ class AvatarSelectionPage {
    * Send the selection to gateway server.
    */
   _submit(displayName, displayChar) {
+    this.DOM.querySelector('button.avatar-confirm-button').innerHTML = `<div class="lds-dual-ring"></div>`;
     this.socket.emit('avatarSelect', {displayName, displayChar});
   }
 
