@@ -200,7 +200,7 @@ class Standalone {
     // Create a new team
     let teamId = randomBytes(32).toString('hex');
     this.teams.set(teamId, new Team(teamId, this.terminalServerGrpcService, this.defaultTerminals));
-    this.teams.get(teamId).startContainers(); // do not wait for the container to start.
+    this.teams.get(teamId).ensureContainersAvailable(); // do not wait for the container to start.
     await this.saveData();
     return teamId;
   }
@@ -510,10 +510,12 @@ class Standalone {
    */
   async s2s_sf_showTerminal(srcExt, playerID, kwargs, sfInfo) {
     await this._finalizeIfNeeded(playerID);
-
+    await this.playerToTeam.get(playerID).ensureContainersAvailable();
     const {nextState} = kwargs;
     const token = await this.getAccessToken(playerID, sfInfo.visibleName);
     await this.helper.callS2cAPI(playerID, 'escape-game', 'showTerminalModal', 60*1000, token);
+    console.log("returned");
+    this.playerToTeam.get(playerID).suspendContainerAfterTimeout(3000);
     return nextState;
   }
 
@@ -875,7 +877,6 @@ class Standalone {
         t.playerIDs.forEach((pid) => {
           this.playerToTeam.set(pid, t);
         });
-        t.startContainers();
       });
     }
   }
@@ -900,8 +901,10 @@ class Team {
     this.terminals = new Map(); // Mapping the terminal id to the container id in the terminal server.
     this.givenItems = new Map();
     this.containerLocks = new AsyncLock();
+    this.containerUsedTimeLocks = new AsyncLock();
 
     this.defaultTerminals = defaultTerminals;
+    this.containerUsedTime = 0;
   }
 
   serialize() {
@@ -960,23 +963,29 @@ class Team {
   /**
    * Start all containers
    */
-  async startContainers() {
-    return await this.containerLocks.acquire('containers', async () => {
-      for (const defaultTerminal of this.defaultTerminals) {
-        try {
-          let ret = await promisify(this.terminalServerGrpcService.CreateContainer.bind(this.terminalServerGrpcService))({
-            imageName: defaultTerminal.imageName
-          }, {deadline: new Date(Date.now() + 20000)});
-
-          if (!ret.success) {
-            console.error(`Fail to start container with image ${defaultTerminal.imageName}.`);
-            return false;
-          }
-          this.terminals.set(defaultTerminal.terminalId, ret.containerId);
-        } catch (e) {
-          console.error('Failed to start container: ', e);
+  async ensureContainersAvailable() {
+    return await this.containerLocks.acquire('containerUsedTime', async () => {
+      ++this.containerUsedTime;
+      return await this.containerLocks.acquire('containers', async () => {
+        if (this.containerUsedTime != 1) {
+          return true;
         }
-      }
+        for (const defaultTerminal of this.defaultTerminals) {
+          try {
+            let ret = await promisify(this.terminalServerGrpcService.CreateContainer.bind(this.terminalServerGrpcService))({
+              imageName: defaultTerminal.imageName
+            }, {deadline: new Date(Date.now() + 20000)});
+  
+            if (!ret.success) {
+              console.error(`Fail to start container with image ${defaultTerminal.imageName}.`);
+              return false;
+            }
+            this.terminals.set(defaultTerminal.terminalId, ret.containerId);
+          } catch (e) {
+            console.error('Failed to start container: ', e);
+          }
+        }
+      });
     });
   }
 
@@ -984,22 +993,42 @@ class Team {
    * Destroy the team.
    */
   async destroy() {
+    return await this.containerLocks.acquire('containers', async () =>{
+      await this.removeContainers();
+    });
+  }
+
+  async removeContainers() {
     // Remove all containers
-    for (const defaultTerminal of this.defaultTerminals) {
-      try {
-        let ret = await promisify(this.terminalServerGrpcService.DestroyContainer.bind(this.terminalServerGrpcService))({
-          containerId: this.terminals.get(defaultTerminal.terminalId)
-        }, {deadline: new Date(Date.now() + 20000)});
-
-        if (!ret.success) {
-          console.error(`Fail to kill container ${defaultTerminal.terminalId} ${this.terminals.get(defaultTerminal.terminalId)}.`);
-          return false;
+    return await this.containerLocks.acquire('containers', async() => {
+      for (const defaultTerminal of this.defaultTerminals) {
+        try {
+          let ret = await promisify(this.terminalServerGrpcService.DestroyContainer.bind(this.terminalServerGrpcService))({
+            containerId: this.terminals.get(defaultTerminal.terminalId)
+          }, {deadline: new Date(Date.now() + 20000)});
+  
+          if (!ret.success) {
+            console.error(`Fail to kill container ${defaultTerminal.terminalId} ${this.terminals.get(defaultTerminal.terminalId)}.`);
+            return false;
+          }
+        } catch (e) {
+          console.error(e);
         }
-      } catch (e) {
-        console.error(e);
       }
-    }
+      return true;
+    });
+  }
 
+  suspendContainerAfterTimeout(timeout) {
+    setTimeout(async (obj) => {
+      console.log("trying to kill\n");
+      return await obj.containerLocks.acquire('containerUsedTime', async() => {
+        if (--obj.containerUsedTime != 0) {
+          return;
+        }
+        await obj.removeContainers();
+      });
+    }, timeout, this);
   }
 
   /**
