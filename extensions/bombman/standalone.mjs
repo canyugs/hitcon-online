@@ -3,7 +3,6 @@
 
 import CellSet from '../../common/maplib/cellset.mjs';
 import {LAYER_BOMB, BOMB_COOLDOWN, LAYER_BOMB_EXPLODE} from './common/client.mjs';
-import InteractiveObjectServerBaseClass from '../../common/interactive-object/server.mjs';
 import {MapCoord} from '../../common/maplib/map.mjs';
 import {createRequire} from 'module';
 const require = createRequire(import.meta.url);
@@ -12,9 +11,6 @@ const alarm = require('alarm');
 const BOMB_COUNTDOWN = 3000; // millisecond
 const BOMB_EXPLODE_TIME = 500; // millisecond
 const START_GAME_INTERVAL = 3600_000; // millisecond
-
-// Bring out the FSM_ERROR for easier reference.
-const FSM_ERROR = InteractiveObjectServerBaseClass.FSM_ERROR;
 
 
 const BOMB_EXPLODE_RANGE = [
@@ -90,18 +86,11 @@ class Standalone {
     // set cooldown
     this.cooldown = new Set(); // TODO: Cooldown Manager
 
-    this.playerIDs = new Set(); // store playerID
+    this.participatePlayerIDs = new Set(); // store playerID
 
     const initTime = new Date();
     const startTime = new Date(Math.floor((+initTime + START_GAME_INTERVAL - 1) / START_GAME_INTERVAL) * START_GAME_INTERVAL);
     alarm(startTime, this.setGameInterval.bind(this));
-  }
-
-  /**
-   * @param {Object} player The player object
-   */
-  joinGame(player) {
-    this.playerIDs.add(player.playerID);
   }
 
   /**
@@ -116,16 +105,18 @@ class Standalone {
    * @return {Boolean} success or not
    */
   async startGame() {
-    // TODO:start Game
     if (this.gameStarted) {
       await this.resetGame();
     }
-    if (this.playerIDs.size < 2) {
-      console.log('[bombman] player not enough to start (< 3)');
+    if (this.participatePlayerIDs.size < 3) {
+      for (const playerID of this.participatePlayerIDs) {
+        await this.callS2cAPI(playerID, 'notification', 'showNotification', 3000, '[bombman] player not enough to start (< 3)');
+      }
       return false;
     }
-    for (const playerID of this.playerIDs) {
-      this.teleportPlayer(playerID);
+    for (const playerID of this.participatePlayerIDs) {
+      await this.callS2cAPI(playerID, 'notification', 'showNotification', 3000, '[bombman] Game Start!');
+      await this.teleportPlayer(playerID);
     }
     this.gameStarted = true;
     return true;
@@ -185,7 +176,7 @@ class Standalone {
    * @return {Boolean} success or not
    */
   async c2s_placeBomb(player, mapCoord) {
-    if (!this.playerIDs.has(player.playerID)) return;
+    if (!this.participatePlayerIDs.has(player.playerID)) return;
     mapCoord = MapCoord.fromObject(mapCoord);
 
     // mapCoord has to be inside an arena
@@ -296,7 +287,8 @@ class Standalone {
    */
   async s2s_sf_joinBombman(srcExt, playerID, kwargs, sfInfo) {
     const {next} = kwargs;
-    this.playerIDs.add(playerID);
+    this.participatePlayerIDs.add(playerID);
+    await this.callS2cAPI(playerID, 'notification', 'showNotification', 3000, '[bombman] Join game successfully!');
     return next;
   }
 
@@ -310,8 +302,8 @@ class Standalone {
    */
   async s2s_sf_quitBombman(srcExt, playerID, kwargs, sfInfo) {
     const {next} = kwargs;
-    if (this.playerIDs.has(playerID)) {
-      this.playerIDs.delete(playerID);
+    if (this.participatePlayerIDs.has(playerID)) {
+      this.participatePlayerIDs.delete(playerID);
     }
     return next;
   }
@@ -328,7 +320,8 @@ class Standalone {
 
   /**
    * kill player and tp
-   * @param {String} playerID
+   * @param {String} playerID player ID
+   * @param {Boolean} endGame kill player and terminate ... ?
    */
   async killPlayer(playerID, endGame = false) {
     const player = this.helper.gameState.getPlayer(playerID);
@@ -336,8 +329,8 @@ class Standalone {
     target.x = 1;
     target.y = 1;
     this.helper.teleport(playerID, target, true);
-    this.playerIDs.delete(playerID);
-    if (this.playerIDs.size <= 1 && !endGame) {
+    this.participatePlayerIDs.delete(playerID);
+    if (this.participatePlayerIDs.size <= 1 && !endGame) {
       await this.terminateGame();
     }
   }
@@ -345,32 +338,38 @@ class Standalone {
   /**
    * @param {String} playerID playerID
    */
-  teleportPlayer(playerID) {
+  async teleportPlayer(playerID) {
     const player = this.helper.gameState.getPlayer(playerID);
     const target = player.mapCoord.copy();
     target.x = 10;
     target.y = 5;
-    this.helper.teleport(player.playerID, target, true);
+    await this.helper.teleport(player.playerID, target, true);
   }
 
+  /**
+   * game is over five trophy and quit
+   */
   async terminateGame() {
-    for (const playerID of this.playerIDs) {
+    for (const playerID of this.participatePlayerIDs) {
       console.log(playerID, 'Win');
       // TODO: give item
       // this.helper.callS2sAPI('item', 'giveItem', playerID, 'bombman_trophy', 1);
     }
     await this.resetGame();
 
-    for (const playerID of this.playerIDs) {
+    for (const playerID of this.participatePlayerIDs) {
       this.killPlayer(playerID, true);
     }
   }
 
+  /**
+   * reset the whole game
+   */
   async resetGame() {
     this.gameStarted = false;
     this.bombCells = new Map();
     this.explodeCells = new Map();
-    this.playerIDs = new Set();
+    this.participatePlayerIDs = new Set();
 
     // clean bomb
     for (const mapName of this.arenaOfMaps.keys()) {
