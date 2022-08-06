@@ -201,7 +201,6 @@ class Standalone {
     // Create a new team
     let teamId = randomBytes(32).toString('hex');
     this.teams.set(teamId, new Team(teamId, this.terminalServerGrpcService, this.defaultTerminals));
-    this.teams.get(teamId).startContainers(); // do not wait for the container to start.
     await this.saveData();
     return teamId;
   }
@@ -511,6 +510,7 @@ class Standalone {
    */
   async s2s_sf_showTerminal(srcExt, playerID, kwargs, sfInfo) {
     await this._finalizeIfNeeded(playerID);
+    await this.playerToTeam.get(playerID).ensureContainersAvailable();
 
     const {nextState} = kwargs;
     const token = await this.getAccessToken(playerID, sfInfo.visibleName);
@@ -876,7 +876,6 @@ class Standalone {
         t.playerIDs.forEach((pid) => {
           this.playerToTeam.set(pid, t);
         });
-        t.startContainers();
       });
     }
   }
@@ -961,7 +960,7 @@ class Team {
   /**
    * Start all containers
    */
-  async startContainers() {
+  async ensureContainersAvailable() {
     return await this.containerLocks.acquire('containers', async () => {
       for (const defaultTerminal of this.defaultTerminals) {
         try {
