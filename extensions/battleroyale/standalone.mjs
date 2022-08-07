@@ -191,9 +191,9 @@ class Standalone {
             }),
         );
         const players = this.helper.gameState.getPlayers();
-        players.forEach(async (player, playerID) => {
+        players.forEach((player, playerID) => {
           if (this.helper.gameMap.getCell(player.mapCoord, LAYER_FIRE.layerName)) {
-            await this.killPlayer(playerID);
+            this.killPlayer(playerID);
           }
         });
         this.fireCounter++;
@@ -250,9 +250,9 @@ class Standalone {
       return true;
     }
     const players = this.helper.gameState.getPlayers();
-    players.forEach(async (player, playerID) => {
+    players.forEach((player, playerID) => {
       if (newBullet.mapCoord.equalsTo(player.mapCoord)) {
-        await this.killPlayer(playerID);
+        this.killPlayer(playerID);
         return true;
       }
     });
