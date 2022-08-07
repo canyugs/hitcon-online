@@ -11,7 +11,7 @@ import {getRunPath, getConfigPath} from '../../common/path-util/path.mjs';
 import {createRequire} from 'module';
 const require = createRequire(import.meta.url);
 
-const otplib = require('otplib');
+const totp = require('totp-generator');
 
 // Bring out the FSM_ERROR for easier reference.
 const FSM_ERROR = InteractiveObjectServerBaseClass.FSM_ERROR;
@@ -93,6 +93,20 @@ class Standalone {
   }
 
   /**
+   * Verify if the totp for secret within window is correct.
+   */
+  _checkOtpWithWindow(secret, target, wind) {
+    const now = new Date().getTime();
+    for (let i = 0; i < wind*2+1; i++) {
+      const tryTime = now+(i-wind)*30*1000;
+      const ref = totp(secret, {timestamp: tryTime});
+      console.log(`${secret} ${(i-wind)} : '${ref}' '${target}'`);
+      if (ref === target) return true;
+    }
+    return false;
+  }
+
+  /**
    * Show an open-ended dialog and check if the entered value is
    * correct, interpreting the entered values as an totp.
    */
@@ -101,13 +115,12 @@ class Standalone {
     const res = await this.helper.callS2cAPI(playerID, 'dialog',
         'showDialogWithPrompt', 60*1000, sfInfo.visibleName, dialog);
 
-    if (typeof otpWindow === 'undefined') {
+    let wind = otpWindow
+    if (typeof wind === 'undefined') {
       // Defaults to 60 seconds of leniency.
-      otplib.totp.options = {window: 2};
-    } else {
-      otplib.totp.options = {window: otpWindow};
+      wind = 2;
     }
-    if (otplib.totp.check(res.msg, secret)) return nextState;
+    if (this._checkOtpWithWindow(secret, res.msg, wind)) return nextState;
 
     //The key is wrong,
     return nextStateIncorrect;
