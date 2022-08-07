@@ -11,7 +11,7 @@ const alarm = require('alarm');
 const BULLET_SPEED = 100; // ms per block (lower -> quicker)
 const BULLET_LIFE = 5; // five blocks
 const MAP_UPDATE_PERIOD = 3000; // ms per update
-const START_GAME_INTERVAL = 30_000; // millisecond
+const START_GAME_INTERVAL = 3600_000; // millisecond
 
 const Facing2Direction = {
   'U': [0, 1],
@@ -162,7 +162,7 @@ class Standalone {
     if (this.gameStarted) {
       await this.resetGame();
     }
-    if (this.participatePlayerIDs.size < 2) {
+    if (this.participatePlayerIDs.size < 3) {
       for (const playerID of this.participatePlayerIDs) {
         await this.helper.callS2cAPI(playerID, 'notification', 'showNotification', 3000, '[battleroyale] player not enough to start (less than 3)');
       }
