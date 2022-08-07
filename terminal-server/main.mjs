@@ -91,29 +91,40 @@ class TerminalServer {
 
   /**
    * Create a container.
-   * @param {Object} call - The gRPC message object <CreateContainerRequest>.
-   * @param {Function} callback - Callback function.
+   * This method is called internally.
+   * @param {string} imageName 
    */
-  async createContainer(call, callback) {
+  async _createContainer(imageName) {
     try {
       let containerId = randomBytes(32).toString('hex');
 
       this.container2sockets[containerId] = new Set();
-      this.handlers[containerId] = new ContainerHandler(call.request.imageName);
+      this.handlers[containerId] = new ContainerHandler(imageName);
       await this.handlers[containerId].spawn();
       console.log('create container: ', containerId);
 
-      callback(null, {
+      return {
         success: true,
         containerId: containerId
-      });
+      };
     } catch (e) {
       console.error('create container failed: ', e);
-      callback(null, {
+      return {
         success: false,
         containerId: null
-      });
+      }
     }
+  }
+
+  /**
+   * Create a container.
+   * This method is exported as a service, and should be called via gRPC.
+   * @param {Object} call - The gRPC message object <CreateContainerRequest>.
+   * @param {Function} callback - Callback function.
+   */
+  async createContainer(call, callback) {
+    const res = await this._createContainer(call.request.imageName);
+    callback(null, res);
   }
 
   /**
@@ -148,7 +159,7 @@ class TerminalServer {
 
   /**
    * Destroy container and kill all related socket.
-   * This method is exported as a service, and should be called via gRPC
+   * This method is exported as a service, and should be called via gRPC.
    * @param {Object} call - The gRPC message object <DestroyContainerRequest>.
    * @param {Function} callback - Callback function.
    */
@@ -158,6 +169,24 @@ class TerminalServer {
     callback(null, {
       success: res
     });
+  }
+
+  async ensureContainerAvailable(call, callback) {
+    let containerId = call.request.containerId;
+    const imageName = call.request.imageName;
+    if (containerId in this.handlers) {
+      this.handlers[containerId].hasSecondChance = true;
+      callback(null, {
+        success: true,
+        containerId: containerId
+      });
+    } else {
+      let {success, containerId} = await this._createContainer(imageName);
+      callback(null, {
+        success: success,
+        containerId: containerId
+      });
+    }
   }
 
   /**
@@ -178,6 +207,7 @@ class TerminalServer {
     let server = new grpc.Server();
     server.addService(rpcProto.TerminalServer.service, {
       CreateContainer: async (call, callback) => await this.createContainer.bind(this)(call, callback),
+      EnsureContainerAvailable: async (call, callback) => await this.ensureContainerAvailable.bind(this)(call, callback),
       DestroyContainer: async (call, callback) => await this.destroyContainer.bind(this)(call, callback)
     });
     server.bindAsync('0.0.0.0:' + TERMINAL_SERVER_GRPC_PORT, grpc.ServerCredentials.createInsecure(), () => {

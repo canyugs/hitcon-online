@@ -77,12 +77,9 @@ class Standalone {
     });
 
     // this.defaultTerminals determines the list of containers to start when the team is created.
-    this.defaultTerminals = [];
+    this.defaultTerminals = new Map();
     this.terminalObjects.forEach((terminalObject, terminalId) => {
-      this.defaultTerminals.push({
-        terminalId: terminalId,
-        imageName: terminalObject.config.terminalInfo.imageName
-      });
+      this.defaultTerminals.set(terminalId, terminalObject.config.terminalInfo.imageName);
     });
 
     // gRPC server
@@ -509,7 +506,7 @@ class Standalone {
    */
   async s2s_sf_showTerminal(srcExt, playerID, kwargs, sfInfo) {
     await this._finalizeIfNeeded(playerID);
-    await this.playerToTeam.get(playerID).ensureContainersAvailable();
+    await this.playerToTeam.get(playerID).ensureContainerAvailable(sfInfo.visibleName);
 
     const {nextState} = kwargs;
     const token = await this.getAccessToken(playerID, sfInfo.visibleName);
@@ -956,27 +953,23 @@ class Team {
     return true;
   }
 
-  /**
-   * Start all containers
-   */
-  async ensureContainersAvailable() {
-    return await this.containerLocks.acquire('containers', async () => {
-      for (const defaultTerminal of this.defaultTerminals) {
-        try {
-          let ret = await promisify(this.terminalServerGrpcService.CreateContainer.bind(this.terminalServerGrpcService))({
-            imageName: defaultTerminal.imageName
-          }, {deadline: new Date(Date.now() + 20000)});
-
-          if (!ret.success) {
-            console.error(`Fail to start container with image ${defaultTerminal.imageName}.`);
-            return false;
-          }
-          this.terminals.set(defaultTerminal.terminalId, ret.containerId);
-        } catch (e) {
-          console.error('Failed to start container: ', e);
-        }
+  async ensureContainerAvailable(terminalId) {
+    const containerId = this.terminals.get(terminalId);
+    const imageName = this.defaultTerminals.get(terminalId);
+    try {
+      let ret = await promisify(this.terminalServerGrpcService.EnsureContainerAvailable.bind(this.terminalServerGrpcService))({
+        containerId: containerId,
+        imageName: imageName
+      }, {deadline: new Date(Date.now() + 20000)});
+      if (!ret.success) {
+        console.error(`Fail to start container with image ${imageName}`);
+        return false;
       }
-    });
+      this.terminals.set(terminalId, ret.containerId);
+    } catch (e) {
+      console.error('Failed to start container', e);
+      return false;
+    }
   }
 
   /**

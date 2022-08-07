@@ -5,6 +5,7 @@ package TerminalServer;
 service TerminalServer {
   rpc CreateContainer (CreateContainerRequest) returns (CreateContainerResponse);
   rpc DestroyContainer (DestroyContainerRequest) returns (DestroyContainerResponse);
+  rpc EnsureContainerAvailable (EnsureContainerAvailableRequest) returns (EnsureContainerAvailableResponse);
 }
 
 message CreateContainerRequest {
@@ -22,4 +23,14 @@ message DestroyContainerRequest {
 
 message DestroyContainerResponse {
     bool success = 1;
+}
+
+message EnsureContainerAvailableRequest {
+  string containerId = 1;
+  string imageName = 2;
+}
+
+message EnsureContainerAvailableResponse {
+  bool success = 1;
+  string containerId = 2;
 }
