@@ -3,12 +3,15 @@
 
 import {MapCoord} from '../../common/maplib/map.mjs';
 import {LAYER_BULLET, LAYER_OBSTACLE, LAYER_FIRE, BULLET_COOLDOWN} from './common/client.mjs';
-import InteractiveObjectServerBaseClass from '../../common/interactive-object/server.mjs';
 import CellSet from '../../common/maplib/cellset.mjs';
+import {createRequire} from 'module';
+const require = createRequire(import.meta.url);
+const alarm = require('alarm');
 
 const BULLET_SPEED = 100; // ms per block (lower -> quicker)
 const BULLET_LIFE = 5; // five blocks
 const MAP_UPDATE_PERIOD = 3000; // ms per update
+const START_GAME_INTERVAL = 30_000; // millisecond
 
 const Facing2Direction = {
   'U': [0, 1],
@@ -16,9 +19,6 @@ const Facing2Direction = {
   'R': [1, 0],
   'L': [-1, 0],
 };
-
-// Bring out the FSM_ERROR for easier reference.
-const FSM_ERROR = InteractiveObjectServerBaseClass.FSM_ERROR;
 
 /**
  * This represents the bullet of battleroyale extension.
@@ -126,9 +126,11 @@ class Standalone {
 
     this.cooldown = new Set();
     this.fireCounter = 0;
-    this.gameStart = false;
-    this.gameUpdate = false;
+    this.gameStarted = false;
     this.updateMapIntervalIDs = [];
+    this.participatePlayerIDs = new Set(); // store playerID
+    this.playerOldPosition = new Map(); // [string, mapCoord] store player's position before tp to game
+
 
     await this.helper.gameState.registerOnPlayerUpdate((msg) => {
       try {
@@ -140,6 +142,70 @@ class Standalone {
 
     // register state functions for NPC
     await this.helper.callS2sAPI('npc', 'registerStateFunc');
+    const initTime = new Date();
+    const startTime = new Date(Math.floor((+initTime + START_GAME_INTERVAL - 1) / START_GAME_INTERVAL) * START_GAME_INTERVAL + START_GAME_INTERVAL/2);
+    alarm(startTime, this.setGameInterval.bind(this));
+  }
+
+  /**
+   * Game interval
+   */
+  setGameInterval() {
+    alarm.recurring(START_GAME_INTERVAL, this.startGame.bind(this));
+  }
+
+  /**
+   * start Game
+   * @return {Boolean} success or not
+   */
+  async startGame() {
+    if (this.gameStarted) {
+      await this.resetGame();
+    }
+    if (this.participatePlayerIDs.size < 2) {
+      for (const playerID of this.participatePlayerIDs) {
+        await this.helper.callS2cAPI(playerID, 'notification', 'showNotification', 3000, '[battleroyale] player not enough to start (less than 3)');
+      }
+      return false;
+    }
+    for (const playerID of this.participatePlayerIDs) {
+      const playerloc = await this.helper.getPlayerLocation(playerID);
+      this.playerOldPosition.set(playerID, playerloc);
+      await this.helper.callS2cAPI(playerID, 'notification', 'showNotification', 3000, '[battleroyale] Game Start!');
+      await this.teleportPlayer(playerID);
+    }
+
+    this.gameStarted = true;
+    const updateMap = setInterval(async () => {
+      for (const mapName of this.arenaOfMaps.keys()) {
+        const needUpdate = this.updateEdge(
+            this.fires, this.arenaOfMaps.get(mapName), this.fireCounter,
+        );
+        if (!needUpdate) {
+          clearInterval(updateMap);
+          return;
+        }
+        await this.helper.broadcastCellSetUpdateToAllUser(
+            'update',
+            mapName,
+            CellSet.fromObject({
+              name: LAYER_FIRE.layerName,
+              cells: Array.from(this.fires),
+            }),
+        );
+        const players = this.helper.gameState.getPlayers();
+        players.forEach((player, playerID) => {
+          if (this.helper.gameMap.getCell(player.mapCoord, LAYER_FIRE.layerName)) {
+            this.killPlayer(playerID);
+          }
+        });
+        this.fireCounter++;
+        this.fires.clear();
+      }
+    }, MAP_UPDATE_PERIOD);
+    this.updateMapIntervalIDs.push(updateMap);
+
+    return true;
   }
 
   /**
@@ -170,11 +236,12 @@ class Standalone {
    * @return {Boolean} success or not
    */
   async c2s_attack(player, mapCoord, facing) {
+    if (!this.participatePlayerIDs.has(player.playerID)) return;
     mapCoord = MapCoord.fromObject(mapCoord);
     // mapCoord has to be inside an arena
     // TODO: use the utility function in maplib if there is such function
     const inside = this.insideMap(mapCoord);
-    if (!inside || !this.gameUpdate) return false;
+    if (!inside || !this.gameStarted) return false;
     // ghost mode no attack
     // if (this.helper.gameState.getPlayer(player.playerID).ghostMode) return false;
 
@@ -188,8 +255,23 @@ class Standalone {
 
     const bulletID = this.bulletID++;
     const newBullet = new Bullet(bulletID, facing, mapCoord);
-    this.bullets.set(bulletID, newBullet);
 
+    // first tick die
+    if (!this.insideMap(newBullet.mapCoord) ||
+    this.helper.gameMap.getCell(newBullet.mapCoord, LAYER_OBSTACLE.layerName)) {
+      return true;
+    } else {
+      const players = this.helper.gameState.getPlayers();
+      players.forEach((player, playerID) => {
+        const {x, y} = newBullet.mapCoord;
+        if (player.mapCoord.x == x && player.mapCoord.y == y) {
+          this.killPlayer(playerID);
+          return true;
+        }
+      });
+    }
+
+    this.bullets.set(bulletID, newBullet);
     // render
     await this.helper.broadcastCellSetUpdateToAllUser(
         'update',
@@ -234,7 +316,7 @@ class Standalone {
           const {world, x, y} = bullet.mapCoord;
           const str = String(world)+'#'+String(x)+'#'+String(y);
           if (playerMap.has(str)) {
-            this.teleport(bullet.mapCoord, playerMap.get(str));
+            this.killPlayer(playerMap.get(str));
             bullet.deleteInterval();
             this.bullets.delete(bulletID);
             playerMap.delete(bullet.mapCoord);
@@ -265,7 +347,6 @@ class Standalone {
    * @return {Boolean} need further update or not
    */
   updateEdge(fires, cellSets, fireCounter) {
-    if (!this.gameUpdate) return true;
     let noUpdateCounter = 0; let totalCell = 0;
     for (const {cells} of cellSets) {
       for (const {x, y, w, h} of cells) {
@@ -303,176 +384,53 @@ class Standalone {
 
     const bullets = this.helper.gameMap.getCell(mapCoord, LAYER_BULLET.layerName);
     if (bullets) {
-      this.teleport(mapCoord, playerID);
+      this.killPlayer(playerID);
       return;
     }
 
     const fire = this.helper.gameMap.getCell(mapCoord, LAYER_FIRE.layerName);
     if (fire) {
-      this.teleport(mapCoord, playerID);
+      this.killPlayer(playerID);
       return;
     }
 
     return;
   }
 
-  /**
-   *
-   * @param {MapCoord} mapCoord
-   * @param {String} playerID
-   * @return {undefined}
-   */
-  teleport(mapCoord, playerID) {
-    const target = mapCoord.copy();
-    target.x = 1;
-    target.y = 1;
-    this.helper.teleport(playerID, target, true);
-  }
 
-  /**
-   * Start the game and update edge
-   * @return {Boolean} successfully start or not
-   */
-  startGame() {
-    if (this.gameStart) {
-      return false;
-    }
-    const updateMap = setInterval( async () => {
-      for (const mapName of this.arenaOfMaps.keys()) { // maybe not multi-map friendly
-        const needUpdate = this.updateEdge(
-            this.fires, this.arenaOfMaps.get(mapName), this.fireCounter,
-        );
-        if (this.gameUpdate) {
-          if (!needUpdate) {
-            clearInterval(updateMap);
-            this.gameUpdate = false;
-            return;
-          }
-          await this.helper.broadcastCellSetUpdateToAllUser(
-              'update',
-              mapName,
-              CellSet.fromObject({
-                name: LAYER_FIRE.layerName,
-                cells: Array.from(this.fires),
-              }),
-          );
-          const players = this.helper.gameState.getPlayers();
-          players.forEach((player, playerID) => {
-            if (this.helper.gameMap.getCell(player.mapCoord, LAYER_FIRE.layerName)) {
-              this.teleport(player.mapCoord, playerID);
-            }
-          });
-          this.fireCounter++;
-          this.fires.clear();
-        }
-      }
-    }, MAP_UPDATE_PERIOD);
-    this.updateMapIntervalIDs.push(updateMap);
-
-    return true;
-  }
   // ----------------------------------
   // State function for NPC
   // ----------------------------------
 
   /**
    * Show a dialog overlay in client browser.
+   * @param {*} srcExt
    * @param {String} playerID
    * @param {Object} kwargs - TODO
+   * @param {*} sfInfo
    * @return {String} - the next state
    */
-  async s2s_sf_startBattleroyale(srcExt, playerID, kwargs, sfInfo) {
+  async s2s_sf_joinBattleroyale(srcExt, playerID, kwargs, sfInfo) {
     const {next} = kwargs;
-    if (this.gameStart) {
-      console.log('game have already started');
-      return next;
-    }
-    try {
-      const success = this.startGame();
-      if (!success) {
-        console.log('Game start fail');
-        return next;
-      }
-      this.gameStart = true;
-      this.gameUpdate = true;
-      return next;
-    } catch (e) {
-      console.error(e);
-      return FSM_ERROR;
-    }
+    this.participatePlayerIDs.add(playerID);
+    await this.helper.callS2cAPI(playerID, 'notification', 'showNotification', 3000, '[battleroyale] Join game successfully');
+    return next;
   }
 
-  // TODO: authority check
-
   /**
-   * reset the game
+   *
    * @param {*} srcExt
    * @param {String} playerID
    * @param {Object} kwargs
    * @param {*} sfInfo
    * @return {String} - the next state
    */
-  async s2s_sf_resetBattleroyale(srcExt, playerID, kwargs, sfInfo) {
+  async s2s_sf_quitBattleroyale(srcExt, playerID, kwargs, sfInfo) {
     const {next} = kwargs;
-    try {
-      this.fires = new Set();
-      this.cooldown = new Set();
-      this.fireCounter = 0;
-      this.gameStart = false;
-      this.gameUpdate = false;
-      for (const mapName of this.arenaOfMaps.keys()) {
-        await this.helper.broadcastCellSetUpdateToAllUser(
-            'update',
-            mapName,
-            CellSet.fromObject({
-              name: LAYER_FIRE.layerName,
-              cells: Array.from(this.fires),
-            }),
-        );
-        await this.helper.broadcastCellSetUpdateToAllUser(
-            'update',
-            mapName,
-            CellSet.fromObject({
-              name: LAYER_BULLET.layerName,
-              cells: Array.from(
-                  this.bullets,
-                  ([_, v]) => v['mapCoord'],
-              ),
-            }),
-        );
-      }
-      for (const ID of this.updateMapIntervalIDs) {
-        clearInterval(ID);
-      }
-      this.updateMapIntervalIDs = [];
-
-      return next;
-    } catch (e) {
-      console.error(e);
-      return FSM_ERROR;
+    if (this.participatePlayerIDs.has(playerID)) {
+      this.participatePlayerIDs.delete(playerID);
     }
-  }
-
-  /**
-   * reset the game
-   * @param {*} srcExt
-   * @param {String} playerID
-   * @param {Object} kwargs
-   * @param {*} sfInfo
-   * @return {String} - the next state
-   */
-  async s2s_sf_pauseBattleroyale(srcExt, playerID, kwargs, sfInfo) {
-    const {next} = kwargs;
-    try {
-      if (!this.gameStart) {
-        console.log('The game has not started yet');
-      }
-      this.gameUpdate = !this.gameUpdate;
-      return next;
-    } catch (e) {
-      console.error(e);
-      return FSM_ERROR;
-    }
+    return next;
   }
 
   /**
@@ -482,6 +440,92 @@ class Standalone {
    */
   async s2s_provideStateFunc(srcExt, registerFunc) {
     this.helper.callS2sAPI(srcExt, registerFunc, this.helper.getListOfStateFunctions(this));
+  }
+
+  /**
+   * kill player and tp
+   * @param {String} playerID player ID
+   * @param {Boolean} endGame kill player and terminate
+   */
+  async killPlayer(playerID, endGame = false) {
+    let target;
+    if (this.playerOldPosition.has(playerID)) {
+      target = this.playerOldPosition.get(playerID);
+    } else { // default
+      const player = this.helper.gameState.getPlayer(playerID);
+      target = player.mapCoord.copy();
+      target.x = 1;
+      target.y = 1;
+    }
+    await this.helper.teleport(playerID, target, true);
+    this.playerOldPosition.delete(playerID);
+    this.participatePlayerIDs.delete(playerID);
+    if (this.participatePlayerIDs.size <= 1 && !endGame) {
+      await this.terminateGame();
+    }
+  }
+
+  /**
+   * @param {String} playerID playerID
+   */
+  async teleportPlayer(playerID) {
+    const player = this.helper.gameState.getPlayer(playerID);
+    const target = player.mapCoord.copy();
+    target.x = 25;
+    target.y = 25;
+    await this.helper.teleport(playerID, target, true);
+  }
+
+  /**
+   * game is over give trophy and quit
+   */
+  async terminateGame() {
+    for (const playerID of this.participatePlayerIDs) {
+      await this.helper.callS2cAPI(playerID, 'notification', 'showNotification', 3000, '[battleroyale] You Win!');
+      // TODO: give item
+    }
+
+    for (const playerID of this.participatePlayerIDs) {
+      await this.killPlayer(playerID, true);
+    }
+
+    await this.resetGame();
+  }
+
+  /**
+   * reset the whole game
+   */
+  async resetGame() {
+    this.gameStarted = false;
+    this.fires = new Set();
+    this.cooldown = new Set();
+    this.fireCounter = 0;
+    this.gameStarted = false;
+    for (const mapName of this.arenaOfMaps.keys()) {
+      await this.helper.broadcastCellSetUpdateToAllUser(
+          'update',
+          mapName,
+          CellSet.fromObject({
+            name: LAYER_FIRE.layerName,
+            cells: Array.from(this.fires),
+          }),
+      );
+      await this.helper.broadcastCellSetUpdateToAllUser(
+          'update',
+          mapName,
+          CellSet.fromObject({
+            name: LAYER_BULLET.layerName,
+            cells: Array.from(
+                this.bullets,
+                ([_, v]) => v['mapCoord'],
+            ),
+          }),
+      );
+    }
+    for (const ID of this.updateMapIntervalIDs) {
+      clearInterval(ID);
+    }
+    this.updateMapIntervalIDs = [];
   }
 }
 

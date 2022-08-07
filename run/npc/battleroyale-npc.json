@@ -24,32 +24,25 @@
           "kwargs": {
             "dialogs": "What do you want to do with battleroyale game ?",
             "options": {
-              "Start Game": "s2",
-              "Reset Game": "s3",
-              "Pause/Resume Game": "s4",
-              "Bye!": "s5"
+              "Join Game": "s2",
+              "Regret to join Game": "s3",
+              "Bye!": "s4"
             }
           }
         },
         "s2": {
-            "func": "startBattleroyale",
+            "func": "joinBattleroyale",
             "kwargs": {
-                "next": "s5"
+                "next": "s4"
             }
         },
         "s3": {
-            "func": "resetBattleroyale",
+            "func": "quitBattleroyale",
             "kwargs": {
-                "next": "s5"
+                "next": "s4"
             }
         },
         "s4": {
-            "func": "pauseBattleroyale",
-            "kwargs": {
-                "next": "s5"
-            }
-        },
-        "s5": {
             "func": "exit",
             "kwargs": {
                 "next": "s1"
