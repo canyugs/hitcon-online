@@ -162,6 +162,7 @@ class Standalone {
 
     // allow items to call the state functions provided by other extensions
     await this.helper.callS2sAPI('iobj-lib', 'provideStateFunc', 'registerStateFuncToItems');
+    await this.helper.callS2sAPI('items', 'provideStateFunc', 'registerStateFuncToItems');
   }
 
   /**

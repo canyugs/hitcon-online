@@ -112,6 +112,7 @@ class Standalone {
     await this._loadFromDisk();
 
     await this.helper.callS2sAPI('iobj-lib', 'provideStateFunc', 'registerStateFuncToTerminals');
+    await this.helper.callS2sAPI('items', 'provideStateFunc', 'registerStateFuncToTerminals');
     this.terminalObjects.forEach((v) => {
       v.registerExtStateFuncAll(
           'escape-game',
