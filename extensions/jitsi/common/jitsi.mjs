@@ -546,7 +546,7 @@ class JitsiHandler {
       const aid = $(a).attr('data-id');
       const bid = $(b).attr('data-id');
       return this.participantSmoothedSounds[bid] - this.participantSmoothedSounds[aid];
-    })
+    });
     remoteUserDOM.slice(0, REMOTE_USER_MAXAMOUNT).appendTo('#jitsi-remote-container');
     remoteUserDOM.slice(REMOTE_USER_MAXAMOUNT).appendTo('#jitsi-modal-container');
   }

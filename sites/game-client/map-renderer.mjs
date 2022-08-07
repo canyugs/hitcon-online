@@ -256,7 +256,7 @@ class MapRenderer {
       return {
         x: Math.floor(coord.x * MAP_CELL_SIZE),
         y: Math.floor(targetCanvas.height - coord.y * MAP_CELL_SIZE),
-      }
+      };
     }
 
     // relative coordinate
@@ -402,7 +402,7 @@ class MapRenderer {
         targetLock = this._generateForegroundLock;
         targetCanvas = this.foregroundCanvas;
         targetLayers = this.customizedForegroundLayers;
-        targetCtx = this.foregroundCtx
+        targetCtx = this.foregroundCtx;
         break;
       case 'background':
         targetLock = this._generateBackgroundLock;

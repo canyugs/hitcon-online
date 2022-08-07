@@ -123,7 +123,7 @@ class Standalone {
       this.doorCells = [config.get('escape-game.doorPosition')];
     } else {
       console.warn('No escape-game.doorPosition defined');
-      this.doorCells = []
+      this.doorCells = [];
     }
     const mapName = "world1";
     await this.helper.broadcastCellSetUpdateToAllUser(
@@ -455,7 +455,7 @@ class Standalone {
    */
    async c2s_getCertificateItem(player, token) {
     if (!config.has('escape-game.certificateC2sToken')) {
-      return "Server error. Please contact devs."
+      return "Server error. Please contact devs.";
     } else if (config.get('escape-game.certificateC2sToken') === token) {
         return await this.helper.callS2sAPI('items', 'AddItem', player.playerID, 'certificate', 1, 1);
     } else {

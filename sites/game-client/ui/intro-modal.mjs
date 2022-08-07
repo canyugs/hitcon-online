@@ -61,7 +61,7 @@ const introPagesData = [
     images: ['/static/sites/game-client/intro-6@2x.png'],
     contentDirection: 'row',
   },
-]
+];
 
 class IntroModal extends Modal {
   constructor(mainUI) {

@@ -115,7 +115,7 @@ class Standalone {
     const res = await this.helper.callS2cAPI(playerID, 'dialog',
         'showDialogWithPrompt', 60*1000, sfInfo.visibleName, dialog);
 
-    let wind = otpWindow
+    let wind = otpWindow;
     if (typeof wind === 'undefined') {
       // Defaults to 60 seconds of leniency.
       wind = 2;
