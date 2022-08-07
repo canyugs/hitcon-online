@@ -140,7 +140,7 @@ class Client {
         if (msg.mapCoord.distanceTo1(npc[1].mapCoord) <= (npc[1].distanceLimit ?
             Math.min(npc[1].distanceLimit, NPC_HINT_DIST) : NPC_HINT_DIST)) {
           this.helper.mainUI.showNPCHint(npc[1].displayName, npc[1].displayCharImgSrc);
-          return
+          return;
         }
       }
     }

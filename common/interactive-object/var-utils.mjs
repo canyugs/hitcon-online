@@ -1,10 +1,10 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
-const GLOB_KEY = 'global_vars'
-const PPLAYER_KEY = 'per_player_vars'
-const POBJ_KEY = 'per_obj_vars'
-const UNIQ_KEY = 'uniq_vars'
+const GLOB_KEY = 'global_vars';
+const PPLAYER_KEY = 'per_player_vars';
+const POBJ_KEY = 'per_obj_vars';
+const UNIQ_KEY = 'uniq_vars';
 
 /**
  * VarUtils provides utilities for accessing variables.

@@ -71,7 +71,7 @@ class AssetServer {
     console.assert(clientType === 'desktop' || clientType === 'mobile',
                    'clientType must be desktop or mobile in _createClientParams');
     const result = {};
-    result.inDiv = []
+    result.inDiv = [];
 
     let partials = await this.extMan.collectPartials(this.extMan.listExtensions(), clientType);
     result.inDiv = [];

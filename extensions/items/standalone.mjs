@@ -762,7 +762,7 @@ class Standalone {
    *   name to the amounts.
    */
   async s2s_CountMultiItems(srcExtName, playerID, items) {
-    const result = {}
+    const result = {};
     result.amounts = {};
     for (const itm of items) {
       result.amounts[itm] = this._countItem(playerID, itm);
