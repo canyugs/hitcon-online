@@ -42,8 +42,7 @@ class Standalone {
   async initialize() {
     // get the default arena of every map
     this.arenaOfMaps = this.helper.gameMap.getOriginalCellSetStartWith('bombmanArena');
-    this.obstaclesOfMaps = this.helper.gameMap.getOriginalCellSetStartWith('bombmanObstacles');
-
+    
     // set dynamic cell set: bombmanHasBomb
     this.bombCells = new Map(); // key: a unique bomb ID; value: the cell
     this.bombID = 0;
