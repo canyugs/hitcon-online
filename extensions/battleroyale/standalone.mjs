@@ -52,16 +52,6 @@ class Bullet {
   }
 
   /**
-   * retrun bullet in this coord
-   * @param {MapCoord} coord
-   * @return {Boolean}
-   */
-  atCoord(coord) {
-    return this.mapCoord.x == coord.x &&
-     this.mapCoord.y == coord.y;
-  }
-
-  /**
    * delete the interval
    * @return {undefined}
    */
@@ -131,7 +121,6 @@ class Standalone {
     this.participatePlayerIDs = new Set(); // store playerID
     this.playerOldPosition = new Map(); // [string, mapCoord] store player's position before tp to game
 
-
     await this.helper.gameState.registerOnPlayerUpdate((msg) => {
       try {
         this.onPlayerUpdate(msg);
@@ -149,7 +138,6 @@ class Standalone {
     // get config from default
     if (config.has('battleroyale.arena')) {
       this.arenaPos = config.get('battleroyale.arena');
-      console.log(this.arenaPos);
     } else {
       // default position
       this.arenaPos = {x: 25, y: 25};
@@ -171,7 +159,7 @@ class Standalone {
     if (this.gameStarted) {
       await this.resetGame();
     }
-    if (this.participatePlayerIDs.size < 3) {
+    if (this.participatePlayerIDs.size < 2) {
       for (const playerID of this.participatePlayerIDs) {
         await this.helper.callS2cAPI(playerID, 'notification', 'showNotification', 3000, '[battleroyale] player not enough to start (less than 3)');
       }
@@ -203,9 +191,9 @@ class Standalone {
             }),
         );
         const players = this.helper.gameState.getPlayers();
-        players.forEach((player, playerID) => {
+        players.forEach(async (player, playerID) => {
           if (this.helper.gameMap.getCell(player.mapCoord, LAYER_FIRE.layerName)) {
-            this.killPlayer(playerID);
+            await this.killPlayer(playerID);
           }
         });
         this.fireCounter++;
@@ -223,17 +211,8 @@ class Standalone {
    * @return {Boolean} inside or not
    */
   insideMap(cellCoord) {
-    for (const {cells} of this.arenaOfMaps.get(cellCoord.mapName)) {
-      for (const cell of cells) {
-        const width = cell.w ?? 1;
-        const height = cell.h ?? 1;
-        if (cell.x <= cellCoord.x && cellCoord.x < cell.x + width &&
-          cell.y <= cellCoord.y && cellCoord.y < cell.y + height) {
-          return true;
-        }
-      }
-    }
-    return false;
+    const cellsets = this.arenaOfMaps.get(cellCoord.mapName);
+    return cellsets.some((cellset) => cellset.containsMapCoord(cellCoord));
   }
 
   /**
@@ -269,16 +248,14 @@ class Standalone {
     if (!this.insideMap(newBullet.mapCoord) ||
     this.helper.gameMap.getCell(newBullet.mapCoord, LAYER_OBSTACLE.layerName)) {
       return true;
-    } else {
-      const players = this.helper.gameState.getPlayers();
-      players.forEach((player, playerID) => {
-        const {x, y} = newBullet.mapCoord;
-        if (player.mapCoord.x == x && player.mapCoord.y == y) {
-          this.killPlayer(playerID);
-          return true;
-        }
-      });
     }
+    const players = this.helper.gameState.getPlayers();
+    players.forEach(async (player, playerID) => {
+      if (newBullet.mapCoord.equalsTo(player.mapCoord)) {
+        await this.killPlayer(playerID);
+        return true;
+      }
+    });
 
     this.bullets.set(bulletID, newBullet);
     // render
@@ -315,7 +292,6 @@ class Standalone {
             }),
         );
       } else {
-        const players = this.helper.gameState.getPlayers();
         const playerMap = new Map();
         players.forEach((player, playerID) => {
           const {world, x, y} = player.mapCoord;
@@ -325,7 +301,7 @@ class Standalone {
           const {world, x, y} = bullet.mapCoord;
           const str = String(world)+'#'+String(x)+'#'+String(y);
           if (playerMap.has(str)) {
-            this.killPlayer(playerMap.get(str));
+            await this.killPlayer(playerMap.get(str));
             bullet.deleteInterval();
             this.bullets.delete(bulletID);
             playerMap.delete(bullet.mapCoord);
@@ -345,9 +321,9 @@ class Standalone {
       }
     }, BULLET_SPEED, bulletID);
 
-
     return true;
   }
+
   /**
    * Given a gameMap return all edge
    * @param {Set} fires the fire Set
@@ -393,62 +369,17 @@ class Standalone {
 
     const bullets = this.helper.gameMap.getCell(mapCoord, LAYER_BULLET.layerName);
     if (bullets) {
-      this.killPlayer(playerID);
+      await this.killPlayer(playerID);
       return;
     }
 
     const fire = this.helper.gameMap.getCell(mapCoord, LAYER_FIRE.layerName);
     if (fire) {
-      this.killPlayer(playerID);
+      await this.killPlayer(playerID);
       return;
     }
 
     return;
-  }
-
-
-  // ----------------------------------
-  // State function for NPC
-  // ----------------------------------
-
-  /**
-   * Show a dialog overlay in client browser.
-   * @param {*} srcExt
-   * @param {String} playerID
-   * @param {Object} kwargs - TODO
-   * @param {*} sfInfo
-   * @return {String} - the next state
-   */
-  async s2s_sf_joinBattleroyale(srcExt, playerID, kwargs, sfInfo) {
-    const {next} = kwargs;
-    this.participatePlayerIDs.add(playerID);
-    await this.helper.callS2cAPI(playerID, 'notification', 'showNotification', 3000, '[battleroyale] Join game successfully');
-    return next;
-  }
-
-  /**
-   *
-   * @param {*} srcExt
-   * @param {String} playerID
-   * @param {Object} kwargs
-   * @param {*} sfInfo
-   * @return {String} - the next state
-   */
-  async s2s_sf_quitBattleroyale(srcExt, playerID, kwargs, sfInfo) {
-    const {next} = kwargs;
-    if (this.participatePlayerIDs.has(playerID)) {
-      this.participatePlayerIDs.delete(playerID);
-    }
-    return next;
-  }
-
-  /**
-   * provide state function to npc
-   * @param {*} srcExt
-   * @param {*} registerFunc
-   */
-  async s2s_provideStateFunc(srcExt, registerFunc) {
-    this.helper.callS2sAPI(srcExt, registerFunc, this.helper.getListOfStateFunctions(this));
   }
 
   /**
@@ -457,6 +388,7 @@ class Standalone {
    * @param {Boolean} endGame kill player and terminate
    */
   async killPlayer(playerID, endGame = false) {
+    if (!this.participatePlayerIDs.has(playerID)) return;
     let target;
     if (this.playerOldPosition.has(playerID)) {
       target = this.playerOldPosition.get(playerID);
@@ -510,6 +442,7 @@ class Standalone {
     this.cooldown = new Set();
     this.fireCounter = 0;
     this.gameStarted = false;
+    this.participatePlayerIDs = new Set();
     for (const mapName of this.arenaOfMaps.keys()) {
       await this.helper.broadcastCellSetUpdateToAllUser(
           'update',
@@ -534,7 +467,51 @@ class Standalone {
     for (const ID of this.updateMapIntervalIDs) {
       clearInterval(ID);
     }
-    this.updateMapIntervalIDs = [];
+    this.updateMapIntervalIDs.length = 0;
+  }
+
+  // ----------------------------------
+  // State function for NPC
+  // ----------------------------------
+
+  /**
+   * Show a dialog overlay in client browser.
+   * @param {*} srcExt
+   * @param {String} playerID
+   * @param {Object} kwargs - TODO
+   * @param {*} sfInfo
+   * @return {String} - the next state
+   */
+  async s2s_sf_joinBattleroyale(srcExt, playerID, kwargs, sfInfo) {
+    const {next} = kwargs;
+    this.participatePlayerIDs.add(playerID);
+    await this.helper.callS2cAPI(playerID, 'notification', 'showNotification', 3000, '[battleroyale] Join game successfully');
+    return next;
+  }
+
+  /**
+   *
+   * @param {*} srcExt
+   * @param {String} playerID
+   * @param {Object} kwargs
+   * @param {*} sfInfo
+   * @return {String} - the next state
+   */
+  async s2s_sf_quitBattleroyale(srcExt, playerID, kwargs, sfInfo) {
+    const {next} = kwargs;
+    if (this.participatePlayerIDs.has(playerID)) {
+      this.participatePlayerIDs.delete(playerID);
+    }
+    return next;
+  }
+
+  /**
+   * provide state function to npc
+   * @param {*} srcExt
+   * @param {*} registerFunc
+   */
+  async s2s_provideStateFunc(srcExt, registerFunc) {
+    this.helper.callS2sAPI(srcExt, registerFunc, this.helper.getListOfStateFunctions(this));
   }
 }
 
