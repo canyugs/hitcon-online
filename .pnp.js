@@ -2729,6 +2729,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageDependencies": [
             ["hitcon-online-battleroyale", "workspace:extensions/battleroyale"],
             ["alarm", "npm:2.0.0"],
+            ["async-lock", "npm:1.3.2"],
             ["config", "npm:3.3.7"]
           ],
           "linkType": "SOFT",
