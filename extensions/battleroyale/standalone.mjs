@@ -137,10 +137,11 @@ class Standalone {
 
     // get config from default
     if (config.has('battleroyale.arena')) {
-      this.arenaPos = config.get('battleroyale.arena');
+      const {mapName, x, y} = config.get('battleroyale.arena');
+      this.arenaCoord = new MapCoord(mapName, x, y);
     } else {
       // default position
-      this.arenaPos = {x: 25, y: 25};
+      this.arenaCoord = new MapCoord('world1', 1, 1);
     }
   }
 
@@ -410,10 +411,7 @@ class Standalone {
    * @param {String} playerID playerID
    */
   async teleportPlayer(playerID) {
-    const player = this.helper.gameState.getPlayer(playerID);
-    const target = player.mapCoord.copy();
-    target.x = this.arenaPos.x;
-    target.y = this.arenaPos.y;
+    const target = this.arenaCoord;
     await this.helper.teleport(playerID, target, true);
   }
 
