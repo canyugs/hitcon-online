@@ -1428,6 +1428,14 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["json5", "npm:2.2.0"]
           ],
           "linkType": "HARD",
+        }],
+        ["npm:3.3.7", {
+          "packageLocation": "./.yarn/cache/config-npm-3.3.7-05ecd74a04-595aef295a.zip/node_modules/config/",
+          "packageDependencies": [
+            ["config", "npm:3.3.7"],
+            ["json5", "npm:2.2.0"]
+          ],
+          "linkType": "HARD",
         }]
       ]],
       ["console-control-strings", [
@@ -2724,7 +2732,8 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./extensions/bombman/",
           "packageDependencies": [
             ["hitcon-online-bombman", "workspace:extensions/bombman"],
-            ["alarm", "npm:2.0.0"]
+            ["alarm", "npm:2.0.0"],
+            ["config", "npm:3.3.7"]
           ],
           "linkType": "SOFT",
         }]

@@ -1013,6 +1013,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"config@npm:^3.3.7":
+  version: 3.3.7
+  resolution: "config@npm:3.3.7"
+  dependencies:
+    json5: ^2.1.1
+  checksum: 595aef295a106d8f70f958e1bc5feed88528e93b3b72b92d411f163b7496c9e971a5cca3bd36b4a35e0fbddcc2dfe0b093a32373ed8209adf3f76ac60aaef3b6
+  languageName: node
+  linkType: hard
+
 "console-control-strings@npm:^1.0.0, console-control-strings@npm:~1.1.0":
   version: 1.1.0
   resolution: "console-control-strings@npm:1.1.0"
@@ -2077,6 +2086,7 @@ __metadata:
   resolution: "hitcon-online-bombman@workspace:extensions/bombman"
   dependencies:
     alarm: ^2.0.0
+    config: ^3.3.7
   languageName: unknown
   linkType: soft
 

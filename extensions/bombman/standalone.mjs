@@ -7,6 +7,7 @@ import {MapCoord} from '../../common/maplib/map.mjs';
 import {createRequire} from 'module';
 const require = createRequire(import.meta.url);
 const alarm = require('alarm');
+const config = require('config');
 
 const BOMB_COUNTDOWN = 3000; // millisecond
 const BOMB_EXPLODE_TIME = 500; // millisecond
@@ -92,6 +93,14 @@ class Standalone {
     const initTime = new Date();
     const startTime = new Date(Math.floor((+initTime + START_GAME_INTERVAL - 1) / START_GAME_INTERVAL) * START_GAME_INTERVAL);
     alarm(startTime, this.setGameInterval.bind(this));
+
+    // get config from default
+    if (config.has('bombman.arena')) {
+      this.arenaPos = config.get('bombman.arena');
+    } else {
+      // default position
+      this.arenaPos = {x: 10, y: 5};
+    }
   }
 
   /**
@@ -131,17 +140,8 @@ class Standalone {
    * @return {Boolean} inside or not
    */
   insideMap(cellCoord) {
-    for (const {cells} of this.arenaOfMaps.get(cellCoord.mapName)) {
-      for (const cell of cells) {
-        const width = cell.w ?? 1;
-        const height = cell.h ?? 1;
-        if (cell.x <= cellCoord.x && cellCoord.x < cell.x + width &&
-          cell.y <= cellCoord.y && cellCoord.y < cell.y + height) {
-          return true;
-        }
-      }
-    }
-    return false;
+    const cellsets = this.arenaOfMaps.get(cellCoord.mapName);
+    return cellsets.some((cellset) => cellset.containsMapCoord(cellCoord));
   }
 
   /**
@@ -334,8 +334,8 @@ class Standalone {
     } else { // default
       const player = this.helper.gameState.getPlayer(playerID);
       target = player.mapCoord.copy();
-      target.x = 10;
-      target.y = 5;
+      target.x = 1;
+      target.y = 1;
       this.playerOldPosition.get(playerID);
     }
 
@@ -352,8 +352,8 @@ class Standalone {
   async teleportPlayer(playerID) {
     const player = this.helper.gameState.getPlayer(playerID);
     const target = player.mapCoord.copy();
-    target.x = 10;
-    target.y = 5;
+    target.x = this.arenaPos.x;
+    target.y = this.arenaPos.y;
     await this.helper.teleport(playerID, target, true);
   }
 
