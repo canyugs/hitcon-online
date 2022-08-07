@@ -4,5 +4,8 @@
   "exports": {
     "standalone": "./standalone.mjs",
     "in-gateway": "./in-gateway.mjs"
+  },
+  "dependencies": {
+    "alarm": "^2.0.0"
   }
 }

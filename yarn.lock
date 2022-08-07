@@ -2078,6 +2078,8 @@ __metadata:
 "hitcon-online-battleroyale@workspace:extensions/battleroyale":
   version: 0.0.0-use.local
   resolution: "hitcon-online-battleroyale@workspace:extensions/battleroyale"
+  dependencies:
+    alarm: ^2.0.0
   languageName: unknown
   linkType: soft
 
