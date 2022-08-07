@@ -96,10 +96,11 @@ class Standalone {
 
     // get config from default
     if (config.has('bombman.arena')) {
-      this.arenaPos = config.get('bombman.arena');
+      let {mapName, x, y} = config.get('bombman.arena');
+      this.arenaCoord = new MapCoord(mapName, x, y);
     } else {
-      // default position
-      this.arenaPos = {x: 10, y: 5};
+      // default position (if no config)
+      this.arenaCoord = new MapCoord('world1', 1, 1);
     }
   }
 
@@ -330,16 +331,12 @@ class Standalone {
     let target;
     if (this.playerOldPosition.has(playerID)) {
       target = this.playerOldPosition.get(playerID);
-      this.playerOldPosition.delete(playerID);
     } else { // default
-      const player = this.helper.gameState.getPlayer(playerID);
-      target = player.mapCoord.copy();
-      target.x = 1;
-      target.y = 1;
-      this.playerOldPosition.get(playerID);
+      target = this.helper.gameMap.getRandomSpawnPoint();
     }
-
+    
     await this.helper.teleport(playerID, target, true);
+    this.playerOldPosition.delete(playerID);
     this.participatePlayerIDs.delete(playerID);
     if (this.participatePlayerIDs.size <= 1 && !endGame) {
       await this.terminateGame();
@@ -351,9 +348,7 @@ class Standalone {
    */
   async teleportPlayer(playerID) {
     const player = this.helper.gameState.getPlayer(playerID);
-    const target = player.mapCoord.copy();
-    target.x = this.arenaPos.x;
-    target.y = this.arenaPos.y;
+    const target = this.arenaCoord.copy();
     await this.helper.teleport(playerID, target, true);
   }
 

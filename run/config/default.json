@@ -65,7 +65,7 @@
     "doorPosition": {"x": 9, "y": 12, "h": 1, "w": 1}
   },
   "bombman": {
-    "arena": {"x":10, "y":5}
+    "arena": {"mapName":"world1","x":10, "y":5}
   },
   "publicAddress": null,
   "allowedOrigins": []
