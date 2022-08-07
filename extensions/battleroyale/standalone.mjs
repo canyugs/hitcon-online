@@ -159,7 +159,7 @@ class Standalone {
     if (this.gameStarted) {
       await this.resetGame();
     }
-    if (this.participatePlayerIDs.size < 2) {
+    if (this.participatePlayerIDs.size < 3) {
       for (const playerID of this.participatePlayerIDs) {
         await this.helper.callS2cAPI(playerID, 'notification', 'showNotification', 3000, '[battleroyale] player not enough to start (less than 3)');
       }
