@@ -100,7 +100,6 @@ class Standalone {
     for (let i = 0; i < wind*2+1; i++) {
       const tryTime = now+(i-wind)*30*1000;
       const ref = totp(secret, {timestamp: tryTime});
-      console.log(`${secret} ${(i-wind)} : '${ref}' '${target}'`);
       if (ref === target) return true;
     }
     return false;
@@ -115,11 +114,9 @@ class Standalone {
     const res = await this.helper.callS2cAPI(playerID, 'dialog',
         'showDialogWithPrompt', 60*1000, sfInfo.visibleName, dialog);
 
-    let wind = otpWindow;
-    if (typeof wind === 'undefined') {
-      // Defaults to 60 seconds of leniency.
-      wind = 2;
-    }
+    // Defaults to 60 seconds of leniency.
+    const wind = otpWindow ?? 2;
+
     if (this._checkOtpWithWindow(secret, res.msg, wind)) return nextState;
 
     //The key is wrong,
