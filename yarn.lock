@@ -2080,6 +2080,7 @@ __metadata:
   resolution: "hitcon-online-battleroyale@workspace:extensions/battleroyale"
   dependencies:
     alarm: ^2.0.0
+    config: ^3.3.7
   languageName: unknown
   linkType: soft
 

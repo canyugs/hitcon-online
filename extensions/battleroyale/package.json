@@ -6,6 +6,7 @@
     "in-gateway": "./in-gateway.mjs"
   },
   "dependencies": {
-    "alarm": "^2.0.0"
+    "alarm": "^2.0.0",
+    "config": "^3.3.7"
   }
 }

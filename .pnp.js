@@ -2728,7 +2728,8 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./extensions/battleroyale/",
           "packageDependencies": [
             ["hitcon-online-battleroyale", "workspace:extensions/battleroyale"],
-            ["alarm", "npm:2.0.0"]
+            ["alarm", "npm:2.0.0"],
+            ["config", "npm:3.3.7"]
           ],
           "linkType": "SOFT",
         }]

@@ -68,6 +68,9 @@
   "bombman": {
     "arena": {"mapName":"world1","x":10, "y":5}
   },
+  "battleroyale": {
+    "arena": {"x":25, "y":25}
+  },
   "publicAddress": null,
   "allowedOrigins": []
 }

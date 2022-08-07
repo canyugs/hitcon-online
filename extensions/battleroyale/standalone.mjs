@@ -7,6 +7,7 @@ import CellSet from '../../common/maplib/cellset.mjs';
 import {createRequire} from 'module';
 const require = createRequire(import.meta.url);
 const alarm = require('alarm');
+const config = require('config');
 
 const BULLET_SPEED = 100; // ms per block (lower -> quicker)
 const BULLET_LIFE = 5; // five blocks
@@ -92,8 +93,7 @@ class Standalone {
   async initialize() {
     // get the default arena of every map
     this.arenaOfMaps = this.helper.gameMap.getOriginalCellSetStartWith('battleroyaleArena');
-    this.obstaclesOfMaps = this.helper.gameMap.getOriginalCellSetStartWith('battleroyaleObstacles');
-
+    
     this.bullets = new Map(); // key: bullet ID; value: Bullet
     this.bulletID = 0;
 
@@ -145,6 +145,15 @@ class Standalone {
     const initTime = new Date();
     const startTime = new Date(Math.floor((+initTime + START_GAME_INTERVAL - 1) / START_GAME_INTERVAL) * START_GAME_INTERVAL + START_GAME_INTERVAL/2);
     alarm(startTime, this.setGameInterval.bind(this));
+
+    // get config from default
+    if (config.has('battleroyale.arena')) {
+      this.arenaPos = config.get('battleroyale.arena');
+      console.log(this.arenaPos);
+    } else {
+      // default position
+      this.arenaPos = {x: 25, y: 25};
+    }
   }
 
   /**
@@ -471,8 +480,8 @@ class Standalone {
   async teleportPlayer(playerID) {
     const player = this.helper.gameState.getPlayer(playerID);
     const target = player.mapCoord.copy();
-    target.x = 25;
-    target.y = 25;
+    target.x = this.arenaPos.x;
+    target.y = this.arenaPos.y;
     await this.helper.teleport(playerID, target, true);
   }
 
