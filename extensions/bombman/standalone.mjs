@@ -273,6 +273,20 @@ class Standalone {
       // No location? Just skip.
       return;
     }
+
+    if (msg.removed) {
+      // player disconnect, remove player if exists
+      if (this.participatePlayerIDs.has(playerID)) {
+        this.participatePlayerIDs.delete(playerID);
+      }
+      if (this.playerOldPosition.has(playerID)) {
+        this.playerOldPosition.delete(playerID);
+      }
+      if (this.participatePlayerIDs.size <= 1) {
+        await this.terminateGame();
+      }
+    }
+
     const explodeCell = this.helper.gameMap.getCell(mapCoord, LAYER_BOMB_EXPLODE.layerName);
     if (explodeCell) { // if walk into bomb => teleport to somewhere
       await this.killPlayer(playerID);

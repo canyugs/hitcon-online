@@ -367,7 +367,19 @@ class Standalone {
       // No location? Just skip.
       return;
     }
-
+    if (msg.removed) {
+      console.log(`${playerID} disconnect`)
+      // player disconnect, remove player if exists
+      if (this.participatePlayerIDs.has(playerID)) {
+        this.participatePlayerIDs.delete(playerID);
+      }
+      if (this.playerOldPosition.has(playerID)) {
+        this.playerOldPosition.delete(playerID);
+      }
+      if (this.participatePlayerIDs.size <= 1) {
+        await this.terminateGame();
+      }
+    }
     const bullets = this.helper.gameMap.getCell(mapCoord, LAYER_BULLET.layerName);
     if (bullets) {
       await this.killPlayer(playerID);
