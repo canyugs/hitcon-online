@@ -59,6 +59,7 @@ class TerminalServer {
         try {
           let decodedToken = await jwtVerify(msg.token, config.get('secret'));
           containerId = decodedToken.containerId;
+          console.log("container id", containerId);
         } catch (err) {
           console.warn(`JWT authentication failed for ${msg.token}: `, err);
           socket.emit('error', {data: 'Invalid token.'});
@@ -67,14 +68,22 @@ class TerminalServer {
 
         // Setup socket and container handler, and add a new PTY.
         socket.containerId = containerId;
-        if (!(containerId in this.handlers)) {
+        console.log("Set up socket!", containerId);
+        let handler = this.handlers[containerId];
+        if (handler === undefined) {
           socket.emit('error', {data: 'Container not found'});
+          return;
         }
-        this.handlers[containerId].newPty(socket);
-        this.container2sockets[containerId].add(socket);
-
-        socket.emit('connected', {});
-        this.addSocket(socket);
+        await handler.statusLock.acquire('StatusRW', async () => {
+          if (handler.handlerStatus !== 1) {
+            socket.emit('error', {data: 'Container is down, ensure it first'});
+            return;
+          }
+          this.handlers[containerId].newPty(socket);
+          this.container2sockets[containerId].add(socket);
+          socket.emit('connected', {});
+          this.addSocket(socket);
+        });
       });
     });
   }
@@ -93,38 +102,34 @@ class TerminalServer {
    * Create a container.
    * This method is called internally.
    * @param {string} imageName 
+   * @param {string} containerId
    */
-  async _createContainer(imageName) {
+  async _createContainer(imageName, containerId) {
     try {
-      let containerId = randomBytes(32).toString('hex');
-
-      this.container2sockets[containerId] = new Set();
-      this.handlers[containerId] = new ContainerHandler(imageName);
       await this.handlers[containerId].spawn();
       console.log('create container: ', containerId);
-
-      return {
-        success: true,
-        containerId: containerId
-      };
+      return true;
     } catch (e) {
       console.error('create container failed: ', e);
-      return {
-        success: false,
-        containerId: null
-      }
+      return false;
     }
   }
 
   /**
-   * Create a container.
+   * Create a containerHadler.
    * This method is exported as a service, and should be called via gRPC.
    * @param {Object} call - The gRPC message object <CreateContainerRequest>.
    * @param {Function} callback - Callback function.
    */
-  async createContainer(call, callback) {
-    const res = await this._createContainer(call.request.imageName);
-    callback(null, res);
+  async createContainerHandler(call, callback) {
+    let containerId = randomBytes(32).toString('hex');
+    const imageName = call.request.imageName;
+    console.log("create containerHandler!", containerId, imageName);
+    this.container2sockets[containerId] = new Set();
+    this.handlers[containerId] = new ContainerHandler(imageName);
+    callback(null, {
+      success: true, containerId: containerId
+    });
   }
 
   /**
@@ -134,10 +139,6 @@ class TerminalServer {
    */
   async _destroyContainer(containerId) {
     try {
-      if (!(containerId in this.handlers) || !(containerId in this.container2sockets)) {
-        throw new Error(`Container ${containerId} not found.`);
-      }
-
       await this.handlers[containerId].destroyContainer();
       for (const socket of this.container2sockets[containerId]) {
         try {
@@ -146,10 +147,7 @@ class TerminalServer {
           console.warn(`Failed to disconnect socket for container ${containerId}: `, e);
         }
       }
-      delete this.handlers[containerId];
       delete this.container2sockets[containerId];
-      console.log('delete container: ', containerId);
-
       return true;
     } catch (e) {
       console.error(`Failed to destroy container${call.request.containerId}`, e);
@@ -158,35 +156,76 @@ class TerminalServer {
   }
 
   /**
-   * Destroy container and kill all related socket.
+   * Destroy a containerHadler.
    * This method is exported as a service, and should be called via gRPC.
    * @param {Object} call - The gRPC message object <DestroyContainerRequest>.
    * @param {Function} callback - Callback function.
    */
-  async destroyContainer(call, callback) {
+  async destroyContainerHandler(call, callback) {
     const containerId = call.request.containerId;
-    const res = await this._destroyContainer(containerId);
-    callback(null, {
-      success: res
+    let handler = this.handlers[containerId];
+    // illegal containerId
+    if (handler === undefined) {
+      callback(null, {
+        success: false
+      });
+      return;
+    }
+    // Change the status to -1, the Reaper will destroy it later
+    await handler.statusLock.acquire('StatusRW', async () => {
+      handler.handlerStatus = -1;
+      console.log('delete containerHandler: ', containerId);
+      callback(null, {
+        success: true
+      });
     });
   }
-
+  /**
+   * Ensure the containerHadler has a available container.
+   * This method is exported as a service, and should be called via gRPC.
+   * @param {Object} call - The gRPC message object <DestroyContainerRequest>.
+   * @param {Function} callback - Callback function.
+   */
   async ensureContainerAvailable(call, callback) {
     let containerId = call.request.containerId;
-    const imageName = call.request.imageName;
-    if (containerId in this.handlers) {
-      this.handlers[containerId].hasSecondChance = true;
+    console.log("Ensure containerHandler!", containerId);
+    let handler = this.handlers[containerId];
+    // illegal containerId
+    if (handler === undefined) {
       callback(null, {
-        success: true,
-        containerId: containerId
+        success: false, containerId: null
       });
-    } else {
-      let {success, containerId} = await this._createContainer(imageName);
-      callback(null, {
-        success: success,
-        containerId: containerId
-      });
+      return;
     }
+    await handler.statusLock.acquire('StatusRW', async () => {
+      // These Container is dead
+      if (handler.handlerStatus === -1) {
+        console.log("These Container is dead");
+        callback(null, {
+          success: false, containerId: null
+        });
+        return;
+      }
+      // Container already exists
+      if (handler.handlerStatus === 1) {
+        handler.hasSecondChance = true;
+        callback(null, {
+          success: true, containerId: containerId
+        });
+        return;
+      }
+      // Else, create a new container for the handler
+      const suc = await this._createContainer(call.request.imageName, call.request.containerId);
+      if (suc) {
+        handler.handlerStatus = 1;
+        handler.hasSecondChance = true;
+      } else {
+        handler.handlerStatus = 0;
+      }
+      callback(null, {
+        success: suc, containerId: containerId
+      });
+    });
   }
 
   /**
@@ -206,7 +245,7 @@ class TerminalServer {
     const rpcProto = grpc.loadPackageDefinition(packageDefinition).TerminalServer;
     let server = new grpc.Server();
     server.addService(rpcProto.TerminalServer.service, {
-      CreateContainer: async (call, callback) => await this.createContainer.bind(this)(call, callback),
+      CreateContainer: async (call, callback) => await this.createContainerHandler.bind(this)(call, callback),
       EnsureContainerAvailable: async (call, callback) => await this.ensureContainerAvailable.bind(this)(call, callback),
       DestroyContainer: async (call, callback) => await this.destroyContainer.bind(this)(call, callback)
     });
@@ -222,18 +261,32 @@ class TerminalServer {
   }
 
   /**
-   * Implements a second-chance algorithm.
-   * If the player doesn't interact with the container for too long, destroy the container.
+   * The Reaper has two jobs:
+   * 1. Implements a second-chance algorithm:
+   *  If the player doesn't interact with the container for too long,
+   *  destroy the container.
+   * 2. Delete the unused containerHandler from the map
    */
   setupContainerReaper() {
     setInterval(obj => {
+      let removeList = [];
       for (const containerId in obj.handlers) {
         const handler = obj.handlers[containerId];
-        if (handler.hasSecondChance) {
-          handler.hasSecondChance = false;
-        } else {
-          this._destroyContainer(containerId);
-        }
+        handler.statusLock.acquire('StatusRW', async () => {
+          if (handler.handlerStatus === -1) {
+            removeList.push(containerId);
+          } else if (handler.handlerStatus === 1) {
+            if (!handler.hasSecondChance) {
+              this._destroyContainer(containerId);
+              handler.handlerStatus = 0;
+            } else {
+              handler.hasSecondChance = false;
+            }
+          }
+        });
+      }
+      for (const containerId in removeList) {
+        this.handlers.delete(containerId);
       }
     }, config.get('secondChanceReaperInterval'), this);
   }

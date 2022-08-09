@@ -73,7 +73,7 @@ class Standalone {
     fs.readdirSync(getRunPath('terminal')).filter(v => v.endsWith('.json')).forEach((file) => {
       const terminalName = file.slice(0, -('.json'.length));
       const terminal = new TerminalObject(helper, terminalName, getRunPath('terminal', file));
-      this.terminalObjects.set(terminal.visibleName, terminal);
+      this.terminalObjects.set(`iobj-${terminal.objectName}`, terminal);
     });
 
     // this.defaultTerminals determines the list of containers to start when the team is created.
@@ -189,7 +189,6 @@ class Standalone {
    */
   async createTeam(playerID) {
     // check _unpackStoredData(), it should mirror this function.
-
     // Check if the player is already in a team.
     if (this.playerToTeam.has(playerID)) {
       throw new Error(`Player ${playerID} is already in a team.`);
@@ -198,6 +197,7 @@ class Standalone {
     // Create a new team
     let teamId = randomBytes(32).toString('hex');
     this.teams.set(teamId, new Team(teamId, this.terminalServerGrpcService, this.defaultTerminals));
+    await this.teams.get(teamId).createContainers();
     await this.saveData();
     return teamId;
   }
@@ -346,7 +346,6 @@ class Standalone {
    * @param {string} playerID The player ID.
    */
   async s2s_queryPlayerStatus(extName, playerID) {
-    console.log(playerID, this.playerToTeam);
     const playerStatus = {};
     if (!this.playerToTeam.has(playerID)) {
       playerStatus.hasTeam = false;
@@ -507,11 +506,12 @@ class Standalone {
    */
   async s2s_sf_showTerminal(srcExt, playerID, kwargs, sfInfo) {
     await this._finalizeIfNeeded(playerID);
-    await this.playerToTeam.get(playerID).ensureContainerAvailable(sfInfo.visibleName);
+    await this.playerToTeam.get(playerID).ensureContainerAvailable(sfInfo.name);
 
     const {nextState} = kwargs;
-    const token = await this.getAccessToken(playerID, sfInfo.visibleName);
+    const token = await this.getAccessToken(playerID, sfInfo.name);
     await this.helper.callS2cAPI(playerID, 'escape-game', 'showTerminalModal', 60*1000, token);
+
     return nextState;
   }
 
@@ -550,7 +550,6 @@ class Standalone {
    */
   async s2s_sf_createTeam(srcExt, playerID, kwargs, sfInfo) {
     const {nextState} = kwargs;
-
     try {
       const teamId = await this.createTeam(playerID); // create team.
       await this.joinTeam(playerID, teamId); // add the player to the team.
@@ -925,6 +924,7 @@ class Team {
       const m = result.givenItems.get(k);
       result.givenItems.set(k, new Map(Object.entries(m)));
     });
+    result.createContainers();
     return result;
   }
 
@@ -954,6 +954,32 @@ class Team {
     return true;
   }
 
+  /**
+   * Create all containers
+   */
+  async createContainers() {
+    return await this.containerLocks.acquire('containers', async () => {
+      for (const terminal of this.defaultTerminals) {
+        const terminalId = terminal[0];
+        const imageName = terminal[1];
+        try {
+          let ret = await promisify(this.terminalServerGrpcService.CreateContainer.bind(this.terminalServerGrpcService))({
+            containerId: this.terminals.get(terminalId),
+            imageName: imageName
+          }, {deadline: new Date(Date.now() + 20000)});
+        
+          if (!ret.success) {
+            console.error(`Fail to start container with image ${this.terminals.get(terminalId)}.`);
+            return false;
+          }
+          this.terminals.set(terminalId, ret.containerId);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    });
+  }
+  
   async ensureContainerAvailable(terminalId) {
     const containerId = this.terminals.get(terminalId);
     const imageName = this.defaultTerminals.get(terminalId);

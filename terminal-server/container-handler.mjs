@@ -8,7 +8,7 @@ const pty = require('node-pty');
 const promisify = require('util').promisify;
 const randomBytes = require('crypto').randomBytes;
 const exec = promisify(require('child_process').exec);
-
+const AsyncLock = require('async-lock');
 const containerPrefix = 'escape_';
 
 /**
@@ -21,7 +21,12 @@ class ContainerHandler {
     this.imageName = imageName;
     this.ptys = {};
     // Set the essential property for the container reaper
-    this.hasSecondChance = true;
+    
+    this.hasSecondChance = false;
+    // true: the conatiner is using; false: the container is idle
+    this.handlerStatus = 0;
+    // -1: the handler is no need; 0: the handler has no container; 1: the handler has a container
+    this.statusLock = new AsyncLock();
   }
 
   /**
