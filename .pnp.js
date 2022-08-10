@@ -2662,6 +2662,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["cors", "npm:2.8.5"],
             ["ejs", "npm:3.1.6"],
             ["express", "npm:4.16.4"],
+            ["is-mobile", "npm:3.1.1"],
             ["minimist", "npm:1.2.5"],
             ["redis", "npm:3.1.2"],
             ["socket.io", "npm:4.1.2"]
@@ -3293,6 +3294,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/is-lambda-npm-1.0.1-7ab55bc8a8-669ea37e8f.zip/node_modules/is-lambda/",
           "packageDependencies": [
             ["is-lambda", "npm:1.0.1"]
+          ],
+          "linkType": "HARD",
+        }]
+      ]],
+      ["is-mobile", [
+        ["npm:3.1.1", {
+          "packageLocation": "./.yarn/cache/is-mobile-npm-3.1.1-71682da812-f800dead66.zip/node_modules/is-mobile/",
+          "packageDependencies": [
+            ["is-mobile", "npm:3.1.1"]
           ],
           "linkType": "HARD",
         }]
