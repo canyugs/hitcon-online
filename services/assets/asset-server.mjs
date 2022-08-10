@@ -12,6 +12,7 @@ import {createRequire} from 'module';
 const require = createRequire(import.meta.url);
 
 const express = require('express');
+const mobile = require('is-mobile');
 
 import {getRunPath, getConfigPath} from '../../common/path-util/path.mjs';
 
@@ -85,6 +86,18 @@ class AssetServer {
   }
 
   /**
+   * Redirects the users according to user's user agent.
+   */
+  redirectByClientType(req, res) {
+    const reqIsMobile = mobile({ua: req});
+    if (reqIsMobile) {
+      res.redirect('/mobile.html');
+    } else {
+      res.redirect('/client.html');
+    }
+  }
+
+  /**
    * Prepare the route for serving the client.
    */
   async clientRoutes() {
@@ -93,7 +106,7 @@ class AssetServer {
 
     // Send the user to the game client page.
     this.app.get('/', (req, res) => {
-      res.redirect('/client.html');
+      this.redirectByClientType(req, res);
     });
 
     // Prepare the client params beforehand.
