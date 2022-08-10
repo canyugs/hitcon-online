@@ -2021,6 +2021,7 @@ __metadata:
     cors: ^2.8.5
     ejs: ^3.1.6
     express: ~4.16.1
+    is-mobile: ^3.1.1
     minimist: ^1.2.5
     redis: ^3.1.2
     socket.io: ^4.1.2
@@ -2568,6 +2569,13 @@ __metadata:
   version: 1.0.1
   resolution: "is-lambda@npm:1.0.1"
   checksum: 669ea37e8fafa800d076e7e7c64eadc9fd2a0607a3bc67e602d37092f2fec91c29929cdeec94e694607a88a2e0bdc7f8e122a9819dacadf05a9c5767c9672eb7
+  languageName: node
+  linkType: hard
+
+"is-mobile@npm:^3.1.1":
+  version: 3.1.1
+  resolution: "is-mobile@npm:3.1.1"
+  checksum: f800dead6697abaef50638158d45b00a52df05fd5f8d9f7390c97e768f7bb24ed044f1fba12ddd0774a2e32463f7632d45d36c108d5ee86b002c1e164dc6b2f8
   languageName: node
   linkType: hard
 
