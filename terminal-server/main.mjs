@@ -30,7 +30,7 @@ class TerminalServer {
     this.app = app;
     this.io = io;
     this.handlers = {};
-    this.container2sockets = {};
+    this.handler2sockets = {};
 
     this.defineServerMethods();
     this.createGrpcServer();
@@ -80,7 +80,7 @@ class TerminalServer {
             return;
           }
           this.handlers[containerId].newPty(socket);
-          this.container2sockets[containerId].add(socket);
+          this.handler2sockets[containerId].add(socket);
           socket.emit('connected', {});
           this.addSocket(socket);
         });
@@ -125,7 +125,7 @@ class TerminalServer {
     let containerId = randomBytes(32).toString('hex');
     const imageName = call.request.imageName;
     console.log("create containerHandler!", containerId, imageName);
-    this.container2sockets[containerId] = new Set();
+    this.handler2sockets[containerId] = new Set();
     this.handlers[containerId] = new ContainerHandler(imageName);
     callback(null, {
       success: true, containerId: containerId
@@ -140,14 +140,13 @@ class TerminalServer {
   async _destroyContainer(containerId) {
     try {
       await this.handlers[containerId].destroyContainer();
-      for (const socket of this.container2sockets[containerId]) {
+      for (const socket of this.handler2sockets[containerId]) {
         try {
           socket.disconnect(true);
         } catch (e) {
           console.warn(`Failed to disconnect socket for container ${containerId}: `, e);
         }
       }
-      delete this.container2sockets[containerId];
       return true;
     } catch (e) {
       console.error(`Failed to destroy container${call.request.containerId}`, e);
@@ -287,6 +286,7 @@ class TerminalServer {
       }
       for (const containerId in removeList) {
         this.handlers.delete(containerId);
+        this.handler2sockets.delete(containerId);
       }
     }, config.get('secondChanceReaperInterval'), this);
   }
