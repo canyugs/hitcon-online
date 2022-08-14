@@ -1,4 +1,5 @@
 {
     "serverPort": 5050,
+    "isolatedNetworkName": "isolated",
     "secret": "secret"
 }

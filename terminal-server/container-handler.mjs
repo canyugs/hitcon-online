@@ -8,6 +8,7 @@ const pty = require('node-pty');
 const promisify = require('util').promisify;
 const randomBytes = require('crypto').randomBytes;
 const exec = promisify(require('child_process').exec);
+const config = require('config');
 
 const containerPrefix = 'escape_';
 
@@ -19,6 +20,7 @@ class ContainerHandler {
   constructor(imageName) {
     this.containerName = containerPrefix + randomBytes(32).toString('hex');
     this.imageName = imageName;
+    this.isolatedNetworkName = config.get('isolatedNetworkName');
     this.ptys = {};
   }
 
@@ -27,7 +29,7 @@ class ContainerHandler {
    */
   async spawn() {
     try {
-      let ret = await exec(`docker run -it -d --name ${this.containerName} --rm ${this.imageName}`);
+      let ret = await exec(`docker run -it -d --name ${this.containerName} --network ${this.isolatedNetworkName} --rm ${this.imageName}`);
       return !!ret.stderr;
     } catch (err) {
       console.error(`Failed to start container ${this.containerName} with ${this.imageName}: `, err);
