@@ -66,6 +66,7 @@ function displayValidation(display) {
  * TODO: jsdoc
  */
 class InteractiveObjectServerBaseClass {
+  static IOBJ_PREFIX = "iobj-"
   /**
    * Create the standalone extension service object but does not start it.
    * @constructor
@@ -112,7 +113,7 @@ class InteractiveObjectServerBaseClass {
 
     // Create the executor
     const sfInfo = {
-      name: `iobj-${this.objectName}`,
+      name: `${InteractiveObjectServerBaseClass.IOBJ_PREFIX}${this.objectName}`,
       visibleName: `${this.visibleName}`
     };
     this.fsmExecutor = new FSMExecutor(this.helper, this.config.FSM, sfInfo);
