@@ -117,31 +117,41 @@ class Standalone {
       );
     });
     if (config.has('escape-game.doorPosition')) {
-      this.doorCells = [config.get('escape-game.doorPosition')];
+      this.doorCells = config.get('escape-game.doorPosition');
     } else {
       console.warn('No escape-game.doorPosition defined');
       this.doorCells = [];
     }
+
+    if (config.has('escape-game.doorTarget')) {
+      this.doorTarget = config.get('escape-game.doorTarget');
+    } else {
+      console.warn('No escape-game.doorTarget defined');
+      this.doorTarget = {'x': 1, 'y': 1};
+    }
+    
     const mapName = "world1";
-    await this.helper.broadcastCellSetUpdateToAllUser(
-      'set',
-      mapName,
-      CellSet.fromObject({
-        name: LAYER_DOOR.layerName,
-        priority: 3,
-        cells: [],
-        layers: {[LAYER_DOOR.layerName]: "B", "wall": true},
-        dynamic: true,
-      }),
-    );
-    await this.helper.broadcastCellSetUpdateToAllUser(
-      'update',
-      "world1",
-      CellSet.fromObject({
-        name: LAYER_DOOR.layerName,
-        cells: this.doorCells
-      }),
-    );
+    for (const doorCell of this.doorCells) {
+      await this.helper.broadcastCellSetUpdateToAllUser(
+        'set',
+        mapName,
+        CellSet.fromObject({
+          name: `DOOR_${doorCell["idx"]}`,
+          cells: [],
+          layers: {[LAYER_DOOR.layerName]: `B${doorCell["idx"]}`, "wall": false},
+          dynamic: true
+        }),
+      );
+    }
+
+    // detect touching an opening door
+    this.helper.gameState.registerOnPlayerUpdate((msg) => {
+      try {
+        this.onPlayerUpdate(msg);
+      } catch (e) {
+        console.error('escape-game register player update listener failed: ', e, e.stack);
+      }
+    });
   }
 
   /**
@@ -158,29 +168,57 @@ class Standalone {
     if (typeof duration !== "number") {
       return false;
     }
-
-    ++this.doorOpenPressedCount;
-    await this.helper.broadcastCellSetUpdateToAllUser(
-      'update',
-      "world1",
-      CellSet.fromObject({
-        name: LAYER_DOOR.layerName,
-        cells: []
-      }),
-    );
-    setTimeout(async function(obj) {
-      if (--obj.doorOpenPressedCount == 0) {        
-        await obj.helper.broadcastCellSetUpdateToAllUser(
+    const mapName = "world1";
+    if (++this.doorOpenPressedCount === 1) {  
+      console.log("open!");
+      for (const doorCell of this.doorCells) {
+        await this.helper.broadcastCellSetUpdateToAllUser(
           'update',
-          "world1",
+          mapName,
           CellSet.fromObject({
-            name: LAYER_DOOR.layerName,
-            cells: obj.doorCells
+            name: `DOOR_${doorCell["idx"]}`,
+            cells: [doorCell]
           }),
-        );  
+        );
+      }
+    }
+    setTimeout(async function(obj) {
+      if (--obj.doorOpenPressedCount === 0) {
+        console.log("close!");
+        for (const doorCell of obj.doorCells) {
+          await obj.helper.broadcastCellSetUpdateToAllUser(
+            'update',
+            mapName,
+            CellSet.fromObject({
+              name: `DOOR_${doorCell["idx"]}`,
+              cells: [],
+            }),
+          );
+        }
       }
     }, duration, this);
     return true;
+  }
+
+  async onPlayerUpdate(msg) {
+    const {mapCoord, playerID} = msg;
+
+    if (typeof playerID !== 'string') {
+      console.warn('Invalid PlayerSyncMessage with non-string msg.playerID', msg, msg.playerID);
+      return;
+    }
+    if (mapCoord === 'undefined') {
+      // No location? Just skip.
+      return;
+    }
+    const explodeCell = this.helper.gameMap.getCell(mapCoord, LAYER_DOOR.layerName);
+    if (explodeCell) { // if walk into opening door => teleport to somewhere
+      const target = mapCoord.copy();
+      target.x = this.doorTarget['x'];
+      target.y = this.doorTarget['y'];
+      this.helper.teleport(msg.playerID, target, true);
+    }
+    return;
   }
 
   /**
