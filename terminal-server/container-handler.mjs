@@ -21,6 +21,8 @@ class ContainerHandler {
     this.containerName = containerPrefix + randomBytes(32).toString('hex');
     this.imageName = imageName;
     this.isolatedNetworkName = config.get('isolatedNetworkName');
+    this.memLimit = config.get('memLimit');
+    this.cpuLimit = config.get('cpuLimit');
     this.ptys = {};
   }
 
@@ -29,7 +31,7 @@ class ContainerHandler {
    */
   async spawn() {
     try {
-      let ret = await exec(`docker run -it -d --name ${this.containerName} --network ${this.isolatedNetworkName} --rm ${this.imageName}`);
+      let ret = await exec(`docker run -it -d --name ${this.containerName} -m ${this.memLimit} --cpus ${this.cpuLimit} --network ${this.isolatedNetworkName} --rm ${this.imageName}`);
       return !!ret.stderr;
     } catch (err) {
       console.error(`Failed to start container ${this.containerName} with ${this.imageName}: `, err);

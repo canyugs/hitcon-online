@@ -1,5 +1,7 @@
 {
     "serverPort": 5050,
     "isolatedNetworkName": "isolated",
+    "memLimit": "16m",
+    "cpuLimit": ".1",
     "secret": "secret"
 }
