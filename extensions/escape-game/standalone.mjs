@@ -73,7 +73,7 @@ class Standalone {
     fs.readdirSync(getRunPath('terminal')).filter(v => v.endsWith('.json')).forEach((file) => {
       const terminalName = file.slice(0, -('.json'.length));
       const terminal = new TerminalObject(helper, terminalName, getRunPath('terminal', file));
-      this.terminalObjects.set(`iobj-${terminal.objectName}`, terminal);
+      this.terminalObjects.set(`${InteractiveObjectServerBaseClass.IOBJ_PREFIX}${terminal.objectName}`, terminal);
     });
 
     // this.defaultTerminals determines the list of containers to start when the team is created.

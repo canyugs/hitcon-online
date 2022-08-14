@@ -169,7 +169,7 @@ class Client {
       } else if (cfg.layerName === 'terminalName') {
         cfg.renderArgs = {
           mapCoord: mapCoord,
-          displayName: terminalId,
+          displayName: clientInfo.visibleName,
           getDrawInfo() {
             return {mapCoord: this.mapCoord, displayName: this.displayName};
           },
