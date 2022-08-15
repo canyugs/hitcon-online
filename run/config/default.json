@@ -64,7 +64,8 @@
     "autoFinalize": true,
     "certificateC2sToken": "1_4m_c3271f1c473_m45732",
     "jwtSecret": "secret",
-    "doorPosition": {"x": 9, "y": 12, "h": 1, "w": 1}
+    "doorPosition": { "mapName":"world1", "x": 9 , "y": 12, "h": 3, "w": 3},
+    "doorTarget": {"x": 1, "y": 1}
   },
   "bombman": {
     "arena": {"mapName":"world1","x":10, "y":5}
