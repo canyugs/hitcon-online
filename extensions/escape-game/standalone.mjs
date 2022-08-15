@@ -20,8 +20,6 @@ import InteractiveObjectServerBaseClass from '../../common/interactive-object/se
 import {getRunPath, getConfigPath} from '../../common/path-util/path.mjs';
 const LAYER_DOOR = {zIndex: 6, layerName: 'escapeGameDoor'};
 import CellSet from '../../common/maplib/cellset.mjs';
-import { throws } from 'assert';
-import { Console } from 'console';
 const MAX_PLAYER_PER_TEAM = 5;
 
 // Bring out the FSM_ERROR for easier reference.
@@ -131,9 +129,9 @@ class Standalone {
       this.doorCells["cells"] = new Map();
       
       let idx = 0;
-      for(let dx = 0; dx < doorPosition['w']; dx++){
-        for(let dy = doorPosition['h']-1; dy >= 0; dy--){
-          this.doorCells["cells"][`B${ idx++ }`] ={
+      for (let dx = 0; dx < doorPosition['w']; dx++) {
+        for (let dy = doorPosition['h']-1; dy >= 0; dy--) {
+          this.doorCells["cells"][`B${ idx++ }`] = {
               "x": doorPosition['x'] + dx,
               "y": doorPosition['y'] + dy,
               "w": 1,
@@ -152,7 +150,7 @@ class Standalone {
       console.warn('No escape-game.doorTarget defined');
       this.doorTarget = -1;
     }
-    if( this.doorCells !== -1){
+    if (this.doorCells !== -1) {
       for (const idx in this.doorCells["cells"]) {
         await this.helper.broadcastCellSetUpdateToAllUser(
           'set',
@@ -240,6 +238,7 @@ class Standalone {
     if (this.doorTarget !== -1 && explodeCell) {
       // if walk into opening door and the destination is setted => teleport to somewhere
       const target = mapCoord.copy();
+      target.mapName = this.doorTarget['mapName'];
       target.x = this.doorTarget['x'];
       target.y = this.doorTarget['y'];
       this.helper.teleport(msg.playerID, target, true);
