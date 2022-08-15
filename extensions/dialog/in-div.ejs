@@ -8,6 +8,13 @@
     width: 100%;
   }
 
+  [data-clienttype=mobile] .dialog {
+    background: #0D0D0D;
+    border-radius: 17px;
+    padding: 0 1em 1.2em;
+    opacity: 0.85;
+  }
+
   .dialog-img {
     background-color: #FFFFFF;
     border-radius: 22px;
@@ -43,6 +50,18 @@
     margin-bottom: 1em;
   }
 
+  [data-clienttype=mobile] .dialog-subject {
+    margin-top: -1em;
+    padding: unset;
+    font-size: 1em;
+    text-shadow:
+       3px 3px 0 #000,
+     -1px -1px 0 #000,
+      1px -1px 0 #000,
+      -1px 1px 0 #000,
+       1px 1px 0 #000;
+  }
+
   .dialog-msg {
     flex-grow: 1;
     box-sizing: border-box;
@@ -52,6 +71,32 @@
     max-height: 297px;
     overflow: auto;
     word-break: break-word;
+  }
+
+  [data-clienttype=mobile] .dialog-msg {
+    background: none;
+    color: white;
+    border-radius: unset;
+    padding: 0.5em 0 0 0.5em;
+  }
+
+  [data-clienttype=mobile] .dialog-msg > a {
+    color: #41eea3;
+  }
+
+  [data-clienttype=mobile] .dialog-msg > input {
+    margin-top: 1em;
+    padding: 0;
+    width: 100%;
+    outline: 0;
+    border-width: 0 0 3px;
+    background: none;
+    color: wheat;
+    font-size: 1.2em
+  }
+
+  [data-clienttype=mobile] .dialog-msg > input:focus {
+    border-color: #269d38;
   }
 
   .dialog-msg img {
@@ -81,12 +126,37 @@
     display: flex;
   }
 
+  [data-clienttype=mobile] #dialog-btn-container {
+    position: unset;
+    margin: 0;
+    justify-content: center;
+    margin-top: 1em;
+  }
+
+  [data-clienttype=mobile] #dialog-btn-container > button {
+    position: unset;
+    margin: 0;
+    font-size: 1.2em;
+    border-radius: 17px;
+    width: 40%;
+  }
+
   .dialog-choice-entry {
     color: blue;
   }
 
   .dialog-choice-entry:hover {
     text-decoration: underline;
+  }
+
+  [data-clienttype=mobile] .dialog-choice-entry {
+    color: wheat;
+    line-height: 2em;
+    margin-bottom: 1em;
+  }
+
+  [data-clienttype=mobile] .dialog-choice-entry > li {
+    margin-bottom: 1em;
   }
 
   .button {

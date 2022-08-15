@@ -51,6 +51,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         "reference": "workspace:extensions/MapWatermark"
       },
       {
+        "name": "hitcon-online-battleroyale",
+        "reference": "workspace:extensions/battleroyale"
+      },
+      {
         "name": "hitcon-online-blank",
         "reference": "workspace:extensions/blank"
       },
@@ -161,6 +165,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
       ["hitcon-online", ["workspace:."]],
       ["hitcon-online-MapWatermark", ["workspace:extensions/MapWatermark"]],
       ["hitcon-online-asset-server", ["workspace:services/assets"]],
+      ["hitcon-online-battleroyale", ["workspace:extensions/battleroyale"]],
       ["hitcon-online-blank", ["workspace:extensions/blank"]],
       ["hitcon-online-bombman", ["workspace:extensions/bombman"]],
       ["hitcon-online-cellsettest", ["workspace:extensions/cellsettest"]],
@@ -364,60 +369,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@npmcli/move-file", "npm:1.1.2"],
             ["mkdirp", "npm:1.0.4"],
             ["rimraf", "npm:3.0.2"]
-          ],
-          "linkType": "HARD",
-        }]
-      ]],
-      ["@otplib/core", [
-        ["npm:12.0.1", {
-          "packageLocation": "./.yarn/cache/@otplib-core-npm-12.0.1-4b9787d379-c4a6f3f0c5.zip/node_modules/@otplib/core/",
-          "packageDependencies": [
-            ["@otplib/core", "npm:12.0.1"]
-          ],
-          "linkType": "HARD",
-        }]
-      ]],
-      ["@otplib/plugin-crypto", [
-        ["npm:12.0.1", {
-          "packageLocation": "./.yarn/cache/@otplib-plugin-crypto-npm-12.0.1-d0dc5d1d98-e319991527.zip/node_modules/@otplib/plugin-crypto/",
-          "packageDependencies": [
-            ["@otplib/plugin-crypto", "npm:12.0.1"],
-            ["@otplib/core", "npm:12.0.1"]
-          ],
-          "linkType": "HARD",
-        }]
-      ]],
-      ["@otplib/plugin-thirty-two", [
-        ["npm:12.0.1", {
-          "packageLocation": "./.yarn/cache/@otplib-plugin-thirty-two-npm-12.0.1-b85109b20e-52f6d5208b.zip/node_modules/@otplib/plugin-thirty-two/",
-          "packageDependencies": [
-            ["@otplib/plugin-thirty-two", "npm:12.0.1"],
-            ["@otplib/core", "npm:12.0.1"],
-            ["thirty-two", "npm:1.0.2"]
-          ],
-          "linkType": "HARD",
-        }]
-      ]],
-      ["@otplib/preset-default", [
-        ["npm:12.0.1", {
-          "packageLocation": "./.yarn/cache/@otplib-preset-default-npm-12.0.1-77f04f54c4-8b702af09b.zip/node_modules/@otplib/preset-default/",
-          "packageDependencies": [
-            ["@otplib/preset-default", "npm:12.0.1"],
-            ["@otplib/core", "npm:12.0.1"],
-            ["@otplib/plugin-crypto", "npm:12.0.1"],
-            ["@otplib/plugin-thirty-two", "npm:12.0.1"]
-          ],
-          "linkType": "HARD",
-        }]
-      ]],
-      ["@otplib/preset-v11", [
-        ["npm:12.0.1", {
-          "packageLocation": "./.yarn/cache/@otplib-preset-v11-npm-12.0.1-df44c202c1-2dac0d8df2.zip/node_modules/@otplib/preset-v11/",
-          "packageDependencies": [
-            ["@otplib/preset-v11", "npm:12.0.1"],
-            ["@otplib/core", "npm:12.0.1"],
-            ["@otplib/plugin-crypto", "npm:12.0.1"],
-            ["@otplib/plugin-thirty-two", "npm:12.0.1"]
           ],
           "linkType": "HARD",
         }]
@@ -1425,6 +1376,14 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/config-npm-3.3.6-a760162d97-c066ebd8ed.zip/node_modules/config/",
           "packageDependencies": [
             ["config", "npm:3.3.6"],
+            ["json5", "npm:2.2.0"]
+          ],
+          "linkType": "HARD",
+        }],
+        ["npm:3.3.7", {
+          "packageLocation": "./.yarn/cache/config-npm-3.3.7-05ecd74a04-595aef295a.zip/node_modules/config/",
+          "packageDependencies": [
+            ["config", "npm:3.3.7"],
             ["json5", "npm:2.2.0"]
           ],
           "linkType": "HARD",
@@ -2703,9 +2662,22 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["cors", "npm:2.8.5"],
             ["ejs", "npm:3.1.6"],
             ["express", "npm:4.16.4"],
+            ["is-mobile", "npm:3.1.1"],
             ["minimist", "npm:1.2.5"],
             ["redis", "npm:3.1.2"],
             ["socket.io", "npm:4.1.2"]
+          ],
+          "linkType": "SOFT",
+        }]
+      ]],
+      ["hitcon-online-battleroyale", [
+        ["workspace:extensions/battleroyale", {
+          "packageLocation": "./extensions/battleroyale/",
+          "packageDependencies": [
+            ["hitcon-online-battleroyale", "workspace:extensions/battleroyale"],
+            ["alarm", "npm:2.0.0"],
+            ["async-lock", "npm:1.3.2"],
+            ["config", "npm:3.3.7"]
           ],
           "linkType": "SOFT",
         }]
@@ -2724,7 +2696,8 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./extensions/bombman/",
           "packageDependencies": [
             ["hitcon-online-bombman", "workspace:extensions/bombman"],
-            ["alarm", "npm:2.0.0"]
+            ["alarm", "npm:2.0.0"],
+            ["config", "npm:3.3.7"]
           ],
           "linkType": "SOFT",
         }]
@@ -2861,7 +2834,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./extensions/iobj-lib/",
           "packageDependencies": [
             ["hitcon-online-iobj-lib", "workspace:extensions/iobj-lib"],
-            ["otplib", "npm:12.0.1"]
+            ["totp-generator", "npm:0.0.13"]
           ],
           "linkType": "SOFT",
         }]
@@ -3325,6 +3298,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD",
         }]
       ]],
+      ["is-mobile", [
+        ["npm:3.1.1", {
+          "packageLocation": "./.yarn/cache/is-mobile-npm-3.1.1-71682da812-f800dead66.zip/node_modules/is-mobile/",
+          "packageDependencies": [
+            ["is-mobile", "npm:3.1.1"]
+          ],
+          "linkType": "HARD",
+        }]
+      ]],
       ["is-number", [
         ["npm:7.0.0", {
           "packageLocation": "./.yarn/cache/is-number-npm-7.0.0-060086935c-eec6e506c6.zip/node_modules/is-number/",
@@ -3453,6 +3435,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["lodash.once", "npm:4.1.1"],
             ["ms", "npm:2.1.3"],
             ["semver", "npm:5.7.1"]
+          ],
+          "linkType": "HARD",
+        }]
+      ]],
+      ["jssha", [
+        ["npm:3.2.0", {
+          "packageLocation": "./.yarn/cache/jssha-npm-3.2.0-c57f6fc836-3bea075c24.zip/node_modules/jssha/",
+          "packageDependencies": [
+            ["jssha", "npm:3.2.0"]
           ],
           "linkType": "HARD",
         }]
@@ -4038,18 +4029,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["prelude-ls", "npm:1.2.1"],
             ["type-check", "npm:0.4.0"],
             ["word-wrap", "npm:1.2.3"]
-          ],
-          "linkType": "HARD",
-        }]
-      ]],
-      ["otplib", [
-        ["npm:12.0.1", {
-          "packageLocation": "./.yarn/cache/otplib-npm-12.0.1-77263e8084-afb790659a.zip/node_modules/otplib/",
-          "packageDependencies": [
-            ["otplib", "npm:12.0.1"],
-            ["@otplib/core", "npm:12.0.1"],
-            ["@otplib/preset-default", "npm:12.0.1"],
-            ["@otplib/preset-v11", "npm:12.0.1"]
           ],
           "linkType": "HARD",
         }]
@@ -5154,15 +5133,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD",
         }]
       ]],
-      ["thirty-two", [
-        ["npm:1.0.2", {
-          "packageLocation": "./.yarn/cache/thirty-two-npm-1.0.2-9d9270aa34-81c46a540b.zip/node_modules/thirty-two/",
-          "packageDependencies": [
-            ["thirty-two", "npm:1.0.2"]
-          ],
-          "linkType": "HARD",
-        }]
-      ]],
       ["through", [
         ["npm:2.3.8", {
           "packageLocation": "./.yarn/cache/through-npm-2.3.8-df5f72a16e-918d915168.zip/node_modules/through/",
@@ -5194,6 +5164,16 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/toidentifier-npm-1.0.1-f759712599-2b5c573af9.zip/node_modules/toidentifier/",
           "packageDependencies": [
             ["toidentifier", "npm:1.0.1"]
+          ],
+          "linkType": "HARD",
+        }]
+      ]],
+      ["totp-generator", [
+        ["npm:0.0.13", {
+          "packageLocation": "./.yarn/cache/totp-generator-npm-0.0.13-cbb24710c0-5445e7bed1.zip/node_modules/totp-generator/",
+          "packageDependencies": [
+            ["totp-generator", "npm:0.0.13"],
+            ["jssha", "npm:3.2.0"]
           ],
           "linkType": "HARD",
         }]

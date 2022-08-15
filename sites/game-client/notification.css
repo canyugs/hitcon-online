@@ -4,7 +4,7 @@
 }
 
 [data-clienttype=mobile] .notification--overlay {
-  bottom: 20%;
+  top: 5vh;
 }
 
 .notification {
@@ -23,7 +23,8 @@
 }
 
 [data-clienttype=mobile] .notification {
-  width: 90vw;
+  width: 80vw;
+  opacity: 0.95;
 }
 
 .notification--inactive {
@@ -48,6 +49,10 @@
   margin-right: 1em;
 }
 
+[data-clienttype=mobile] .notification-text {
+  font-size: 1em;
+}
+
 .notification-progress-bar {
   height: 7px;
   margin: 0 2px;
@@ -61,6 +66,12 @@
   overflow: hidden;
   --animation-time: 5s;
 }
+
+[data-clienttype=mobile] .notification-progress-bar > span {
+  background: #0D0D0D;
+}
+
+
 
 .notification-progress-bar > span[style="width: 100%"] {
   border-bottom-right-radius: 10px;
@@ -152,6 +163,10 @@
   white-space: nowrap;
 }
 
+[data-clienttype=mobile] .announcement-text {
+  font-size: 1em;
+}
+
 .announcement-close {
   background: none;
   border: none;
@@ -163,10 +178,19 @@
   padding: 20px 30px 0 30px;
 }
 
+[data-clienttype=mobile] .notification--card {
+  width: 80vw;
+}
+
 .notification--npc-type {
   position: relative;
   display: flex;
   overflow: hidden;
+}
+
+[data-clienttype=mobile] .notification--npc-type {
+  justify-content: space-between;
+  align-items: center;
 }
 
 .notification--npc--border {
@@ -178,14 +202,26 @@
   background: #1465FF;
 }
 
+[data-clienttype=mobile] .notification--npc--border {
+  height: 7px;
+  background: #0D0D0D;
+}
+
+
 .notification--npc--avatar {
   width: 53px;
   height: 72px;
   margin-right: 20px;
 }
 
+[data-clienttype=mobile] .notification--npc--avatar {
+  margin: 0;
+  height: unset;
+}
+
 .notification--npc--avatar > img {
   width: 100%;
+  vertical-align: middle;
 }
 
 .notification--npc--text {
@@ -201,6 +237,11 @@
   padding-bottom: 10px;
 }
 
+[data-clienttype=mobile] .notification--npc--name {
+  font-size: 1em;
+  font-weight: bolder;
+}
+
 .notification--npc--usage {
   font-size: 15px;
   text-align: center;
@@ -213,4 +254,8 @@
   border-radius: 4px;
   box-shadow: 0px 2px 4px #000000;
   padding: 1px 5px;
+}
+
+[data-clienttype=mobile] .notification--npc--usage {
+  font-size: 0.8em;
 }

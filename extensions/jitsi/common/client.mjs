@@ -152,7 +152,7 @@ class Client {
     this.modalButton = document.querySelector('#jitsi-others-btn');
     this.modalButton.addEventListener('click', ()=>{
       this.modal.show();
-    })
+    });
 
     // Microphone button
     this.microphoneButton = new ToolbarButton('/static/extensions/jitsi/common/icons/microphone-off.svg', false);

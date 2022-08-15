@@ -162,6 +162,7 @@ class Standalone {
 
     // allow items to call the state functions provided by other extensions
     await this.helper.callS2sAPI('iobj-lib', 'provideStateFunc', 'registerStateFuncToItems');
+    await this.helper.callS2sAPI('items', 'provideStateFunc', 'registerStateFuncToItems');
   }
 
   /**
@@ -761,7 +762,7 @@ class Standalone {
    *   name to the amounts.
    */
   async s2s_CountMultiItems(srcExtName, playerID, items) {
-    const result = {}
+    const result = {};
     result.amounts = {};
     for (const itm of items) {
       result.amounts[itm] = this._countItem(playerID, itm);

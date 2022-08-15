@@ -7,6 +7,6 @@
     "in-gateway": "./in-gateway.mjs"
   },
   "dependencies": {
-    "otplib": "^12.0.1"
+    "totp-generator": "^0.0.13"
   }
 }

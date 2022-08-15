@@ -9,7 +9,7 @@ const promisify = require('util').promisify;
 const randomBytes = require('crypto').randomBytes;
 const exec = promisify(require('child_process').exec);
 const config = require('config');
-
+const AsyncLock = require('async-lock');
 const containerPrefix = 'escape_';
 
 /**
@@ -24,6 +24,13 @@ class ContainerHandler {
     this.memLimit = config.get('memLimit');
     this.cpuLimit = config.get('cpuLimit');
     this.ptys = {};
+    // Set the essential property for the container reaper
+    
+    this.hasSecondChance = false;
+    // true: the conatiner is using; false: the container is idle
+    this.handlerStatus = 0;
+    // -1: the handler is no need; 0: the handler has no container; 1: the handler has a container
+    this.statusLock = new AsyncLock();
   }
 
   /**
@@ -52,7 +59,9 @@ class ContainerHandler {
     }
 
     // Redirect the input to pty.
+    // And prevent it from being cleaned by the reaper
     socket.on('ptyDataInput', (data) => {
+      this.hasSecondChance = true;
       this.ptys[socket.id].write(data);
     });
 
@@ -80,10 +89,10 @@ class ContainerHandler {
    */
   async destroyContainer() {
     try {
-      let ret = await exec(`docker stop ${this.containerName}`);
+      let ret = await exec(`docker kill ${this.containerName}`);
       return !!ret.stderr;
     } catch (err) {
-      console.error(`Failed to stop ${this.containerName}: `, err);
+      console.error(`Failed to kill ${this.containerName}: `, err);
     }
   }
 }

@@ -10,21 +10,18 @@
       </div>
 
       <div id="avatar-selection-div" style="background-color: #000E26;" class="container-center">
+        <div class="avatar-name-edit">
+          <h3 class="welcome-title">歡迎來到 HITCON Online <br>該如何稱呼您 ?</h3>
+          <input id="display-name" type="text" name="display-name" class="avatar-name-input" placeholder="請輸入您的暱稱"></input>
+          <div class="avatar-name-rules">注意：<br>1. 暱稱將會顯示在公眾場合，不可使用冒犯他人的詞彙，詳細情形可查看<a href="https://hitcon.org/2022/coc/" target="_blank">大會行為守則</a> <br>2. 字數限制為 4~16 字 <br>3. 部分特殊字元可能無法使用<br> 你是不是想做壞壞的事
+          </div>
+          <!-- TODO
+            <button class="avatar-confirm-button">確認</button>
+          -->
+        </div>
         <div class="avatar-selection-background container-center-column">
-          <div class="avatar-selection-title">Welcome to HITCON Online<br>Choose Avatar</div>
+          <div class="avatar-selection-title">Choose Avatar</div>
           <div id="avatar-preview-container" class="container-center"></div>
-          <label class="avatar-display-name container-center">
-            Display Name:
-            <input id="display-name" type="text" name="display-name" class="avatar-display-name-text">
-            <div class="tooltip">
-              <img src="/static/sites/game-client/question-mark.svg" class="avatar-display-name-desc" alt="naming description">
-              <span class="tooltip-text">
-                暱稱將會顯示在公眾場合<br>
-                不可使用冒犯他人的詞彙<br>
-                詳細情形可查看<a href="https://hitcon.org/2021/coc/" target="_blank">大會行為守則</a>
-              </span>
-            </div>
-          </label>
           <button name="submit" class="avatar-confirm-button">Join HITCON Online!</button>
         </div>
       </div>
@@ -101,7 +98,7 @@
               <!-- 按 <span>F</span> 跟 NPC 對話
               // Uncomment when keypress interaction for NPC is implemented.
               -->
-              Click the NPC to interact. 點選NPC以互動。
+              Click the NPC to interact. <br>點選NPC以互動。
             </div>
           </div>
         </div>

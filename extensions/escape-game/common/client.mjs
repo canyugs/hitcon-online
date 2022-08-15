@@ -36,8 +36,8 @@ class TerminalModal extends Modal {
    */
   onPostShow() {
     // Set the size.
-    this.setSize('80%', '25%');
-    this.setPosition('10%', '7%');
+    this.setSize('60%', '25%');
+    this.setPosition('20%', '7%');
     this.customOnPostShow();
     return true;
   }
@@ -105,10 +105,12 @@ class Client {
       this.term.write('\r\n*** Connected ***\r\n');
 
       this.term.onData((data) => {
+        console.log("Inputttt");
         this.socket.emit('ptyDataInput', data);
       });
 
       this.socket.on('ptyDataOutput', (data) => {
+        console.log("Outputtt");
         this.term.write(data);
       });
 
@@ -167,7 +169,7 @@ class Client {
       } else if (cfg.layerName === 'terminalName') {
         cfg.renderArgs = {
           mapCoord: mapCoord,
-          displayName: terminalId,
+          displayName: clientInfo.visibleName,
           getDrawInfo() {
             return {mapCoord: this.mapCoord, displayName: this.displayName};
           },

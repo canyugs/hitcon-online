@@ -3,5 +3,6 @@
     "isolatedNetworkName": "isolated",
     "memLimit": "16m",
     "cpuLimit": ".1",
-    "secret": "secret"
+    "secret": "secret",
+    "secondChanceReaperInterval": 3000
 }

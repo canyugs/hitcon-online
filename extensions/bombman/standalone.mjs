@@ -7,6 +7,7 @@ import {MapCoord} from '../../common/maplib/map.mjs';
 import {createRequire} from 'module';
 const require = createRequire(import.meta.url);
 const alarm = require('alarm');
+const config = require('config');
 
 const BOMB_COUNTDOWN = 3000; // millisecond
 const BOMB_EXPLODE_TIME = 500; // millisecond
@@ -41,8 +42,7 @@ class Standalone {
   async initialize() {
     // get the default arena of every map
     this.arenaOfMaps = this.helper.gameMap.getOriginalCellSetStartWith('bombmanArena');
-    this.obstaclesOfMaps = this.helper.gameMap.getOriginalCellSetStartWith('bombmanObstacles');
-
+    
     // set dynamic cell set: bombmanHasBomb
     this.bombCells = new Map(); // key: a unique bomb ID; value: the cell
     this.bombID = 0;
@@ -92,6 +92,15 @@ class Standalone {
     const initTime = new Date();
     const startTime = new Date(Math.floor((+initTime + START_GAME_INTERVAL - 1) / START_GAME_INTERVAL) * START_GAME_INTERVAL);
     alarm(startTime, this.setGameInterval.bind(this));
+
+    // get config from default
+    if (config.has('bombman.arena')) {
+      let {mapName, x, y} = config.get('bombman.arena');
+      this.arenaCoord = new MapCoord(mapName, x, y);
+    } else {
+      // default position (if no config)
+      this.arenaCoord = new MapCoord('world1', 1, 1);
+    }
   }
 
   /**
@@ -131,17 +140,8 @@ class Standalone {
    * @return {Boolean} inside or not
    */
   insideMap(cellCoord) {
-    for (const {cells} of this.arenaOfMaps.get(cellCoord.mapName)) {
-      for (const cell of cells) {
-        const width = cell.w ?? 1;
-        const height = cell.h ?? 1;
-        if (cell.x <= cellCoord.x && cellCoord.x < cell.x + width &&
-          cell.y <= cellCoord.y && cellCoord.y < cell.y + height) {
-          return true;
-        }
-      }
-    }
-    return false;
+    const cellsets = this.arenaOfMaps.get(cellCoord.mapName);
+    return cellsets.some((cellset) => cellset.containsMapCoord(cellCoord));
   }
 
   /**
@@ -330,16 +330,12 @@ class Standalone {
     let target;
     if (this.playerOldPosition.has(playerID)) {
       target = this.playerOldPosition.get(playerID);
-      this.playerOldPosition.delete(playerID);
     } else { // default
-      const player = this.helper.gameState.getPlayer(playerID);
-      target = player.mapCoord.copy();
-      target.x = 10;
-      target.y = 5;
-      this.playerOldPosition.get(playerID);
+      target = this.helper.gameMap.getRandomSpawnPoint();
     }
-
+    
     await this.helper.teleport(playerID, target, true);
+    this.playerOldPosition.delete(playerID);
     this.participatePlayerIDs.delete(playerID);
     if (this.participatePlayerIDs.size <= 1 && !endGame) {
       await this.terminateGame();
@@ -351,9 +347,7 @@ class Standalone {
    */
   async teleportPlayer(playerID) {
     const player = this.helper.gameState.getPlayer(playerID);
-    const target = player.mapCoord.copy();
-    target.x = 10;
-    target.y = 5;
+    const target = this.arenaCoord.copy();
     await this.helper.teleport(playerID, target, true);
   }
 

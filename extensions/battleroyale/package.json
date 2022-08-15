@@ -1,12 +1,13 @@
 {
-  "name": "hitcon-online-bombman",
-  "version": "0.0.1",
+  "name": "hitcon-online-battleroyale",
+  "version": "0.0.0",
   "exports": {
     "standalone": "./standalone.mjs",
     "in-gateway": "./in-gateway.mjs"
   },
   "dependencies": {
     "alarm": "^2.0.0",
+    "async-lock": "^1.3.2",
     "config": "^3.3.7"
   }
 }
