@@ -20,6 +20,8 @@ import InteractiveObjectServerBaseClass from '../../common/interactive-object/se
 import {getRunPath, getConfigPath} from '../../common/path-util/path.mjs';
 const LAYER_DOOR = {zIndex: 6, layerName: 'escapeGameDoor'};
 import CellSet from '../../common/maplib/cellset.mjs';
+import { throws } from 'assert';
+import { Console } from 'console';
 const MAX_PLAYER_PER_TEAM = 5;
 
 // Bring out the FSM_ERROR for easier reference.
@@ -116,32 +118,53 @@ class Standalone {
           ['showTerminal', 'checkIsInFinalizedTeam', 'forceFinalizeTeam'],
       );
     });
-    if (config.has('escape-game.doorPosition')) {
-      this.doorCells = config.get('escape-game.doorPosition');
+    if (config.has('escape-game.doorPosition')) {      
+      // A door must be an rectangle.
+      // And the assets of the door given in generateMapConfig.mjs
+      // needs to be indexed as "D0", "D1", "D2", "D3", ..., "Dn".
+      // representing each blocks of the door from top to bottom, from left to right. 
+      
+      const doorPosition = config.get('escape-game.doorPosition');
+      
+      this.doorCells = new Map();
+      this.doorCells["mapName"] = doorPosition["mapName"];
+      this.doorCells["cells"] = new Map();
+      
+      let idx = 0;
+      for(let dx = 0; dx < doorPosition['w']; dx++){
+        for(let dy = doorPosition['h']-1; dy >= 0; dy--){
+          this.doorCells["cells"][`B${ idx++ }`] ={
+              "x": doorPosition['x'] + dx,
+              "y": doorPosition['y'] + dy,
+              "w": 1,
+              "h": 1
+          };
+        }
+      }
     } else {
       console.warn('No escape-game.doorPosition defined');
-      this.doorCells = [];
+      this.doorCells = -1;
     }
 
     if (config.has('escape-game.doorTarget')) {
       this.doorTarget = config.get('escape-game.doorTarget');
     } else {
       console.warn('No escape-game.doorTarget defined');
-      this.doorTarget = {'x': 1, 'y': 1};
+      this.doorTarget = -1;
     }
-    
-    const mapName = "world1";
-    for (const doorCell of this.doorCells) {
-      await this.helper.broadcastCellSetUpdateToAllUser(
-        'set',
-        mapName,
-        CellSet.fromObject({
-          name: `DOOR_${doorCell["idx"]}`,
-          cells: [],
-          layers: {[LAYER_DOOR.layerName]: `B${doorCell["idx"]}`, "wall": false},
-          dynamic: true
-        }),
-      );
+    if( this.doorCells !== -1){
+      for (const idx in this.doorCells["cells"]) {
+        await this.helper.broadcastCellSetUpdateToAllUser(
+          'set',
+          this.doorCells["mapName"],
+          CellSet.fromObject({
+            name: `escape-game-${idx}`,
+            cells: [],
+            layers: {[LAYER_DOOR.layerName]: idx, "wall": false},
+            dynamic: true
+          }),
+        );
+      }
     }
 
     // detect touching an opening door
@@ -165,33 +188,34 @@ class Standalone {
   }
 
   async e2s_openDoor(duration) {
+    if (this.doorCells === -1) {
+      console.warn('Getting e2s_openDoor with no doorCells defined, ignore.');
+      return false;
+    }
     if (typeof duration !== "number") {
       return false;
     }
-    const mapName = "world1";
-    if (++this.doorOpenPressedCount === 1) {  
-      console.log("open!");
-      for (const doorCell of this.doorCells) {
+    if (++this.doorOpenPressedCount === 1) {
+      for (const idx in this.doorCells["cells"]) {
         await this.helper.broadcastCellSetUpdateToAllUser(
           'update',
-          mapName,
+          this.doorCells["mapName"],
           CellSet.fromObject({
-            name: `DOOR_${doorCell["idx"]}`,
-            cells: [doorCell]
+            name: `escape-game-${idx}`,
+            cells: [ this.doorCells["cells"][idx] ]
           }),
         );
       }
     }
     setTimeout(async function(obj) {
       if (--obj.doorOpenPressedCount === 0) {
-        console.log("close!");
-        for (const doorCell of obj.doorCells) {
+        for (const idx in obj.doorCells["cells"]) {
           await obj.helper.broadcastCellSetUpdateToAllUser(
             'update',
-            mapName,
+            obj.doorCells["mapName"],
             CellSet.fromObject({
-              name: `DOOR_${doorCell["idx"]}`,
-              cells: [],
+              name: `escape-game-${idx}`,
+              cells: []
             }),
           );
         }
@@ -211,8 +235,10 @@ class Standalone {
       // No location? Just skip.
       return;
     }
+    
     const explodeCell = this.helper.gameMap.getCell(mapCoord, LAYER_DOOR.layerName);
-    if (explodeCell) { // if walk into opening door => teleport to somewhere
+    if (this.doorTarget !== -1 && explodeCell) {
+      // if walk into opening door and the destination is setted => teleport to somewhere
       const target = mapCoord.copy();
       target.x = this.doorTarget['x'];
       target.y = this.doorTarget['y'];

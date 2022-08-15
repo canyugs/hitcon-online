@@ -517,49 +517,49 @@ newAssetsConfig.layerMap.bombmanBombExplode = {
     };
 newAssetsConfig.layerMap.escapeGameDoor = {
       "B0": [
-        "Dungeon_v16",
-        8,
-        13
+          "Dungeon_v16",
+          8,
+          13
       ],
       "B1": [
-        "Dungeon_v16",
-        9,
-        13
+          "Dungeon_v16",
+          8,
+          14
       ],
       "B2": [
-        "base",
-        10,
-        13
+          "Dungeon_v16",
+          8,
+          15
       ],
       "B3": [
           "Dungeon_v16",
-        8,
-        14
+          9,
+          13
       ],
       "B4": [
-        "Dungeon_v16",
-        9,
-        14
+          "Dungeon_v16",
+          9,
+          14
       ],
       "B5": [
-        "base",
-        10,
-        14
+          "Dungeon_v16",
+          9,
+          15
       ],
       "B6": [
           "Dungeon_v16",
-        8,
-        15
+          10,
+          13
       ],
       "B7": [
-        "Dungeon_v16",
-        9,
-        15
+          "Dungeon_v16",
+          10,
+          14
       ],
       "B8": [
-        "base",
-        10,
-        15
+          "Dungeon_v16",
+          10,
+          15
       ]
     };
 newAssetsConfig.layerMap.battleroyaleObstacle = {
