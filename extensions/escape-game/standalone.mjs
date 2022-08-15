@@ -898,6 +898,13 @@ class Team {
     this.containerLocks = new AsyncLock();
 
     this.defaultTerminals = defaultTerminals;
+    if (config.has('escape-game.jwtSecret')) {
+      this.jwtSecret = config.get('escape-game.jwtSecret');
+    } else {
+      console.warn('No escape-game.jwtSecret defined, using "not_a_secret" as jwtSecret instead.');
+      this.jwtSecret = "not_a_secret";
+    }
+
   }
 
   serialize() {
@@ -1035,7 +1042,7 @@ class Team {
       }
       return jwt.sign({
         containerId: this.terminals.get(terminalId)
-      }, 'secret', {expiresIn: 10});
+      }, this.jwtSecret, {expiresIn: 10});
     });
   }
 }
