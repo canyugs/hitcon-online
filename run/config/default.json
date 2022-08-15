@@ -63,6 +63,7 @@
   "escape-game": {
     "autoFinalize": true,
     "certificateC2sToken": "1_4m_c3271f1c473_m45732",
+    "jwtSecret": "secret",
     "doorPosition": {"x": 9, "y": 12, "h": 1, "w": 1}
   },
   "bombman": {
