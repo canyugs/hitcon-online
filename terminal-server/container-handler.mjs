@@ -20,9 +20,21 @@ class ContainerHandler {
   constructor(imageName) {
     this.containerName = containerPrefix + randomBytes(32).toString('hex');
     this.imageName = imageName;
-    this.isolatedNetworkName = config.get('isolatedNetworkName');
-    this.memLimit = config.get('memLimit');
-    this.cpuLimit = config.get('cpuLimit');
+    if (config.has('isolatedNetworkName')) {
+      this.isolatedNetworkName = config.get('isolatedNetworkName');
+    } else {
+      this.isolatedNetworkName = 'bridge';
+    }
+    if (config.has('memLimit')) {
+      this.memLimit = config.get('memLimit');
+    } else {
+      this.memLimit = '256m';
+    }
+    if (config.has('cpuLimit')) {
+      this.cpuLimit = config.get('cpuLimit');
+    } else {
+      this.cpuLimit = '1';
+    }
     this.ptys = {};
     // Set the essential property for the container reaper
     
