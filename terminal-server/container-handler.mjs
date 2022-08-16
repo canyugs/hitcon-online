@@ -50,7 +50,8 @@ class ContainerHandler {
    */
   async spawn() {
     try {
-      let ret = await exec(`docker run -it -d --name ${this.containerName} -m ${this.memLimit} --cpus ${this.cpuLimit} --network ${this.isolatedNetworkName} --rm ${this.imageName}`);      return !!ret.stderr;
+      let ret = await exec(`docker run -it -d --name ${this.containerName} -m ${this.memLimit} --cpus ${this.cpuLimit} --network ${this.isolatedNetworkName} --rm ${this.imageName}`);
+      return !!ret.stderr;
     } catch (err) {
       console.error(`Failed to start container ${this.containerName} with ${this.imageName}: `, err);
     }
