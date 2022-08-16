@@ -8,6 +8,7 @@ const pty = require('node-pty');
 const promisify = require('util').promisify;
 const randomBytes = require('crypto').randomBytes;
 const exec = promisify(require('child_process').exec);
+const config = require('config');
 const AsyncLock = require('async-lock');
 const containerPrefix = 'escape_';
 
@@ -19,6 +20,21 @@ class ContainerHandler {
   constructor(imageName) {
     this.containerName = containerPrefix + randomBytes(32).toString('hex');
     this.imageName = imageName;
+    if (config.has('isolatedNetworkName')) {
+      this.isolatedNetworkName = config.get('isolatedNetworkName');
+    } else {
+      this.isolatedNetworkName = 'bridge';
+    }
+    if (config.has('memLimit')) {
+      this.memLimit = config.get('memLimit');
+    } else {
+      this.memLimit = '256m';
+    }
+    if (config.has('cpuLimit')) {
+      this.cpuLimit = config.get('cpuLimit');
+    } else {
+      this.cpuLimit = '1';
+    }
     this.ptys = {};
     // Set the essential property for the container reaper
     
@@ -34,8 +50,7 @@ class ContainerHandler {
    */
   async spawn() {
     try {
-      let ret = await exec(`docker run -it -d --name ${this.containerName} --rm ${this.imageName}`);
-      return !!ret.stderr;
+      let ret = await exec(`docker run -it -d --name ${this.containerName} -m ${this.memLimit} --cpus ${this.cpuLimit} --network ${this.isolatedNetworkName} --rm ${this.imageName}`);      return !!ret.stderr;
     } catch (err) {
       console.error(`Failed to start container ${this.containerName} with ${this.imageName}: `, err);
     }
