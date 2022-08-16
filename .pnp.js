@@ -3002,6 +3002,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["hitcon-online-terminal-server", "workspace:terminal-server"],
             ["@grpc/grpc-js", "npm:1.3.7"],
             ["@grpc/proto-loader", "npm:0.6.4"],
+            ["async-lock", "npm:1.3.0"],
             ["config", "npm:3.3.6"],
             ["express", "npm:4.17.1"],
             ["jsonwebtoken", "npm:8.5.1"],
