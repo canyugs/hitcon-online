@@ -127,6 +127,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         "reference": "workspace:extensions/point-system"
       },
       {
+        "name": "hitcon-online-rotating-teleport",
+        "reference": "workspace:extensions/rotating-teleport"
+      },
+      {
         "name": "hitcon-online-setting",
         "reference": "workspace:extensions/setting"
       },
@@ -192,6 +196,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
       ["hitcon-online-ping", ["workspace:extensions/ping"]],
       ["hitcon-online-playerlist", ["workspace:extensions/playerlist"]],
       ["hitcon-online-point-system", ["workspace:extensions/point-system"]],
+      ["hitcon-online-rotating-teleport", ["workspace:extensions/rotating-teleport"]],
       ["hitcon-online-rpc-directory", ["workspace:common/rpc-directory"]],
       ["hitcon-online-setting", ["workspace:extensions/setting"]],
       ["hitcon-online-standalone-server", ["workspace:services/standalone"]],
@@ -2944,6 +2949,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["hitcon-online-point-system", "workspace:extensions/point-system"],
             ["axios", "npm:0.21.4"],
             ["config", "npm:3.3.6"]
+          ],
+          "linkType": "SOFT",
+        }]
+      ]],
+      ["hitcon-online-rotating-teleport", [
+        ["workspace:extensions/rotating-teleport", {
+          "packageLocation": "./extensions/rotating-teleport/",
+          "packageDependencies": [
+            ["hitcon-online-rotating-teleport", "workspace:extensions/rotating-teleport"]
           ],
           "linkType": "SOFT",
         }]

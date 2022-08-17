@@ -2234,6 +2234,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"hitcon-online-rotating-teleport@workspace:extensions/rotating-teleport":
+  version: 0.0.0-use.local
+  resolution: "hitcon-online-rotating-teleport@workspace:extensions/rotating-teleport"
+  languageName: unknown
+  linkType: soft
+
 "hitcon-online-rpc-directory@workspace:common/rpc-directory":
   version: 0.0.0-use.local
   resolution: "hitcon-online-rpc-directory@workspace:common/rpc-directory"
