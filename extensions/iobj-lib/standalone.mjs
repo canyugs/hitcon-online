@@ -153,6 +153,11 @@ class Standalone {
       allowOverlap = true;
     }
     const result = await this.helper.teleport(playerID, mapCoord, allowOverlap);
+    // TODO: check if we should use rotating teleport instead of normal teleport
+    // if (???) {
+    //   await this.helper.callS2sAPI('rotating-teleport', 'teleport', msg.playerID, target);
+    // }
+    // await this.helper.callS2sAPI('rotating-teleport', 'teleport', playerID, mapCoord);
 
     if (result) return nextState;
     console.warn(`Player '${playerID}' cannot go to the place`);

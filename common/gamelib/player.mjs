@@ -42,6 +42,7 @@ class Player {
     // only on client side
     this.lastMovingTimeClient = 0;
     this.mainPlayer = false;
+    this.customGetDrawInfoFunc = null;
   }
 
   get displayName() {
@@ -53,10 +54,22 @@ class Player {
   }
 
   /**
+   * jsdoc: TODO
+   * @param {Function} func - This function takes a Player object as argument. The return value
+   * should be an object, whose attribute would be used to overwrite the drawInfo returned by
+   * getDrawInfo().
+   */
+  setCustomGetDrawInfo(func) {
+    this.customGetDrawInfoFunc = func;
+  }
+
+  /**
    * Used by MapRenderer.
    * @return {Object}
    */
   getDrawInfo() {
+    const customDrawInfo = (typeof this.customGetDrawInfoFunc === 'function') ? this.customGetDrawInfoFunc(this) : {};
+
     // smoothly move the player
     const now = Date.now();
     const lastMovingTime = (this.mainPlayer) ? this.lastMovingTimeClient : this.lastMovingTime;
@@ -84,13 +97,14 @@ class Player {
       retFacing = this.facing;
     }
 
-    return {
+    // let customDrawInfo to overwrite attributes
+    return Object.assign({
       mapCoord: retMapCoord,
       displayChar: this.displayChar,
       facing: retFacing,
       displayName: this.displayName,
       ghostMode: this.ghostMode,
-    };
+    }, customDrawInfo);
   }
 
   /**

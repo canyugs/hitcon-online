@@ -1,7 +1,6 @@
 // Copyright 2021 HITCON Online Contributors
 // SPDX-License-Identifier: BSD-2-Clause
 
-import assert from 'assert';
 import {MapCoord} from '../../common/maplib/map.mjs';
 
 /**
@@ -107,6 +106,10 @@ class Standalone {
       }
     }
     await this.helper.teleport(msg.playerID, target, true);
+    // TODO: check if we should use rotating teleport instead of normal teleport
+    // if (???) {
+    //   await this.helper.callS2sAPI('rotating-teleport', 'teleport', msg.playerID, target);
+    // }
   }
 
   /**

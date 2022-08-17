@@ -199,6 +199,13 @@ class GameMap {
   }
 
   /**
+   * Get a reference of all maps. Should be careful when modifying it.
+   */
+  getMaps() {
+    return this._maps;
+  }
+
+  /**
    * Remove all the dynamic cell set.
    */
   removeAllDynamicCellSet() {
