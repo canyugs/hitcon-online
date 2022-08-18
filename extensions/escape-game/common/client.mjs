@@ -105,12 +105,10 @@ class Client {
       this.term.write('\r\n*** Connected ***\r\n');
 
       this.term.onData((data) => {
-        console.log("Inputttt");
         this.socket.emit('ptyDataInput', data);
       });
 
       this.socket.on('ptyDataOutput', (data) => {
-        console.log("Outputtt");
         this.term.write(data);
       });
 
