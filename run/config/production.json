@@ -47,7 +47,8 @@
       "playerlist",
       "iframe",
       "escape-game",
-      "jitsi"
+      "jitsi",
+      "rotating-teleport"
     ],
     "standaloneAuto": {
       "addr": "127.0.0.1",
