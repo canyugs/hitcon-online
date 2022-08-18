@@ -61,7 +61,11 @@ class GameClient {
       });
       socket.on('unauthorized', (msg) => {
         console.error(`Authorization failed: ${JSON.stringify(msg.data)}`);
-        this.mainUI.errorModal.displayError("Authorization failed.", "Please refresh to reconnect.");
+        this.mainUI.errorModal.displayError(
+          "Authorization failed.",
+          "Please login at <a href='https://hitcon.org/2022/login'>HITCON PEACE 2022 official website</a>.</br> You can also refresh to reconnect.  ",
+          true
+        );
         this.onDisconnect();
       });
       socket.on('previousData', (msg) => {

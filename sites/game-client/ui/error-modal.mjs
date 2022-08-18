@@ -16,14 +16,18 @@ class ErrorModal extends Modal {
     this.handlerMessageDom = document.getElementById(ERROR_HANDLER_MESSAGE_DIV);
   }
 
-  displayError(errorMsg, handlerMsg) {
+  displayError(errorMsg, handlerMsg, hasHTMLTag=false) {
     this.errorMessageDom.innerText = errorMsg;
     const refreshButton = document.createElement('button');
     refreshButton.addEventListener('click', () => {
       location.reload();
     });
     refreshButton.innerText = 'press to refresh';
-    this.handlerMessageDom.innerText = handlerMsg;
+    if (hasHTMLTag) {
+      this.handlerMessageDom.innerHTML = handlerMsg;
+    } else {
+      this.handlerMessageDom.innerText = handlerMsg;
+    }
     this.handlerMessageDom.appendChild(refreshButton);
     this.show();
   }
