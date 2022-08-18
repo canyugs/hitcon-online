@@ -133,6 +133,10 @@ class MainUI {
     this.removeNotification();
   }
 
+  /**
+   * Dismiss a notification.
+   * This method is called when the notification div is clicked.
+   */
   dismissNotification() {
     ++this._dismissedNotifications;
     console.assert(this._notificationList.length > 0, 'Race condition in dismissNotification');
