@@ -83,6 +83,7 @@ class MainUI {
 
     this.utilPanelManager = new UtilPanelManager(this);
     this._notificationList = new Array();
+    this._dismissedNotifications = 0;
     this._announcementList = new Array();
 
     const exitFocus = document.getElementById('exit-focus');
@@ -121,9 +122,25 @@ class MainUI {
   }
 
   updateNotification() {
-    console.assert(this._notificationList.length > 0, 'Race condition in updateAnnouncement');
+    if (this._dismissedNotifications > 0) {
+      --this._dismissedNotifications;
+      console.log("Notification has been dismissed previously, skipping");
+      return;
+    }
+    console.assert(this._notificationList.length > 0, 'Race condition in updateNotification');
 
     // this._notificationList[0] was on display and it's now timed out.
+    this.removeNotification();
+  }
+
+  dismissNotification() {
+    ++this._dismissedNotifications;
+    console.assert(this._notificationList.length > 0, 'Race condition in dismissNotification');
+
+    this.removeNotification();
+  }
+
+  removeNotification() {
     this._notificationList.shift();
     if (this._notificationList.length === 0) {
       // No more messages.
@@ -140,7 +157,7 @@ class MainUI {
         this.updateNotification();
       }, timeout);
     }
-  };
+  }
 
   _setAnnouncementMarquee(msg) {
     // We need this method because we want to compensate for longer text.
