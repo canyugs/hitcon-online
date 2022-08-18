@@ -56,9 +56,20 @@ class Standalone {
     }
     let target = null;
     let perm = null;
+    let spin = false;
     try {
       if (typeof cellVal === 'string') {
         // Decode it into the target MapCoord.
+        const hex_split = cellVal.split('#');
+        cellVal = hex_split[0];
+        if (hex_split.length >= 2) {
+          for (let i = 1; i < hex_split.length; i++) {
+            if (hex_split[i] === 'spin') {
+              spin = true;
+            }
+          }
+        }
+
         const vals = cellVal.split('@');
         if (vals.length === 1) {
           target = MapCoord.fromSerializedStr(vals[0]);
@@ -105,11 +116,11 @@ class Standalone {
         return;
       }
     }
-    await this.helper.teleport(msg.playerID, target, true);
-    // TODO: check if we should use rotating teleport instead of normal teleport
-    // if (???) {
-    //   await this.helper.callS2sAPI('rotating-teleport', 'teleport', msg.playerID, target);
-    // }
+    if (spin) {
+      await this.helper.callS2sAPI('rotating-teleport', 'teleport', msg.playerID, target);
+    } else {
+      await this.helper.teleport(msg.playerID, target, true);
+    }
   }
 
   /**
