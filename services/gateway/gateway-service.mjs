@@ -404,6 +404,11 @@ class GatewayService {
    * Called on callS2cAPI event.
    */
   _onCallC2sAPI(socket, msg, callback) {
+    if (typeof callback !== 'function') {
+      console.error('_onCallC2sAPI() callback not function');
+      return;
+    }
+
     const p = this.extMan.onC2sCalled(msg, socket.playerID);
     p.then((msg) => {
       if (typeof msg === 'object' && msg !== null && 'error' in msg && typeof msg.error === 'string') {
